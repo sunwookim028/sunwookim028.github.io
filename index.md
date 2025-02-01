@@ -6,9 +6,9 @@ layout: homepage
 
 I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. I have research experiences with GPUs and hardware-software co-design, supported by academic training across the computing stack. I aim to study **computer systems integrating heterogeneous components**, with respect to concrete applications like AI or data systems. 
 
-I see myself happy doing computer systems research, on both technical and personal levels. [Volunteer working][solar-tz] on solar power grids in rural communities near Mount. Kilimanjaro, I learned firsthand that critical infrastructure underpin people's lives. Today, computers are one of the most critical infrastructure in our communities, comparable to legal or water systems. Computer systems research is where my dedication to serve others merrily marry my enthusiasm for elegant structures.
-
 I aspire to contribute research for the wider adoption of specialized architecture. Specialization is increasingly accepted in various forms (massively parallel processors, dedicated hardware, near-data processing, quantum computers, etc.). They support demanding workloads (e.g. LLMs) and continue advancing computing systems despite slow device scaling. However, they inherently trade off general utility for high performance in specific domains. My goal is to extend utility of specialized architecture, by targetting wider, real-world operating settings. I aim to build **cross-stack solutions addressing real-world complexities** like diverse software stacks and input scenarios.
+
+I see myself happy doing computer systems research, on both technical and personal levels. [Volunteer working][solar-tz] on solar power grids in rural communities near Mount. Kilimanjaro, I learned firsthand that critical infrastructure underpin people's lives. Today, computers are one of the most critical infrastructure in our communities, comparable to legal or water systems. Computer systems research is where my dedication to serve others merrily marry my enthusiasm for elegant technical structures.
 
 I look forward to my Ph.D. as a joyful chance to build, experiment and learn - rolling up my sleeves to create working system prototypes that span multiple layers of the stack! If you are interested in working on this quest with me, please leave me a quick email. 
 
