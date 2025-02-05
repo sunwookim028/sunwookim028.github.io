@@ -3,19 +3,18 @@ layout: homepage
 ---
 
 ## About Me
-<div id="standardView" style="display: block;">
-<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. I have research experiences with GPUs and hardware-software co-design, supported by academic training across the computing stack. My interests lie in cross-stack efforts to leverage <strong>specialized hardware accelerators</strong>.</p>
 
-<p>I look forward to my Ph.D. to build, experiment and learn systems. If you are interested in any aspect, I'd be happy to discuss futher through email!</p>
+<div id="standardView" style="display: block;">
+<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. My research interests lie in cross-stack efforts to leverage <strong>specialized hardware accelerators</strong>.</p>
+
+<p>I am excited about my research journey. If any aspect of my work interests you, I would be happy to discuss further at my email.</p>
 </div>
 <div id="expandedView" style="display: none;">
-<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. I have research experiences with GPUs and hardware-software co-design, supported by academic training across the computing stack. My interests lie in cross-stack efforts to leverage <strong>specialized hardware accelerators</strong>.</p>
+<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. My research interests lie in cross-stack efforts to leverage <strong>specialized hardware accelerators</strong>.</p>
 
-<p>I aspire to contribute research for the wider adoption of specialized architecture. Specialization is increasingly accepted in various forms (massively parallel processors, dedicated hardware, near-data processing, quantum computers, etc.). They support demanding workloads (e.g. LLMs) and continue advancing computing systems despite slow device scaling. However, they inherently trade off general utility for high performance in specific domains. My goal is to extend utility of specialized architecture, by targetting wider, real-world operating settings. I aim to build cross-stack solutions addressing real-world complexities like diverse software stacks and input scenarios.</p>
+<p>I see myself thriving in computer systems research, both technically and personally. While <a href="https://github.com/sunwookim028/solar-tz">volunteering</a> with solar power grid projects in rural communities near Mount Kilimanjaro, I learned firsthand how critical technical infrastructure underpins people's lives. Today, computing has become as fundamental to society as electricity and telecommunications. Computing innovations increasingly shape how we solve human challenges. Computer systems research allows me to combine my passion for service with my love of elegant technical solutions.</p>
 
-<p>I see myself happy doing computer systems research, on both technical and personal levels. <a href="https://github.com/sunwookim028/solar-tz">Volunteer working</a> on solar power grids in rural communities near Mount. Kilimanjaro, I learned firsthand that critical infrastructure underpin people's lives. Today, computers are one of the most critical infrastructure in our communities, comparable to legal or water systems. Computer systems research is where my dedication to serve others merrily marry my enthusiasm for elegant structures.</p>
-
-<p>I look forward to my Ph.D. to build, experiment and learn systems. If you are interested in any aspect, I'd be happy to discuss futher through email!</p>
+<p>I am excited about my research journey. If any aspect of my work interests you, I would be happy to discuss further at my email.</p>
 </div>
 <button id="toggleButton">Expanded</button>
 
@@ -26,27 +25,27 @@ layout: homepage
     if (standard.style.display === 'block') {
       standard.style.display = 'none';
       expanded.style.display = 'block';
-      this.textContent = 'Summarize';
+      this.textContent = 'Standard';
     } else {
       standard.style.display = 'block';
       expanded.style.display = 'none';
-      this.textContent = 'Expand';
+      this.textContent = 'Expanded';
     }
   });
 </script>
-
-{% comment %} Prior Experiences {% endcomment %}
-[solar-tz]: https://github.com/sunwookim028/solar-tz "Project Page"
-
 
 
 ## Research Interests
 - **Computer Architecture and Systems:** heterogeneous processing / memory / IO elements.
 
+I aim to advance the frontier of specialized computer architectures as computing enters a new era where general-purpose scaling alone cannot meet our needs. This shift is already evident across the computing landscape, from domain-specific accelerators in academia and industry, to the widespread adoption of GPGPUs and FPGAs in cloud infrastructure, to emerging paradigms like near-data processing and quantum systems.
+
+While these specialized architectures offer promising paths forward for demanding workloads like large language models, their adoption faces fundamental challenges. The trade-off between domain-specific efficiency and general applicability creates both technical and practical barriers. Limited hardware utilization may not justify the investment costs, while increased software and physical design complexity can offset potential performance gains. My research aims to bridge this gap.
+
 ### Themes
 - Accelerator-rich Systems
     - **accelerator integration** e.g. taming acc. cost, where to run OS
-    - **extending accelerators for wider utility** e.g. for evolving/compound workloads, CXL NMP & expander form, NPUs for linear algebra or graph workloads, virtualization, programmability & reconfigurability
+    - **extending accelerators for wider utility** e.g. for evolving/compound workloads, CXL NMP & expander form, NPUs for linear algebra or graph workloads, multi-tenancy, programmability & reconfigurability
 
 - Easy-to-use Heterogeneous Systems
     - **unifying interfaces** e.g. het. storage engine, memory pooling, language/framework and compilers supporting multiple machines (PyTorch)
@@ -55,7 +54,7 @@ layout: homepage
 - Application-first Specialized Systems 
     - **vertical co-optimization** e.g. FPGA & algorithm co-evolution, quantum comm., DNA storage engines, robotics
 
-{% comment %} Potential Thrusts {% endcomment %}
+{% comment %} References {% endcomment %}
 [quantum-comm]: https://dl.acm.org/doi/pdf/10.1145/3643832.3661388 "Minsung Kim @Rutgers"
 
 ### Prior Experiences
