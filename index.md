@@ -53,9 +53,12 @@ While these specialized architectures offer promising paths forward for demandin
 
 - Application-first Specialized Systems 
     - **vertical co-optimization** e.g. FPGA & algorithm co-evolution, quantum comm., DNA storage engines, robotics
+ 
+Visit my [blog] to discover more!
 
 {% comment %} References {% endcomment %}
 [quantum-comm]: https://dl.acm.org/doi/pdf/10.1145/3643832.3661388 "Minsung Kim @Rutgers"
+[blog]: https://gelatinous-hippodraco-ca0.notion.site/Test-page-19bdf68bfc30806a9c13ffd5c4198b49?pvs=4 "Blog Main"
 
 ### Prior Experiences
 - Accelerating compound bioinformatics workload with commodity GPUs (CUDA). [*Project Page*][titan]
