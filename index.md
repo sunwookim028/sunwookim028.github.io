@@ -12,7 +12,10 @@ layout: homepage
 <div id="expandedView" style="display: none;">
 <p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. My research interests lie in cross-stack efforts to leverage <strong>specialized hardware accelerators</strong>.</p>
 
-<p>I see myself thriving in computer systems research, both technically and personally. While <a href="https://github.com/sunwookim028/solar-tz">volunteering</a> with solar power grid projects in rural communities near Mount Kilimanjaro, I learned firsthand how critical technical infrastructure underpins people's lives. Today, computing has become as fundamental to society as electricity and telecommunications. Computing innovations increasingly shape how we solve human challenges. Computer systems research allows me to combine my passion for service with my love of elegant technical solutions.</p>
+<p>I see myself thriving in computer systems research, both technically and personally. While <a href="https://github.com/sunwookim028/solar-tz">volunteering</a> with solar power grid projects in rural communities near Mount Kilimanjaro, I learned firsthand how critical technical infrastructure underpins people's lives.</p>
+
+<p>Today, computing has become as fundamental to society as electricity and telecommunications. Computing innovations increasingly shape how we solve human challenges. Computer systems research allows me to combine my passion for service with my love of elegant technical solutions.</p>
+
 
 <p>I am excited about my research journey. If any aspect of my work interests you, I would be happy to discuss further at my email.</p>
 </div>
