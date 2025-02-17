@@ -58,7 +58,8 @@ Visit my [blog] to discover more!
 
 {% comment %} References {% endcomment %}
 [quantum-comm]: https://dl.acm.org/doi/pdf/10.1145/3643832.3661388 "Minsung Kim @Rutgers"
-[blog]: https://gelatinous-hippodraco-ca0.notion.site/Test-page-19bdf68bfc30806a9c13ffd5c4198b49?pvs=4 "Blog Main"
+[blog]: https://gelatinous-hippodraco-ca0.notion.site/Blog-Main-19bdf68bfc308089b89ecc90db926b99?pvs=4 "Blog Main"
+
 
 ### Prior Experiences
 - Accelerating compound bioinformatics workload with commodity GPUs (CUDA). [*Project Page*][titan]
