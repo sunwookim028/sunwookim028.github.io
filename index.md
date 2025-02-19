@@ -5,7 +5,7 @@ layout: homepage
 ## About Me
 
 <div id="standardView" style="display: block;">
-<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. My research interests lie in cross-stack efforts, spanning <strong>emerging workloads, design automation, and general systems and architecture topics</strong>. I pioneer transformative approaches that harness advanced computing power, fostering a future where technology uplifts human dignity and enriches our shared humanity.</p>
+<p>I am a Fulbright scholar seeking Ph.D. positions (EE or CS) starting Fall 2025. My research interests lie in cross-stack efforts, spanning <strong>emerging workloads, design automation, and wider systems and architecture topics</strong>. I pioneer transformative approaches that harness advanced computing power, fostering a future where technology uplifts human dignity and enriches our shared humanity.</p>
 
 <p>I am excited about my research journey. If any aspect of my work interests you, I would be happy to discuss further at my email.</p>
 </div>
