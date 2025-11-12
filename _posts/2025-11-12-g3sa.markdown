@@ -3,7 +3,7 @@ layout: post
 title:  "G3SA: A GPU-accelerated Gold-standard Genomics Library for End-to-end Sequence Alignment"
 date:   2025-11-12 22:21:59 +00:00
 image: /images/g3sa.jpg
-categories: research-sunwoo
+categories: research
 author: "Yeejoo Han, Sunwoo Kim"
 authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Seongyeon Park, Jinho Lee"
 venue: "International Conference on Supercomputing"
