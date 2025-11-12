@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "G3SA"
-date:   2023-10-09 22:21:59 +00:00
+date:   2025-10-09 22:21:59 +00:00
 image: /images/pairwise.png
 categories: research
 author: "Sunwoo Kim"
