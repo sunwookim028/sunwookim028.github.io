@@ -1,4 +1,8 @@
-# updated website
+# Personal Website
+
+This repo is built on [this template](https://github.com/leonidk/leonidk.github.io), and is [live](https://sunwookim028.github.io).
+
+Below are from the original repo's README.
 
 This repo is built on a fork of **Jekyll Now** from [this repository](https://github.com/barryclark/jekyll-now). **Jekyll** is a static site generator that's perfect for GitHub hosted blogs ([Jekyll Repository](https://github.com/jekyll/jekyll))
 
