@@ -5,10 +5,10 @@ date:   2025-10-09 22:21:59 +00:00
 image: /images/g3sa.png
 categories: research
 author: "Sunwoo Kim"
-authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Katherine Shih, Martial Hebert, Aaron Steinfeld"
-venue: "International Conference on Intelligent Robots and Systems"
+authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Seongyeon Park, Jinho Lee"
+venue: "International Conference on Supercomputing"
 arxiv: https://arxiv.org/abs/2308.04571
 code: https://github.com/leonidk/pairwise
-website: https://leonidk.github.io/pairwise
+website: https://dl.acm.org/doi/10.1145/3721145.3729516
 ---
-We show how to perform efficient black-box optimization of algorithm configuration from user preferences. Results include Intel RealSense stereo cameras and a robot social navigation policy.
+We show how to accelerate practical sequence aligner workloads with multiple GPUs. Results include end-to-end speedups for Minimap2 and BWA-MEM aligners using NVIDIA A6000 GPUs.
