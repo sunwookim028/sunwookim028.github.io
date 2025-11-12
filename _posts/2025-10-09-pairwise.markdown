@@ -2,10 +2,10 @@
 layout: post
 title:  "G3SA"
 date:   2025-10-09 22:21:59 +00:00
-image: /images/g3sa.jpg
+image: /images/g3sa.png
 categories: research
 author: "Sunwoo Kim"
-authors: "<strong>Leonid Keselman</strong>, Katherine Shih, Martial Hebert, Aaron Steinfeld"
+authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Katherine Shih, Martial Hebert, Aaron Steinfeld"
 venue: "International Conference on Intelligent Robots and Systems"
 arxiv: https://arxiv.org/abs/2308.04571
 code: https://github.com/leonidk/pairwise
