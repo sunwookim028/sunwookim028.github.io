@@ -7,6 +7,6 @@ categories: research-sunwoo
 author: "Yeejoo Han, Sunwoo Kim"
 authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Seongyeon Park, Jinho Lee"
 venue: "International Conference on Supercomputing"
-website: [paper](https://dl.acm.org/doi/10.1145/3721145.3729516)
+website: https://dl.acm.org/doi/10.1145/3721145.3729516
 ---
 We show scalable GPU-acceleration techniques for practical sequence aligner workloads.
