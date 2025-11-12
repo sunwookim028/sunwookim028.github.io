@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "G3SA"
+date:   2025-08-22 22:21:59 +00:00
+image: /images/g3sa.png
+categories: research
+author: "Sunwoo Kim"
+authors: "Yeejoo Han, <strong>Sunwoo Kim</strong>, Seongyeon Park, Jinho Lee"
+venue: "International Conference on Supercomputing"
+code: https://github.com/sunwookim028/G3SA
+website: https://dl.acm.org/doi/10.1145/3721145.3729516
+---
+We show how to accelerate practical sequence aligner workloads with multiple GPUs. Results on Minimap2 and BWA-MEM using NVIDIA A6000s.
