@@ -1,0 +1,53 @@
+# Target location in repo: /.github/workflows/build-cv.yml
+#
+# Builds cv/cv.tex via latexmk, copies the resulting PDF to /cv.pdf at repo
+# root so it's served at https://sunwookim028.github.io/cv.pdf, and commits
+# the PDF back to the default branch. Only triggers on changes to cv/ to
+# avoid rebuilding on every site edit.
+#
+# Requires repo-level Settings → Actions → General → Workflow permissions =
+# Read and write. Set once via:
+#   gh api -X PUT /repos/:owner/:repo/actions/permissions/workflow \
+#     -f default_workflow_permissions=write
+
+name: Build CV PDF
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'cv/**'
+      - '.github/workflows/build-cv.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PDF with latexmk
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: cv.tex
+          working_directory: cv/
+          latexmk_shell_escape: false
+
+      - name: Copy built PDF to repo root
+        run: cp cv/cv.pdf ./cv.pdf
+
+      - name: Commit PDF back to main
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cv.pdf
+          if git diff --staged --quiet; then
+            echo "cv.pdf unchanged, skipping commit."
+          else
+            git commit -m "Rebuild CV PDF [skip ci]"
+            git push
+          fi

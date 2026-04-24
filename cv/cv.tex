@@ -1,0 +1,355 @@
+%----------------------------------------------------------------------------
+% CV — Sunwoo Kim
+% Based on the RenderCV EngineeringResumes theme (LaTeX edition) by Sina Atalay,
+% published on Overleaf. This is a standalone port — no rendercv/Python needed.
+% Build: `make` (runs latexmk), or `pdflatex cv.tex` twice.
+%----------------------------------------------------------------------------
+\documentclass[10pt, letterpaper]{article}
+
+\usepackage[
+    ignoreheadfoot,
+    top=1.5 cm,
+    bottom=1.5 cm,
+    left=1.8 cm,
+    right=1.8 cm,
+    footskip=1.0 cm,
+]{geometry}
+\usepackage{titlesec}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{primaryColor}{RGB}{0, 0, 0}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[
+    pdftitle={Sunwoo Kim's CV},
+    pdfauthor={Sunwoo Kim},
+    pdfcreator={LaTeX},
+    colorlinks=true,
+    urlcolor=primaryColor,
+    linkcolor=primaryColor,
+    citecolor=primaryColor
+]{hyperref}
+\usepackage[pscoord]{eso-pic}
+\usepackage{calc}
+\usepackage{bookmark}
+\usepackage{lastpage}
+\usepackage{changepage}
+\usepackage{paracol}
+\usepackage{ifthen}
+\usepackage{needspace}
+\usepackage{iftex}
+\usepackage{fancyhdr}
+
+% Ensure generated PDF is machine-readable / ATS-parsable:
+\ifPDFTeX
+    \input{glyphtounicode}
+    \pdfgentounicode=1
+    \usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+    \usepackage{lmodern}
+\fi
+
+\usepackage[default]{sourceserifpro}
+
+% Settings
+\raggedright
+\AtBeginEnvironment{adjustwidth}{\partopsep0pt}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[C]{\small\color{gray}\thepage\ / \pageref*{LastPage}}
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0pt}
+\setlength{\topskip}{0pt}
+\setlength{\columnsep}{0.15cm}
+\linespread{1.08}
+
+\titleformat{\section}{\needspace{4\baselineskip}\bfseries\large}{}{0pt}{}[\vspace{2pt}\titlerule]
+\titlespacing{\section}{-1pt}{0.45 cm}{0.3 cm}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\small$\bullet$}}$}
+
+\newenvironment{highlights}{
+    \begin{itemize}[
+        topsep=0.12 cm, parsep=0.14 cm, partopsep=0pt,
+        itemsep=0pt, leftmargin=0 cm + 10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{highlightsforbulletentries}{
+    \begin{itemize}[
+        topsep=0.12 cm, parsep=0.14 cm, partopsep=0pt,
+        itemsep=0pt, leftmargin=10pt
+    ]
+}{
+    \end{itemize}
+}
+
+\newenvironment{onecolentry}{
+    \begin{adjustwidth}{0 cm + 0.00001 cm}{0 cm + 0.00001 cm}
+}{
+    \end{adjustwidth}
+}
+
+\newenvironment{twocolentry}[2][]{
+    \onecolentry
+    \def\secondColumn{#2}
+    \setcolumnwidth{\fill, 4.5 cm}
+    \begin{paracol}{2}
+}{
+    \switchcolumn \raggedleft \secondColumn
+    \end{paracol}
+    \endonecolentry
+}
+
+\newenvironment{header}{
+    \setlength{\topsep}{0pt}\par\kern\topsep\centering\linespread{1.5}
+}{
+    \par\kern\topsep
+}
+
+\newcommand{\placelastupdatedtext}{%
+  \AddToShipoutPictureFG*{%
+    \put(
+        \LenToUnit{\paperwidth-2 cm-0 cm+0.05cm},
+        \LenToUnit{\paperheight-1.0 cm}
+    ){\vtop{{\null}\makebox[0pt][c]{
+        \small\color{gray}\textit{Last updated in April 2026}\hspace{\widthof{Last updated in April 2026}}
+    }}}%
+  }%
+}
+
+% Convenience macro for project/role subtitles
+\newcommand{\entrysubtitle}[1]{%
+    \begin{onecolentry}\textit{\small #1}\end{onecolentry}%
+}
+
+\let\hrefWithoutArrow\href
+
+%----------------------------------------------------------------------------
+\begin{document}
+    \newcommand{\AND}{\unskip
+        \cleaders\copy\ANDbox\hskip\wd\ANDbox
+        \ignorespaces
+    }
+    \newsavebox\ANDbox
+    \sbox\ANDbox{$|$}
+
+    \placelastupdatedtext
+
+    \begin{header}
+        \fontsize{25 pt}{25 pt}\selectfont Sunwoo Kim
+
+        \vspace{3 pt}
+
+        \normalsize\textit{PhD Student --- Compiler-aided reasoning for chip design}
+
+        \vspace{5 pt}
+
+        \normalsize
+        \mbox{Ithaca, NY}%
+        \kern 5.0 pt\AND\kern 5.0 pt%
+        \mbox{\hrefWithoutArrow{mailto:sk3463@cornell.edu}{sk3463@cornell.edu}}%
+        \kern 5.0 pt\AND\kern 5.0 pt%
+        \mbox{\hrefWithoutArrow{tel:+1-607-262-0961}{(607) 262-0961}}%
+        \kern 5.0 pt\AND\kern 5.0 pt%
+        \mbox{\hrefWithoutArrow{https://sunwookim028.github.io}{sunwookim028.github.io}}%
+        \kern 5.0 pt\AND\kern 5.0 pt%
+        \mbox{\hrefWithoutArrow{https://github.com/sunwookim028}{github.com/sunwookim028}}%
+    \end{header}
+
+    \vspace{5 pt - 0.3 cm}
+
+
+    %------------------------------------------------------------------------
+    \section{Education}
+
+        \begin{twocolentry}{Aug 2025 -- present}
+            \textbf{Cornell University}, PhD in Computer Engineering
+        \end{twocolentry}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Advisor: Prof. Zhiru Zhang
+                \item Selected coursework: Advanced Compilers; High-Level Digital Design Automation
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{twocolentry}{Mar 2019 -- Feb 2025}
+            \textbf{Seoul National University}, BS in Electrical \& Computer Engineering (cum laude)
+        \end{twocolentry}
+
+
+    %------------------------------------------------------------------------
+    \section{Experience}
+
+        \begin{twocolentry}{Aug 2025 -- present}
+            \textbf{Student Researcher}, Computer Systems Lab, Cornell University -- Ithaca, NY
+        \end{twocolentry}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Research: Chip design infrastructure using MLIR-based abstractions and LLM agents (see Projects)
+                \item Mentoring: 14 undergraduate researchers across two semesters; several since interned at AMD and Micron
+                \item Service: Artifact Evaluation Committee, MLSys 2026
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{twocolentry}{Jan 2026 -- present}
+            \textbf{Teaching Assistant}, School of ECE, Cornell University -- Ithaca, NY
+        \end{twocolentry}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Developing hardware design and programming labs for a new ECE course on AI hardware, taught by Prof. Zhang
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{twocolentry}{Jan 2024 -- June 2025}
+            \textbf{Research Intern}, Accelerated Intelligent Systems Lab, SNU -- Seoul, Korea
+        \end{twocolentry}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Co-led kernel design and indexing optimization for G\textsuperscript{3}SA, a GPU-accelerated sequence alignment library
+                \item Co-first author on ACM ICS 2025 publication
+            \end{highlights}
+        \end{onecolentry}
+
+
+    %------------------------------------------------------------------------
+    \section{Projects}
+
+        \begin{twocolentry}{Sept 2025 -- present}
+            \textbf{Compiler-Aided Reasoning for Agentic RTL Design} \hrefWithoutArrow{https://sunwookim028.github.io/compiler-aided-reasoning/}{\small\textit{(link)}}
+        \end{twocolentry}
+
+        \vspace{0.05 cm}
+        \entrysubtitle{Compiler infrastructure and composability as grounding for LLM-based hardware design.}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Implemented a parametrized TPU in Allo; extended Allo with scratchpad modeling and kernel-launch programming to support ASIC beyond FPGA backends (\textasciitilde15$\times$ fewer lines of code than our Verilog baseline)
+                \item Compiler-based composition of HLS and IP modules for verifiable assembly, targeting a CGRA design
+                \item MLIR-based microarchitecture abstractions above HLS/RTL for automated ISA extraction and compiler backend generation, targeting the TPU design
+                \item Task decomposition and position-independent context caching for large-scale design tasks
+                \item Harness design and post-training for EDA-specific tool use and reasoning
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{twocolentry}{Oct 2025 -- present}
+            \textbf{Agentic PyTorch Backend for Heterogeneous Acceleration} \hrefWithoutArrow{https://sunwookim028.github.io/agentic-pytorch-backend/}{\small\textit{(link)}}
+        \end{twocolentry}
+
+        \vspace{0.05 cm}
+        \entrysubtitle{Agent-driven backend adaptation for evolving heterogeneous hardware (e.g., edge NPUs, chiplet-based SiPs) and kernel libraries.}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Program partitioning (e.g., PD disagg.) and compilation for heterogeneous systems (NPU+GPU, CGRA+PIM)
+                \item Demonstrated on AMD Strix Halo with IRON and ROCm libraries
+                \item Automated kernel-library registration and partitioning-logic updates via LLM agents
+            \end{highlights}
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{twocolentry}{Jan 2024 -- present}
+            \textbf{Hardware-Accelerated Scalable Tooling} \hrefWithoutArrow{https://sunwookim028.github.io/scalable-tooling/}{\small\textit{(link)}}
+        \end{twocolentry}
+
+        \vspace{0.05 cm}
+        \entrysubtitle{Multi-GPU software for genomics; GPU-accelerated simulation for chip design.}
+
+        \vspace{0.12 cm}
+        \begin{onecolentry}
+            \begin{highlights}
+                \item Multi-GPU acceleration for high-throughput NGS pipelines (kernels for all seed, chain, extend alignment stages)
+                \item Triton migration for long-term maintainability
+                \item GPU-accelerated architecture simulation for chip design
+            \end{highlights}
+        \end{onecolentry}
+
+
+    %------------------------------------------------------------------------
+    \section{Selected Honors}
+
+        \begin{onecolentry}
+            \begin{highlightsforbulletentries}
+                \item Fulbright Award for Graduate Studies in STEM (graciously declined), \$40k (2024)
+                \item Korea Presidential Science Scholarship, full tuition and stipend (2019--2024)
+                \item SNU Semiconductor Specialization Scholarship, \$11k (2023)
+            \end{highlightsforbulletentries}
+        \end{onecolentry}
+
+
+    %------------------------------------------------------------------------
+    \needspace{10\baselineskip}
+    \section{Publications}
+
+        \vspace{0.10 cm}
+        %{\large Conference Papers}
+        %\vspace{0.15 cm}
+
+        \begin{samepage}
+            \begin{twocolentry}{ICS 2025}
+                \textbf{G\textsuperscript{3}SA: A GPU-Accelerated Gold Standard Genomics Library for End-to-End Sequence Alignment} \href{https://doi.org/10.1145/3721145.3729516}{\small\textit{(link)}}
+            \end{twocolentry}
+
+            \vspace{0.10 cm}
+            \begin{onecolentry}
+                \mbox{Yeejoo Han*}, \mbox{\textbf{Sunwoo Kim}*}, \mbox{Seongyeon Park}, \mbox{Jinho Lee}\quad\textit{(* equal contribution)}
+
+            \end{onecolentry}
+        \end{samepage}
+
+        \vspace{0.25 cm}
+
+        %{\large Workshop Papers}
+        %\vspace{0.15 cm}
+
+        \begin{samepage}
+            \begin{twocolentry}{LATTE 2026 (Workshop)}
+                \textbf{From Pragmas to Partners: A Symbiotic Evolution of Agentic High-Level Synthesis} \href{https://capra.cs.cornell.edu/latte26}{\small\textit{(link)}}
+            \end{twocolentry}
+
+            \vspace{0.10 cm}
+            \begin{onecolentry}
+                \mbox{Niansong Zhang}, \mbox{\textbf{Sunwoo Kim}}, \mbox{Shreesha Srinath}, \mbox{Zhiru Zhang}
+
+            \end{onecolentry}
+        \end{samepage}
+
+
+    %------------------------------------------------------------------------
+    \section{Skills}
+
+        \begin{onecolentry}
+            \textbf{Programming Languages:} C, C++, CUDA, Python, Bash, Verilog, SystemVerilog
+        \end{onecolentry}
+
+        \vspace{0.28 cm}
+
+        \begin{onecolentry}
+            \textbf{Frameworks \& Tools:} MLIR, PyTorch, Allo, Vitis HLS, cocotb, Vivado, SPICE, Make, gdb, git
+        \end{onecolentry}
+
+\end{document}

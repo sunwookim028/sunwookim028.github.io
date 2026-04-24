@@ -1,18 +1,60 @@
-# Personal Website
+# sunwookim028.github.io
 
-This repo is built on [this template](https://github.com/leonidk/leonidk.github.io), and is [live](https://sunwookim028.github.io).
+Personal site. Bare Jekyll, self-hosted Source Serif 4, CV built by CI from LaTeX.
 
-Below are from the original repo's README.
+## Local dev
 
-This repo is built on a fork of **Jekyll Now** from [this repository](https://github.com/barryclark/jekyll-now). **Jekyll** is a static site generator that's perfect for GitHub hosted blogs ([Jekyll Repository](https://github.com/jekyll/jekyll))
+Requires Homebrew Ruby 3.3 (`brew install ruby@3.3`) and `export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"` in `~/.zshrc`. Then `make setup` to install gems into `vendor/`. Run `make help` from the repo root to see the other targets (`serve`, `cv`, `clean`).
 
-The website design is just a modification of [Jon Barron's website](https://jonbarron.info/) and is converted for my own use, re-purposing my old markdown posts. **Feel free to use template for your own purposes**, but please respect copyright for all the images/content in my `images`, `pdfs`, `_posts` folders. 
+## Where things live
 
+| | File |
+|---|---|
+| Home content | `index.md` |
+| Deep-dive pages (linked from CV) | `compiler-aided-reasoning.md`, `agentic-pytorch-backend.md`, `scalable-tooling.md` |
+| One layout for all pages | `_layouts/default.html` |
+| All CSS (variables at top) | `assets/css/main.scss` |
+| Fonts (self-hosted woff2) | `assets/fonts/SourceSerif4-*.woff2` |
+| Site config | `_config.yml` |
+| CV source | `cv/cv.tex`, `cv/Makefile` |
+| CV build workflow | `.github/workflows/build-cv.yml` |
 
+## Single-variable style experiments
 
-## issues
-* In general, jekyll will try to build a full page for every post. I skip that by forcing `permalink: /`. This creates multiple entries in sitemap.xml for index.html but is otherwise fine. 
-* If you want multiple paragraphs, consider using `excerpt_separator: <!--more-->` in `_config.yml`, for my own use I didn't need this. 
-* My own posts have lots of extra stuff left over from my old jekyll design ("author", long descriptions, etc.), feel free to ignore them
-* I use thumbnails, so I can upload arbitrary sized images but then only display small ones. The `_make_thumbnails.sh` script generates them and the html template looks in `tn/` for all images. 
-* I have three categories of post with slightly differerent formatting, so changing sizing requires edits in multiple paces. 
+All in `assets/css/main.scss`:
+
+| Change this | Effect |
+|---|---|
+| `body { max-width: 680px }` | Text column width. 680 = ~65ch reading measure. Try 760–820 for more fill, 960+ to fill desktop. |
+| `$bg: #faf7ee` | Page background (ivory). |
+| `$accent: #B31B1B` | Link color (Cornell carnelian). |
+| `$serif: ...` | Body font stack. Fallbacks are Cambria → Georgia if Source Serif 4 fails to load. |
+| `body { font-size: 17px }` | Base type size. Scales everything via rem. |
+
+Change one thing at a time, reload, judge.
+
+## Adding a deeper-dive page
+
+Copy an existing `*.md`, edit front matter:
+
+```yaml
+---
+layout: default
+title: Short Page Title
+permalink: /short-slug/
+---
+```
+
+The CV links to these URLs — if you rename a slug, update `cv/cv.tex` too.
+
+Images: drop into `images/`, reference with `![alt](/images/file.png)`. For captions use `<figure><img><figcaption>...`.
+
+## CV
+
+- Source: `cv/cv.tex`. Uses `sourceserifpro` LaTeX package so CV and site match.
+- Local build: `make cv`.
+- CI build: any push to `master` touching `cv/**` triggers `.github/workflows/build-cv.yml`, which builds and commits `cv.pdf` at repo root. Requires repo-level **Settings → Actions → General → Workflow permissions = Read and write**.
+
+## Previous version
+
+The pre-2026-04 Jon Barron–template site lives on branch `archive-2025-12-29` on origin.
