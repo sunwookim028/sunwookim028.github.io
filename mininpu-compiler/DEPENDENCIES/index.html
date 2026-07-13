@@ -1,0 +1,741 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Minimal extensible compiler framework — Triton to a custom NPU ISA.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu-compiler/DEPENDENCIES/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+    
+    
+      
+        <title>Dependencies - mininpu-compiler</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#dependencies" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="mininpu-compiler" class="md-header__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu-compiler
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Dependencies
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="mininpu-compiler" class="md-nav__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu-compiler
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Charter / Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPILER_ARCHITECTURE/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compiler Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SUPPORTED_TRITON/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supported Triton
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_BUDGET/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Memory Budget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GLOSSARY/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossary
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../isa/npu-isa/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISA narrative
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tier-0-the-mininpu-sibling-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 0: the mininpu sibling package
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tier 0: the mininpu sibling package">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mininpu-runtime-subset-internal-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      mininpu runtime subset (internal distribution)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-1-sim-only-no-compiler-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 1: sim-only (no compiler build)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-2-compiler-path-npu-opt-npu-translate-e2e-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 2: compiler path (npu-opt, npu-translate, e2e tests)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tier-3-triton-frontend-py-kernel-linalg-npu-asm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tier 3: Triton frontend (.py kernel -&gt; linalg -&gt; NPU asm)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-demo-extra" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional: demo extra
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick reference
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h1>
+<p>This project has three install tiers, from lightest to heaviest. Pick the
+tier that matches what you need to run; each one is a strict superset of the
+previous.</p>
+<p>Dependency SSOT: <code>pyproject.toml</code> (<code>[project.dependencies]</code> +
+<code>[project.optional-dependencies]</code>). <code>requirements.txt</code> is a thin convenience
+mirror for <code>pip install -r requirements.txt</code>; it is kept in sync by hand and
+must never diverge from <code>pyproject.toml</code> (same versions, same triton pin).</p>
+<p>Python requirement: <strong>&gt;=3.9</strong> (all tiers).</p>
+<h2 id="tier-0-the-mininpu-sibling-package">Tier 0: the <code>mininpu</code> sibling package<a class="headerlink" href="#tier-0-the-mininpu-sibling-package" title="Permanent link">&para;</a></h2>
+<p>Everything below depends on the <code>mininpu</code> package: the functional
+simulator / assembler / ISA SSOT (<code>mininpu.iss</code>, <code>mininpu.asm</code>, <code>mininpu.isa</code>,
+<code>mininpu.hwparams</code>).</p>
+<p><code>mininpu</code> is <strong>not published to PyPI</strong>. It lives in a sibling repo and is
+expected at <code>../mininpu</code> relative to this repo's checkout:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sunwookim028/mininpu<span class="w"> </span>../mininpu<span class="w">   </span><span class="c1"># if not already cloned</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../mininpu
+</code></pre></div>
+<p><code>pip install -e .</code> in this repo declares <code>mininpu&gt;=0.4.0</code> as a dependency,
+but pip cannot resolve it from PyPI. Install the sibling first, or install
+this package with <code>--no-deps</code> after <code>mininpu</code> is already present:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../mininpu
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w"> </span>--no-deps
+</code></pre></div>
+<h3 id="mininpu-runtime-subset-internal-distribution">mininpu runtime subset (internal distribution)<a class="headerlink" href="#mininpu-runtime-subset-internal-distribution" title="Permanent link">&para;</a></h3>
+<p>Distribution is internal (a small shared group, not public PyPI). The compiler
+ships as a self-contained wheel; the <code>mininpu</code> runtime it depends on ships
+alongside it as a trimmed subset, not the whole <code>mininpu</code> repo.</p>
+<p>The shipped <code>mininpu_compiler</code> package has exactly <strong>one</strong> hard <code>mininpu</code>
+import: <code>compile.py</code> does <code>from mininpu.asm import assemble_program</code> (the
+binary-image path). Everything else importing <code>mininpu</code> is tests/demo, not the
+shipped package.</p>
+<p>Verified runtime import closures:</p>
+<ul>
+<li><code>import mininpu.asm</code> -&gt; <code>{asm, core, isa}</code></li>
+<li><code>import mininpu.iss.simulator</code> -&gt; <code>{iss, core, isa, hwparams}</code></li>
+<li>Neither loads <code>mininpu.cost</code> (its cost imports are lazy, inside functions).</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Status</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mininpu/__init__.py</code></td>
+<td>REQUIRED</td>
+<td>package root</td>
+</tr>
+<tr>
+<td><code>mininpu/hwparams.py</code></td>
+<td>REQUIRED</td>
+<td>hardware geometry SSOT (sim path)</td>
+</tr>
+<tr>
+<td><code>mininpu/isa/</code></td>
+<td>REQUIRED</td>
+<td>opcode/encoding SSOT</td>
+</tr>
+<tr>
+<td><code>mininpu/core/</code></td>
+<td>REQUIRED</td>
+<td>insn/decode core</td>
+</tr>
+<tr>
+<td><code>mininpu/asm/</code></td>
+<td>REQUIRED</td>
+<td>assembler (<code>assemble_program</code>)</td>
+</tr>
+<tr>
+<td><code>mininpu/iss/</code></td>
+<td>REQUIRED</td>
+<td>functional simulator</td>
+</tr>
+<tr>
+<td><code>mininpu/cost/</code></td>
+<td>EXCLUDED</td>
+<td>not imported by this repo (lazy-only)</td>
+</tr>
+<tr>
+<td><code>mininpu/abi.py</code></td>
+<td>EXCLUDED</td>
+<td>not needed by the compiler</td>
+</tr>
+<tr>
+<td><code>mininpu/ip_packaging.py</code></td>
+<td>EXCLUDED</td>
+<td>not needed by the compiler</td>
+</tr>
+<tr>
+<td>everything else (RTL, verification, docs)</td>
+<td>EXCLUDED</td>
+<td>not runtime</td>
+</tr>
+</tbody>
+</table>
+<p>Two tiers within the subset:</p>
+<ul>
+<li><strong>compile-only</strong> needs <code>{isa, core, asm, hwparams}</code></li>
+<li><strong>+ functional simulation</strong> adds <code>{iss}</code></li>
+<li>cost-model features are intentionally unavailable in the subset.</li>
+</ul>
+<p>Stage it with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>bash<span class="w"> </span>scripts/stage-mininpu-subset.sh
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">#   MININPU_SRC  source checkout   (default: sibling ../mininpu)</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">#   DEST         staging dest      (default: &lt;repo&gt;/dist/mininpu-subset)</span>
+</code></pre></div>
+<p>The script copies only the required subset, runtime-only: it excludes
+<code>__pycache__</code>/<code>*.pyc</code> and mininpu's internal tests (<code>tests/</code> dirs and
+<code>test_*.py</code> files), then runs a static import-closure check. Dropping the tests
+also removes the only (lazy) <code>mininpu.cost</code> reference, so the artifact has no
+cost coupling at all. The shared-server destination is TBD; for now it stages
+into a local <code>dist/</code> the release process copies onward.</p>
+<h2 id="tier-1-sim-only-no-compiler-build">Tier 1: sim-only (no compiler build)<a class="headerlink" href="#tier-1-sim-only-no-compiler-build" title="Permanent link">&para;</a></h2>
+<p>Runs the Python functional simulator and unit tests. No MLIR, no C++
+toolchain.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>../mininpu
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>pip<span class="w"> </span>install<span class="w"> </span>numpy<span class="w"> </span>pytest<span class="w">      </span><span class="c1"># or: pip install -e .[dev] --no-deps</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>make<span class="w"> </span>sim-test
+</code></pre></div>
+<h2 id="tier-2-compiler-path-npu-opt-npu-translate-e2e-tests">Tier 2: compiler path (npu-opt, npu-translate, e2e tests)<a class="headerlink" href="#tier-2-compiler-path-npu-opt-npu-translate-e2e-tests" title="Permanent link">&para;</a></h2>
+<p>Requires a prebuilt MLIR tree at the pinned LLVM commit.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>bash<span class="w"> </span>scripts/build-mlir.sh<span class="w">    </span><span class="c1"># clones llvm-project @ pinned commit, ~20 min</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>make<span class="w"> </span>build<span class="w">                    </span><span class="c1"># cmake + ninja: npu-opt, npu-translate, ~1 min</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>make<span class="w"> </span>e2e-test<span class="w">                 </span><span class="c1"># test/e2e/sim_validate (needs npu-opt)</span>
+</code></pre></div>
+<p><code>triton-shared-opt</code> (needed for the Triton frontend, tier 3) is built
+separately:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>make<span class="w"> </span>build-triton-shared<span class="w">      </span><span class="c1"># ~5 min, after build-mlir</span>
+</code></pre></div>
+<h2 id="tier-3-triton-frontend-py-kernel-linalg-npu-asm">Tier 3: Triton frontend (<code>.py</code> kernel -&gt; linalg -&gt; NPU asm)<a class="headerlink" href="#tier-3-triton-frontend-py-kernel-linalg-npu-asm" title="Permanent link">&para;</a></h2>
+<p>Only needed for <code>make triton-test</code> (compiling actual Triton kernels, not
+just running pre-lowered snapshots). Pulls the pinned Triton frontend.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>frontend<span class="o">]</span><span class="w">    </span><span class="c1"># triton==3.4.0</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>make<span class="w"> </span>triton-test
+</code></pre></div>
+<p><strong>Triton pin:</strong> the only Triton version anywhere in this repo is <code>==3.4.0</code>
+(the <code>[frontend]</code> and <code>[dev]</code> extras in <code>pyproject.toml</code>, mirrored in
+<code>requirements.txt</code>). <code>triton-shared-opt</code> is built against Triton commit
+<code>e44bd1c8</code> == 3.4.0; do not bump one without the other.</p>
+<h2 id="optional-demo-extra">Optional: <code>demo</code> extra<a class="headerlink" href="#optional-demo-extra" title="Permanent link">&para;</a></h2>
+<p><code>demo/chat.py</code> and <code>scripts/demo_tinyllama.py</code> load HuggingFace weights and
+tokenizers. <code>torch</code> is intentionally excluded from this extra: weights load
+via <code>safetensors</code> directly as numpy; <code>torch</code> is only used for the optional
+HF reference-output comparison.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>demo<span class="o">]</span><span class="w">        </span><span class="c1"># transformers, safetensors, tokenizers</span>
+</code></pre></div>
+<p>The full demo conda-env setup (<code>bash scripts/setup-demo-env.sh</code>) additionally
+installs CPU-only <code>torch</code> and pre-downloads model checkpoints; see that
+script for the full package list.</p>
+<h2 id="quick-reference">Quick reference<a class="headerlink" href="#quick-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sim unit tests</td>
+<td><code>pip install -e ../mininpu &amp;&amp; pip install -e .[dev] --no-deps &amp;&amp; make sim-test</code></td>
+</tr>
+<tr>
+<td>Compiler e2e tests</td>
+<td>above + <code>bash scripts/build-mlir.sh &amp;&amp; make build &amp;&amp; make e2e-test</code></td>
+</tr>
+<tr>
+<td>Triton atom-kernel tests</td>
+<td>above + <code>make build-triton-shared &amp;&amp; pip install -e .[frontend] &amp;&amp; make triton-test</code></td>
+</tr>
+<tr>
+<td>Demo (chat)</td>
+<td><code>pip install -e .[demo]</code> (or <code>bash scripts/setup-demo-env.sh</code> for the full conda env)</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.suggest", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
