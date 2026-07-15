@@ -1,0 +1,222 @@
+<title>Shared fp primitives - pipeline stages - FIG. 11</title>
+<style>
+  :root{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8;
+    --mem:#255e9e;  --mem-f:#d6e6f6;
+    --mxu:#237a5d;  --mxu-f:#cfe9de;
+    --vpu:#5f42a0;  --vpu-f:#e1d9f2;
+    --ext:#4f5a68;  --ext-f:#dbe1e9;
+    --new:#bd3423;
+    --font-s: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-m: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+      --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+      --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+      --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8; --mem:#255e9e; --mem-f:#d6e6f6;
+    --mxu:#237a5d; --mxu-f:#cfe9de; --vpu:#5f42a0; --vpu-f:#e1d9f2;
+    --ext:#4f5a68; --ext-f:#dbe1e9; --new:#bd3423;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+    --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+    --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+    --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-s);
+       margin:0; padding:28px 22px 56px; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1720px; margin:0 auto;}
+  header{margin:0 4px 16px;}
+  h1{font-size:22px; font-weight:650; letter-spacing:-.01em; margin:0 0 4px; text-wrap:balance;}
+  .sub{font-family:var(--font-m); font-size:12.5px; color:var(--muted); margin:0;}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin:12px 4px 0;
+          font-family:var(--font-m); font-size:11.5px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .sw{width:13px; height:13px; border-radius:3px; border:1.5px solid;}
+  .swl{width:15px; height:0; border-top:3px solid var(--new);}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px;
+          background:var(--chip); margin-top:14px;}
+  svg{display:block; min-width:1120px; width:100%; height:auto;}
+  text{font-family:var(--font-m); fill:var(--ink);}
+  .ti{font-family:var(--font-s); font-weight:650;}
+  .t-mxu{fill:var(--mxu);} .t-vpu{fill:var(--vpu);} .t-mem{fill:var(--mem);} .t-muted{fill:var(--muted);}
+  .stg-mxu{fill:color-mix(in srgb, var(--mxu) 14%, var(--chip)); stroke:var(--mxu); stroke-width:1.3;}
+  .stg-vpu{fill:color-mix(in srgb, var(--vpu) 14%, var(--chip)); stroke:var(--vpu); stroke-width:1.3;}
+  .stg-hw{fill:color-mix(in srgb, var(--mem) 20%, var(--chip)); stroke:var(--mem); stroke-width:1.3;}
+  .pill{fill:var(--ext-f); stroke:var(--ext); stroke-width:1.3;}
+  .reg{fill:var(--new); opacity:.92; rx:2;}
+  .rulerline{stroke:var(--line); stroke-width:1.4;}
+  .tick{stroke:var(--line); stroke-width:1;}
+  .cyc{fill:var(--muted); font-size:13px; font-weight:700;}
+  .cyc2{fill:var(--muted); font-size:10.5px;}
+  .stitle{font-weight:650; font-size:12.5px;}
+  .d{fill:var(--ink); font-size:11px;}
+  .d2{fill:var(--muted); font-size:10px;}
+  .reglab{fill:var(--new); font-size:9.5px; font-weight:700;}
+  .flow{fill:none; stroke:var(--line); stroke-width:1.6; marker-end:url(#arw);}
+  .card{border:1px solid var(--line); border-radius:10px; background:var(--chip); padding:14px 16px; margin-top:16px;}
+  .card h2{font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; font-weight:650;}
+  .card ul{margin:0; padding-left:18px; columns:2; column-gap:26px; font-size:12px; line-height:1.5;}
+  @media(max-width:760px){.card ul{columns:1;}}
+  .card code{font-family:var(--font-m); color:var(--ink); font-size:11px;}
+  .foot{margin:16px 4px 0; font-family:var(--font-m); font-size:11px; color:var(--muted); line-height:1.55;}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Shared fp primitives - pipeline stages <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 11</span></h1>
+  <p class="sub">The two atoms every compute unit is built from &middot; <code>fp_add</code> LATENCY=2 &middot; <code>fp_mul</code> LATENCY=2 &middot; horizontal = clock cycles, red bars = pipeline register boundaries</p>
+  <div class="legend">
+    <span><i class="sw" style="background:color-mix(in srgb,var(--mem) 20%,var(--chip));border-color:var(--mem)"></i>DSP48E2 / BRAM hard-block segment</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--mxu) 14%,var(--chip));border-color:var(--mxu)"></i>fp_add LUT / CARRY8 segment</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--vpu) 14%,var(--chip));border-color:var(--vpu)"></i>fp_mul LUT segment</span>
+    <span><i class="swl"></i>pipeline register (clock edge)</span>
+  </div>
+</header>
+
+<div class="scroll">
+<svg viewBox="0 0 1140 560" role="img" aria-label="Shared fp primitives pipeline stages FIG 11">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker>
+  </defs>
+
+  <!-- ===== CYCLE RULER (shared) ===== -->
+  <!-- cycle columns: c0 [230..470] c1 [500..740] c2 [770..1010] ; result @ cycle 2 -->
+  <line class="rulerline" x1="230" y1="66" x2="1010" y2="66"/>
+  <line class="tick" x1="230" y1="60" x2="230" y2="486"/>
+  <line class="tick" x1="485" y1="60" x2="485" y2="486"/>
+  <line class="tick" x1="755" y1="60" x2="755" y2="486"/>
+  <line class="tick" x1="1010" y1="60" x2="1010" y2="486"/>
+  <text class="cyc" x="350"  y="52" text-anchor="middle">cycle 0</text>
+  <text class="cyc" x="620"  y="52" text-anchor="middle">cycle 1</text>
+  <text class="cyc" x="882"  y="52" text-anchor="middle">cycle 2</text>
+  <text class="cyc2" x="230" y="500" text-anchor="middle">t = 0</text>
+  <text class="cyc2" x="485" y="500" text-anchor="middle">+1 cy</text>
+  <text class="cyc2" x="755" y="500" text-anchor="middle">+2 cy</text>
+  <text class="cyc2" x="1010" y="500" text-anchor="middle">result</text>
+
+  <!-- =========================================================
+       fp_add  (LATENCY=2)  -- 3 comb segments, 2 register stages
+       ========================================================= -->
+  <text class="ti t-mxu" x="20" y="116" font-size="13">fp_add</text>
+  <text class="d2" x="20" y="132">LATENCY=2</text>
+  <text class="d2" x="20" y="146">FP32 IEEE-754</text>
+  <text class="d2" x="20" y="160">LUT + CARRY8</text>
+  <text class="d2" x="20" y="174">(no DSP)</text>
+
+  <!-- operand pill -->
+  <rect class="pill" x="150" y="120" width="70" height="60" rx="6"/>
+  <text class="d" x="185" y="146" text-anchor="middle">a, b</text>
+  <text class="d2" x="185" y="162" text-anchor="middle">fp32</text>
+  <path class="flow" d="M220,150 L228,150"/>
+
+  <!-- seg1 align+add -->
+  <rect class="stg-mxu" x="232" y="112" width="250" height="76" rx="5"/>
+  <text class="stitle t-mxu" x="242" y="132">unpack + align</text>
+  <text class="d" x="242" y="150">exponent align (barrel shift)</text>
+  <text class="d" x="242" y="166">mantissa add / subtract</text>
+  <text class="d2" x="242" y="181">special-case detect (NaN/Inf/0)</text>
+
+  <!-- REG 1 -->
+  <rect class="reg" x="485" y="108" width="8" height="84" rx="2"/>
+  <text class="reglab" x="489" y="102" text-anchor="middle">FF p1</text>
+
+  <!-- seg2 normalize -->
+  <rect class="stg-mxu" x="502" y="112" width="250" height="76" rx="5"/>
+  <text class="stitle t-mxu" x="512" y="132">normalize</text>
+  <text class="d" x="512" y="150">LZC leading-zero count</text>
+  <text class="d" x="512" y="166">mantissa shift + exponent</text>
+  <text class="d2" x="512" y="181">the 200 MHz worst half</text>
+
+  <!-- REG 2 -->
+  <rect class="reg" x="755" y="108" width="8" height="84" rx="2"/>
+  <text class="reglab" x="759" y="102" text-anchor="middle">FF p2</text>
+
+  <!-- seg3 pack -->
+  <rect class="stg-mxu" x="772" y="112" width="238" height="76" rx="5"/>
+  <text class="stitle t-mxu" x="782" y="132">pack</text>
+  <text class="d" x="782" y="150">round / subnormal / overflow</text>
+  <text class="d" x="782" y="166">assemble sign|exp|mant</text>
+  <text class="d2" x="782" y="181">light final tail</text>
+
+  <!-- result pill -->
+  <path class="flow" d="M1010,150 L1030,150"/>
+  <rect class="pill" x="1032" y="120" width="80" height="60" rx="6"/>
+  <text class="d" x="1072" y="146" text-anchor="middle">sum</text>
+  <text class="d2" x="1072" y="162" text-anchor="middle">@ 2 cy</text>
+
+  <!-- =========================================================
+       fp_mul  (LATENCY=2)  -- 3 comb segments, 2 register stages
+       ========================================================= -->
+  <text class="ti t-vpu" x="20" y="296" font-size="13">fp_mul</text>
+  <text class="d2" x="20" y="312">LATENCY=2</text>
+  <text class="d2" x="20" y="326">FP32 IEEE-754</text>
+  <text class="d2" x="20" y="340">DSP48E2 core</text>
+  <text class="d2" x="20" y="354">(+ LUT round)</text>
+
+  <!-- operand pill -->
+  <rect class="pill" x="150" y="300" width="70" height="60" rx="6"/>
+  <text class="d" x="185" y="326" text-anchor="middle">a, b</text>
+  <text class="d2" x="185" y="342" text-anchor="middle">fp32</text>
+  <path class="flow" d="M220,330 L228,330"/>
+
+  <!-- seg1 unpack -->
+  <rect class="stg-vpu" x="232" y="292" width="250" height="76" rx="5"/>
+  <text class="stitle t-vpu" x="242" y="312">driver + unpack</text>
+  <text class="d" x="242" y="330">exponent add, sign xor</text>
+  <text class="d" x="242" y="346">subnormal-input normalize</text>
+  <text class="d2" x="242" y="361">absorbs SPAD-read driver cone</text>
+
+  <!-- REG 1 -->
+  <rect class="reg" x="485" y="288" width="8" height="84" rx="2"/>
+  <text class="reglab" x="489" y="282" text-anchor="middle">FF unpk</text>
+
+  <!-- seg2 DSP multiply (hard block) -->
+  <rect class="stg-hw" x="502" y="292" width="250" height="76" rx="5"/>
+  <text class="stitle t-mem" x="512" y="312">24x24 multiply</text>
+  <text class="d" x="512" y="330">DSP48E2 mantissa product</text>
+  <text class="d" x="512" y="346">50-bit partial result</text>
+  <text class="d2" x="512" y="361">hard-block segment</text>
+
+  <!-- REG 2 -->
+  <rect class="reg" x="755" y="288" width="8" height="84" rx="2"/>
+  <text class="reglab" x="759" y="282" text-anchor="middle">FF prod</text>
+
+  <!-- seg3 round+pack -->
+  <rect class="stg-vpu" x="772" y="292" width="238" height="76" rx="5"/>
+  <text class="stitle t-vpu" x="782" y="312">round + pack</text>
+  <text class="d" x="782" y="330">guard/round/sticky, normalize</text>
+  <text class="d" x="782" y="346">subnormal / overflow, pack</text>
+  <text class="d2" x="782" y="361">LUT round tail</text>
+
+  <!-- result pill -->
+  <path class="flow" d="M1010,330 L1030,330"/>
+  <rect class="pill" x="1032" y="300" width="80" height="60" rx="6"/>
+  <text class="d" x="1072" y="326" text-anchor="middle">product</text>
+  <text class="d2" x="1072" y="342" text-anchor="middle">@ 2 cy</text>
+
+  <!-- register-count summary under the ruler -->
+  <text class="d2" x="230" y="524">Both primitives: 3 combinational segments (each &lt; 5 ns at 200 MHz), 2 pipeline register boundaries, arithmetic bit-identical across LATENCY values.</text>
+  <text class="d2" x="230" y="540">Under Verilator the DPI model is combinational; callers hold inputs across the reservation window (or use a LATENCY-deep shim) so sim == synth.</text>
+</svg>
+</div>
+
+<div class="card">
+  <h2>Reference - FIG. 11 (RTL-verified depths)</h2>
+  <ul>
+    <li><b>fp_add</b> <code>LATENCY=2</code>: <code>{align+add}</code> | <code>{normalize LZC+shift+exp}</code> | <code>{pack}</code>. 2 register FFs (<code>p1</code>, <code>p2</code>), result 2 clocks after inputs. LUT + CARRY8; the normalize half was the 200 MHz worst cone. Source: <code>fpu/fp_add.sv</code> (lat2 generate arm).</li>
+    <li><b>fp_mul</b> <code>LATENCY=2</code>: <code>{driver+unpack}</code> | <code>{DSP48 multiply}</code> | <code>{round+pack}</code>. 2 register FFs (<code>g_reg_unpack</code> at L&gt;=2, <code>g_reg_product</code> at L&gt;=1). Vivado infers one DSP48E2 for the 24x24 mantissa multiply. Source: <code>fpu/fp_mul.sv</code>.</li>
+    <li><b>Why they are the atoms:</b> the PE MAC, the mxu_accumulator RMW, every VPU function (gelu / exp2 / reduce / SIMD), and the exp2 BRAM <code>x - floor(x)</code> subtract all instantiate these two. Their 2-cycle depth is what sets <code>PE_LATENCY</code>, <code>D_vpu</code>, and the reduce-tree latency downstream.</li>
+  </ul>
+</div>
+<p class="foot">FIG. 11 depicts RTL-measured pipeline depths on <code>rtl/full-npu-wire</code>. Grounded in <code>npu/src/compute_tile/fpu/{fp_add,fp_mul}.sv</code>. Stage/latency view; the structural block figures are FIG. 5 / 7.</p>
+</div>

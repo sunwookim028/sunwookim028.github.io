@@ -291,10 +291,19 @@
           </div>
         </div>
 
+        <h3>Shared fp primitives</h3>
+        <iframe src="figures/fig11_fp_primitives.html" loading="lazy" title="FIG. 11 shared fp primitives pipeline stages" style="width:100%;height:560px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 11 - shared fp primitives, stage/latency view: <code>fp_add</code> LATENCY=2 (<code>{align+add}</code> | <code>{normalize}</code> | <code>{pack}</code>, LUT/CARRY8) and <code>fp_mul</code> LATENCY=2 (<code>{unpack}</code> | <code>{DSP48}</code> | <code>{round+pack}</code>). The atoms every unit below is built from.
+           <a href="figures/fig11_fp_primitives.html">open standalone</a></p>
+
         <h3>MXU</h3>
         <iframe src="figures/fig7_mxu.html" loading="lazy" title="FIG. 7 MXU datapath" style="width:100%;height:780px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
         <p class="sub">FIG. 7 - MXU datapath: 8x8 weight-stationary systolic array, 2 weight buffers, X streamed from VREG (cast to bf16 at the PE input), output to ACC.
            <a href="figures/fig7_mxu.html">open standalone</a></p>
+
+        <iframe src="figures/fig12_mxu_pipeline.html" loading="lazy" title="FIG. 12 MXU matmul pipeline stages" style="width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 12 - MXU matmul pipeline, stage/latency view: X burst-read (VREG) to fp32-&gt;bf16 cast to 8x8 systolic array (SKEW = PE_LATENCY+1 = 3, per-PE MAC = combinational fp_mul + registered fp_add L=2) to <code>mxu_accumulator</code> causal-fold RMW to ACC. Reservation offsets d(r) = 2N + 3r, PE_LAT = 5. Structural figure is FIG. 7, tile-loop Gantt FIG. 9.
+           <a href="figures/fig12_mxu_pipeline.html">open standalone</a></p>
 
         <h3>VPU pipeline</h3>
         <p class="sub"><span class="sev good">Locked structure</span> - fixed-depth,
@@ -334,10 +343,19 @@
         <p class="sub">FIG. 10 - VPU row-pipelining: latency-serial (8 x D_vpu = 184 cy) vs row-pipelined (~8 + 23 = 31 cy) schedules for an 8-row tile through the <code>D_vpu = 23</code> pipeline; <code>D_vpu</code> is the per-row drain, amortized across the tile-loop.
            <a href="figures/fig10_vpu_rowpipe.html">open standalone</a></p>
 
+        <iframe src="figures/fig13_vpu_pipeline.html" loading="lazy" title="FIG. 13 VPU pipeline uniform D_vpu terminal" style="width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 13 - VPU pipeline to the uniform <code>D_vpu = 23</code> terminal, stage/latency view: per-function depths within the 23-cycle envelope (gelu ~22-stage sets it; exp2 = 5, reduce-tree = 9, single-src SIMD shallow, all padded to 23). The 5 single-source SIMD ops are row-pipelined; gelu / exp2 / two-source ops stay latency-serial.
+           <a href="figures/fig13_vpu_pipeline.html">open standalone</a></p>
+
         <h3>SPAD</h3>
         <iframe src="figures/fig8_spad.html" loading="lazy" title="FIG. 8 SPAD datapath" style="width:100%;height:700px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
         <p class="sub">FIG. 8 - SPAD datapath: 32 KiB, 8 banks (<code>bank = row mod 8</code>), bf16; compute clients fixed-latency, the DMU yields on a bank conflict so compute never stalls.
            <a href="figures/fig8_spad.html">open standalone</a></p>
+
+        <h3>LSU pipeline</h3>
+        <iframe src="figures/fig14_lsu_pipeline.html" loading="lazy" title="FIG. 14 LSU 10-cycle pipeline" style="width:100%;height:640px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 14 - LSU pipeline, stage/latency view: FIXED LATENCY = ROWS + SPAD_RD_LATENCY = 8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath, read tile-row r on cycle r, write RL=2 later, and own the bf16 &harr; fp32 casts.
+           <a href="figures/fig14_lsu_pipeline.html">open standalone</a></p>
 
         <h3 id="vreg">VREG realization (whole-tile-row RF + MXU-burst temporal separation)</h3>
         <p class="sub"><span class="sev good">Locked</span> - resolved model.</p>
