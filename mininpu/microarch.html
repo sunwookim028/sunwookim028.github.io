@@ -80,7 +80,8 @@
             <p>In-order issue, <strong>1 instruction/cycle</strong>. No producer-busy
                scoreboard; no hardware interlock. All hazard avoidance is
                <strong>static compiler scheduling</strong>. <code>flush.slot</code> is
-               the <strong>only runtime sync</strong>.</p>
+               the <strong>only mid-program runtime synchronization</strong>
+               (<code>halt</code> is the terminal drain at end of kernel).</p>
             <p>Nonblocking set = <code>{mxu.matmul, mxu.load.w, mxu.acc.init,
                async-DMA}</code>; everything else is <strong>blocking</strong>.</p>
           </div>
@@ -106,7 +107,8 @@
           </div>
           <div class="card" id="lpm">
             <h3>Literal pool (LPM)</h3>
-            <p>On-chip param RAM in the sequencer (<strong>~256 x 64b</strong>),
+            <p>On-chip param RAM in the sequencer (<strong>256 x 64b (~2 KiB),
+               provisional</strong>; final sizing during implementation),
                <strong>pool-index</strong> space, baked + launch-patched, read in
                <strong>Decode</strong>.</p>
             <p><strong>Realization:</strong> reuse the mature
@@ -125,6 +127,30 @@
         <h2><span class="num">02</span> Execution model / pipeline</h2>
         <p class="sub"><span class="sev good">Locked</span> - the fully-exposed,
            compiler-timed pipeline.</p>
+
+        <div class="call" style="border-left-color:var(--good)">
+          <div class="lbl" style="color:var(--good)">Performance model &middot; throughput-bound, not latency-bound</div>
+          <p>The compute tile is <strong>throughput-bound</strong>. Per-instruction
+             latency - including <code>D_vpu</code> and the matmul systolic fill - is
+             <strong>negligible for performance</strong>: it is the pipeline
+             <strong>drain latency</strong>, amortized across the tile-loop, not on a
+             serial critical path. So <strong>pipeline depth may grow freely to meet
+             timing</strong> while <strong>throughput stays 1 tile-row/cycle (VPU) and 1
+             column/cycle (MXU)</strong>.</p>
+          <p><strong>This rests on row-pipelining.</strong> The VPU is a fixed-depth
+             pipeline that <strong>issues 1 tile-row/cycle with multiple rows in
+             flight</strong> (rows overlapped); <code>D_vpu</code> is only the drain
+             latency of a single row, paid once and hidden behind the following rows,
+             hence negligible. softmax / LayerNorm are dependent reduction chains within a
+             row, but the <strong>tile-loop supplies the row-level parallelism</strong>
+             the pipeline consumes, so the pipe stays full.</p>
+          <p>The level-wise reduce-tree pipelining and the deep fp pipelines are
+             <strong>intended design, not overhead</strong>: fp arithmetic follows
+             standard pipelined designs (FloPoCo-style; <code>fp_mul</code> combinational,
+             IEEE <code>fp_add</code> registered / multi-stage), so deepening a stage to
+             close 200 MHz spends latency (which does not matter) to preserve throughput
+             (which does).</p>
+        </div>
 
         <div class="ladder">
           <div class="rung">
@@ -146,13 +172,13 @@
         </div>
 
         <ul>
-          <li><strong>Stages:</strong> F (fetch <code>IRAM[PC]</code>, 1/cy) to D (decode + per-unit AGU address gen + iv broadcast) to X (execute, op-specific latency) to W (writeback to VREG / ACC / SPAD / DRAM per the op's writeback target).</li>
-          <li><strong>Fully exposed pipeline:</strong> the sequencer issues exactly 1 instruction per cycle and NEVER stalls to wait on a result. The only runtime waits are <code>flush.slot</code> (waits on an async-DMA slot) and <code>halt</code> (drains DMU).</li>
+          <li><strong>Stages:</strong> F (fetch <code>IRAM[PC]</code>, 1/cy) to D (decode + per-unit AGU address gen + iv broadcast) to X (execute, op-specific latency) to W (writeback to VREG / ACC / SPAD / DRAM per the op's writeback target). This is the architectural <strong>issue</strong> model; the physical Fetch is a pipelined multi-cycle IRAM BRAM read (~3 cycles) that still sustains <strong>1 instruction/cycle</strong> issue in steady state (see the <a href="implementation.html#s2">Doc 3 tile-sequencer FSM</a>).</li>
+          <li><strong>Fully exposed pipeline:</strong> the sequencer issues exactly 1 instruction per cycle and NEVER stalls to wait on a result. The only runtime waits are <code>flush.slot</code> (the sole mid-program sync, waits on an async-DMA slot) and <code>halt</code> (the terminal drain at end of kernel, not a mid-program sync).</li>
           <li><strong>Fixed, data-independent latencies:</strong> the compiler covers every latency by placing dependents later and filling gaps with independent instructions or NOPs. No hardware interlock, no scoreboard.</li>
           <li><strong>Nonblocking ops</strong> (<code>mxu.matmul</code>, <code>mxu.load.w</code>, <code>mxu.acc.init</code>, async-DMA) run in background FUs: the sequencer issues them in 1 cycle and proceeds. The compiler overlaps them (e.g. a background matmul concurrent with a foreground VPU op) and double-buffers the shared VREG tiles.</li>
           <li><strong>Completion:</strong> compute nonblocking ops are fixed-latency, so they need NO fence (compiler-timed). async-DMA is variable-latency, so the compiler inserts <code>flush.slot</code> before any consumer of the DMA'd region.</li>
           <li><strong>Structural single-instance limits:</strong> 1 MXU (matmuls serialize), 1 inactive weight buffer (at most 1 <code>load.w</code> preload ahead), <strong>2 outstanding DMA slots</strong> (<code>DMA_SLOT_COUNT=2</code>; <code>flush.slot</code>'s bitmask selects among them, async-only).</li>
-          <li><strong>Latencies:</strong> the structurally-fixed values are the systolic fill = <code>2N-1</code>, the VPU pipeline depth <code>D_vpu = 9</code>, and the registered-PE MAC; the absolute offsets (<code>d</code>, <code>L_matmul</code>, PE pipeline depth) are TBD (RTL / synth-timing measured).</li>
+          <li><strong>Latencies:</strong> the structurally-fixed values are <code>N</code> and the systolic fill = <code>2N-1</code>; the VPU pipeline depth <code>D_vpu</code>, the registered-PE MAC / PE pipeline depth, and the absolute offsets (<code>d</code>, <code>L_matmul</code>) are <strong>RTL / synth-timing measured</strong> implementation numbers (<code>D_vpu</code> currently about 11, finalized by the fp-pipeline pass), NOT ISA-visible structural constants.</li>
         </ul>
 
         <iframe src="figures/fig6_sequencer.html" loading="lazy" title="FIG. 6 tile sequencer" style="width:100%;height:700px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
@@ -179,22 +205,26 @@
           </div>
           <div class="card">
             <h3>VPU</h3>
-            <p><strong>Fixed uniform-depth pipeline</strong>, <strong>8 lanes</strong>,
+            <p><strong>Fixed-depth pipeline</strong>, <strong>8 lanes</strong>,
                function-select <code>{reduce | lut | simd}</code>.
                <strong>Lane = column, row-serial</strong>: one 256-bit tile-row per
                cycle, 8 columns in parallel (the natural structure for the per-row
-               reductions in softmax / LayerNorm). Throughput = 1 tile-row/cycle.</p>
-            <p><strong>Uniform pipeline depth <code>D_vpu = 9</code>.</strong>
-               <code>fp_mul</code> and <code>fp_add</code> stay
-               <strong>combinational</strong> (each single fp op fits under the
-               5 ns / 200 MHz budget); pipeline <strong>registers sit between the fp
-               ops</strong>. The deepest function is <strong>gelu</strong>
-               (~6 <code>fp_mul</code> + 2 <code>fp_add</code> + the tanh BRAM lookup
-               &asymp; 9 stages), which sets <code>D_vpu</code>; the other functions
-               (reduce tree, exp2 BRAM, rsqrt, simd) are padded to the same depth so the
-               reservation window is single. Reuses the <code>fpu/*</code> primitives
-               (exp2 / rsqrt / tanh / recip BRAM LUTs, <code>fp_mul</code> /
-               <code>fp_add</code>).</p>
+               reductions in softmax / LayerNorm). Throughput = 1 tile-row/cycle
+               (row-pipelined, multiple rows in flight).</p>
+            <p><strong>Pipeline depth <code>D_vpu</code> is RTL / synth-measured</strong>
+               (currently about 11, finalized by the fp-pipeline pass), an implementation
+               number, NOT an ISA-visible structural constant. <code>fp_mul</code> stays
+               <strong>combinational</strong> (maps to a DSP), but an IEEE
+               <code>fp_add</code> is <strong>registered</strong> (1+ pipeline stages,
+               standard FloPoCo-style: a single combinational IEEE fp_add is ~11 ns and
+               misses the 5 ns / 200 MHz budget); the reduce-sum tree is
+               <strong>level-wise pipelined</strong> and each BRAM-read to compute cone is
+               registered. <code>D_vpu</code> is therefore the <strong>sum of registered
+               stages</strong> (RTL-measured), not an fp-op count. The deepest function
+               (gelu) sets it; the other functions (reduce tree, exp2 BRAM, rsqrt, simd)
+               align to the same depth so the reservation window is single. Reuses the
+               <code>fpu/*</code> primitives (exp2 / rsqrt / tanh / recip BRAM LUTs,
+               <code>fp_mul</code> / <code>fp_add</code>).</p>
           </div>
           <div class="card">
             <h3>VREG</h3>
@@ -207,10 +237,12 @@
           </div>
           <div class="card">
             <h3>ACC</h3>
-            <p><strong>[8x8] fp32 x depth 2 = 512 B.</strong> 8 per-column banks. Banks
-               <strong>{0,1} are both used</strong> for depth-2 double-buffering; the ACC
-               bank field selects the bank.</p>
-            <p><strong>Depth-2 double-buffer:</strong> the second bank overlaps a
+            <p><strong>[8x8] fp32 x depth 2 = 512 B.</strong> <strong>8 per-column
+               banks</strong> (the physical column organization: one accumulator column
+               per systolic column). Separately, <strong>ACC buffers {0,1}</strong> are
+               both used for depth-2 double-buffering; the ACC <strong>buffer</strong>
+               field (the depth index) selects the buffer, not a column bank.</p>
+            <p><strong>Depth-2 double-buffer:</strong> the second buffer overlaps a
                block's drain/store tail (<code>acc.store</code> &rarr; gelu &rarr;
                <code>vreg.store</code>) with the next block's matmul.</p>
           </div>
@@ -230,8 +262,10 @@
             <p><code>loop.end</code> branch bubble = <strong>0</strong>: a counted loop
                with a precomputed target.</p>
             <p><strong>Full-unroll is infeasible</strong> (the unrolled GPT-2 static
-               instruction count far exceeds the 4096-deep IRAM; <code>N=16</code> tiling
-               gives about 8x fewer tiles), so outer tiling must be in-kernel nested
+               instruction count far exceeds the 4096-deep IRAM; a wider <code>N=16</code>
+               systolic array - the same systolic tile dimension <code>N</code>, a
+               microarch sweep target, not an independent outer factor - gives about 8x
+               fewer tiles than <code>N=8</code>), so outer tiling must be in-kernel nested
                loops driven by the <a href="#s1">base-offset (bo) accumulators</a> (full
                rule: the <a href="isa.html#s2-2">ISA addressing model</a>).</p>
           </div>
@@ -252,23 +286,32 @@
            for the current model.</p>
 
         <h3>VPU pipeline</h3>
-        <p class="sub"><span class="sev good">Locked</span> - fixed uniform-depth vector
-           pipeline, <code>D_vpu = 9</code>.</p>
+        <p class="sub"><span class="sev good">Locked structure</span> - fixed-depth,
+           row-pipelined vector pipeline; the depth <code>D_vpu</code> is
+           RTL / synth-measured (currently about 11), not a locked constant.</p>
         <ul>
           <li><strong>Structure:</strong> 8 lanes (lane = column), row-serial at one
-            256-bit tile-row per cycle, throughput 1 tile-row/cycle. <code>fp_mul</code>
-            and <code>fp_add</code> stay <strong>combinational</strong> (each single fp
-            op fits under the 5 ns / 200 MHz budget); pipeline <strong>registers sit
-            between the fp ops</strong>. Each pipeline stage is a single combinational fp
-            op, kept under 5 ns (to be confirmed by the 200 MHz synth-timing gate).</li>
-          <li><strong>Depth is set by gelu:</strong> the deepest function is gelu
-            (~6 <code>fp_mul</code> + 2 <code>fp_add</code> + the tanh BRAM lookup
-            &asymp; 9 stages), which fixes <code>D_vpu = 9</code>; the other functions
-            (reduce tree, exp2 BRAM, rsqrt, simd) are padded to the same depth so the
-            reservation window is single.</li>
+            256-bit tile-row per cycle, throughput 1 tile-row/cycle
+            (<strong>row-pipelined</strong>: multiple tile-rows in flight, 1 issued per
+            cycle, each draining after <code>D_vpu</code> cycles). <code>fp_mul</code>
+            stays <strong>combinational</strong> (DSP), but an IEEE <code>fp_add</code> is
+            <strong>registered</strong> (1+ pipeline stages, standard FloPoCo-style: a
+            single combinational IEEE fp_add is ~11 ns and misses the 5 ns / 200 MHz
+            budget); the reduce-sum tree is <strong>level-wise pipelined</strong> and each
+            BRAM-read to compute cone is registered.</li>
+          <li><strong>Depth is RTL-measured, set by gelu:</strong> <code>D_vpu</code> is
+            the <strong>sum of the registered stages</strong> along the deepest function
+            (gelu: <code>fp_mul</code> / registered <code>fp_add</code> chain + the tanh
+            BRAM lookup), measured from RTL / synth (currently about 11, finalized by the
+            fp-pipeline pass), <strong>not</strong> a hand-counted fp-op total; the other
+            functions (reduce tree, exp2 BRAM, rsqrt, simd) align to the same depth so the
+            reservation window is single. <code>D_vpu</code> is an implementation number,
+            in the same bucket as <code>L_matmul</code> and the PE pipeline depth, NOT an
+            ISA-visible structural constant (unlike <code>N</code> and <code>2N-1</code>).</li>
           <li><strong>Replaces the old single-cycle combinational gelu chain</strong>
             (which synthesized to ~126 logic levels / ~36 ns and fails 200 MHz). The
-            pipelined VPU splits that chain into single-fp-op stages, each under 5 ns.</li>
+            pipelined VPU splits that chain into registered stages, each under the 5 ns
+            budget.</li>
         </ul>
         <p class="sub">Diagram deferred to the presentation refresh; see the text above
            for the current model.</p>
@@ -302,8 +345,8 @@
              <strong>disjoint cycles</strong>. The MXU burst is a small fraction of the
              matmul, so the foreground unit has VREG to itself otherwise. Tail ordering
              is handled by the scheduler. The VPU has a single fixed pipeline depth
-             (<code>D_vpu = 9</code>, uniform across functions), so a VPU result is
-             available at issue + <code>D_vpu</code>.</p>
+             (<code>D_vpu</code>, RTL / synth-measured, uniform across functions), so a VPU
+             result is available at issue + <code>D_vpu</code>.</p>
         </div>
 
         <h3>MXU: reuse vs change vs the existing RTL</h3>
@@ -322,9 +365,9 @@
             <tr><td>X source</td><td>SPAD</td><td>VREG (read via <code>R_mxu</code> into the X staging buffer)</td><td><strong>change:</strong> re-source X from VREG</td></tr>
             <tr><td>fp32 -&gt; bf16 cast</td><td>on the SPAD read path</td><td>cast at the MXU input stage</td><td><strong>change:</strong> move cast onto the VREG-&gt;staging path</td></tr>
             <tr><td>Matmul result</td><td>stored back to SPAD</td><td>stays in ACC</td><td><strong>change:</strong> remove store-back (drop <code>S_STORE</code>)</td></tr>
-            <tr><td>ACC drain</td><td>-</td><td><code>acc.store</code> = ACC -&gt; VREG fp32 (<code>W_mxu</code>)</td><td><strong>change:</strong> add <code>acc.store</code></td></tr>
+            <tr><td>ACC drain (<code>acc.store</code>)</td><td>-</td><td>result stays in ACC; the <strong>LSU</strong> drains ACC -&gt; VREG fp32</td><td><strong>change:</strong> add the drain, <strong>owned by the LSU</strong> (not the MXU)</td></tr>
             <tr><td>Bias init</td><td>-</td><td><code>acc.init</code> = SPAD bias -&gt; ACC broadcast</td><td><strong>change:</strong> add <code>acc.init</code></td></tr>
-            <tr><td>ACC banking</td><td>single</td><td>depth-2 double-buffer, bank field {0,1}</td><td><strong>change:</strong> plumb the ACC bank field</td></tr>
+            <tr><td>ACC buffering</td><td>single</td><td>depth-2 double-buffer, buffer field {0,1} (the depth index, not the 8 per-column banks)</td><td><strong>change:</strong> plumb the ACC buffer field</td></tr>
           </tbody>
         </table>
         </div>
@@ -339,9 +382,10 @@
             <code>2N-1</code> as the weight-march / switch wavefront only.</li>
           <li><strong>File plan:</strong> <code>pe.sv</code> + <code>systolic.sv</code>
             unchanged; <code>mxu.sv</code> FSM re-sources X from VREG, drops
-            <code>S_STORE</code>, adds <code>acc.store</code> / <code>acc.init</code>
-            states + bank wiring; <code>mxu_accumulator.sv</code> adds bias-init + bank
-            select + VREG drain; new cast on the X-load path.</li>
+            <code>S_STORE</code>, adds the <code>acc.init</code> state + buffer wiring;
+            <code>mxu_accumulator.sv</code> adds bias-init + buffer select (the matmul
+            result stays in ACC); the <strong>LSU</strong> owns the ACC &rarr; VREG drain
+            (<code>acc.store</code>); new cast on the X-load path.</li>
         </ul>
 
         <h3>SPAD access model</h3>
@@ -387,8 +431,9 @@
         <p class="sub">Absolute cycle counts and roofline ratios are deliberately
            omitted here: they are latency-dependent and therefore
            <strong>TBD (RTL-measured)</strong> under the <code>sim == synth</code>
-           contract. Only <code>N</code>, the systolic fill <code>2N-1</code>, and the
-           VPU depth <code>D_vpu = 9</code> are structurally fixed.</p>
+           contract. Only <code>N</code> and the systolic fill <code>2N-1</code> are
+           structurally fixed; the VPU depth <code>D_vpu</code> is RTL-measured (currently
+           about 11), like <code>L_matmul</code> and the PE pipeline depth.</p>
       </section>
 
       <section id="s5" class="reveal">
@@ -397,13 +442,15 @@
 
         <div class="call" style="border-left-color:var(--gap)">
           <div class="lbl" style="color:var(--gap)">Pending &middot; reservation-window offsets</div>
-          <p>The remaining reservation offsets (<code>d</code>, <code>L_matmul</code>,
-             the MXU PE pipeline depth, and the absolute numbers in the
+          <p>The reservation offsets (<code>d</code>, <code>L_matmul</code>, the MXU PE
+             pipeline depth, <strong>the VPU pipeline depth <code>D_vpu</code></strong>,
+             and the absolute numbers in the
              <a href="isa.html#s5">ISA timing contract</a>) are <strong>pending
              RTL / synth-timing</strong> and must be <strong>sim == synth
-             verified</strong>. The VPU pipeline depth is now <strong>locked</strong>
-             (<code>D_vpu = 9</code>, structural); <code>N</code>, the systolic fill
-             <code>2N-1</code>, and <code>D_vpu = 9</code> are the structurally-fixed
+             verified</strong>. <code>D_vpu</code> is an implementation number (currently
+             about 11, finalized by the fp-pipeline pass), in the same bucket as
+             <code>L_matmul</code> and the PE pipeline depth; only <code>N</code> and the
+             systolic fill <code>2N-1</code> are the ISA-visible structurally-fixed
              values.</p>
         </div>
 

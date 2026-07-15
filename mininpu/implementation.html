@@ -150,6 +150,12 @@
         </div>
 
         <ul>
+          <li><strong>Fetch depth:</strong> the <code>FETCH</code> pipe (F1 / F2 / F3,
+            ~3 cycles) is the <strong>physical realization of the single architectural
+            <code>F</code> stage</strong> (a pipelined IRAM BRAM read), not an extra
+            architectural stage: it still issues <strong>1 instruction/cycle</strong> in
+            steady state, matching the <code>F &rarr; D &rarr; X &rarr; W</code> issue
+            model in the <a href="microarch.html#s2">microarch reference</a>.</li>
           <li><strong>Literal pool:</strong> reuse the existing
             <strong>IRAM-embedded pool machinery</strong> (mature, tested) rather than a
             separate LPM RAM; the pool is loaded with the kernel image and read in Decode
@@ -347,7 +353,7 @@
               <td>3</td>
               <td>VPU</td>
               <td><code>vpu.reduce</code>, <code>vpu.lut</code>, <code>vpu.simd</code></td>
-              <td><code>reduce</code>: row read -&gt; horizontal tree (sum/max) -&gt; per-row scalar; <code>lut</code>: row read -&gt; exp2 / rsqrt / gelu(poly+tanh) / recip -&gt; write; <code>simd</code>: 2 reads -&gt; fp_mul + fp_add per funct -&gt; broadcast mux -&gt; write; uniform pipeline depth <code>D_vpu = 9</code> (functions padded to a single depth, gelu-set)</td>
+              <td><code>reduce</code>: row read -&gt; horizontal tree (sum/max) -&gt; per-row scalar; <code>lut</code>: row read -&gt; exp2 / rsqrt / gelu(poly+tanh) / recip -&gt; write; <code>simd</code>: 2 reads -&gt; fp_mul + fp_add per funct -&gt; broadcast mux -&gt; write; fixed pipeline depth <code>D_vpu</code> (RTL / synth-measured, currently about 11, finalized by the fp-pipeline pass; functions aligned to a single depth, gelu-set)</td>
               <td><code>test_vpu</code> (per-function vs fp oracle, LUT tolerance; latency gate = <code>sim == synth</code>)</td>
               <td>GELU / LayerNorm / softmax; 32x32 GELU(X@W^T+b) worked example e2e</td>
             </tr>

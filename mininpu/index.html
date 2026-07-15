@@ -62,47 +62,20 @@
 
     <section id="figures" class="reveal">
       <h2><span class="num">02</span> Figures</h2>
-      <p class="sub">Self-contained interactive block diagrams (theme-aware) for the
-         compute-tile datapath and GPT-2 kernel schedules.</p>
+      <p class="sub">The document text is now the authoritative source for the
+         compute-tile model. The earlier per-unit block diagrams (compute-tile overview,
+         VPU, MXU, SPAD) were superseded and mutually overlapping, so they have been
+         retired to keep no two figures covering the same content and nothing
+         contradicting the text. Per-unit pipeline diagrams will be re-authored later;
+         until then, see the doc text for the current model. Only the tile-sequencer
+         figure remains current.</p>
       <div class="figgrid">
-
-        <a class="figcard" href="figures/fig1_2_compute_tile.html">
-          <div class="tag">FIG. 1-2 <span class="sev gap">pending refresh</span></div>
-          <div class="name">Compute-tile architecture</div>
-          <div class="cap">Top-level tile datapath: devmem to SPAD to VREG to ACC
-            spine, MXU / VPU units, and the tile sequencer. Diagram predates the current
-            model; refresh pending.</div>
-        </a>
-
-        <a class="figcard" href="figures/fig5_vpu.html">
-          <div class="tag">FIG. 5 <span class="sev gap">pending refresh</span></div>
-          <div class="name">VPU</div>
-          <div class="cap">Vector pipeline: 8 lanes, function-select
-            {reduce | lut | simd}. Diagram predates the locked uniform-depth
-            (<code>D_vpu = 9</code>) pipeline; refresh pending.</div>
-        </a>
 
         <a class="figcard" href="figures/fig6_sequencer.html">
           <div class="tag">FIG. 6</div>
           <div class="name">Tile sequencer</div>
           <div class="cap">Issue unit: IRAM 4096 x 64b + folded PC and decoder,
             induction-variable broadcast, loop-frame stack.</div>
-        </a>
-
-        <a class="figcard" href="figures/fig7_mxu.html">
-          <div class="tag">FIG. 7 <span class="sev gap">pending refresh</span></div>
-          <div class="name">MXU</div>
-          <div class="cap">8x8 weight-stationary systolic array, bf16 x bf16 to fp32
-            accumulate, double-buffered weight buffers. Diagram predates the current
-            model; refresh pending.</div>
-        </a>
-
-        <a class="figcard" href="figures/fig8_spad.html">
-          <div class="tag">FIG. 8 <span class="sev gap">pending refresh</span></div>
-          <div class="name">SPAD datapath</div>
-          <div class="cap">On-chip scratchpad: 1024 x 256b = 32 KiB, bf16, 8 banks,
-            dual-port (DMU vs compute). Diagram predates the current model; refresh
-            pending.</div>
         </a>
 
       </div>

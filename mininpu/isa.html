@@ -53,8 +53,9 @@
             detects a clobbered in-flight operand.</li>
           <li><strong>The compiler owns all hazard avoidance</strong>, latency padding,
             and structural serialization (see <a href="#s6">Section 6</a>).</li>
-          <li><code>flush.slot</code> is the <strong>only runtime sync</strong>
-            primitive.</li>
+          <li><code>flush.slot</code> is the <strong>only mid-program runtime
+            synchronization</strong> primitive; <code>halt</code> is the terminal drain
+            (end of kernel), not a mid-program sync.</li>
           <li><strong>Nonblocking set</strong> = <code>{mxu.matmul, mxu.load.w,
             mxu.acc.init, async-DMA}</code>; every other op is <strong>blocking</strong>.</li>
           <li><strong>Instruction word:</strong> 64-bit fixed width; operand storage is
@@ -104,7 +105,7 @@
             <tr>
               <td><span class="mono">ACC</span></td>
               <td>matmul accumulator, fp32 (MXU-owned)</td>
-              <td>ACC bank index; banks {0,1} both used (depth-2 double-buffer)</td>
+              <td>ACC buffer index; buffers {0,1} both used (depth-2 double-buffer)</td>
               <td><strong>[8x8] fp32 x depth 2 = 512 B</strong>, 8 per-column banks</td>
             </tr>
             <tr>
@@ -124,7 +125,7 @@
               <td>literal pool: on-chip constant / param RAM in the tile sequencer
                  (baked + launch-patched, read-only to the datapath)</td>
               <td>pool-index (8-bit, 0..255)</td>
-              <td>256 x 64b = <strong>~2 KiB</strong>; <strong>NOT devmem, NOT SPAD</strong></td>
+              <td>256 x 64b = <strong>~2 KiB</strong> (provisional; final sizing during implementation); <strong>NOT devmem, NOT SPAD</strong></td>
             </tr>
           </tbody>
         </table>
@@ -162,8 +163,9 @@
            <code>wbuf</code> and <code>control</code>. It is the tile's constant store.</p>
         <ul>
           <li><strong>Address space:</strong> a separate <strong>pool-index</strong>
-            space, 8-bit index (0..255); <strong>256 x 64b entries (~2 KiB)</strong>;
-            on-chip RAM inside the tile sequencer. <strong>NOT devmem, NOT SPAD.</strong></li>
+            space, 8-bit index (0..255); <strong>256 x 64b entries (~2 KiB),
+            provisional (final sizing during implementation)</strong>; on-chip RAM inside
+            the tile sequencer. <strong>NOT devmem, NOT SPAD.</strong></li>
           <li><strong>Structure:</strong> an array of 64-bit constant entries. Entry
             classes: (a) <strong>loop descriptor</strong> = <code>{hi bound, packed
             bo-stride vector}</code>; (b) <strong>devmem base address</strong>
@@ -174,7 +176,8 @@
             <code>program_id</code>/<code>GRID_LINEAR</code> + <code>kernel_args</code>).
             Part of the kernel image (loaded with the code).</li>
           <li><strong>Operands that reference it:</strong> <code>loop.begin.op1</code>
-            (hi + adjacent stride vector), <code>dmu.*.op1</code> (devmem base; stride
+            (pool index of the loop descriptor {hi, bo-stride vector}),
+            <code>dmu.*.op1</code> (devmem base; stride
             at <code>pool[idx+1]</code>), <code>vpu.simd.op2</code> (immediate when
             <code>bcast=imm</code>).</li>
         </ul>
@@ -292,9 +295,9 @@
             </tr>
             <tr>
               <td><code>0x50</code></td><td><code>loop.begin</code></td>
-              <td>iv id</td><td>hi bound (pool index)</td>
+              <td>iv id</td><td>loop descriptor (pool index): {hi, bo-stride vector}</td>
               <td><code>(lo&lt;&lt;8) | step</code>, both 8-bit literals</td>
-              <td><code>[4]=IMM_OP1</code></td>
+              <td><code>[4]=IMM_OP1</code> (immediate <code>hi</code>; no-bo loops only)</td>
               <td>push loop frame, IV=lo</td>
             </tr>
             <tr>
@@ -334,9 +337,9 @@
           <li><code>vreg.store</code> - VREG[<code>op1</code>] to SPAD[<code>op0</code>], truncate fp32 to bf16.</li>
           <li><code>dmu.load.spm</code> - async DRAM to SPAD; async, 2 slots (<code>DMA_SLOT_COUNT=2</code>); region unsafe to consume until a matching <code>flush.slot</code>.</li>
           <li><code>dmu.store.spm</code> - async SPAD to DRAM; <code>op2=0xFFFF</code> derives shape at lowering.</li>
-          <li><code>loop.begin</code> - push a loop frame on <code>op0</code>, set <code>IV=lo</code> (LIFO, nest depth 4).</li>
+          <li><code>loop.begin</code> - push a loop frame on <code>op0</code>, set <code>IV=lo</code> (LIFO, nest depth 4). <code>op1</code> is the pool index of the loop descriptor <code>{hi bound, bo-stride vector}</code> (always resident in the literal pool, so the stride vector is always available); the <code>IMM_OP1</code> flag instead supplies an immediate <code>hi</code> and is used only for loops that drive no <code>bo</code> strides.</li>
           <li><code>loop.end</code> - <code>IV += step</code>; branch to body while <code>IV &lt; hi</code>, else pop.</li>
-          <li><code>flush.slot</code> - block until the masked DMU slot(s) report done; the only runtime sync.</li>
+          <li><code>flush.slot</code> - block until the masked DMU slot(s) report done; the only mid-program runtime sync (<code>halt</code> is the terminal drain, not a mid-program sync).</li>
           <li><code>halt</code> - drain all outstanding DMU, then assert <code>done</code>; ends the kernel.</li>
         </ul>
       </section>
@@ -350,7 +353,7 @@
         </div>
         <div class="call">
           <div class="lbl">Locked</div>
-          <p>ACC banks <strong>{0,1} are both used</strong> for depth-2 double-buffering (<code>acc_out</code> / <code>acc_src</code> in <code>[0, ACC_DEPTH=2)</code>). The existing ACC-bank operand field is now <strong>plumbed to select the bank</strong> (no encoding change); an index <code>&gt;= ACC_DEPTH</code> is still an <strong>illegal-op</strong>.</p>
+          <p>ACC <strong>buffers {0,1} are both used</strong> for depth-2 double-buffering (<code>acc_out</code> / <code>acc_src</code> in <code>[0, ACC_DEPTH=2)</code>). The existing ACC buffer-index operand field is now <strong>plumbed to select the buffer</strong> (the depth index; no encoding change); an index <code>&gt;= ACC_DEPTH</code> is still an <strong>illegal-op</strong>. This depth-2 buffer index is distinct from the 8 per-column banks (the physical column organization of the <code>[8x8]</code> accumulator).</p>
         </div>
         <div class="call">
           <div class="lbl">Locked</div>
@@ -382,11 +385,22 @@
           <li>A kernel binary <strong>declares the timing-rev</strong> it was compiled
             against; a hardware timing-rev mismatch is <strong>rejected / flagged</strong>.
             This is the concrete form of "recompile if latencies change".</li>
-          <li>The concrete structural values are <code>N</code>, the systolic fill
-            <code>2N-1</code>, and the VPU pipeline depth <code>D_vpu = 9</code>. The
-            remaining offsets (<code>d</code>, <code>L_matmul</code>, and the MXU PE
-            pipeline depth) plus all absolute numbers are <strong>TBD (RTL /
-            synth-timing measured)</strong>.</li>
+          <li>The concrete <strong>structural</strong> values are <code>N</code> and the
+            systolic fill <code>2N-1</code>. The VPU pipeline depth <code>D_vpu</code>,
+            the MXU PE pipeline depth, the offsets (<code>d</code>, <code>L_matmul</code>),
+            and all absolute numbers are <strong>RTL / synth-timing measured</strong>
+            implementation values - <code>D_vpu</code> is currently about 11 (finalized by
+            the fp-pipeline pass), NOT an ISA-visible structural constant.</li>
+          <li><strong>Throughput-bound, not latency-bound:</strong> these
+            per-instruction latencies (including <code>D_vpu</code> and the matmul
+            systolic fill) are <strong>negligible for performance</strong> - the tile is
+            throughput-bound, so pipeline depth may grow to meet 200 MHz while throughput
+            stays <strong>1 tile-row/cycle (VPU)</strong> and <strong>1 column/cycle
+            (MXU)</strong>. The VPU is <strong>row-pipelined</strong> (1 tile-row issued
+            per cycle, multiple rows in flight); <code>D_vpu</code> is the per-row drain
+            latency, amortized across the tile-loop. The deep fp / reduce-tree pipelining
+            (combinational <code>fp_mul</code>, registered IEEE <code>fp_add</code>) is
+            intended design, not overhead.</li>
         </ul>
 
         <p class="sub">Structural access windows (offsets symbolic; issue cycle =
@@ -418,13 +432,13 @@
             <tr>
               <td><code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code></td>
               <td><code>VREG</code> (x2 reads for <code>simd</code>, on the two whole-tile-row read ports)</td>
-              <td><code>VREG</code> on <code>W_vpu</code> at <code>t + D_vpu</code></td>
-              <td><code>D_vpu = 9</code> (fixed uniform pipeline depth; gelu fp-op chain, one fp op per stage; per-stage &lt; 5 ns confirmed by synth-timing at 200 MHz)</td>
+              <td><code>VREG</code> on the <strong>single write port</strong> at <code>t + D_vpu</code></td>
+              <td><code>D_vpu</code> = VPU pipeline depth, <strong>RTL / synth-measured</strong> (currently about 11, finalized by the fp-pipeline pass); an implementation number, not a locked constant. Fixed and uniform across functions (gelu-set), so a result is available at issue + <code>D_vpu</code></td>
             </tr>
             <tr>
               <td><code>acc.store</code></td>
               <td><code>ACC</code></td>
-              <td><code>VREG</code> on <code>W_mxu</code></td>
+              <td><code>VREG</code> on the <strong>single write port</strong> (LSU-driven)</td>
               <td>exact lossless fp32</td>
             </tr>
             <tr>
@@ -437,14 +451,23 @@
         </table>
         </div>
 
+        <p class="sub">VREG is <strong>2r1w</strong>: the VPU writeback and the LSU
+           writeback (<code>acc.store</code> / <code>vreg.load</code>) name the
+           <strong>same single physical write port</strong>, time-shared by the compiler
+           schedule so two writes never collide in a cycle. A 2nd write port is a sizing
+           option only, not part of the baseline.</p>
+
         <div class="call" style="border-left-color:var(--gap)">
           <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL / synth-timing measured</div>
-          <p><code>d</code>, <code>L_matmul</code>, the MXU PE pipeline depth, and all
-             absolute numbers are <strong>TBD (RTL / synth-timing measured)</strong>.
-             <code>N</code>, <code>2N-1</code>, and <code>D_vpu = 9</code> are the
-             concrete structural values. All latencies are <strong>FIXED and
-             data-independent</strong>, since the no-scoreboard model relies on it:
-             <strong>simulation latency must equal synthesis latency.</strong></p>
+          <p><code>d</code>, <code>L_matmul</code>, the MXU PE pipeline depth, <strong>the
+             VPU pipeline depth <code>D_vpu</code></strong> (currently about 11), and all
+             absolute numbers are <strong>TBD (RTL / synth-timing measured)</strong>. Only
+             <code>N</code> and <code>2N-1</code> are the ISA-visible concrete structural
+             values. All latencies are <strong>FIXED and data-independent</strong> once
+             measured, since the no-scoreboard model relies on it:
+             <strong>simulation latency must equal synthesis latency</strong> - and a
+             wrong latency (e.g. assuming <code>D_vpu = 9</code> when the RTL is 11)
+             silently miscompiles.</p>
         </div>
       </section>
 
@@ -454,12 +477,12 @@
            entirely on the static schedule. The compiler MUST obey every rule.</p>
         <ul>
           <li><strong>RAW (latency-respecting placement):</strong> schedule a consumer no earlier than producer-issue + producer-latency; fill gaps with independent ops or NOPs.</li>
-          <li><strong>WAR on inputs is unguarded:</strong> never overwrite a VREG / SPAD row / ACC bank still being read by an in-flight instruction.</li>
+          <li><strong>WAR on inputs is unguarded:</strong> never overwrite a VREG / SPAD row / ACC buffer still being read by an in-flight instruction.</li>
           <li><strong>WAW ordering:</strong> two writes to the same destination must be program-ordered with non-overlapping write windows.</li>
           <li><strong>Structural hazards:</strong> one matmul at a time; exactly one <code>mxu.load.w</code> per matmul (single inactive wbuf); one VPU op-stream at a time.</li>
           <li><strong>VREG 2r1w (whole-tile-row):</strong> at most 2 reads + 1 write per cycle; keep the foreground unit's (VPU / LSU) VREG accesses in cycles disjoint from the MXU X-read burst (temporal separation, not banking).</li>
           <li><strong>DMU ordering:</strong> insert <code>flush.slot</code> before consuming a <code>dmu.load.spm</code> region; ensure producing <code>vreg.store</code>s complete before a <code>dmu.store.spm</code> reads; fence two async DMAs to the same region.</li>
-          <li><strong>ACC discipline:</strong> seed (<code>mxu.acc.init</code> or <code>accum=0</code>), accumulate (<code>accum=1</code>, same bank, in order), drain (<code>acc.store</code>).</li>
+          <li><strong>ACC discipline:</strong> seed (<code>mxu.acc.init</code> or <code>accum=0</code>), accumulate (<code>accum=1</code>, same buffer, in order), drain (<code>acc.store</code>, LSU-driven).</li>
           <li><strong>Loops:</strong> literal-only trip counts (<code>lo</code>/<code>step</code> 8-bit, <code>hi</code> from the pool); nest depth 4 (LIFO); no runtime-data-derived counts.</li>
           <li><strong>Addressing:</strong> compile-baked (literals + launch-patched pool indices + IV-relative <code>base + iv*stride</code>); no runtime data-dependent addressing in v1.</li>
           <li><strong>Recompilation:</strong> a binary is valid only for the latencies it was compiled against; recompile if any FU latency, <code>N</code>, or <code>D_vpu</code> changes.</li>
@@ -502,7 +525,7 @@ loop.end  m                        ; iter: bo_X+=4, bo_Ys+=16 | exit: pop</code>
           </thead>
           <tbody>
             <tr><td>1</td><td><code>acc.init ACC0,B(n)</code></td><td>02</td><td>00</td><td>0000</td><td>0200</td><td>0000</td><td>bias = 0x200 + bo_B(2) = 0x202</td></tr>
-            <tr><td>2</td><td><code>loop.begin k</code></td><td>50</td><td>10</td><td>0000</td><td>0004</td><td>0001</td><td>hi=4, lo&lt;&lt;8|step=0x0001</td></tr>
+            <tr><td>2</td><td><code>loop.begin k</code></td><td>50</td><td>00</td><td>0000</td><td>0002</td><td>0001</td><td>op1=pool[2]={hi=4, k bo-strides}; op2 lo&lt;&lt;8|step=0x0001</td></tr>
             <tr><td>3</td><td><code>load.w W</code></td><td>00</td><td>00</td><td>0000</td><td>0000</td><td>0000</td><td>W row = 0 + bo_W(0x20) + k*4</td></tr>
             <tr><td>4</td><td><code>matmul ACC0,X,accum</code></td><td>01</td><td>01</td><td>0000</td><td>0000</td><td>0000</td><td>X id = 0 + bo_X(4) + k = 4..7</td></tr>
             <tr><td>5</td><td><code>loop.end k</code></td><td>51</td><td>00</td><td>0000</td><td>0000</td><td>0000</td><td>iv+=1, branch if k&lt;4</td></tr>
@@ -546,9 +569,9 @@ ACC  : [init]              +=mm0  +=mm1  +=mm2  +=mm3 -&gt; drain(2N-1) -&gt; ac
       <section id="s8" class="reveal">
         <h2><span class="num">08</span> Deferred / Notes</h2>
         <ul>
-          <li><strong>ACC bank-index operand:</strong> now plumbed for depth-2 double-buffering (banks {0,1}, no encoding change); a deeper ACC depth sweep (&gt; 2) remains deferred (#313 / #262).</li>
+          <li><strong>ACC buffer-index operand:</strong> now plumbed for depth-2 double-buffering (buffers {0,1}, the depth index, not the 8 per-column banks; no encoding change); a deeper ACC depth sweep (&gt; 2) remains deferred (#313 / #262).</li>
           <li><strong>MXU addressing:</strong> drive path truncates to 13-bit (interim).</li>
-          <li><strong><code>N</code>:</strong> <code>N=8</code> baseline; <code>N</code> is a microarch parameter, NOT ISA-visible (16 is an ISA-invariant sweep target).</li>
+          <li><strong><code>N</code>:</strong> <code>N=8</code> baseline; <code>N</code> is the <strong>systolic tile dimension</strong>, a microarch parameter NOT ISA-visible (<code>N=16</code> is an ISA-invariant sweep target: the same <code>N</code> realized as a wider 16x16 array, not an independent outer tiling factor).</li>
           <li><strong>Implementation gate (not part of this spec):</strong> <code>encoders.py</code> + ISS still carry pre-0.5.0 semantics (<code>acc.store</code> direction, SPAD-X matmul, missing new-op encoders) and MUST be rewritten to match this spec before merge-lock.</li>
         </ul>
         <p class="sub"><em>End of mininpu Compute-Tile ISA Reference v0.5.0.</em></p>
