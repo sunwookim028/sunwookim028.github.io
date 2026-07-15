@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference Microarchitecture - mininpu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="inner">
+    <a class="brand" href="index.html">mini<span>npu</span></a>
+    <a class="nl" href="isa.html">ISA 0.5.0</a>
+    <a class="nl" href="microarch.html">Microarchitecture</a>
+    <a class="nl" href="implementation.html">Implementation</a>
+    <a class="nl" href="index.html#figures">Figures</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page">
+    <h1>Reference Microarchitecture &nbsp;<span class="pill wip">In progress</span></h1>
+    <p class="sub">Doc 2 of 3 &middot; the datapath behind ISA 0.5.0</p>
+  </header>
+
+  <p>This document describes the compute-tile microarchitecture that implements
+     <a href="isa.html">ISA 0.5.0</a>. Content is split into two zones: a
+     <strong style="color:var(--mxu)">LOCKED</strong> section (the current known
+     design) and a <strong style="color:var(--ctrl)">DECISIONS PENDING</strong>
+     callout listing still-open items.</p>
+
+  <div class="toc">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#locked">Locked design</a> - concurrency, AGU, MXU, VPU, VREG, ACC, SPAD, pipeline/roofline</li>
+      <li><a href="#pending">Decisions pending</a></li>
+      <li><a href="#figures">Figures</a></li>
+    </ol>
+  </div>
+
+  <!-- ==================== LOCKED ==================== -->
+  <div class="zone locked" id="locked">
+    <div class="zone-head">
+      <span class="pill locked">Locked</span>
+      <h2>Current design</h2>
+    </div>
+
+    <h3>Concurrency model</h3>
+    <ul>
+      <li>In-order issue, <strong>1 instruction/cycle</strong>.</li>
+      <li><strong>No producer-busy scoreboard</strong>; no hardware interlock.</li>
+      <li>All hazard avoidance is <strong>static compiler scheduling</strong>.</li>
+      <li><code>flush.slot</code> is the <strong>only runtime sync</strong>
+        primitive.</li>
+      <li>Nonblocking set = <code>{mxu.matmul, mxu.load.w, mxu.acc.init,
+        async-DMA}</code>; everything else is <strong>blocking</strong>.</li>
+    </ul>
+
+    <h3>Distributed per-unit AGU</h3>
+    <ul>
+      <li>Each unit has its own address-generation unit (AGU).</li>
+      <li>Address = <code>base + iv&middot;stride + march</code>.</li>
+      <li><code>base</code> = compile-baked immediate + <code>GRID_LINEAR</code>
+        launch patch (<strong>not a CSR</strong>).</li>
+      <li><code>iv</code> (induction variable) is broadcast from the tile
+        sequencer.</li>
+    </ul>
+
+    <h3>MXU</h3>
+    <ul>
+      <li><strong>8&times;8 weight-stationary systolic</strong> array.</li>
+      <li><strong>bf16 &times; bf16 &rarr; fp32 accumulate.</strong></li>
+      <li><strong>2 weight buffers</strong> (active / inactive double-buffer).</li>
+      <li>X streams from <strong>VREG</strong>, cast fp32 &rarr; bf16 at the PE
+        input (no separate X input buffer).</li>
+      <li>Output &rarr; <strong>ACC</strong>.</li>
+      <li>RS-hybrid (row-stationary hybrid) dataflow.</li>
+    </ul>
+
+    <h3>VPU</h3>
+    <ul>
+      <li><strong>Fixed-depth streaming pipeline</strong>, <strong>8 lanes</strong>.</li>
+      <li>Function-select <code>{reduce | lut | simd}</code>.</li>
+      <li><code>D_VPU = 12</code> (gelu-driven, <code>N</code>-invariant,
+        synth-tunable localparam).</li>
+      <li><strong>Uniform depth</strong> across all functions.</li>
+    </ul>
+
+    <h3>VREG</h3>
+    <ul>
+      <li><strong>32 &times; [8&times;8] fp32 = 8 KiB.</strong></li>
+      <li><strong>Banked per-column</strong>, 2 read + 2 write ports
+        (<code>R_mxu</code> / <code>R_vpu</code> / <code>W_mxu</code> /
+        <code>W_vpu</code>).</li>
+      <li>Realized via bank-parallelism + static conflict-free scheduling (not a
+        true multiport).</li>
+    </ul>
+
+    <h3>ACC</h3>
+    <ul>
+      <li><strong>[8&times;8] fp32 &times; depth 2 = 512 B.</strong></li>
+      <li><strong>8 per-column banks.</strong></li>
+      <li>Bank is implicit (v1 uses bank 0).</li>
+    </ul>
+
+    <h3>SPAD</h3>
+    <ul>
+      <li><strong>bf16</strong> storage.</li>
+      <li>Separate, <strong>0-based on-chip address space</strong> (like CUDA
+        <code>.shared</code>).</li>
+    </ul>
+
+    <h3>MXU || VPU pipeline and roofline</h3>
+    <ul>
+      <li><strong>1-tile software pipeline</strong> overlapping MXU and VPU:
+        ~22% overlap gain in attention (3:1 ratio); moot in MLP (40:1 ratio).</li>
+      <li>Roofline: MLP / matmul-heavy blocks are <strong>MXU-bound</strong>.</li>
+      <li>Roofline: devmem tiny matmul is <strong>DRAM-BW-bound</strong> - the
+        4 B/cy HP-port wall vs the 32 B/cy internal DM bus.</li>
+    </ul>
+  </div>
+
+  <!-- ==================== PENDING ==================== -->
+  <div class="zone pending" id="pending">
+    <div class="zone-head">
+      <span class="pill wip">Decisions pending</span>
+      <h2>Open items</h2>
+    </div>
+
+    <h3>4-stage pipeline formalization (Fetch &rarr; Decode &rarr; Execute &rarr; Writeback)</h3>
+    <ul>
+      <li>Writeback targets VREG <em>or</em> ACC (matmul / <code>acc.store</code>
+        write ACC, not VREG) - final stage naming / routing is TBD.</li>
+      <li>Exact issue / stall rules per op class, expressed in pipeline terms.</li>
+      <li>Whether a separate operand-read (VREG read) stage exists, and its
+        latency.</li>
+    </ul>
+
+    <h3>Per-op Execute latencies</h3>
+    <ul>
+      <li>Must be <strong>sim == synth verified</strong>.</li>
+      <li>The current latency table (<a href="isa.html#s5">Doc 1, Section 5</a>) is
+        <strong>derived, not yet RTL-measured</strong>.</li>
+    </ul>
+
+    <h3>Remaining structural questions</h3>
+    <ul>
+      <li>AGU placement within the pipeline.</li>
+      <li>VREG 2r2w physical realization (bank structure + port arbitration).</li>
+      <li><code>flush.slot</code> drain semantics expressed in pipeline terms.</li>
+    </ul>
+  </div>
+
+  <!-- ==================== FIGURES ==================== -->
+  <h2 id="figures">Figures</h2>
+  <div class="figgrid">
+    <a class="figcard" href="figures/fig1_2_compute_tile.html">
+      <div class="tag">FIG. 1-2</div>
+      <div class="name">Compute tile</div>
+      <div class="cap">Top-level tile datapath and unit layout.</div>
+    </a>
+    <a class="figcard" href="figures/fig5_vpu.html">
+      <div class="tag">FIG. 5</div>
+      <div class="name">VPU</div>
+      <div class="cap">Fixed-depth streaming vector pipeline, 8 lanes.</div>
+    </a>
+    <a class="figcard" href="figures/fig6_sequencer.html">
+      <div class="tag">FIG. 6</div>
+      <div class="name">Sequencer</div>
+      <div class="cap">Tile sequencer: IRAM + folded PC/decoder, IV broadcast.</div>
+    </a>
+    <a class="figcard" href="figures/fig7_mxu.html">
+      <div class="tag">FIG. 7</div>
+      <div class="name">MXU</div>
+      <div class="cap">8&times;8 weight-stationary systolic array.</div>
+    </a>
+    <a class="figcard" href="figures/fig8_spad.html">
+      <div class="tag">FIG. 8</div>
+      <div class="name">SPAD</div>
+      <div class="cap">32 KiB bf16 scratchpad, 8 banks, dual-port.</div>
+    </a>
+    <a class="figcard" href="figures/fig9_gpt2_kernels.html">
+      <div class="tag">FIG. 9</div>
+      <div class="name">Kernel Gantts</div>
+      <div class="cap">GPT-2 per-kernel MXU || VPU overlap schedules.</div>
+    </a>
+  </div>
+
+</div>
+
+<footer class="foot">
+  mininpu &middot; Reference Microarchitecture (Doc 2, WIP) &middot;
+  <a href="index.html">back to index</a>
+</footer>
+
+</body>
+</html>

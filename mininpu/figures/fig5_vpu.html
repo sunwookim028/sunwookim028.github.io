@@ -1,0 +1,529 @@
+<title>mininpu VPU datapath - FIG. 5</title>
+<style>
+  :root{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8;
+    --mem:#255e9e;  --mem-f:#d6e6f6;
+    --mxu:#237a5d;  --mxu-f:#cfe9de;
+    --vpu:#5f42a0;  --vpu-f:#e1d9f2;
+    --ext:#4f5a68;  --ext-f:#dbe1e9;
+    --new:#bd3423;
+    --font-s: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-m: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+      --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+      --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+      --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8; --mem:#255e9e; --mem-f:#d6e6f6;
+    --mxu:#237a5d; --mxu-f:#cfe9de; --vpu:#5f42a0; --vpu-f:#e1d9f2;
+    --ext:#4f5a68; --ext-f:#dbe1e9; --new:#bd3423;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+    --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+    --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+    --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-s);
+       margin:0; padding:28px 22px 56px; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1720px; margin:0 auto;}
+  header{margin:0 4px 16px;}
+  h1{font-size:22px; font-weight:650; letter-spacing:-.01em; margin:0 0 4px; text-wrap:balance;}
+  .sub{font-family:var(--font-m); font-size:12.5px; color:var(--muted); margin:0;}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin:12px 4px 0;
+          font-family:var(--font-m); font-size:11.5px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .sw{width:13px; height:13px; border-radius:3px; border:1.5px solid;}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px;
+          background:var(--chip); margin-top:14px;}
+  svg{display:block; min-width:1320px; width:100%; height:auto;}
+  .b-mem{fill:var(--mem-f);  stroke:var(--mem);  stroke-width:1.5;}
+  .b-vpu{fill:var(--vpu-f);  stroke:var(--vpu);  stroke-width:1.5;}
+  .b-ext{fill:var(--ext-f);  stroke:var(--ext);  stroke-width:1.5;}
+  .rf{stroke-width:2;}
+  .inner{fill:none; stroke:var(--muted); stroke-width:1; opacity:.6;}
+  .new-o{stroke:var(--new); stroke-width:2; stroke-dasharray:5 3; fill:none;}
+  text{font-family:var(--font-m); fill:var(--ink);}
+  .ti{font-family:var(--font-s); font-weight:650;}
+  .t-mem{fill:var(--mem);} .t-vpu{fill:var(--vpu);} .t-ext{fill:var(--ext);}
+  .d{fill:var(--ink); font-size:11px;}
+  .d2{fill:var(--muted); font-size:10.5px;}
+  .flow{fill:none; stroke:var(--line); stroke-width:1.6; marker-end:url(#arw);}
+  .flow2{fill:none; stroke:var(--line); stroke-width:1.6; marker-end:url(#arw); marker-start:url(#arw);}
+  .fnew{fill:none; stroke:var(--new); stroke-width:1.9; marker-end:url(#arwn); stroke-dasharray:5 3;}
+  .fbc{fill:none; stroke:var(--vpu); stroke-width:1.5; stroke-dasharray:4 3; marker-end:url(#arwv);}
+  .lbl{font-size:10px; fill:var(--ink); paint-order:stroke; stroke:var(--chip);
+       stroke-width:3.4px; stroke-linejoin:round;}
+  .lbl-n{font-size:10px; fill:var(--new); paint-order:stroke; stroke:var(--chip);
+         stroke-width:3.4px; stroke-linejoin:round; font-weight:600;}
+  .lbl-v{font-size:10px; fill:var(--vpu); paint-order:stroke; stroke:var(--chip);
+         stroke-width:3.2px; stroke-linejoin:round;}
+  .ref{font-family:var(--font-m); font-weight:700; font-size:12px; fill:var(--ink);
+       paint-order:stroke; stroke:var(--chip); stroke-width:3.6px; stroke-linejoin:round;}
+  .refs{font-family:var(--font-m); font-weight:700; font-size:10px; fill:var(--muted);
+        paint-order:stroke; stroke:var(--chip); stroke-width:3.2px; stroke-linejoin:round;}
+  .badge{font-size:9.5px; font-weight:700; fill:var(--new);}
+  /* stage boxes inside the lane FU pipeline */
+  .stg{fill:color-mix(in srgb, var(--vpu) 15%, var(--chip)); stroke:var(--vpu); stroke-width:1;}
+  .stg-lut{fill:color-mix(in srgb, var(--vpu) 22%, var(--chip)); stroke:var(--vpu); stroke-width:1.1;}
+  .regbar{fill:var(--vpu); opacity:.85;}
+  .sub-cone{fill:none; stroke:var(--vpu); stroke-width:.8; opacity:.75;}
+  .lane-out{fill:none; stroke:var(--vpu); stroke-width:2.4;}
+  .fu-out{fill:none; stroke:var(--vpu); stroke-width:1.3; stroke-dasharray:3 2; opacity:.7;}
+  .vregcol{fill:var(--mem-f); stroke:var(--mem); stroke-width:1.2;}
+  .rnode{fill:color-mix(in srgb, var(--vpu) 30%, var(--chip)); stroke:var(--vpu); stroke-width:1.2;}
+  .redge{fill:none; stroke:var(--vpu); stroke-width:1.5;}
+  .card{border:1px solid var(--line); border-radius:10px; background:var(--chip); padding:14px 16px;}
+  .card h2{font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+           color:var(--muted); margin:0 0 10px; font-weight:650;}
+  .reflist{columns:4; column-gap:24px; font-family:var(--font-m); font-size:11px; line-height:1.75; margin:0; padding:0; list-style:none;}
+  @media(max-width:1100px){.reflist{columns:3;}}
+  @media(max-width:760px){.reflist{columns:2;}}
+  .reflist li{break-inside:avoid;}
+  .reflist b{color:var(--vpu); font-weight:700; display:inline-block; width:32px;}
+  .reflist .nw{color:var(--new);}
+  .delta{margin-top:16px; border:1px solid var(--new); border-radius:10px;
+          background:color-mix(in srgb, var(--new) 8%, var(--chip)); padding:14px 16px;}
+  .delta h2{color:var(--new); font-size:12px; letter-spacing:.06em; text-transform:uppercase; margin:0 0 8px; font-weight:700;}
+  .delta ul{margin:0; padding-left:18px; columns:2; column-gap:26px; font-size:12px; line-height:1.5;}
+  @media(max-width:760px){.delta ul{columns:1;}}
+  .delta code{font-family:var(--font-m); color:var(--ink); font-size:11px;}
+  .foot{margin:16px 4px 0; font-family:var(--font-m); font-size:11px; color:var(--muted); line-height:1.55;}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>mininpu VPU datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 5</span></h1>
+  <p class="sub">redesign (LOCKED) &middot; fixed-depth cross-row-pipelined vector unit &middot; N=8 lanes (BANKING=8) &middot; one function-select pipeline: {reduce | LUT | SIMD lane-ALU} &middot; VPU=VREG-only &middot; VREG banked per-column, 2r2w</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU lane FU / pipeline</span>
+    <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD (memory)</span>
+    <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>cast / scalar source</span>
+    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; redesign vs current RTL</span>
+  </div>
+</header>
+
+<div class="scroll">
+<svg viewBox="0 0 1680 1128" role="img" aria-label="VPU datapath lane diagram FIG 5">
+  <defs>
+    <marker id="arw"  viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker>
+    <marker id="arwn" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--new)"/></marker>
+    <marker id="arwv" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--vpu)"/></marker>
+  </defs>
+
+  <!-- =========================================================
+       BROADCAST NET  (our addition) — col0 / scalar -> all lanes
+       ========================================================= -->
+  <rect class="b-ext" x="40" y="44" width="150" height="34" rx="5"/>
+  <text x="49" y="60" class="d" font-weight="600">scalar / imm / bias</text>
+  <text x="49" y="73" class="d2">col0[r] &middot; literal</text>
+  <text x="182" y="42" class="refs" text-anchor="end">560</text>
+
+  <rect class="b-vpu" x="200" y="44" width="1295" height="34" rx="5"/>
+  <text x="212" y="60" class="ti t-vpu" font-size="12.5">BROADCAST NET</text>
+  <text x="360" y="60" class="d">fanout mux: col0[r] / scalar / imm / bias &rarr; all 8 lanes (operand-B select)</text>
+  <text x="360" y="73" class="d2">read-before-row dependency: bcast scalar of row r must be read BEFORE row r computes</text>
+  <text x="1485" y="42" class="ref" text-anchor="end">550</text>
+
+  <!-- =========================================================
+       VREG — vector register file, 2D tile, 32 regs (per-lane banked slices)
+       ========================================================= -->
+  <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG &mdash; 32 &times; [8&times;8] fp32 (8 KiB) &middot; banked per-column RF &middot; 2r2w (R_mxu ‖ R_vpu / W_mxu ‖ W_vpu) &mdash; LOCKED</text>
+  <text x="1485" y="104" class="ref" text-anchor="end">510</text>
+  <!-- port annotation -->
+  <text x="40" y="150" class="d2">rd A · R_mxu</text>
+  <text x="40" y="170" class="d2">rd B · R_vpu</text>
+  <text x="40" y="190" class="d2">wr ×2 · W_mxu/W_vpu</text>
+  <rect class="new-o" x="1035" y="112" width="460" height="94" rx="7"/>
+  <text x="1485" y="128" class="badge" text-anchor="end">LOCKED: banked per-column RF (not monolithic, not true multiport)</text>
+  <text x="1485" y="144" class="badge" text-anchor="end">8 col-slices: col across 32 regs &times; 8 rows = 256 fp32 words each</text>
+  <text x="1485" y="160" class="badge" text-anchor="end">each slice banked by reg-id into 1r1w banks · bank count synth-tuned</text>
+  <text x="1485" y="176" class="badge" text-anchor="end">2r2w = bank parallelism + static conflict-free schedule (was OPEN, now locked)</text>
+
+  <!-- =========================================================
+       LANE ARRAY  (8 columns)  +  FUNCTION-SELECT FU band outline
+       ========================================================= -->
+  <!-- Functional-Unit band outline (horizontal band of FUs) -->
+  <rect class="fu-out" x="196" y="256" width="1303" height="404" rx="8"/>
+  <text x="204" y="250" class="ti t-vpu" font-size="12">FUNCTION-SELECT FU  &mdash;  fixed-depth pipeline D (sized at synth, gelu-driven, #217)</text>
+  <text x="1495" y="250" class="ref" text-anchor="end">520</text>
+
+  <!-- cross-row streaming legend (left rail, aligned to stages) -->
+  <text x="40" y="240" class="d" font-weight="600" fill="var(--vpu)">cross-row streaming</text>
+  <text x="40" y="253" class="d2">1 row / cycle (snapshot)</text>
+  <text x="40" y="285"  class="d2">s0 &larr; row r+5</text>
+  <text x="40" y="339"  class="d2">s1 &larr; row r+4</text>
+  <text x="40" y="396"  class="d2">s2 &larr; row r+3</text>
+  <text x="40" y="451"  class="d2">s3 &larr; row r+2</text>
+  <text x="40" y="543"  class="d2">s4 &larr; row r+1</text>
+  <text x="40" y="634"  class="d2">s5 &larr; row r &rarr; wb</text>
+  <rect class="new-o" x="36" y="690" width="150" height="78" rx="6"/>
+  <text x="44" y="708" class="badge">&Delta; TODAY: ZERO</text>
+  <text x="44" y="722" class="badge">cross-row pipelining.</text>
+  <text x="44" y="736" class="badge">one row fully drains</text>
+  <text x="44" y="750" class="badge">before next starts</text>
+  <text x="44" y="764" class="badge">(16-56 cyc/tile &rarr; 8+D)</text>
+
+  <!-- ================= per-lane columns ================= -->
+  <!-- Lane geometry: laneX(i)=200+165*i, width 140; stage box x=laneX+8 w=124 -->
+
+  <!-- ============ L0 (fully detailed, outlined as "Lane") ============ -->
+  <!-- VREG column slice -->
+  <rect class="vregcol" x="208" y="112" width="124" height="94" rx="4"/>
+  <text x="214" y="128" class="d" font-weight="700" fill="var(--mem)">VREG col 0</text>
+  <text x="214" y="144" class="d2">owns elem column 0</text>
+  <text x="214" y="160" class="d2">reg[0..31][row][0]</text>
+  <text x="214" y="182" class="d2">R_mxu ‖ R_vpu&rarr;s0</text>
+  <text x="214" y="197" class="d2">W_vpu&larr;s5 ‖ W_mxu</text>
+  <!-- read/write port arrows -->
+  <path class="flow" d="M240,206 L240,262"/>
+  <path class="flow" d="M262,206 L262,262"/>
+  <text x="252" y="228" class="lbl">rd A/B</text>
+
+  <!-- L0 pipeline stages -->
+  <!-- s0 -->
+  <rect class="stg" x="208" y="262" width="124" height="44" rx="3"/>
+  <text x="214" y="279" class="d">s0 &middot; VREG read</text><text x="214" y="294" class="d2">row r operands</text>
+  <rect class="regbar" x="208" y="307" width="124" height="5" rx="1.5"/>
+  <!-- s1 -->
+  <rect class="stg" x="208" y="315" width="124" height="48" rx="3"/>
+  <text x="214" y="332" class="d">s1 &middot; operand mux</text><text x="214" y="347" class="d2">+ broadcast select</text><text x="214" y="360" class="d2">A / B / bcast / imm</text>
+  <rect class="regbar" x="208" y="364" width="124" height="5" rx="1.5"/>
+  <!-- s2 -->
+  <rect class="stg" x="208" y="372" width="124" height="46" rx="3"/>
+  <text x="214" y="389" class="d">s2 &middot; fp_mul</text><text x="214" y="404" class="d2">registered (pipe)</text>
+  <rect class="regbar" x="208" y="419" width="124" height="5" rx="1.5"/>
+  <!-- s3 -->
+  <rect class="stg" x="208" y="427" width="124" height="46" rx="3"/>
+  <text x="214" y="444" class="d">s3 &middot; fp_add</text><text x="214" y="459" class="d2">registered (pipe)</text>
+  <rect class="regbar" x="208" y="474" width="124" height="5" rx="1.5"/>
+  <!-- s4 (LUT / gelu cone) -->
+  <rect class="stg-lut" x="208" y="482" width="124" height="120" rx="3"/>
+  <text x="214" y="498" class="d" font-weight="700">s4 &middot; LUT</text>
+  <text x="214" y="512" class="d2">per-lane ROMs:</text>
+  <text x="214" y="525" class="d2">exp2 &middot; rsqrt</text>
+  <text x="214" y="538" class="d2">gelu-tanh cone:</text>
+  <!-- gelu cone substages -->
+  <rect class="sub-cone" x="214" y="544" width="112" height="14" rx="2"/><text x="219" y="554" class="d2" style="font-size:8.5px">6&times; mul</text>
+  <rect class="sub-cone" x="214" y="560" width="112" height="14" rx="2"/><text x="219" y="570" class="d2" style="font-size:8.5px">2&times; add</text>
+  <rect class="sub-cone" x="214" y="576" width="112" height="14" rx="2"/><text x="219" y="586" class="d2" style="font-size:8.5px">tanh ROM</text>
+  <text x="214" y="599" class="d2" style="font-size:8.5px">split into pipe stages</text>
+  <rect class="regbar" x="208" y="603" width="124" height="5" rx="1.5"/>
+  <!-- s5 -->
+  <rect class="stg" x="208" y="611" width="124" height="44" rx="3"/>
+  <text x="214" y="628" class="d">s5 &middot; result sel</text><text x="214" y="643" class="d2">&rarr; writeback</text>
+
+  <!-- Lane outline (accent box) around L0's VREG slice + FU pipeline -->
+  <rect class="lane-out" x="202" y="108" width="136" height="551" rx="8"/>
+  <text x="270" y="674" class="ti t-vpu" font-size="12" text-anchor="middle">L0 = &ldquo;Lane&rdquo;</text>
+
+  <!-- ============ L1 (fully detailed, no lane outline) ============ -->
+  <rect class="vregcol" x="373" y="112" width="124" height="94" rx="4"/>
+  <text x="379" y="128" class="d" font-weight="700" fill="var(--mem)">VREG col 1</text>
+  <text x="379" y="144" class="d2">owns elem column 1</text>
+  <text x="379" y="182" class="d2">2 rd &rarr; s0</text>
+  <text x="379" y="197" class="d2">2 wr &larr; s5 / W_mxu</text>
+  <path class="flow" d="M405,206 L405,262"/>
+  <path class="flow" d="M427,206 L427,262"/>
+
+  <rect class="stg" x="373" y="262" width="124" height="44" rx="3"/>
+  <text x="379" y="279" class="d">s0 &middot; VREG read</text><text x="379" y="294" class="d2">row r</text>
+  <rect class="regbar" x="373" y="307" width="124" height="5" rx="1.5"/>
+  <rect class="stg" x="373" y="315" width="124" height="48" rx="3"/>
+  <text x="379" y="332" class="d">s1 &middot; op mux</text><text x="379" y="347" class="d2">+ bcast select</text>
+  <rect class="regbar" x="373" y="364" width="124" height="5" rx="1.5"/>
+  <rect class="stg" x="373" y="372" width="124" height="46" rx="3"/>
+  <text x="379" y="389" class="d">s2 &middot; fp_mul</text><text x="379" y="404" class="d2">registered</text>
+  <rect class="regbar" x="373" y="419" width="124" height="5" rx="1.5"/>
+  <rect class="stg" x="373" y="427" width="124" height="46" rx="3"/>
+  <text x="379" y="444" class="d">s3 &middot; fp_add</text><text x="379" y="459" class="d2">registered</text>
+  <rect class="regbar" x="373" y="474" width="124" height="5" rx="1.5"/>
+  <rect class="stg-lut" x="373" y="482" width="124" height="120" rx="3"/>
+  <text x="379" y="498" class="d" font-weight="700">s4 &middot; LUT</text>
+  <text x="379" y="512" class="d2">exp2 &middot; rsqrt</text>
+  <text x="379" y="525" class="d2">gelu-tanh</text>
+  <rect class="sub-cone" x="379" y="544" width="112" height="14" rx="2"/><text x="384" y="554" class="d2" style="font-size:8.5px">6&times; mul</text>
+  <rect class="sub-cone" x="379" y="560" width="112" height="14" rx="2"/><text x="384" y="570" class="d2" style="font-size:8.5px">2&times; add</text>
+  <rect class="sub-cone" x="379" y="576" width="112" height="14" rx="2"/><text x="384" y="586" class="d2" style="font-size:8.5px">tanh ROM</text>
+  <rect class="regbar" x="373" y="603" width="124" height="5" rx="1.5"/>
+  <rect class="stg" x="373" y="611" width="124" height="44" rx="3"/>
+  <text x="379" y="628" class="d">s5 &middot; result sel</text><text x="379" y="643" class="d2">&rarr; writeback</text>
+  <text x="435" y="674" class="d2" font-size="11" text-anchor="middle">L1</text>
+
+  <!-- ============ L2..L7 (repeated structure, faded, x8 reads clearly) ============ -->
+  <!-- L2 -->
+  <g opacity="0.9">
+    <rect class="vregcol" x="538" y="112" width="124" height="94" rx="4"/><text x="544" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 2</text><text x="544" y="146" class="d2">elem col 2</text>
+    <path class="flow" d="M570,206 L570,262"/><path class="flow" d="M592,206 L592,262"/>
+    <rect class="stg" x="538" y="262" width="124" height="44" rx="3"/><text x="544" y="288" class="d2">s0</text>
+    <rect class="regbar" x="538" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="538" y="315" width="124" height="48" rx="3"/><text x="544" y="343" class="d2">s1</text>
+    <rect class="regbar" x="538" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="538" y="372" width="124" height="46" rx="3"/><text x="544" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="538" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="538" y="427" width="124" height="46" rx="3"/><text x="544" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="538" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="538" y="482" width="124" height="120" rx="3"/><text x="544" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="544" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="544" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="544" y="576" width="112" height="14" rx="2"/>
+    <text x="549" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="538" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="538" y="611" width="124" height="44" rx="3"/><text x="544" y="637" class="d2">s5</text>
+    <text x="600" y="674" class="d2" font-size="11" text-anchor="middle">L2</text>
+  </g>
+  <!-- L3 -->
+  <g opacity="0.82">
+    <rect class="vregcol" x="703" y="112" width="124" height="94" rx="4"/><text x="709" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 3</text><text x="709" y="146" class="d2">elem col 3</text>
+    <path class="flow" d="M735,206 L735,262"/><path class="flow" d="M757,206 L757,262"/>
+    <rect class="stg" x="703" y="262" width="124" height="44" rx="3"/><text x="709" y="288" class="d2">s0</text>
+    <rect class="regbar" x="703" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="703" y="315" width="124" height="48" rx="3"/><text x="709" y="343" class="d2">s1</text>
+    <rect class="regbar" x="703" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="703" y="372" width="124" height="46" rx="3"/><text x="709" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="703" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="703" y="427" width="124" height="46" rx="3"/><text x="709" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="703" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="703" y="482" width="124" height="120" rx="3"/><text x="709" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="709" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="709" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="709" y="576" width="112" height="14" rx="2"/>
+    <text x="714" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="703" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="703" y="611" width="124" height="44" rx="3"/><text x="709" y="637" class="d2">s5</text>
+    <text x="765" y="674" class="d2" font-size="11" text-anchor="middle">L3</text>
+  </g>
+  <!-- L4 -->
+  <g opacity="0.74">
+    <rect class="vregcol" x="868" y="112" width="124" height="94" rx="4"/><text x="874" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 4</text><text x="874" y="146" class="d2">elem col 4</text>
+    <path class="flow" d="M900,206 L900,262"/><path class="flow" d="M922,206 L922,262"/>
+    <rect class="stg" x="868" y="262" width="124" height="44" rx="3"/><text x="874" y="288" class="d2">s0</text>
+    <rect class="regbar" x="868" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="868" y="315" width="124" height="48" rx="3"/><text x="874" y="343" class="d2">s1</text>
+    <rect class="regbar" x="868" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="868" y="372" width="124" height="46" rx="3"/><text x="874" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="868" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="868" y="427" width="124" height="46" rx="3"/><text x="874" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="868" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="868" y="482" width="124" height="120" rx="3"/><text x="874" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="874" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="874" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="874" y="576" width="112" height="14" rx="2"/>
+    <text x="879" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="868" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="868" y="611" width="124" height="44" rx="3"/><text x="874" y="637" class="d2">s5</text>
+    <text x="930" y="674" class="d2" font-size="11" text-anchor="middle">L4</text>
+  </g>
+  <!-- L5 -->
+  <g opacity="0.66">
+    <rect class="vregcol" x="1033" y="112" width="124" height="94" rx="4"/><text x="1039" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 5</text><text x="1039" y="146" class="d2">elem col 5</text>
+    <path class="flow" d="M1065,206 L1065,262"/><path class="flow" d="M1087,206 L1087,262"/>
+    <rect class="stg" x="1033" y="262" width="124" height="44" rx="3"/><text x="1039" y="288" class="d2">s0</text>
+    <rect class="regbar" x="1033" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1033" y="315" width="124" height="48" rx="3"/><text x="1039" y="343" class="d2">s1</text>
+    <rect class="regbar" x="1033" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1033" y="372" width="124" height="46" rx="3"/><text x="1039" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="1033" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1033" y="427" width="124" height="46" rx="3"/><text x="1039" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="1033" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="1033" y="482" width="124" height="120" rx="3"/><text x="1039" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="1039" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="1039" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="1039" y="576" width="112" height="14" rx="2"/>
+    <text x="1044" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="1033" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1033" y="611" width="124" height="44" rx="3"/><text x="1039" y="637" class="d2">s5</text>
+    <text x="1095" y="674" class="d2" font-size="11" text-anchor="middle">L5</text>
+  </g>
+  <!-- L6 -->
+  <g opacity="0.58">
+    <rect class="vregcol" x="1198" y="112" width="124" height="94" rx="4"/><text x="1204" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 6</text><text x="1204" y="146" class="d2">elem col 6</text>
+    <path class="flow" d="M1230,206 L1230,262"/><path class="flow" d="M1252,206 L1252,262"/>
+    <rect class="stg" x="1198" y="262" width="124" height="44" rx="3"/><text x="1204" y="288" class="d2">s0</text>
+    <rect class="regbar" x="1198" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1198" y="315" width="124" height="48" rx="3"/><text x="1204" y="343" class="d2">s1</text>
+    <rect class="regbar" x="1198" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1198" y="372" width="124" height="46" rx="3"/><text x="1204" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="1198" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1198" y="427" width="124" height="46" rx="3"/><text x="1204" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="1198" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="1198" y="482" width="124" height="120" rx="3"/><text x="1204" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="1204" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="1204" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="1204" y="576" width="112" height="14" rx="2"/>
+    <text x="1209" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="1198" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1198" y="611" width="124" height="44" rx="3"/><text x="1204" y="637" class="d2">s5</text>
+    <text x="1260" y="674" class="d2" font-size="11" text-anchor="middle">L6</text>
+  </g>
+  <!-- L7 -->
+  <g opacity="0.5">
+    <rect class="vregcol" x="1363" y="112" width="124" height="94" rx="4"/><text x="1369" y="130" class="d" font-weight="700" fill="var(--mem)">VREG col 7</text><text x="1369" y="146" class="d2">elem col 7</text>
+    <path class="flow" d="M1395,206 L1395,262"/><path class="flow" d="M1417,206 L1417,262"/>
+    <rect class="stg" x="1363" y="262" width="124" height="44" rx="3"/><text x="1369" y="288" class="d2">s0</text>
+    <rect class="regbar" x="1363" y="307" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1363" y="315" width="124" height="48" rx="3"/><text x="1369" y="343" class="d2">s1</text>
+    <rect class="regbar" x="1363" y="364" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1363" y="372" width="124" height="46" rx="3"/><text x="1369" y="399" class="d2">s2 fp_mul</text>
+    <rect class="regbar" x="1363" y="419" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1363" y="427" width="124" height="46" rx="3"/><text x="1369" y="454" class="d2">s3 fp_add</text>
+    <rect class="regbar" x="1363" y="474" width="124" height="5" rx="1.5"/>
+    <rect class="stg-lut" x="1363" y="482" width="124" height="120" rx="3"/><text x="1369" y="500" class="d2">s4 LUT</text>
+    <rect class="sub-cone" x="1369" y="544" width="112" height="14" rx="2"/><rect class="sub-cone" x="1369" y="560" width="112" height="14" rx="2"/><rect class="sub-cone" x="1369" y="576" width="112" height="14" rx="2"/>
+    <text x="1374" y="596" class="d2" style="font-size:8.5px">gelu cone</text>
+    <rect class="regbar" x="1363" y="603" width="124" height="5" rx="1.5"/>
+    <rect class="stg" x="1363" y="611" width="124" height="44" rx="3"/><text x="1369" y="637" class="d2">s5</text>
+    <text x="1425" y="674" class="d2" font-size="11" text-anchor="middle">L7</text>
+  </g>
+
+  <!-- "identical FU x8" caption -->
+  <text x="1013" y="240" class="d2" text-anchor="middle" style="font-size:11px">identical function-select FU pipeline &times; 8  (L0..L7, one elem-column each)</text>
+
+  <!-- ============ Delta callouts on stages (right rail) ============ -->
+  <rect class="new-o" x="1505" y="365" width="160" height="52" rx="6"/>
+  <text x="1513" y="382" class="badge">&Delta; s2 fp_mul today is</text>
+  <text x="1513" y="395" class="badge">COMBINATIONAL (latency</text>
+  <text x="1513" y="408" class="badge">ignored) &rarr; register it</text>
+
+  <rect class="new-o" x="1505" y="424" width="160" height="50" rx="6"/>
+  <text x="1513" y="440" class="badge">fp_mul / fp_add (s2/s3) =</text>
+  <text x="1513" y="452" class="badge">SHARED FP modules, also</text>
+  <text x="1513" y="464" class="badge">in MXU &middot; fp_max PLANNED</text>
+
+  <rect class="new-o" x="1505" y="482" width="160" height="120" rx="6"/>
+  <text x="1513" y="500" class="badge">&Delta; s4 gelu = #217</text>
+  <text x="1513" y="514" class="badge">129-logic-level comb</text>
+  <text x="1513" y="528" class="badge">cone, forces 50 MHz.</text>
+  <text x="1513" y="542" class="badge">redesign splits into</text>
+  <text x="1513" y="556" class="badge">pipe stages &rarr; target</text>
+  <text x="1513" y="570" class="badge">clock. PLANNED (not yet):</text>
+  <text x="1513" y="584" class="badge">drop recip (=rsqrt&sup2;);</text>
+  <text x="1513" y="598" class="badge">add fp_max {max}</text>
+
+  <rect class="new-o" x="1505" y="611" width="160" height="62" rx="6"/>
+  <text x="1513" y="626" class="badge">INVARIANT (locked): fixed,</text>
+  <text x="1513" y="638" class="badge">data-indep FU latency</text>
+  <text x="1513" y="650" class="badge">(no iterative op) &rarr;</text>
+  <text x="1513" y="662" class="badge">sim==synth obligation</text>
+
+  <!-- =========================================================
+       CROSS-LANE REDUCE TREE (our addition) — binary tree depth 3
+       ========================================================= -->
+  <rect class="fu-out" x="196" y="678" width="1303" height="192" rx="8" style="stroke:var(--vpu);stroke-dasharray:5 3;opacity:.85"/>
+  <text x="204" y="696" class="ti t-vpu" font-size="12">CROSS-LANE REDUCE TREE &mdash; binary, depth log&#8322;8 = 3 &middot; sum-tree &#8741; max-tree</text>
+  <text x="1495" y="696" class="ref" text-anchor="end">530</text>
+  <text x="204" y="864" class="d2">vpu.reduce {sum, max} : combine all 8 lanes &rarr; per-row scalar into col0 &middot; row r &rarr; element r</text>
+
+  <!-- level 0: taps from each lane s5 (lane centers 270,435,600,765,930,1095,1260,1425) -->
+  <!-- level 1 nodes (4): 352.5, 682.5, 1012.5, 1342.5 @ y=760 -->
+  <!-- level 2 nodes (2): 517.5, 1177.5 @ y=808 -->
+  <!-- level 3 node (1): 847.5 @ y=846 (col0 result) -->
+  <!-- edges L0..L7 -> level1 -->
+  <path class="redge" d="M270,655 L270,712 L352,712 L352,742"/>
+  <path class="redge" d="M435,655 L435,712 L353,712"/>
+  <path class="redge" d="M600,655 L600,712 L682,712 L682,742"/>
+  <path class="redge" d="M765,655 L765,712 L683,712"/>
+  <path class="redge" d="M930,655 L930,712 L1012,712 L1012,742"/>
+  <path class="redge" d="M1095,655 L1095,712 L1013,712"/>
+  <path class="redge" d="M1260,655 L1260,712 L1342,712 L1342,742"/>
+  <path class="redge" d="M1425,655 L1425,712 L1343,712"/>
+  <!-- level1 -> level2 -->
+  <path class="redge" d="M352,772 L352,790 L517,790 L517,798"/>
+  <path class="redge" d="M682,772 L682,790 L518,790"/>
+  <path class="redge" d="M1012,772 L1012,790 L1177,790 L1177,798"/>
+  <path class="redge" d="M1342,772 L1342,790 L1178,790"/>
+  <!-- level2 -> level3 -->
+  <path class="redge" d="M517,828 L517,838 L847,838 L847,844"/>
+  <path class="redge" d="M1177,828 L1177,838 L848,838"/>
+  <!-- nodes -->
+  <rect class="rnode" x="330" y="742" width="45" height="30" rx="4"/><text x="352" y="761" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="660" y="742" width="45" height="30" rx="4"/><text x="682" y="761" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="990" y="742" width="45" height="30" rx="4"/><text x="1012" y="761" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="1320" y="742" width="45" height="30" rx="4"/><text x="1342" y="761" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="495" y="798" width="45" height="30" rx="4"/><text x="517" y="817" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="1155" y="798" width="45" height="30" rx="4"/><text x="1177" y="817" class="d2" text-anchor="middle">&Sigma;/max</text>
+  <rect class="rnode" x="822" y="844" width="52" height="30" rx="4" style="stroke-width:2"/><text x="848" y="863" class="d2" text-anchor="middle" font-weight="700">col0[r]</text>
+
+  <!-- writeback of reduce result -> VREG col0 (element r) : route left up -->
+  <path class="fbc" d="M822,859 C120,859 120,150 202,140"/>
+  <text x="130" y="850" class="lbl-v">reduce result &rarr; VREG col0 (elem r) &middot; via W_vpu (1 of 2 write ports)</text>
+  <!-- broadcast of col0 -> broadcast net (up) -->
+  <path class="fbc" d="M848,844 C848,110 130,110 130,78"/>
+  <text x="150" y="98" class="lbl-v">col0[r] &rarr; BROADCAST NET (feed next row)</text>
+
+  <!-- =========================================================
+       CAST + MEMORY SUBSYSTEM
+       ========================================================= -->
+  <rect class="b-ext" x="200" y="905" width="1295" height="54" rx="6"/>
+  <text x="212" y="927" class="ti t-ext" font-size="12.5">CAST unit &mdash; bf16 &harr; fp32</text>
+  <text x="420" y="927" class="d">the ONLY VREG &harr; SPAD path (vreg.load / vreg.store) &middot; 8 elem/cyc</text>
+  <text x="420" y="945" class="d2">FU never touches ACC/SPAD directly &mdash; VPU = VREG-only; all memory traffic is cast load/store</text>
+  <text x="1485" y="903" class="ref" text-anchor="end">540</text>
+
+  <rect class="b-mem" x="120" y="985" width="1440" height="80" rx="6"/>
+  <text x="136" y="1010" class="ti t-mem" font-size="15">MEMORY SUBSYSTEM &mdash; SPAD (scratchpad)</text>
+  <text x="136" y="1032" class="d">256b row &middot; bf16 &middot; on-chip 32 B/cy &middot; 32 KiB (1024&times;256b) &middot; 8 banks (addr%8)</text>
+  <text x="136" y="1050" class="d2">source/sink for cast load/store (vreg.load: SPAD&rarr;VREG (bf16&rarr;fp32) rows in, vreg.store fp32&rarr;bf16 rows out) &middot; no ACC/SPAD access from the FU datapath</text>
+  <text x="1544" y="1008" class="ref" text-anchor="end">500</text>
+
+  <!-- cast <-> lanes (writeback / load) -->
+  <path class="flow2" d="M270,655 C270,760 200,830 200,905"/>
+  <text x="150" y="895" class="lbl">s5 &rarr; cast &rarr; VREG/SPAD</text>
+  <!-- cast <-> SPAD -->
+  <path class="flow2" d="M300,959 L300,985"/><text x="308" y="978" class="lbl">vreg.load / vreg.store 256b</text>
+
+  <!-- =========================================================
+       FUNCTION-SELECT LEGEND (bottom-left)
+       ========================================================= -->
+  <rect class="inner" x="40" y="905" width="150" height="160" rx="6" style="opacity:1;stroke:var(--vpu)"/>
+  <text x="48" y="923" class="ti t-vpu" font-size="11">Function-select</text>
+  <text x="48" y="940" class="d2">one pipeline executes</text>
+  <text x="48" y="953" class="d2">ONE of per op:</text>
+  <text x="48" y="972" class="d">&bull; reduce &nbsp;(530)</text>
+  <text x="48" y="988" class="d">&bull; LUT &nbsp;&nbsp;&nbsp;(s4)</text>
+  <text x="48" y="1004" class="d">&bull; SIMD lane-ALU</text>
+  <text x="58" y="1019" class="d2">(s2/s3 + bcast)</text>
+  <text x="48" y="1038" class="d2">selected by opcode:</text>
+  <text x="48" y="1052" class="d2">vpu.reduce / .lut / .simd</text>
+  <text x="48" y="1064" class="badge">NOT separate datapaths</text>
+</svg>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Reference numerals &mdash; FIG. 5</h2>
+  <ul class="reflist">
+    <li><b>500</b> Memory subsystem &mdash; SPAD (256b row, bf16)</li>
+    <li><b>510</b> VREG (32 &times; [8&times;8] fp32, 8 KiB, banked per-column, 2r2w)</li>
+    <li><b>510 LOCKED</b> banked per-column RF, 2r2w via bank parallelism + static conflict-free schedule</li>
+    <li class="nw"><b>R_mxu</b> X-stream fp32&rarr;bf16 cast at MXU input (LOCKED, see FIG.1)</li>
+    <li><b>520</b> Function-select FU (fixed depth D)</li>
+    <li><b>521</b> s0 VREG read</li>
+    <li><b>522</b> s1 operand mux + bcast select</li>
+    <li><b>523</b> s2 fp_mul (registered)</li>
+    <li><b>524</b> s3 fp_add (registered)</li>
+    <li><b>525</b> s4 LUT (exp2 / rsqrt / gelu-tanh cone)</li>
+    <li><b>526</b> s5 result select &rarr; writeback</li>
+    <li><b>530</b> cross-lane reduce tree (depth 3)</li>
+    <li><b>540</b> cast unit (bf16 &harr; fp32)</li>
+    <li><b>550</b> broadcast net (col0 / scalar fanout)</li>
+    <li><b>560</b> scalar / imm / bias source</li>
+    <li class="nw"><b>&Delta;523</b> today fp_mul combinational</li>
+    <li class="nw"><b>&Delta;525</b> gelu #217 129-level cone @50 MHz</li>
+    <li class="nw"><b>525 PLANNED</b> unify LUTs &rarr; fp_lut_rom.sv + .mem; drop recip; add fp_max (not yet built)</li>
+    <li class="nw"><b>&Delta;520</b> today: zero cross-row pipelining</li>
+    <li class="nw"><b>&Delta;510</b> ACC_ROW ops dropped (VREG-only, #303)</li>
+  </ul>
+</div>
+
+<div class="delta">
+  <h2>&Delta; redesign vs current RTL</h2>
+  <ul>
+    <li><b>Real pipeline, latencies honored.</b> Today: combinational datapath + retrofitted registers (the &ldquo;Fix 1-16&rdquo; timing campaign); FSM <code>stage_cnt</code> hand-mirrors physical register depth (fragile sim/synth invariant, drift bugs). Redesign: <code>sim == synth</code>.</li>
+    <li><b>gelu pipelined.</b> Today: single 129-logic-level combinational cone (#217, forces 50 MHz). Redesign: split into pipe stages inside s4 &rarr; target clock.</li>
+    <li><b>Cross-row streaming.</b> Today: ZERO cross-row pipelining &mdash; one row fully drains before the next (16-56 cyc/tile). Redesign: 1 row/cycle streamed &rarr; <code>8 + D</code> cyc.</li>
+    <li><b>VREG-only, W_vpu = 1 of 2 write ports.</b> Today: separate BRAM Port-B writeback mux + in-place <code>ACC_ROW</code> ops (#303). Redesign: VPU FU drives 1 of the VREG's 2 write ports (W_vpu), <code>ACC_ROW</code> dropped; FU touches VREG only (cast is the sole memory path).</li>
+    <li><b>VREG banking LOCKED.</b> Banked per-column RF: 8 col-slices (one per lane), each = that column across 32 regs &times; 8 rows (256 fp32 words). Each slice serves 2 rd (R_mxu X-stream, R_vpu lane) + 2 wr (W_mxu acc.store, W_vpu result), banked by reg-id into simple 1r1w banks; the static schedule keeps concurrent reads on different banks and concurrent writes on different banks (conflict-free) &rarr; 2r2w without a true 2r2w SRAM. Bank count synth-tuned. (was OPEN monolithic-vs-per-lane; now locked.)</li>
+    <li><b>MXU X-input cast (LOCKED).</b> The R_mxu read streams VREG fp32; an 8-lane <code>fp32&rarr;bf16</code> cast sits at the MXU X-stream input (bf16&times;bf16 PEs, fp32 accumulate &mdash; no PE widening). Shown in FIG.1; VREG stays fp32 (VPU format).</li>
+    <li><b>LUT ROMs PLANNED (not yet built).</b> Today = 4 inline-initial ROMs (exp2 / rsqrt / tanh / recip). PLANNED redesign target: unify into <code>fp_lut_rom.sv</code> with externalized <code>.mem</code> tables, drop recip (= rsqrt&sup2;), and instantiate <code>fp_max</code> for <code>vpu.simd {max}</code>.</li>
+    <li><b>Function-select, not 3 datapaths.</b> ISA <code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code> map to one opcode-selected pipeline (reduce tree | LUT stage | SIMD lane-ALU), not parallel units.</li>
+  </ul>
+</div>
+</div>

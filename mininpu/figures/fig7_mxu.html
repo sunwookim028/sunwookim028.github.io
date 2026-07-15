@@ -1,0 +1,473 @@
+<title>mininpu MXU datapath - FIG. 7</title>
+<style>
+  :root{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8;
+    --mem:#255e9e;  --mem-f:#d6e6f6;
+    --mxu:#237a5d;  --mxu-f:#cfe9de;
+    --vpu:#5f42a0;  --vpu-f:#e1d9f2;
+    --ext:#4f5a68;  --ext-f:#dbe1e9;
+    --new:#bd3423;
+    --font-s: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-m: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+      --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+      --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+      --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8; --mem:#255e9e; --mem-f:#d6e6f6;
+    --mxu:#237a5d; --mxu-f:#cfe9de; --vpu:#5f42a0; --vpu-f:#e1d9f2;
+    --ext:#4f5a68; --ext-f:#dbe1e9; --new:#bd3423;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+    --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+    --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+    --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-s);
+       margin:0; padding:28px 22px 56px; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1780px; margin:0 auto;}
+  header{margin:0 4px 16px;}
+  h1{font-size:22px; font-weight:650; letter-spacing:-.01em; margin:0 0 4px; text-wrap:balance;}
+  .sub{font-family:var(--font-m); font-size:12.5px; color:var(--muted); margin:0;}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin:12px 4px 0;
+          font-family:var(--font-m); font-size:11.5px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .sw{width:13px; height:13px; border-radius:3px; border:1.5px solid;}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px;
+          background:var(--chip); margin-top:14px;}
+  svg{display:block; min-width:1500px; width:100%; height:auto;}
+  .b-mem{fill:var(--mem-f);  stroke:var(--mem);  stroke-width:1.5;}
+  .b-mxu{fill:var(--mxu-f);  stroke:var(--mxu);  stroke-width:1.5;}
+  .b-ext{fill:var(--ext-f);  stroke:var(--ext);  stroke-width:1.5;}
+  .rf{stroke-width:2;}
+  .inner{fill:none; stroke:var(--muted); stroke-width:1; opacity:.6;}
+  .new-o{stroke:var(--new); stroke-width:2; stroke-dasharray:5 3; fill:none;}
+  text{font-family:var(--font-m); fill:var(--ink);}
+  .ti{font-family:var(--font-s); font-weight:650;}
+  .t-mem{fill:var(--mem);} .t-mxu{fill:var(--mxu);} .t-ext{fill:var(--ext);}
+  .d{fill:var(--ink); font-size:11px;}
+  .d2{fill:var(--muted); font-size:10.5px;}
+  .flow{fill:none; stroke:var(--line); stroke-width:1.6; marker-end:url(#arw);}
+  .flow2{fill:none; stroke:var(--line); stroke-width:1.6; marker-end:url(#arw); marker-start:url(#arw);}
+  .fnew{fill:none; stroke:var(--new); stroke-width:1.9; marker-end:url(#arwn); stroke-dasharray:5 3;}
+  /* MXU dataflow families */
+  .fx{fill:none; stroke:var(--mxu); stroke-width:1.9; marker-mid:url(#arwm); marker-end:url(#arwm);}
+  .fp{fill:none; stroke:var(--mxu); stroke-width:1.9; marker-mid:url(#arwm); marker-end:url(#arwm); opacity:.72;}
+  .fw{fill:none; stroke:var(--mxu); stroke-width:1.6; marker-end:url(#arwm); stroke-dasharray:5 3;}
+  .fm{fill:none; stroke:var(--mxu); stroke-width:1.6; marker-end:url(#arwm);}
+  .lbl{font-size:10px; fill:var(--ink); paint-order:stroke; stroke:var(--chip);
+       stroke-width:3.4px; stroke-linejoin:round;}
+  .lbl-n{font-size:10px; fill:var(--new); paint-order:stroke; stroke:var(--chip);
+         stroke-width:3.4px; stroke-linejoin:round; font-weight:600;}
+  .lbl-m{font-size:10px; fill:var(--mxu); paint-order:stroke; stroke:var(--chip);
+         stroke-width:3.2px; stroke-linejoin:round;}
+  .ref{font-family:var(--font-m); font-weight:700; font-size:12px; fill:var(--ink);
+       paint-order:stroke; stroke:var(--chip); stroke-width:3.6px; stroke-linejoin:round;}
+  .refs{font-family:var(--font-m); font-weight:700; font-size:10px; fill:var(--muted);
+        paint-order:stroke; stroke:var(--chip); stroke-width:3.2px; stroke-linejoin:round;}
+  .badge{font-size:9.5px; font-weight:700; fill:var(--new);}
+  /* stage / structural boxes */
+  .stg{fill:color-mix(in srgb, var(--mxu) 15%, var(--chip)); stroke:var(--mxu); stroke-width:1;}
+  .stg-hi{fill:color-mix(in srgb, var(--mxu) 24%, var(--chip)); stroke:var(--mxu); stroke-width:1.2;}
+  .regbar{fill:var(--mxu); opacity:.85;}
+  /* the PE cell */
+  .pe{fill:color-mix(in srgb, var(--mxu) 13%, var(--chip)); stroke:var(--mxu); stroke-width:1.1;}
+  .pe-hi{fill:color-mix(in srgb, var(--mxu) 13%, var(--chip)); stroke:var(--mxu); stroke-width:2.2;}
+  .array-out{fill:none; stroke:var(--mxu); stroke-width:2.4;}
+  .castcol{fill:var(--ext-f); stroke:var(--ext); stroke-width:1.2;}
+  .vregcol{fill:var(--mem-f); stroke:var(--mem); stroke-width:1.2;}
+  .accbank{fill:var(--mem-f); stroke:var(--mem); stroke-width:1.4;}
+  .accslot{fill:color-mix(in srgb, var(--mxu, var(--mxu)) 12%, var(--chip)); stroke:var(--mxu); stroke-width:.9;}
+  .card{border:1px solid var(--line); border-radius:10px; background:var(--chip); padding:14px 16px;}
+  .card h2{font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+           color:var(--muted); margin:0 0 10px; font-weight:650;}
+  .reflist{columns:4; column-gap:24px; font-family:var(--font-m); font-size:11px; line-height:1.75; margin:0; padding:0; list-style:none;}
+  @media(max-width:1100px){.reflist{columns:3;}}
+  @media(max-width:760px){.reflist{columns:2;}}
+  .reflist li{break-inside:avoid;}
+  .reflist b{color:var(--mxu); font-weight:700; display:inline-block; width:32px;}
+  .reflist .nw{color:var(--new);}
+  .delta{margin-top:16px; border:1px solid var(--new); border-radius:10px;
+          background:color-mix(in srgb, var(--new) 8%, var(--chip)); padding:14px 16px;}
+  .delta h2{color:var(--new); font-size:12px; letter-spacing:.06em; text-transform:uppercase; margin:0 0 8px; font-weight:700;}
+  .delta ul{margin:0; padding-left:18px; columns:2; column-gap:26px; font-size:12px; line-height:1.5;}
+  @media(max-width:760px){.delta ul{columns:1;}}
+  .delta code{font-family:var(--font-m); color:var(--ink); font-size:11px;}
+  .foot{margin:16px 4px 0; font-family:var(--font-m); font-size:11px; color:var(--muted); line-height:1.55;}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>mininpu MXU datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 7</span></h1>
+  <p class="sub">weight-stationary systolic array (RS-hybrid: W stationary, X row-streamed) &middot; N=8 &rarr; 8&times;8 = 64 PE &middot; bf16&times;bf16&rarr;fp32 MAC &middot; ACC = 8 per-column banks &times; depth 2 (fp32) &middot; X streamed from VREG (cast at boundary, LOCKED) &middot; N=8 baseline; datapath parameterized (N=16 = ISA-invariant sweep)</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>PE / systolic array / ACC compute</span>
+    <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD / ACC storage (memory)</span>
+    <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>CAST fp32&rarr;bf16 boundary</span>
+    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; locked resolution vs prior OPEN</span>
+    <span>&#9642; active weight buf &middot; &#9643; inactive weight buf</span>
+  </div>
+</header>
+
+<div class="scroll">
+<svg viewBox="0 0 1760 1200" role="img" aria-label="MXU systolic datapath diagram FIG 7">
+  <defs>
+    <marker id="arw"  viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker>
+    <marker id="arwn" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--new)"/></marker>
+    <marker id="arwm" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.6" markerHeight="6.6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--mxu)"/></marker>
+  </defs>
+
+  <!-- =========================================================
+       SPAD  (weight source, low-rate) + acc.init bias source
+       ========================================================= -->
+  <rect class="b-mem" x="130" y="48" width="640" height="52" rx="6"/>
+  <text x="144" y="70" class="ti t-mem" font-size="13">SPAD &mdash; scratchpad (bf16, 256b row)</text>
+  <text x="144" y="90" class="d2">weight source (low-rate) &middot; bias row source for acc.init &middot; MXU never streams X from here anymore</text>
+  <text x="758" y="46" class="ref" text-anchor="end">700</text>
+
+  <!-- load.w path SPAD -> weight-load network -->
+  <path class="fw" d="M700,100 C700,150 760,180 812,258"/>
+  <text x="712" y="150" class="lbl-m">mxu.load.w</text>
+  <text x="712" y="164" class="d2" style="font-size:9.5px">fills INACTIVE buffer</text>
+  <text x="712" y="177" class="d2" style="font-size:9.5px">transB = reverse row order</text>
+  <text x="712" y="190" class="d2" style="font-size:9.5px">nonblocking</text>
+
+  <!-- =========================================================
+       WEIGHT DOUBLE-BUFFER LOAD NETWORK  (north of array)
+       ========================================================= -->
+  <rect class="stg-hi" x="456" y="258" width="768" height="70" rx="6"/>
+  <text x="466" y="278" class="ti t-mxu" font-size="12">WEIGHT DOUBLE-BUFFER LOAD NETWORK &mdash; shift weights down each column into per-PE buffers</text>
+  <text x="466" y="296" class="d2">load fills the INACTIVE buffer of every PE while a matmul runs on the ACTIVE one &middot; a matmul START implicitly PROMOTES inactive &rarr; active (buffer swap)</text>
+  <text x="466" y="312" class="d2">weight-stationary: once promoted, W stays resident in the PE for the whole K-stream</text>
+  <text x="1216" y="256" class="ref" text-anchor="end">710</text>
+
+  <!-- weight fill arrows down into each column top -->
+  <path class="fw" d="M504,328 L504,366"/><path class="fw" d="M600,328 L600,366"/>
+  <path class="fw" d="M696,328 L696,366"/><path class="fw" d="M792,328 L792,366"/>
+  <path class="fw" d="M888,328 L888,366"/><path class="fw" d="M984,328 L984,366"/>
+  <path class="fw" d="M1080,328 L1080,366"/><path class="fw" d="M1176,328 L1176,366"/>
+
+  <!-- psum=0 injection at north edge -->
+  <text x="504"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="600"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="696"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="792"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="888"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="984"  y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="1080" y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+  <text x="1176" y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
+
+  <!-- =========================================================
+       VREG  (X source, fp32)  +  CAST 8-lane fp32 -> bf16
+       ========================================================= -->
+  <rect class="vregcol" x="130" y="372" width="176" height="512" rx="6"/>
+  <text x="140" y="392" class="ti t-mem" font-size="12">VREG (fp32)</text>
+  <text x="140" y="410" class="d2">X operand source</text>
+  <text x="140" y="426" class="d2">2D tile, per-row</text>
+  <text x="140" y="620" class="d2" font-weight="700" fill="var(--mem)">R_mxu read port</text>
+  <text x="140" y="635" class="d2">stream 1 row / cyc &rarr;</text>
+  <text x="140" y="820" class="d2" font-weight="700" fill="var(--mem)">W_mxu write port</text>
+  <text x="140" y="835" class="d2">&larr; acc.store (fp32)</text>
+  <text x="306" y="370" class="ref" text-anchor="end">730</text>
+
+  <!-- CAST band -->
+  <rect class="castcol" x="316" y="372" width="130" height="512" rx="6"/>
+  <text x="325" y="392" class="ti t-ext" font-size="11.5">CAST 8-lane</text>
+  <text x="325" y="408" class="d2">fp32 &rarr; bf16</text>
+  <rect class="new-o" x="320" y="416" width="122" height="52" rx="5"/>
+  <text x="326" y="432" class="badge">&Delta; LOCKED = cast</text>
+  <text x="326" y="445" class="badge">at the boundary</text>
+  <text x="326" y="458" class="badge">(was OPEN:</text>
+  <text x="326" y="470" class="badge">widen vs cast)</text>
+  <text x="325" y="500" class="d2" style="font-size:9.5px">PEs stay</text>
+  <text x="325" y="513" class="d2" style="font-size:9.5px">bf16&times;bf16;</text>
+  <text x="325" y="526" class="d2" style="font-size:9.5px">fp32 accumulate</text>
+  <!-- 8 cast lane ticks -->
+  <rect class="regbar" x="322" y="540" width="118" height="4" rx="1"/>
+  <text x="325" y="558" class="d2" style="font-size:9px">lane0 &rarr; row0</text>
+  <text x="325" y="572" class="d2" style="font-size:9px">lane1 &rarr; row1</text>
+  <text x="325" y="586" class="d2" style="font-size:9px">&#8942;  (one per</text>
+  <text x="325" y="600" class="d2" style="font-size:9px">systolic row)</text>
+  <text x="325" y="614" class="d2" style="font-size:9px">lane7 &rarr; row7</text>
+  <text x="446" y="370" class="ref" text-anchor="end">740</text>
+
+  <!-- VREG R_mxu -> CAST -->
+  <path class="fm" d="M306,628 L316,628"/>
+  <text x="240" y="600" class="lbl-m">R_mxu fp32 stream</text>
+
+  <!-- CAST -> array west edge : 8 rows, one per cycle -->
+  <path class="fx" d="M446,404 L456,404"/>
+  <path class="fx" d="M446,468 L456,468"/>
+  <path class="fx" d="M446,532 L456,532"/>
+  <path class="fx" d="M446,596 L456,596"/>
+  <path class="fx" d="M446,660 L456,660"/>
+  <path class="fx" d="M446,724 L456,724"/>
+  <path class="fx" d="M446,788 L456,788"/>
+  <path class="fx" d="M446,852 L456,852"/>
+  <text x="360" y="700" class="lbl-m">bf16 X, one row / cycle &rarr; W-edge</text>
+
+  <!-- =========================================================
+       8 x 8 SYSTOLIC PE ARRAY
+       ========================================================= -->
+  <rect class="array-out" x="452" y="368" width="776" height="520" rx="9"/>
+  <text x="460" y="360" class="ti t-mxu" font-size="12">SYSTOLIC ARRAY &mdash; 8&times;8 = 64 PE &middot; W stationary &middot; X streams W&rarr;E &middot; partial sums accumulate N&rarr;S</text>
+  <text x="1226" y="360" class="ref" text-anchor="end">750</text>
+
+  <!-- ===== ROW 0 (r0) ===== -->
+  <g>
+    <rect class="pe-hi" x="456" y="372" width="96" height="64" rx="4"/><text x="462" y="386" class="d2" style="font-size:9px">r0c0</text><rect x="522" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text><text x="462" y="430" class="d2" style="font-size:7.5px">bf16&#178;&rarr;f32</text>
+    <rect class="pe-hi" x="552" y="372" width="96" height="64" rx="4"/><text x="558" y="386" class="d2" style="font-size:9px">r0c1</text><rect x="618" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="372" width="96" height="64" rx="4"/><text x="654" y="386" class="d2" style="font-size:9px">r0c2</text><rect x="714" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="372" width="96" height="64" rx="4"/><text x="750" y="386" class="d2" style="font-size:9px">r0c3</text><rect x="810" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="372" width="96" height="64" rx="4"/><text x="846" y="386" class="d2" style="font-size:9px">r0c4</text><rect x="906" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="372" width="96" height="64" rx="4"/><text x="942" y="386" class="d2" style="font-size:9px">r0c5</text><rect x="1002" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="372" width="96" height="64" rx="4"/><text x="1038" y="386" class="d2" style="font-size:9px">r0c6</text><rect x="1098" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="372" width="96" height="64" rx="4"/><text x="1134" y="386" class="d2" style="font-size:9px">r0c7</text><rect x="1194" y="379" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="379" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="418" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 1 ===== -->
+  <g>
+    <rect class="pe" x="456" y="436" width="96" height="64" rx="4"/><text x="462" y="450" class="d2" style="font-size:9px">r1c0</text><rect x="522" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="436" width="96" height="64" rx="4"/><rect x="618" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="436" width="96" height="64" rx="4"/><rect x="714" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="436" width="96" height="64" rx="4"/><rect x="810" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="436" width="96" height="64" rx="4"/><rect x="906" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="436" width="96" height="64" rx="4"/><rect x="1002" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="436" width="96" height="64" rx="4"/><rect x="1098" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="436" width="96" height="64" rx="4"/><rect x="1194" y="443" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="443" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="482" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 2 ===== -->
+  <g opacity="0.94">
+    <rect class="pe" x="456" y="500" width="96" height="64" rx="4"/><text x="462" y="514" class="d2" style="font-size:9px">r2c0</text><rect x="522" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="500" width="96" height="64" rx="4"/><rect x="618" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="500" width="96" height="64" rx="4"/><rect x="714" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="500" width="96" height="64" rx="4"/><rect x="810" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="500" width="96" height="64" rx="4"/><rect x="906" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="500" width="96" height="64" rx="4"/><rect x="1002" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="500" width="96" height="64" rx="4"/><rect x="1098" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="500" width="96" height="64" rx="4"/><rect x="1194" y="507" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="507" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="546" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 3 ===== -->
+  <g opacity="0.9">
+    <rect class="pe" x="456" y="564" width="96" height="64" rx="4"/><text x="462" y="578" class="d2" style="font-size:9px">r3c0</text><rect x="522" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="564" width="96" height="64" rx="4"/><rect x="618" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="564" width="96" height="64" rx="4"/><rect x="714" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="564" width="96" height="64" rx="4"/><rect x="810" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="564" width="96" height="64" rx="4"/><rect x="906" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="564" width="96" height="64" rx="4"/><rect x="1002" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="564" width="96" height="64" rx="4"/><rect x="1098" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="564" width="96" height="64" rx="4"/><rect x="1194" y="571" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="571" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="610" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 4 ===== -->
+  <g opacity="0.86">
+    <rect class="pe" x="456" y="628" width="96" height="64" rx="4"/><text x="462" y="642" class="d2" style="font-size:9px">r4c0</text><rect x="522" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="628" width="96" height="64" rx="4"/><rect x="618" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="628" width="96" height="64" rx="4"/><rect x="714" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="628" width="96" height="64" rx="4"/><rect x="810" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="628" width="96" height="64" rx="4"/><rect x="906" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="628" width="96" height="64" rx="4"/><rect x="1002" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="628" width="96" height="64" rx="4"/><rect x="1098" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="628" width="96" height="64" rx="4"/><rect x="1194" y="635" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="635" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="674" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 5 ===== -->
+  <g opacity="0.82">
+    <rect class="pe" x="456" y="692" width="96" height="64" rx="4"/><text x="462" y="706" class="d2" style="font-size:9px">r5c0</text><rect x="522" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="692" width="96" height="64" rx="4"/><rect x="618" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="692" width="96" height="64" rx="4"/><rect x="714" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="692" width="96" height="64" rx="4"/><rect x="810" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="692" width="96" height="64" rx="4"/><rect x="906" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="692" width="96" height="64" rx="4"/><rect x="1002" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="692" width="96" height="64" rx="4"/><rect x="1098" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="692" width="96" height="64" rx="4"/><rect x="1194" y="699" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="699" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="738" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 6 ===== -->
+  <g opacity="0.78">
+    <rect class="pe" x="456" y="756" width="96" height="64" rx="4"/><text x="462" y="770" class="d2" style="font-size:9px">r6c0</text><rect x="522" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="756" width="96" height="64" rx="4"/><rect x="618" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="756" width="96" height="64" rx="4"/><rect x="714" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="756" width="96" height="64" rx="4"/><rect x="810" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="756" width="96" height="64" rx="4"/><rect x="906" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="756" width="96" height="64" rx="4"/><rect x="1002" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="756" width="96" height="64" rx="4"/><rect x="1098" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="756" width="96" height="64" rx="4"/><rect x="1194" y="763" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="763" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="802" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+  <!-- ===== ROW 7 ===== -->
+  <g opacity="0.74">
+    <rect class="pe" x="456" y="820" width="96" height="64" rx="4"/><text x="462" y="834" class="d2" style="font-size:9px">r7c0</text><rect x="522" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="534" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="494" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="552" y="820" width="96" height="64" rx="4"/><rect x="618" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="630" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="600" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="648" y="820" width="96" height="64" rx="4"/><rect x="714" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="726" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="696" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="744" y="820" width="96" height="64" rx="4"/><rect x="810" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="822" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="792" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="840" y="820" width="96" height="64" rx="4"/><rect x="906" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="918" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="888" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="936" y="820" width="96" height="64" rx="4"/><rect x="1002" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1014" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="984" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1032" y="820" width="96" height="64" rx="4"/><rect x="1098" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1110" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1080" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+    <rect class="pe" x="1128" y="820" width="96" height="64" rx="4"/><rect x="1194" y="827" width="8" height="8" rx="1.5" fill="var(--mxu)"/><rect x="1206" y="827" width="8" height="8" rx="1.5" fill="none" stroke="var(--mxu)" stroke-width="1"/><text x="1176" y="866" style="font-size:14px" fill="var(--mxu)" text-anchor="middle">&#8859;</text>
+  </g>
+
+  <!-- ROW 0 X-stream W->E (representative full row, arrowheads at each PE boundary) -->
+  <polyline class="fx" points="456,404 552,404 648,404 744,404 840,404 936,404 1032,404 1128,404 1224,404"/>
+  <text x="1232" y="400" class="lbl-m">X_out (drained)</text>
+  <!-- COL 0 psum N->S (representative full column) -->
+  <polyline class="fp" points="504,366 504,436 504,500 504,564 504,628 504,692 504,756 504,820 504,884"/>
+
+  <!-- other rows: west-edge already fed by cast arrows; other cols: south drain arrows below -->
+
+  <!-- =========================================================
+       COLUMN DRAIN -> ACC  (8 columns)
+       ========================================================= -->
+  <path class="fp" d="M600,884 L600,952"/><path class="fp" d="M696,884 L696,952"/>
+  <path class="fp" d="M792,884 L792,952"/><path class="fp" d="M888,884 L888,952"/>
+  <path class="fp" d="M984,884 L984,952"/><path class="fp" d="M1080,884 L1080,952"/>
+  <path class="fp" d="M1176,884 L1176,952"/>
+  <path class="fp" d="M504,884 L504,952"/>
+  <text x="1232" y="920" class="lbl-m">each column drains its psum &rarr; its ACC bank</text>
+
+  <!-- =========================================================
+       ACC  — 8 per-column banks x depth 2 (fp32, MXU-owned)
+       ========================================================= -->
+  <rect class="accbank" x="452" y="956" width="776" height="96" rx="7"/>
+  <text x="460" y="948" class="ti t-mem" font-size="12">ACC &mdash; 8 per-column banks (ONE bank / systolic column) &times; depth 2 (double-buffer) &middot; fp32 &middot; MXU-owned</text>
+  <text x="1226" y="948" class="ref" text-anchor="end">760</text>
+  <!-- 8 banks, each 2 depth slots -->
+  <g>
+    <rect class="accslot" x="462" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="462" y="1018" width="84" height="24" rx="3"/><text x="504" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank0</text>
+    <rect class="accslot" x="558" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="558" y="1018" width="84" height="24" rx="3"/><text x="600" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank1</text>
+    <rect class="accslot" x="654" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="654" y="1018" width="84" height="24" rx="3"/><text x="696" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank2</text>
+    <rect class="accslot" x="750" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="750" y="1018" width="84" height="24" rx="3"/><text x="792" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank3</text>
+    <rect class="accslot" x="846" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="846" y="1018" width="84" height="24" rx="3"/><text x="888" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank4</text>
+    <rect class="accslot" x="942" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="942" y="1018" width="84" height="24" rx="3"/><text x="984" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank5</text>
+    <rect class="accslot" x="1038" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="1038" y="1018" width="84" height="24" rx="3"/><text x="1080" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank6</text>
+    <rect class="accslot" x="1134" y="990" width="84" height="24" rx="3"/><rect class="accslot" x="1134" y="1018" width="84" height="24" rx="3"/><text x="1176" y="982" class="d2" text-anchor="middle" style="font-size:8.5px">bank7</text>
+  </g>
+  <text x="462" y="1006" class="d2" style="font-size:8px" fill="var(--mem)">slot A</text>
+  <text x="462" y="1034" class="d2" style="font-size:8px" fill="var(--mem)">slot B</text>
+
+  <!-- acc.init : bias broadcast preload from SPAD -->
+  <path class="fnew" d="M380,68 C360,500 360,1000 452,1000"/>
+  <text x="150" y="1005" class="lbl-n">mxu.acc.init: SPAD bias row &rarr; broadcast-preload ALL rows of ACC</text>
+  <text x="1232" y="1000" class="lbl-m">accum flag: matmul adds over K-tiles into SAME ACC (serialized)</text>
+  <text x="1232" y="1016" class="lbl-m">causal: mask upper-triangle to -&infin;</text>
+
+  <!-- acc.store : drain ACC -> VREG (W_mxu, lossless fp32) -->
+  <path class="fm" d="M452,1030 C300,1030 218,980 218,888"/>
+  <text x="150" y="1055" class="lbl-m">acc.store: ACC &rarr; VREG (W_mxu, fp32 LOSSLESS)</text>
+  <text x="1232" y="1032" class="ref">770</text>
+
+  <!-- =========================================================
+       PE DETAIL callout A  (full microstructure)
+       ========================================================= -->
+  <rect class="stg" x="1300" y="372" width="430" height="356" rx="8"/>
+  <text x="1312" y="392" class="ti t-mxu" font-size="12">PE[r][c] detail  (&times; 64)</text>
+  <text x="1312" y="408" class="d2">systolic cell &middot; weight-stationary</text>
+
+  <!-- psum_in (N) -->
+  <rect class="b-mxu" x="1500" y="414" width="130" height="26" rx="4"/><text x="1565" y="431" class="d" text-anchor="middle" style="font-size:10px">psum_in (N) fp32</text>
+  <path class="fp" d="M1565,440 L1565,470"/>
+  <!-- X_in (W) + X_reg + X_out (E) -->
+  <rect class="b-mxu" x="1312" y="512" width="96" height="30" rx="4"/><text x="1360" y="531" class="d" text-anchor="middle" style="font-size:10px">X_in (W)</text>
+  <path class="fx" d="M1408,527 L1470,527"/>
+  <rect class="stg-hi" x="1470" y="470" width="150" height="96" rx="5"/>
+  <text x="1545" y="492" class="d" text-anchor="middle" font-weight="700">MAC &#8859;</text>
+  <text x="1545" y="508" class="d2" text-anchor="middle" style="font-size:9px">X &middot; W_active</text>
+  <text x="1545" y="521" class="d2" text-anchor="middle" style="font-size:9px">bf16&times;bf16 &rarr; fp32</text>
+  <text x="1545" y="536" class="d2" text-anchor="middle" style="font-size:9px">+ psum_in (fp32)</text>
+  <text x="1512" y="556" class="refs">751</text>
+  <path class="fx" d="M1620,527 L1690,527"/>
+  <rect class="b-mxu" x="1636" y="574" width="88" height="26" rx="4"/><text x="1680" y="591" class="d" text-anchor="middle" style="font-size:10px">X_out (E)</text>
+  <path class="fx" d="M1680,566 L1680,574"/>
+  <text x="1636" y="620" class="refs">752 X pass-through W&rarr;E</text>
+  <!-- weight active buffer feeding MAC -->
+  <rect class="stg" x="1312" y="452" width="120" height="40" rx="4"/><text x="1372" y="468" class="d" text-anchor="middle" style="font-size:10px">W active</text><text x="1372" y="482" class="d2" text-anchor="middle" style="font-size:8.5px">bf16, stationary</text>
+  <path class="fm" d="M1432,472 L1470,490"/>
+  <!-- psum_reg -> psum_out (S) -->
+  <path class="fp" d="M1545,566 L1545,640"/>
+  <rect class="b-mxu" x="1480" y="640" width="130" height="26" rx="4"/><text x="1545" y="657" class="d" text-anchor="middle" style="font-size:10px">psum_out (S) fp32</text>
+  <text x="1480" y="686" class="refs">753 psum pass-through N&rarr;S</text>
+  <text x="1312" y="632" class="d2" style="font-size:9px">fp_mul / fp_add in the MAC =</text>
+  <text x="1312" y="646" class="d2" style="font-size:9px">SHARED FP modules, also</text>
+  <text x="1312" y="660" class="d2" style="font-size:9px">instantiated in the VPU lane.</text>
+  <text x="1312" y="674" class="d2" style="font-size:9px">fp_max: not in MXU (PLANNED).</text>
+  <text x="1312" y="712" class="d2" style="font-size:9.5px">registered pass-through both axes: 1 hop / cycle (systolic)</text>
+
+  <!-- =========================================================
+       PE DETAIL callout B  (weight double-buffer promote)
+       ========================================================= -->
+  <rect class="stg" x="1300" y="748" width="430" height="230" rx="8"/>
+  <text x="1312" y="768" class="ti t-mxu" font-size="12">Weight double-buffer (per PE)</text>
+  <text x="1720" y="766" class="ref" text-anchor="end">720</text>
+
+  <!-- load.w into inactive -->
+  <path class="fw" d="M1440,788 L1540,812"/>
+  <text x="1312" y="792" class="lbl-m">mxu.load.w</text>
+  <text x="1312" y="806" class="d2" style="font-size:9px">(nonblocking)</text>
+
+  <rect class="stg-hi" x="1330" y="816" width="150" height="50" rx="5"/>
+  <text x="1405" y="836" class="d" text-anchor="middle" font-weight="700">&#9642; ACTIVE</text>
+  <text x="1405" y="851" class="d2" text-anchor="middle" style="font-size:9px">feeds MAC now</text>
+  <rect class="stg" x="1548" y="816" width="150" height="50" rx="5"/>
+  <text x="1623" y="836" class="d" text-anchor="middle" font-weight="700">&#9643; INACTIVE</text>
+  <text x="1623" y="851" class="d2" text-anchor="middle" style="font-size:9px">being loaded</text>
+
+  <!-- promote arrow -->
+  <path class="fm" d="M1548,841 L1480,841"/>
+  <text x="1514" y="884" class="lbl-m" text-anchor="middle">PROMOTE</text>
+  <text x="1514" y="898" class="d2" text-anchor="middle" style="font-size:9px">on matmul START</text>
+  <text x="1514" y="911" class="d2" text-anchor="middle" style="font-size:9px">inactive &rarr; active (swap)</text>
+  <text x="1312" y="940" class="d2" style="font-size:9.5px">transB = reverse the weight-row LOAD ORDER into the buffer.</text>
+  <text x="1312" y="956" class="d2" style="font-size:9.5px">Load overlaps the running matmul on the active buffer.</text>
+
+  <!-- =========================================================
+       PORTS + LATENCY summary (bottom-left)
+       ========================================================= -->
+  <rect class="inner" x="130" y="1078" width="700" height="98" rx="6" style="opacity:1;stroke:var(--mxu)"/>
+  <text x="142" y="1098" class="ti t-mxu" font-size="11">Ports &amp; timing</text>
+  <text x="142" y="1116" class="d2">&bull; SPAD-read: weights only, LOW rate (load.w) + bias row for acc.init</text>
+  <text x="142" y="1132" class="d2">&bull; VREG-read R_mxu: X stream (fp32 &rarr; cast &rarr; bf16 W-edge, 1 row/cyc)</text>
+  <text x="142" y="1148" class="d2">&bull; VREG-write W_mxu: acc.store drains ACC &rarr; VREG (fp32 lossless)</text>
+  <text x="142" y="1164" class="d2">&bull; latency = N-fill(8) + K-stream, fixed &middot; matmul NONBLOCKING &middot; FA output O lives in VREG (ACC stays depth 2)</text>
+</svg>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Reference numerals &mdash; FIG. 7</h2>
+  <ul class="reflist">
+    <li><b>700</b> SPAD &mdash; weight source (low-rate) + acc.init bias row</li>
+    <li><b>710</b> weight double-buffer load network (shift down columns)</li>
+    <li><b>720</b> per-PE weight double-buffer (active / inactive + promote)</li>
+    <li><b>730</b> VREG (fp32) &mdash; X source, R_mxu rd / W_mxu wr</li>
+    <li><b>740</b> CAST 8-lane fp32 &rarr; bf16 (boundary)</li>
+    <li><b>750</b> 8&times;8 = 64 PE systolic array</li>
+    <li><b>751</b> PE MAC (bf16&times;bf16 &rarr; fp32 partial, + psum_in)</li>
+    <li><b>752</b> PE X pass-through (W &rarr; E, registered)</li>
+    <li><b>753</b> PE partial-sum pass-through (N &rarr; S, fp32)</li>
+    <li><b>760</b> ACC &mdash; 8 per-column banks &times; depth 2 (fp32, MXU-owned)</li>
+    <li><b>761</b> mxu.acc.init (bias broadcast preload)</li>
+    <li><b>762</b> accum flag (K-tile accumulate, same ACC, serialized)</li>
+    <li><b>763</b> causal (upper-triangle mask &rarr; -&infin;)</li>
+    <li><b>770</b> acc.store drain &rarr; VREG (W_mxu, lossless)</li>
+    <li class="nw"><b>&Delta;740</b> fp32-X resolved = CAST at boundary (was OPEN)</li>
+    <li class="nw"><b>&Delta;730</b> X now from VREG, not SPAD</li>
+    <li class="nw"><b>&Delta;760</b> output to ACC, not SPAD</li>
+    <li class="nw"><b>&Delta;761</b> acc.init added (bias preload)</li>
+  </ul>
+</div>
+
+<div class="delta">
+  <h2>&Delta; locked MXU vs prior design</h2>
+  <ul>
+    <li><b>X source moved to VREG.</b> X now streams from <code>VREG</code> (fp32) via the <code>R_mxu</code> read port, no longer fetched from SPAD. SPAD is now weight-only (plus the acc.init bias row).</li>
+    <li><b>fp32-X into 16-bit PEs = CAST at the boundary (LOCKED).</b> The former OPEN choice (widen PEs vs cast) resolves to an explicit 8-lane <code>fp32 &rarr; bf16</code> CAST at the west edge. PEs stay <code>bf16&times;bf16</code>; accumulation stays fp32.</li>
+    <li><b>Output drains to ACC, not SPAD.</b> Each systolic column drains its partial sums into its own ACC bank; <code>acc.store</code> is the only path back to VREG (fp32 lossless via <code>W_mxu</code>).</li>
+    <li><b>ACC = 8 banks &times; depth 2.</b> One bank per column, double-buffered fp32, MXU-owned. <code>accum</code> folds K-tiles into the same ACC (serialized); <code>causal</code> masks the upper triangle. FA output <code>O</code> lives in VREG, so ACC stays depth 2.</li>
+    <li><b>+ mxu.acc.init.</b> New op broadcast-preloads a SPAD bias row into ALL rows of ACC before a matmul, so matmul accumulates onto bias.</li>
+    <li><b>Weight double-buffer.</b> <code>mxu.load.w</code> fills the INACTIVE buffer while a matmul runs on the ACTIVE one; a matmul start implicitly PROMOTES inactive &rarr; active. <code>transB</code> reverses weight-row load order. Nonblocking; fixed latency = N-fill(8) + K-stream.</li>
+  </ul>
+</div>
+</div>

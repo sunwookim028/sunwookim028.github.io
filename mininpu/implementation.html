@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Implementation (Files &amp; Modules) - mininpu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="inner">
+    <a class="brand" href="index.html">mini<span>npu</span></a>
+    <a class="nl" href="isa.html">ISA 0.5.0</a>
+    <a class="nl" href="microarch.html">Microarchitecture</a>
+    <a class="nl" href="implementation.html">Implementation</a>
+    <a class="nl" href="index.html#figures">Figures</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page">
+    <h1>Implementation (Files &amp; Modules) &nbsp;<span class="pill wip">In progress</span></h1>
+    <p class="sub">Doc 3 of 3 &middot; how the design maps to RTL</p>
+  </header>
+
+  <p>This document maps the microarchitecture onto the RTL file / module hierarchy.
+     Content is split into a <strong style="color:var(--mxu)">LOCKED</strong>
+     section (decided) and a <strong style="color:var(--ctrl)">DECISIONS
+     PENDING</strong> callout.</p>
+
+  <div class="toc">
+    <h4>Contents</h4>
+    <ol>
+      <li><a href="#locked">Locked design</a> - sequencer fold</li>
+      <li><a href="#pending">Decisions pending</a> - DMU internals, VPU refactor, target hierarchy</li>
+    </ol>
+  </div>
+
+  <!-- ==================== LOCKED ==================== -->
+  <div class="zone locked" id="locked">
+    <div class="zone-head">
+      <span class="pill locked">Locked</span>
+      <h2>Current design</h2>
+    </div>
+
+    <h3>Sequencer fold</h3>
+    <ul>
+      <li>The <strong>PC and decoder move inside the tile sequencer</strong>.</li>
+      <li>The combined unit is renamed <strong>"Tile sequencer"</strong>.</li>
+      <li>It is the <strong>issue unit</strong>: IRAM <code>4096 &times; 64b</code>
+        + decoder.</li>
+    </ul>
+  </div>
+
+  <!-- ==================== PENDING ==================== -->
+  <div class="zone pending" id="pending">
+    <div class="zone-head">
+      <span class="pill wip">Decisions pending</span>
+      <h2>Open items</h2>
+    </div>
+
+    <h3>DMU internals (currently a black box)</h3>
+    <ul>
+      <li>Descriptor slots.</li>
+      <li>Burst behavior.</li>
+      <li><code>dm_axi</code> error / timeout handling.</li>
+      <li>Blocking vs async policy.</li>
+    </ul>
+
+    <h3>VPU file refactor (14 &rarr; 5 files)</h3>
+    <ul>
+      <li>A <strong>proposal, not yet decided</strong>.</li>
+      <li>Which modules merge.</li>
+      <li>Shared FP-primitive location.</li>
+    </ul>
+
+    <h3>Target file / module hierarchy</h3>
+    <ul>
+      <li>Module hierarchy + line counts + interfaces.</li>
+      <li>To be authored <strong>once the above are decided</strong>.</li>
+    </ul>
+  </div>
+
+</div>
+
+<footer class="foot">
+  mininpu &middot; Implementation (Doc 3, WIP) &middot;
+  <a href="index.html">back to index</a>
+</footer>
+
+</body>
+</html>

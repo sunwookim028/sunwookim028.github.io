@@ -1,0 +1,512 @@
+<title>GPT-2 kernel latency &amp; Gantts - FIG. 9</title>
+<style>
+  :root{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8;
+    --mem:#255e9e;  --mem-f:#d6e6f6;
+    --mxu:#237a5d;  --mxu-f:#cfe9de;
+    --vpu:#5f42a0;  --vpu-f:#e1d9f2;
+    --ext:#4f5a68;  --ext-f:#dbe1e9;
+    --new:#bd3423;
+    --font-s: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-m: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+      --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+      --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+      --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
+    --ctrl:#9c6c15; --ctrl-f:#f5e7c8; --mem:#255e9e; --mem-f:#d6e6f6;
+    --mxu:#237a5d; --mxu-f:#cfe9de; --vpu:#5f42a0; --vpu-f:#e1d9f2;
+    --ext:#4f5a68; --ext-f:#dbe1e9; --new:#bd3423;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c1016; --chip:#151b23; --ink:#e6edf5; --muted:#8b97a7; --line:#46536a;
+    --ctrl:#e0ad55; --ctrl-f:#332a11; --mem:#6ba6e6; --mem-f:#122740;
+    --mxu:#5cc79f; --mxu-f:#0e2b21; --vpu:#a98ae0; --vpu-f:#221833;
+    --ext:#93a1b3; --ext-f:#1a222d; --new:#ff6a5a;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-s);
+       margin:0; padding:28px 22px 56px; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1360px; margin:0 auto;}
+  header{margin:0 4px 16px;}
+  h1{font-size:22px; font-weight:650; letter-spacing:-.01em; margin:0 0 4px; text-wrap:balance;}
+  .sub{font-family:var(--font-m); font-size:12.5px; color:var(--muted); margin:0; line-height:1.5;}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin:12px 4px 0;
+          font-family:var(--font-m); font-size:11.5px; color:var(--muted);}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .sw{width:13px; height:13px; border-radius:3px; border:1.5px solid;}
+  .grid{display:grid; grid-template-columns:1fr; gap:16px; margin-top:16px;}
+  .card{border:1px solid var(--line); border-radius:10px; background:var(--chip); padding:16px 18px;}
+  .card > h2{font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+           color:var(--muted); margin:0 0 4px; font-weight:650;}
+  .card > h2 .rn{font-family:var(--font-m); color:var(--vpu); font-weight:700; margin-right:8px;}
+  .card > .k{font-family:var(--font-m); font-size:11.5px; color:var(--muted); margin:0 0 14px;}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:8px;
+          background:var(--chip);}
+  svg{display:block; width:100%; height:auto;}
+  text{font-family:var(--font-m); fill:var(--ink);}
+
+  /* ---------- Panel A table ---------- */
+  .ltab-wrap{overflow-x:auto;}
+  table.ltab{border-collapse:collapse; width:100%; min-width:820px;
+             font-family:var(--font-m); font-size:12px;}
+  table.ltab th{ text-align:left; font-weight:650; color:var(--muted);
+                 font-size:10.5px; letter-spacing:.05em; text-transform:uppercase;
+                 padding:6px 12px 8px; border-bottom:1.5px solid var(--line);}
+  table.ltab td{ padding:9px 12px; border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);
+                 vertical-align:top; line-height:1.35;}
+  table.ltab tr:last-child td{border-bottom:none;}
+  .op{font-weight:650; color:var(--vpu); white-space:nowrap;}
+  .num{font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap;}
+  .dim{color:var(--muted);}
+  .chip{display:inline-block; font-size:10px; font-weight:700; letter-spacing:.03em;
+        padding:2px 8px; border-radius:999px; border:1.5px solid; white-space:nowrap;}
+  .chip.nb{color:var(--mxu); border-color:var(--mxu); background:var(--mxu-f);}
+  .chip.bl{color:var(--ctrl); border-color:var(--ctrl); background:var(--ctrl-f);}
+  .chip.vp{color:var(--vpu); border-color:var(--vpu); background:var(--vpu-f);}
+  .chip.as{color:var(--mem); border-color:var(--mem); background:var(--mem-f);}
+  .chip.ct{color:var(--muted); border-color:var(--muted); background:color-mix(in srgb,var(--line) 18%,transparent);}
+  .footchip{display:inline-block; margin-top:14px; font-family:var(--font-m);
+            font-size:11px; color:var(--muted); background:color-mix(in srgb,var(--line) 14%,transparent);
+            border:1px solid var(--line); border-radius:7px; padding:7px 11px; line-height:1.5;}
+  .footchip b{color:var(--ink); font-weight:650;}
+
+  /* ---------- SVG shared ---------- */
+  .lane-lbl{font-size:11px; font-weight:650;}
+  .lane-sub{font-size:9px; fill:var(--muted);}
+  .axis{stroke:var(--line); stroke-width:1;}
+  .tick{stroke:var(--line); stroke-width:1; opacity:.55;}
+  .tickt{font-size:9px; fill:var(--muted);}
+  .grid-l{stroke:var(--line); stroke-width:1; opacity:.28; stroke-dasharray:2 3;}
+  .bar-mxu{fill:var(--mxu-f); stroke:var(--mxu); stroke-width:1.5;}
+  .bar-mxu2{fill:color-mix(in srgb,var(--mxu) 30%,var(--chip)); stroke:var(--mxu); stroke-width:1.5;}
+  .bar-vpu{fill:var(--vpu-f); stroke:var(--vpu); stroke-width:1.5;}
+  .bar-ctrl{fill:var(--ctrl-f); stroke:var(--ctrl); stroke-width:1.5;}
+  .bar-idle{fill:none; stroke:var(--line); stroke-width:1; stroke-dasharray:3 3; opacity:.6;}
+  .bar-dmu{fill:color-mix(in srgb,var(--mem) 16%,var(--chip)); stroke:var(--mem); stroke-width:1; stroke-dasharray:4 2; opacity:.75;}
+  .ghost{fill:none; stroke:var(--new); stroke-width:1.6; stroke-dasharray:5 3;}
+  .blab{font-size:9.5px; fill:var(--ink); paint-order:stroke; stroke:var(--chip);
+        stroke-width:3px; stroke-linejoin:round;}
+  .blab-w{font-size:9px; font-weight:650; fill:var(--ink);}
+  .blab-mxu{fill:var(--mxu);} .blab-vpu{fill:var(--vpu);} .blab-ctrl{fill:var(--ctrl);}
+  .newlab{font-size:9px; fill:var(--new); font-weight:600; paint-order:stroke; stroke:var(--chip); stroke-width:3px; stroke-linejoin:round;}
+  .budget{fill:color-mix(in srgb,var(--line) 12%,var(--chip)); stroke:var(--line); stroke-width:1;}
+  .budget-t{font-size:9.5px; fill:var(--ink);}
+  .budget-h{font-size:9.5px; font-weight:700; fill:var(--muted); letter-spacing:.04em;}
+  .badge-box{fill:color-mix(in srgb,var(--new) 10%,var(--chip)); stroke:var(--new); stroke-width:1.2;}
+  .badge-t{font-size:9.5px; font-weight:700; fill:var(--new);}
+  .ref{font-family:var(--font-m); font-weight:700; font-size:11.5px; fill:var(--ink);
+       paint-order:stroke; stroke:var(--chip); stroke-width:3.4px; stroke-linejoin:round;}
+  .warn{fill:var(--ctrl);}
+  .meter-bad{fill:var(--new); opacity:.85;}
+  .meter-ok{fill:var(--mxu); opacity:.8;}
+
+  /* ---------- Panel C ---------- */
+  .band-mlp{fill:color-mix(in srgb,var(--mxu) 58%,var(--chip)); stroke:var(--mxu); stroke-width:1;}
+  .band-proj{fill:color-mix(in srgb,var(--mxu) 26%,var(--chip)); stroke:var(--mxu); stroke-width:1;}
+  .band-attn{fill:color-mix(in srgb,var(--vpu) 46%,var(--chip)); stroke:var(--vpu); stroke-width:1;}
+  .band-vpu{fill:color-mix(in srgb,var(--ctrl) 46%,var(--chip)); stroke:var(--ctrl); stroke-width:1;}
+  .totline{fill:none; stroke:var(--new); stroke-width:2.4;}
+  .totdot{fill:var(--chip); stroke:var(--new); stroke-width:2;}
+  .totend{fill:var(--new); stroke:var(--chip); stroke-width:1.6;}
+  .cguide{stroke:var(--ink); stroke-width:1.3; stroke-dasharray:5 3; opacity:.7;}
+  .cross{fill:var(--new);}
+
+  /* ---------- reference card ---------- */
+  .reflist{columns:3; column-gap:24px; font-family:var(--font-m); font-size:11px; line-height:1.7; margin:0; padding:0; list-style:none;}
+  @media(max-width:900px){.reflist{columns:2;}}
+  @media(max-width:600px){.reflist{columns:1;}}
+  .reflist li{break-inside:avoid;}
+  .reflist b{color:var(--vpu); font-weight:700; display:inline-block; width:34px;}
+  .caption{margin-top:6px; font-family:var(--font-m); font-size:11.5px; color:var(--muted); line-height:1.6;}
+  .caption b{color:var(--ink); font-weight:650;}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>GPT-2 kernel latency &amp; cycle-aligned Gantts <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 9</span></h1>
+  <p class="sub">per-instruction latency legend &middot; four cycle-accurate execution windows (MLP fc1, attention block, LayerNorm, devmem C=A@B microbench) &middot; full-layer prefill roll-up<br>N=8 lanes (BANKING=8) &middot; Dm=768, Dff=3072 &middot; static schedule, no scoreboard &middot; latencies fixed &amp; data-independent (sim == synth)</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>MXU / matmul (NONBLK)</span>
+    <span><i class="sw" style="background:var(--ctrl-f);border-color:var(--ctrl)"></i>blocking op / control (BLOCK)</span>
+    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU pipe (reduce / lut / simd)</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--mem) 16%,var(--chip));border-color:var(--mem);border-style:dashed"></i>DMU load.w (hidden)</span>
+    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>forfeited overlap / warning</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ============================================================= PANEL A -->
+  <div class="card">
+    <h2><span class="rn">900</span>Instruction latency table &mdash; legend for panels B &amp; C</h2>
+    <p class="k">issue&rarr;done latency, throughput, per-cycle port pressure, and class of all 15 ISA 0.5.0 opcodes (variable = DRAM/DMU-dependent)</p>
+    <div class="ltab-wrap">
+    <table class="ltab">
+      <thead>
+        <tr>
+          <th>Instruction</th>
+          <th class="num">Latency (issue&rarr;done)</th>
+          <th>Throughput</th>
+          <th>Ports / cyc</th>
+          <th>Class</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="op">mxu.load.w <span class="dim">0x00</span></td><td class="num">8</td><td class="dim">8 / K-tile</td><td>SPAD rd&times;8 (fill shadow buf)</td><td><span class="chip nb">NONBLK</span> <span class="dim">hidden under matmul; transB</span></td></tr>
+        <tr><td class="op">mxu.matmul <span class="dim">0x01</span></td><td class="num">15 fill <span class="dim">(once/K-loop)</span><br>then 8 / K-tile</td><td class="dim">8 / K-tile</td><td>VREG rd&times;8 (X, fp32&rarr;bf16 cast) + ACC RMW&times;8</td><td><span class="chip nb">NONBLK</span> <span class="dim">accum, causal</span></td></tr>
+        <tr><td class="op">mxu.acc.init <span class="dim">0x02</span></td><td class="num">3 <span class="dim">(L_LUT+1)</span></td><td class="dim">&mdash;</td><td>SPAD rd&times;1 (bias) &rarr; ACC wr&times;1 (bcast 8 col-banks)</td><td><span class="chip nb">NONBLK</span></td></tr>
+        <tr><td class="op">vpu.reduce <span class="dim">0x10</span></td><td class="num">19 <span class="dim">(D_VPU+N&minus;1)</span></td><td class="dim">8 / op</td><td>VREG rd&times;8 + wr&times;8 (&Sigma;/max tree &rarr; col0)</td><td><span class="chip vp">VPU-PIPE</span></td></tr>
+        <tr><td class="op">vpu.lut <span class="dim">0x11</span></td><td class="num">19</td><td class="dim">8 / op</td><td>VREG rd&times;8 + wr&times;8 + LUT ROM rd&times;8 (exp/rsqrt/gelu)</td><td><span class="chip vp">VPU-PIPE</span></td></tr>
+        <tr><td class="op">vpu.simd <span class="dim">0x12</span></td><td class="num">19</td><td class="dim">8 / op</td><td>VREG rd&times;8 + wr&times;8 (funct &times; bcast)</td><td><span class="chip vp">VPU-PIPE</span></td></tr>
+        <tr><td class="op">acc.store <span class="dim">0x30</span></td><td class="num">9 <span class="dim">(N+cast)</span></td><td class="dim">&mdash;</td><td>ACC rd&times;8 + VREG wr&times;8 (fp32 lossless)</td><td><span class="chip bl">BLOCK</span> <span class="dim">overlaps next matmul (ACC depth-2)</span></td></tr>
+        <tr><td class="op">vreg.load <span class="dim">0x32</span></td><td class="num">9 <span class="dim">(N+cast)</span></td><td class="dim">&mdash;</td><td>SPAD rd&times;8 &rarr; VREG wr&times;8 (bf16&rarr;fp32)</td><td><span class="chip bl">BLOCK</span></td></tr>
+        <tr><td class="op">vreg.store <span class="dim">0x33</span></td><td class="num">9 <span class="dim">(N+cast)</span></td><td class="dim">&mdash;</td><td>VREG rd&times;8 &rarr; SPAD wr&times;8 (fp32&rarr;bf16)</td><td><span class="chip bl">BLOCK</span></td></tr>
+        <tr><td class="op">dmu.load.spm <span class="dim">0x40</span></td><td class="num">variable <span class="dim">(DRAM)</span></td><td class="dim">&le; 32 B/cy (DM bus)</td><td>SPAD Port&nbsp;A &harr; DM bus (off-tile DRAM)</td><td><span class="chip as">ASYNC</span> <span class="dim">single-outstanding; flush.slot-ordered</span></td></tr>
+        <tr><td class="op">dmu.store.spm <span class="dim">0x42</span></td><td class="num">variable <span class="dim">(DRAM)</span></td><td class="dim">&le; 32 B/cy</td><td>SPAD Port&nbsp;A &harr; DM bus</td><td><span class="chip as">ASYNC</span></td></tr>
+        <tr><td class="op">loop.begin <span class="dim">0x50</span></td><td class="num">1</td><td class="dim">&mdash;</td><td>none (iv_reg &larr; lo, literal)</td><td><span class="chip ct">CTRL</span> <span class="dim">issue-only</span></td></tr>
+        <tr><td class="op">loop.end <span class="dim">0x51</span></td><td class="num">1</td><td class="dim">&mdash;</td><td>none (iv += step; branch)</td><td><span class="chip ct">CTRL</span></td></tr>
+        <tr><td class="op">flush.slot <span class="dim">0x53</span></td><td class="num">variable <span class="dim">(wait)</span></td><td class="dim">&mdash;</td><td>none (spins on DMU slot-done)</td><td><span class="chip bl">BLOCK</span> <span class="dim">only runtime sync</span></td></tr>
+        <tr><td class="op">halt <span class="dim">0x5F</span></td><td class="num">variable <span class="dim">(drain)</span></td><td class="dim">&mdash;</td><td>none (drain all DMU &rarr; done)</td><td><span class="chip ct">CTRL</span> <span class="dim">terminal</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="footchip"><b>D_VPU=12</b> N-invariant &middot; streamed VPU = <b>8K+11</b> &middot; no scoreboard &middot; N=8, L_MUL=L_ADD=1, L_LUT=2</div>
+  </div>
+
+  <!-- ============================================================= PANEL B1 -->
+  <div class="card">
+    <h2><span class="rn">910</span>MLP fc1 output-tile window &mdash; 783 cyc (K = Dm/8 = 96)</h2>
+    <p class="k">systolic fill then 96 K-tiles of matmul; acc.store + gelu of the prior tile collapse into the first ~28 cyc, VPU idle for the rest</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1320 214" role="img" aria-label="MLP fc1 cycle Gantt, 783 cycles, MXU bound">
+      <!-- lane labels -->
+      <text x="12" y="52" class="lane-lbl blab-mxu">MXU</text><text x="12" y="64" class="lane-sub">matmul array</text>
+      <text x="12" y="94" class="lane-lbl blab-vpu">VPU</text><text x="12" y="106" class="lane-sub">acc.store+gelu</text>
+      <text x="12" y="136" class="lane-lbl" style="fill:var(--mem)">DMU</text><text x="12" y="148" class="lane-sub">load.w stream</text>
+      <!-- timeline frame x0=130 x1=1030 (900px) scale=1.1494 -->
+      <!-- grid ticks 0..783 -->
+      <g>
+        <line class="tick" x1="130" y1="44" x2="130" y2="170"/><text class="tickt" x="130" y="182" text-anchor="middle">0</text>
+        <line class="tick" x1="245" y1="44" x2="245" y2="170"/><text class="tickt" x="245" y="182" text-anchor="middle">100</text>
+        <line class="tick" x1="360" y1="44" x2="360" y2="170"/><text class="tickt" x="360" y="182" text-anchor="middle">200</text>
+        <line class="tick" x1="475" y1="44" x2="475" y2="170"/><text class="tickt" x="475" y="182" text-anchor="middle">300</text>
+        <line class="tick" x1="590" y1="44" x2="590" y2="170"/><text class="tickt" x="590" y="182" text-anchor="middle">400</text>
+        <line class="tick" x1="705" y1="44" x2="705" y2="170"/><text class="tickt" x="705" y="182" text-anchor="middle">500</text>
+        <line class="tick" x1="820" y1="44" x2="820" y2="170"/><text class="tickt" x="820" y="182" text-anchor="middle">600</text>
+        <line class="tick" x1="935" y1="44" x2="935" y2="170"/><text class="tickt" x="935" y="182" text-anchor="middle">700</text>
+        <line class="tick" x1="1030" y1="44" x2="1030" y2="170"/><text class="tickt" x="1030" y="182" text-anchor="middle">783</text>
+      </g>
+      <text x="580" y="199" class="tickt" text-anchor="middle">cycles (this output-tile window)</text>
+      <!-- MXU: fill 0-15 then matmul 15-783 -->
+      <rect class="bar-ctrl" x="130" y="42" width="18" height="26" rx="2"/>
+      <rect class="bar-mxu" x="148" y="42" width="882" height="26" rx="2"/>
+      <text x="589" y="59" class="blab" text-anchor="middle">96 K-tiles &times; 8 = 768 cyc &middot; matmul (RMW ACC)</text>
+      <text x="139" y="35" class="newlab" text-anchor="middle">fill 15</text>
+      <line class="axis" x1="148" y1="30" x2="148" y2="42"/>
+      <!-- VPU: busy 0-28 then idle -->
+      <rect class="bar-vpu" x="130" y="80" width="32" height="26" rx="2"/>
+      <rect class="bar-idle" x="162" y="80" width="868" height="26" rx="2"/>
+      <text x="146" y="76" class="blab-vpu blab-w" text-anchor="middle" style="font-size:8px">store9+gelu19</text>
+      <text x="596" y="97" class="blab" text-anchor="middle" style="fill:var(--muted)">IDLE ~755 cyc (gelu+bias of tile j&minus;1 already retired)</text>
+      <!-- DMU: hidden stream -->
+      <rect class="bar-dmu" x="148" y="118" width="882" height="26" rx="2"/>
+      <text x="589" y="135" class="blab" text-anchor="middle" style="fill:var(--mem)">load.w per K-tile @ matmul rate &middot; fully hidden (shadow buf)</text>
+      <!-- badge -->
+      <rect class="badge-box" x="1050" y="42" width="258" height="34" rx="6"/>
+      <text x="1060" y="56" class="badge-t">MXU-bound &middot; matmul:gelu 40:1</text>
+      <text x="1060" y="69" class="badge-t" style="font-weight:600">(global 194:1) &middot; gelu+bias hidden</text>
+      <!-- budget -->
+      <rect class="budget" x="1050" y="84" width="258" height="86" rx="6"/>
+      <text x="1060" y="100" class="budget-h">BUDGET</text>
+      <text x="1060" y="116" class="budget-t">MLP / tile =</text>
+      <text x="1060" y="130" class="budget-t">Dm&middot;Dff/4 + (15/8)(Dm+Dff)</text>
+      <text x="1060" y="145" class="budget-t" style="font-weight:700">= 597,024 cy</text>
+      <text x="1060" y="162" class="budget-t">T_MLP(S) &asymp; S&middot;Dm&middot;Dff / 32</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- ============================================================= PANEL B2 -->
+  <div class="card">
+    <h2><span class="rn">920</span>Attention block &mdash; 408 cyc SERIAL (decision B: no overlap)</h2>
+    <p class="k">four non-overlapping phases across MXU/VPU lanes; softmax dependency stalls the block; the softmax&#8214;matmul overlap is deliberately forfeited</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1320 232" role="img" aria-label="Attention block Gantt, 408 cycles serial, softmax dependency bound">
+      <text x="12" y="52" class="lane-lbl blab-mxu">MXU</text><text x="12" y="64" class="lane-sub">busy 192 (47%)</text>
+      <text x="12" y="94" class="lane-lbl blab-vpu">VPU</text><text x="12" y="106" class="lane-sub">busy 216 (53%)</text>
+      <text x="12" y="136" class="lane-lbl newlab" style="stroke:none">overlap</text><text x="12" y="148" class="lane-sub">(forfeited)</text>
+      <!-- timeline x0=130 x1=1030 scale=2.2059 ; marks 0,96,237,333,408 -->
+      <g>
+        <line class="tick" x1="130" y1="44" x2="130" y2="188"/><text class="tickt" x="130" y="200" text-anchor="middle">0</text>
+        <line class="tick" x1="342" y1="44" x2="342" y2="188"/><text class="tickt" x="342" y="200" text-anchor="middle">96</text>
+        <line class="tick" x1="653" y1="44" x2="653" y2="188"/><text class="tickt" x="653" y="200" text-anchor="middle">237</text>
+        <line class="tick" x1="864" y1="44" x2="864" y2="188"/><text class="tickt" x="864" y="200" text-anchor="middle">333</text>
+        <line class="tick" x1="1030" y1="44" x2="1030" y2="188"/><text class="tickt" x="1030" y="200" text-anchor="middle">408</text>
+      </g>
+      <text x="580" y="217" class="tickt" text-anchor="middle">cycles (per head, one row-tile)</text>
+      <!-- MXU: A 0-96, C 237-333 -->
+      <rect class="bar-mxu" x="130" y="42" width="212" height="26" rx="2"/>
+      <text x="236" y="59" class="blab" text-anchor="middle">A: S=Q@K&#7488; (96)</text>
+      <rect class="bar-mxu" x="653" y="42" width="211" height="26" rx="2"/>
+      <text x="758" y="59" class="blab" text-anchor="middle">C: P@V (96)</text>
+      <!-- VPU: B 96-237, D 333-408 -->
+      <rect class="bar-vpu" x="342" y="80" width="311" height="26" rx="2"/>
+      <text x="497" y="97" class="blab" text-anchor="middle">B: softmax (141)</text>
+      <rect class="bar-vpu" x="864" y="80" width="166" height="26" rx="2"/>
+      <text x="947" y="97" class="blab" text-anchor="middle">D: O update (75)</text>
+      <!-- serial-dependency connectors -->
+      <line class="tick" x1="342" y1="68" x2="342" y2="80" style="opacity:1;stroke:var(--muted)"/>
+      <line class="tick" x1="653" y1="80" x2="653" y2="68" style="opacity:1;stroke:var(--muted)"/>
+      <line class="tick" x1="864" y1="68" x2="864" y2="80" style="opacity:1;stroke:var(--muted)"/>
+      <!-- GHOST forfeited overlap -> ~310 -->
+      <rect class="ghost" x="130" y="118" width="397" height="26" rx="2"/>
+      <line class="ghost" x1="527" y1="112" x2="527" y2="150"/>
+      <text class="tickt" x="527" y="160" text-anchor="middle" style="fill:var(--new)">~310</text>
+      <text x="245" y="135" class="newlab" text-anchor="middle">softmax &#8214; matmul (if overlapped)</text>
+      <!-- badge -->
+      <rect class="badge-box" x="1050" y="42" width="258" height="34" rx="6"/>
+      <text x="1060" y="56" class="badge-t">softmax dependency-stall-bound</text>
+      <text x="1060" y="69" class="badge-t" style="font-weight:600">block = 408 serial</text>
+      <!-- forfeited callout -->
+      <rect class="budget" x="1050" y="84" width="258" height="46" rx="6" style="stroke:var(--new)"/>
+      <text x="1060" y="100" class="newlab" style="stroke:none;font-weight:700">~22% forfeited &rarr; VREG &le;26 &le;32</text>
+      <text x="1060" y="114" class="newlab" style="stroke:none">(overlap needs ~34 &mdash; over budget)</text>
+      <text x="1060" y="126" class="budget-t" style="fill:var(--muted)">decision B: keep serial, spare VREG</text>
+      <!-- budget -->
+      <rect class="budget" x="1050" y="138" width="258" height="50" rx="6"/>
+      <text x="1060" y="154" class="budget-h">BUDGET</text>
+      <text x="1060" y="170" class="budget-t">per head/row-tile &asymp; 22.875&middot;S + 193</text>
+      <text x="1060" y="184" class="budget-t" style="font-weight:700">O(S&sup2;)</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- ============================================================= PANEL B3 -->
+  <div class="card">
+    <h2><span class="rn">930</span>LayerNorm &mdash; Dm=768 = 96 D-tiles (two passes)</h2>
+    <p class="k">Pass-1 packs 3 ops into a zero-idle 24-cyc slot; Pass-2 is single-port-SPAD bandwidth-bound (32 accesses/tile &gt; 24 VPU cyc)</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1320 214" role="img" aria-label="LayerNorm Gantt, Pass-1 packed pattern and Pass-2 SPAD bound, total 5509 cycles">
+      <!-- PASS 1 packed slot (zoomed, one D-tile = 24 cy = R1|S|R2) -->
+      <text x="12" y="40" class="lane-lbl blab-vpu">Pass-1</text><text x="12" y="52" class="lane-sub">per D-tile, 24 cy</text>
+      <!-- slot frame -->
+      <g>
+        <line class="tick" x1="130" y1="30" x2="130" y2="86"/><text class="tickt" x="130" y="98" text-anchor="middle">0</text>
+        <line class="tick" x1="238" y1="30" x2="238" y2="86"/><text class="tickt" x="238" y="98" text-anchor="middle">8</text>
+        <line class="tick" x1="346" y1="30" x2="346" y2="86"/><text class="tickt" x="346" y="98" text-anchor="middle">16</text>
+        <line class="tick" x1="454" y1="30" x2="454" y2="86"/><text class="tickt" x="454" y="98" text-anchor="middle">24</text>
+      </g>
+      <rect class="bar-vpu" x="130" y="34" width="106" height="30" rx="2"/><text x="183" y="53" class="blab" text-anchor="middle">R1 reduce &Sigma;x</text>
+      <rect class="bar-ctrl" x="238" y="34" width="106" height="30" rx="2"/><text x="291" y="53" class="blab" text-anchor="middle">S sub/&mu;</text>
+      <rect class="bar-vpu" x="346" y="34" width="106" height="30" rx="2"/><text x="399" y="53" class="blab" text-anchor="middle">R2 reduce &Sigma;x&sup2;</text>
+      <text x="291" y="26" class="newlab" text-anchor="middle">packed &mdash; zero idle slot</text>
+      <text x="475" y="53" class="blab-w blab-vpu" style="font-size:10px">&times; 96 tiles &rarr; Pass-1 = 2324 cy</text>
+      <line class="grid-l" x1="130" y1="72" x2="1030" y2="72"/>
+      <text x="640" y="84" class="tickt">(then mid = 95 cy: finalize &mu;, 1/&sigma; via vpu.lut rsqrt)</text>
+
+      <!-- PASS 2 strip + SPAD port meter -->
+      <text x="12" y="128" class="lane-lbl" style="fill:var(--new)">Pass-2</text><text x="12" y="140" class="lane-sub">SPAD-bound</text>
+      <rect class="bar-ctrl" x="130" y="118" width="720" height="28" rx="2"/>
+      <text x="490" y="136" class="blab" text-anchor="middle">normalize+scale/shift &middot; 96 D-tiles &middot; stalled on SPAD reload</text>
+      <!-- SPAD single-port meter: 32 acc/tile vs 24 VPU cyc -->
+      <text x="880" y="122" class="budget-h">SPAD port / tile</text>
+      <rect class="meter-bad" x="880" y="128" width="256" height="9" rx="2"/>
+      <text x="1008" y="135" class="blab-w" text-anchor="middle" style="fill:var(--chip);font-size:8px">32 acc (need)</text>
+      <rect class="meter-ok" x="880" y="140" width="192" height="9" rx="2"/>
+      <text x="976" y="147" class="blab-w" text-anchor="middle" style="fill:var(--chip);font-size:8px">24 VPU cyc</text>
+      <line class="ghost" x1="1072" y1="126" x2="1072" y2="151"/>
+      <text x="1088" y="158" class="newlab">1.33&times; over &rarr; BW stall</text>
+      <!-- badge -->
+      <rect class="badge-box" x="130" y="164" width="470" height="30" rx="6"/>
+      <text x="140" y="177" class="badge-t">Pass-2 SPAD single-port BW-bound</text>
+      <text x="140" y="189" class="badge-t" style="font-weight:600">Pass-1 VPU-op-count-bound</text>
+      <!-- budget -->
+      <rect class="budget" x="612" y="164" width="280" height="30" rx="6"/>
+      <text x="622" y="177" class="budget-t" style="font-weight:700">Pass1 2324 + mid 95 + Pass2 3090</text>
+      <text x="622" y="189" class="budget-t" style="font-weight:700">= 5509 cy</text>
+      <!-- warning glyph -->
+      <path class="warn" d="M912 168 L926 192 L898 192 Z" opacity=".9"/>
+      <text x="912" y="188" text-anchor="middle" style="font-size:11px;font-weight:700;fill:var(--chip)">!</text>
+      <text x="932" y="174" class="budget-t" style="fill:var(--ctrl)">assumes accumulating vpu.reduce (else 7045)</text>
+      <text x="932" y="188" class="budget-t" style="fill:var(--ctrl)">+ single-port SPAD (else Pass2 &rarr; 2322)</text>
+    </svg>
+    </div>
+  </div>
+
+  <!-- ============================================================= PANEL 935 -->
+  <div class="card">
+    <h2><span class="rn">935</span>devmem C = A @ B (16&times;16 bf16) &mdash; DRAM-bandwidth-bound</h2>
+    <p class="k">isolated devmem&rarr;devmem matmul; A+B load (1024 B) and C store (512 B) over the 4 B/cy DRAM HP port dwarf the 160-cy 8-matmul compute (MXU busy just 79 cy) &middot; DMU single-outstanding serializes A,B</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1320 214" role="img" aria-label="devmem C=A@B 16x16 bf16 microbench Gantt, DRAM bandwidth bound, 544 cycles">
+      <!-- lane labels -->
+      <text x="12" y="52" class="lane-lbl" style="fill:var(--mem)">DMU</text><text x="12" y="64" class="lane-sub">SPAD PortA&harr;DRAM</text>
+      <text x="12" y="94" class="lane-lbl blab-mxu">MXU</text><text x="12" y="106" class="lane-sub">matmul array</text>
+      <text x="12" y="136" class="lane-lbl blab-vpu">VPU/move</text><text x="12" y="148" class="lane-sub">vreg/acc move</text>
+      <!-- timeline frame x0=130 x1=1030 (900px) scale=1.65441 px/cy ; cmax=544 -->
+      <g>
+        <line class="tick" x1="130"    y1="34" x2="130"    y2="150"/><text class="tickt" x="130"    y="162" text-anchor="middle">0</text>
+        <line class="tick" x1="295.44" y1="34" x2="295.44" y2="150"/><text class="tickt" x="295.44" y="162" text-anchor="middle">100</text>
+        <line class="tick" x1="460.88" y1="34" x2="460.88" y2="150"/><text class="tickt" x="460.88" y="162" text-anchor="middle">200</text>
+        <line class="tick" x1="626.32" y1="34" x2="626.32" y2="150"/><text class="tickt" x="626.32" y="162" text-anchor="middle">300</text>
+        <line class="tick" x1="791.76" y1="34" x2="791.76" y2="150"/><text class="tickt" x="791.76" y="162" text-anchor="middle">400</text>
+        <line class="tick" x1="957.21" y1="34" x2="957.21" y2="150"/><text class="tickt" x="957.21" y="162" text-anchor="middle">500</text>
+        <line class="tick" x1="1030"   y1="34" x2="1030"   y2="150"/><text class="tickt" x="1030"   y="162" text-anchor="middle">544</text>
+      </g>
+      <text x="580" y="180" class="tickt" text-anchor="middle">cycles (whole devmem&rarr;devmem kernel)</text>
+
+      <!-- DMU lane : DOMINANT -->
+      <rect class="bar-dmu" x="130"    y="42" width="423.53" height="26" rx="2"/>
+      <text x="341.8" y="59" class="blab" text-anchor="middle" style="fill:var(--mem)">load A+B &middot; 256 cy @ 4 B/cy (1024 B)</text>
+      <rect class="bar-idle" x="553.53" y="42" width="264.71" height="26" rx="2"/>
+      <text x="685.9" y="59" class="blab" text-anchor="middle" style="fill:var(--muted);font-size:8.5px">idle (single-outstanding)</text>
+      <rect class="bar-dmu" x="818.24" y="42" width="211.76" height="26" rx="2"/>
+      <text x="924.1" y="59" class="blab" text-anchor="middle" style="fill:var(--mem)">store C &middot; 128 cy (512 B)</text>
+
+      <!-- MXU lane : tiny compute island -->
+      <rect class="bar-idle" x="130"    y="80" width="483.09" height="26" rx="2"/>
+      <text x="371" y="97" class="blab" text-anchor="middle" style="fill:var(--muted)">MXU idle &mdash; waiting on A,B load</text>
+      <rect class="bar-ctrl" x="613.09" y="80" width="24.81" height="26" rx="2"/>
+      <rect class="bar-mxu"  x="637.9"  y="80" width="105.89" height="26" rx="2"/>
+      <text x="690.8" y="97" class="blab" text-anchor="middle" style="font-size:8px">8 matmul (79)</text>
+      <text x="625" y="76" class="newlab" text-anchor="middle" style="font-size:8px">fill15</text>
+      <rect class="bar-idle" x="743.79" y="80" width="286.21" height="26" rx="2"/>
+      <text x="887" y="97" class="blab" text-anchor="middle" style="fill:var(--muted)">MXU idle &mdash; store</text>
+
+      <!-- VPU / move lane -->
+      <rect class="bar-idle" x="130"    y="118" width="423.53" height="26" rx="2"/>
+      <rect class="bar-vpu"  x="553.53" y="118" width="59.56"  height="26" rx="2"/>
+      <text x="583.3" y="135" class="blab" text-anchor="middle" style="font-size:8px">vld&times;4</text>
+      <rect x="637.9" y="118" width="105.89" height="26" rx="2" style="fill:none;stroke:var(--vpu);stroke-width:1.2;stroke-dasharray:3 2;opacity:.6"/>
+      <text x="690.8" y="135" class="blab" text-anchor="middle" style="fill:var(--vpu);font-size:7.5px">acc.store (hidden)</text>
+      <rect class="bar-vpu"  x="743.79" y="118" width="74.45"  height="26" rx="2"/>
+      <text x="781" y="135" class="blab" text-anchor="middle" style="font-size:7.5px">acc+vst&times;4</text>
+      <rect class="bar-idle" x="818.24" y="118" width="211.76" height="26" rx="2"/>
+
+      <!-- flush.slot fences -->
+      <line x1="553.53" y1="30" x2="553.53" y2="152" style="stroke:var(--ctrl);stroke-width:1.3;stroke-dasharray:4 3;opacity:.85"/>
+      <text x="553.53" y="27" class="blab-w blab-ctrl" text-anchor="middle" style="font-size:8px">flush.slot</text>
+      <line x1="818.24" y1="30" x2="818.24" y2="152" style="stroke:var(--ctrl);stroke-width:1.3;stroke-dasharray:4 3;opacity:.85"/>
+      <text x="818.24" y="27" class="blab-w blab-ctrl" text-anchor="middle" style="font-size:8px">flush.slot</text>
+
+      <!-- badge : bottleneck -->
+      <rect class="badge-box" x="1050" y="42" width="258" height="62" rx="6"/>
+      <text x="1060" y="57" class="badge-t">DRAM-BW-bound</text>
+      <text x="1060" y="71" class="badge-t" style="font-weight:600">DMA 384 cy (71%) &gt;&gt; compute (29%)</text>
+      <text x="1060" y="85" class="badge-t" style="font-weight:600">DRAM HP port 4 B/cy = the wall</text>
+      <text x="1060" y="99" class="badge-t" style="font-weight:600">DM bus 32 B/cy (8&times; wider) idle</text>
+      <!-- budget -->
+      <rect class="budget" x="1050" y="114" width="258" height="64" rx="6"/>
+      <text x="1060" y="130" class="budget-h">BUDGET</text>
+      <text x="1060" y="146" class="budget-t">load 256 + compute 160</text>
+      <text x="1060" y="160" class="budget-t" style="font-weight:700">+ store 128 = 544 cy</text>
+      <text x="1060" y="174" class="budget-t" style="fill:var(--muted)">prefetch lower bound = 384 cy</text>
+    </svg>
+    </div>
+    <p class="caption"><b>Roofline opposite of the MLP panels:</b> a tiny isolated devmem matmul is <b>memory-bound, not MXU-bound</b> &mdash; the on-chip DM bus (32 B/cy) sits ~8&times; idle behind the 4 B/cy DRAM HP port (MXU busy only 79 of 544 cy). This is why decode wants wider DRAM/HBM [v3]. Load/store also carry a one-time DRAM access latency on top, dwarfed by the BW term. <b>Tile-granular prefetch</b> could hide the 160-cy compute under the 256-cy load (total &rarr; ~load+store = 384 cy), still DRAM-BW-bound.</p>
+  </div>
+
+  <!-- ============================================================= PANEL C -->
+  <div class="card">
+    <h2><span class="rn">940</span>Full-layer roll-up (prefill) &mdash; unit share vs sequence length</h2>
+    <p class="k">100% stacked-area of per-unit cycle share across S (log scale); overlaid absolute total on secondary log axis with emphasized endpoints</p>
+    <div class="scroll">
+    <svg viewBox="0 0 1120 500" role="img" aria-label="Full-layer prefill roll-up, stacked area of unit share by sequence length with total overlay">
+      <!-- left axis title -->
+      <text x="24" y="230" transform="rotate(-90 24 230)" class="tickt" text-anchor="middle">unit share of layer cycles (%)</text>
+      <text x="1096" y="230" transform="rotate(90 1096 230)" class="tickt" text-anchor="middle" style="fill:var(--new)">total layer cycles (log)</text>
+      <!-- horizontal grid + left ticks : 0..100 mapped y=420..40 -->
+      <g>
+        <line class="grid-l" x1="90" y1="420" x2="1010" y2="420"/><text class="tickt" x="82" y="424" text-anchor="end">0</text>
+        <line class="grid-l" x1="90" y1="325" x2="1010" y2="325"/><text class="tickt" x="82" y="329" text-anchor="end">25</text>
+        <line class="grid-l" x1="90" y1="230" x2="1010" y2="230"/><text class="tickt" x="82" y="234" text-anchor="end">50</text>
+        <line class="grid-l" x1="90" y1="135" x2="1010" y2="135"/><text class="tickt" x="82" y="139" text-anchor="end">75</text>
+        <line class="grid-l" x1="90" y1="40"  x2="1010" y2="40"/><text class="tickt" x="82" y="44"  text-anchor="end">100</text>
+      </g>
+
+      <!-- stacked bands ; x pts: 90,312.5,535,757.5,980 -->
+      <!-- VPU (top, ctrl) full to 100 -->
+      <polygon class="band-vpu" points="90,40 312.5,40 535,40 757.5,40 980,40 980,42.3 757.5,43 535,43 312.5,43.4 90,43.8"/>
+      <!-- attention (vpu color) -->
+      <polygon class="band-attn" points="90,43.8 312.5,43.4 535,43 757.5,43 980,42.3 980,187.8 757.5,133.1 535,94.7 312.5,71.5 90,59"/>
+      <!-- proj (mxu light) -->
+      <polygon class="band-proj" points="90,59 312.5,71.5 535,94.7 757.5,133.1 980,187.8 980,265.3 757.5,228.9 535,203.4 312.5,187.8 90,179.5"/>
+      <!-- MLP (mxu, bottom) -->
+      <polygon class="band-mlp" points="90,179.5 312.5,187.8 535,203.4 757.5,228.9 980,265.3 980,420 90,420"/>
+
+      <!-- band in-place labels -->
+      <text x="420" y="340" class="blab-w" style="fill:var(--chip);font-size:12px;font-weight:700" text-anchor="middle">MLP (fc1+fc2)</text>
+      <text x="430" y="150" class="blab-w" style="fill:var(--ink);font-size:11px;font-weight:700" text-anchor="middle">proj (QKV + out)</text>
+      <text x="820" y="95" class="blab-w" style="fill:var(--chip);font-size:11px;font-weight:700" text-anchor="middle">attention</text>
+      <text x="700" y="35" class="blab-w blab-ctrl" style="font-size:10px" text-anchor="middle">VPU (LN + resid)</text>
+
+      <!-- x axis + S ticks (log2) -->
+      <line class="axis" x1="90" y1="420" x2="1010" y2="420"/>
+      <g>
+        <line class="tick" x1="90"    y1="420" x2="90"    y2="426"/><text class="tickt" x="90"    y="438" text-anchor="middle">128</text>
+        <line class="tick" x1="312.5" y1="420" x2="312.5" y2="426"/><text class="tickt" x="312.5" y="438" text-anchor="middle">256</text>
+        <line class="tick" x1="535"   y1="420" x2="535"   y2="426"/><text class="tickt" x="535"   y="438" text-anchor="middle">512</text>
+        <line class="tick" x1="757.5" y1="420" x2="757.5" y2="426"/><text class="tickt" x="757.5" y="438" text-anchor="middle">1024</text>
+        <line class="tick" x1="980"   y1="420" x2="980"   y2="426"/><text class="tickt" x="980"   y="438" text-anchor="middle">2048</text>
+      </g>
+      <text x="550" y="456" class="tickt" text-anchor="middle">sequence length S (log&#8322;)</text>
+
+      <!-- GPT-2 max ctx guide @ S=1024 -->
+      <line class="cguide" x1="757.5" y1="40" x2="757.5" y2="420"/>
+      <text x="763" y="54" class="blab-w" style="fill:var(--ink);font-size:9.5px;font-weight:700">GPT-2 max ctx (1024)</text>
+
+      <!-- attention = MLP crossover @ S~2178 (just beyond 2048, x~1000) -->
+      <path class="cross" d="M1000 44 l6 11 l-12 0 Z"/>
+      <line class="cguide" x1="1000" y1="55" x2="1000" y2="265" style="stroke:var(--new);opacity:.55"/>
+      <text x="1000" y="278" class="newlab" text-anchor="middle" style="stroke:none">S&asymp;2178</text>
+      <text x="1000" y="290" class="newlab" text-anchor="middle" style="stroke:none;font-weight:600">attn = MLP</text>
+
+      <!-- TOTAL overlay (secondary log axis) -->
+      <polyline class="totline" points="90,400.2 312.5,322.5 535,241.4 757.5,154.2 980,57.9"/>
+      <circle class="totdot" cx="312.5" cy="322.5" r="4"/>
+      <circle class="totdot" cx="535" cy="241.4" r="4"/>
+      <circle class="totdot" cx="757.5" cy="154.2" r="4"/>
+      <circle class="totend" cx="90" cy="400.2" r="6"/>
+      <circle class="totend" cx="980" cy="57.9" r="6"/>
+      <!-- total value labels -->
+      <text x="96"  y="392" class="newlab" style="stroke:none">15.16M</text>
+      <text x="318" y="314" class="newlab" style="stroke:none">31.45M</text>
+      <text x="541" y="233" class="newlab" style="stroke:none">67.40M</text>
+      <text x="748" y="146" class="newlab" style="stroke:none">152.78M</text>
+      <text x="974" y="50"  class="newlab" style="stroke:none" text-anchor="end">377.52M cy</text>
+      <!-- overlay legend -->
+      <line class="totline" x1="700" y1="472" x2="726" y2="472"/><circle class="totend" cx="713" cy="472" r="4"/>
+      <text x="732" y="476" class="tickt">absolute total (right log axis)</text>
+    </svg>
+    </div>
+    <p class="caption"><b>TOTAL LAYER = 34.31&middot;S&sup2; + 114,065&middot;S cy</b>; dominant unit = MXU (75.5% matmul at S=1024, &ge;61% floor); attention is the only O(S&sup2;) term, overtakes MLP only at S&asymp;2178 (beyond 1024 ctx) &rarr; <b>within-spec always matmul/MLP-bound</b>.</p>
+  </div>
+
+  <!-- ============================================================= REF CARD -->
+  <div class="card">
+    <h2>Reference numerals &mdash; FIG. 9</h2>
+    <ul class="reflist">
+      <li><b>900</b> instruction latency table (legend for B/C)</li>
+      <li><b>910</b> MLP fc1 output-tile Gantt (783 cyc, MXU-bound)</li>
+      <li><b>920</b> attention block Gantt (408 cyc serial, softmax-stall)</li>
+      <li><b>930</b> LayerNorm Gantt (Pass-1 packed / Pass-2 SPAD-bound, 5509)</li>
+      <li><b>935</b> devmem C=A@B microbench (DRAM-BW-bound)</li>
+      <li><b>940</b> full-layer prefill roll-up (share + absolute total)</li>
+      <li><b>NB</b> NONBLK class = hidden under active matmul (MXU)</li>
+      <li><b>BL</b> BLOCK class = serializing op (amber / ctrl)</li>
+      <li><b>VP</b> VPU-pipe class = one function-select pipe (reduce/lut/simd)</li>
+      <li><b>AS</b> ASYNC DMU = off-tile DRAM &harr; SPAD (variable, flush.slot-ordered)</li>
+      <li><b>CT</b> CTRL = sequencer control (loop.begin/end, halt)</li>
+    </ul>
+  </div>
+
+</div>
+</div>

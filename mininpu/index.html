@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mininpu - Compute-Tile Documentation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="inner">
+    <a class="brand" href="index.html">mini<span>npu</span></a>
+    <a class="nl" href="isa.html">ISA 0.5.0</a>
+    <a class="nl" href="microarch.html">Microarchitecture</a>
+    <a class="nl" href="implementation.html">Implementation</a>
+    <a class="nl" href="#figures">Figures</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="page">
+    <h1>mininpu Compute-Tile Documentation</h1>
+    <p class="sub">ASIC-bound, composable NPU IP template &middot; compute-tile design &middot; ISA 0.5.0</p>
+  </header>
+
+  <p>
+    mininpu is an ASIC-bound, composable NPU IP template (MXU / VPU / tile / NoC)
+    built as an IO-attached discrete accelerator. This site collects the
+    compute-tile design docs: a locked instruction-set reference plus two
+    work-in-progress design documents. FPGA is a test platform only; the design
+    stays ASIC-targeting.
+  </p>
+
+  <h2>Document set</h2>
+  <div class="cards">
+
+    <a class="card" href="isa.html">
+      <div class="kicker">Doc 1 &middot; <span class="pill locked">Locked</span></div>
+      <h3>ISA 0.5.0 Specification</h3>
+      <p>The complete instruction-set reference: 15 opcodes, 64-bit fixed word,
+         in-order single issue, no hardware interlock, and the full compiler
+         scheduling contract.</p>
+    </a>
+
+    <a class="card" href="microarch.html">
+      <div class="kicker">Doc 2 &middot; <span class="pill wip">In progress</span></div>
+      <h3>Reference Microarchitecture</h3>
+      <p>The datapath behind the ISA: concurrency model, per-unit AGU, MXU / VPU
+         / VREG / ACC / SPAD, and the MXU&#8214;VPU software pipeline. Locked
+         design plus open decisions.</p>
+    </a>
+
+    <a class="card" href="implementation.html">
+      <div class="kicker">Doc 3 &middot; <span class="pill wip">In progress</span></div>
+      <h3>Implementation (Files &amp; Modules)</h3>
+      <p>How the design maps to RTL: the tile-sequencer fold, DMU internals, and
+         the target file/module hierarchy. Locked decisions plus pending
+         proposals.</p>
+    </a>
+
+  </div>
+
+  <h2 id="figures">Figures</h2>
+  <p>Self-contained interactive block diagrams (dark, technical) for the
+     compute-tile datapath and GPT-2 kernel schedules.</p>
+
+  <div class="figgrid">
+
+    <a class="figcard" href="figures/fig1_2_compute_tile.html">
+      <div class="tag">FIG. 1-2</div>
+      <div class="name">Compute-tile architecture</div>
+      <div class="cap">Top-level tile datapath: devmem &#8596; SPAD &#8596; VREG
+        &#8596; ACC spine, MXU / VPU units, and the tile sequencer.</div>
+    </a>
+
+    <a class="figcard" href="figures/fig5_vpu.html">
+      <div class="tag">FIG. 5</div>
+      <div class="name">VPU</div>
+      <div class="cap">Fixed-depth streaming vector pipeline: 8 lanes,
+        function-select {reduce | lut | simd}, uniform depth D_VPU = 12.</div>
+    </a>
+
+    <a class="figcard" href="figures/fig6_sequencer.html">
+      <div class="tag">FIG. 6</div>
+      <div class="name">Tile sequencer</div>
+      <div class="cap">Issue unit: IRAM 4096 &times; 64b + folded PC and decoder,
+        induction-variable broadcast, loop-frame stack.</div>
+    </a>
+
+    <a class="figcard" href="figures/fig7_mxu.html">
+      <div class="tag">FIG. 7</div>
+      <div class="name">MXU</div>
+      <div class="cap">8&times;8 weight-stationary systolic array, bf16&times;bf16
+        &rarr; fp32 accumulate, double-buffered weight buffers, RS-hybrid
+        dataflow.</div>
+    </a>
+
+    <a class="figcard" href="figures/fig8_spad.html">
+      <div class="tag">FIG. 8</div>
+      <div class="name">SPAD datapath</div>
+      <div class="cap">On-chip scratchpad: 1024 &times; 256b = 32 KiB, bf16,
+        8 banks, dual-port (DMU vs compute).</div>
+    </a>
+
+    <a class="figcard" href="figures/fig9_gpt2_kernels.html">
+      <div class="tag">FIG. 9</div>
+      <div class="name">GPT-2 kernel Gantts</div>
+      <div class="cap">Per-kernel issue/execution schedules showing the
+        MXU&#8214;VPU overlap for attention vs MLP blocks.</div>
+    </a>
+
+  </div>
+
+</div>
+
+<footer class="foot">
+  mininpu &middot; compute-tile documentation &middot; generated static site (GitHub Pages).
+  Terminology: see <code>GLOSSARY.md</code>; design SSOT: <code>docs/charter.md</code>.
+</footer>
+
+</body>
+</html>
