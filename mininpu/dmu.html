@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMU: Data Moving Unit - Design Brief - mininpu</title>
+<style>body{margin:0}</style>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">mininpu &middot; Doc 4 &middot; <span class="sev gap">Design brief</span></div>
+    <h1>DMU: Data Moving Unit - Design Brief</h1>
+    <p class="lede">Consolidated, doc-first design brief for the compute-tile async
+       DMA unit. It assembles already-locked decisions and the existing DMA RTL
+       surface into one authoritative contract; it does not invent new
+       microarchitecture. Everything is split into <strong>LOCKED</strong> (the
+       contract the DMU must honor) and <strong>OPEN</strong> (the implementer's
+       design space).</p>
+    <div class="chips">
+      <span class="chip"><b>compute-tile</b> DMU</span>
+      <span class="chip">async, <b>2 slots</b></span>
+      <span class="chip"><b>0x40</b> load &middot; <b>0x42</b> store</span>
+      <span class="chip">v1 <b>single-outstanding</b></span>
+      <span class="chip">SPAD only, <b>no ACC</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="shell">
+
+    <nav class="toc" aria-label="Table of contents">
+      <ol>
+        <li><a href="#s0"><span class="idx">00</span>How to read this brief</a></li>
+        <li><a href="#s1"><span class="idx">01</span>Role &amp; Doctrine</a></li>
+        <li><a href="#s2"><span class="idx">02</span>ISA Surface</a></li>
+        <li><a href="#s3"><span class="idx">03</span>Data Path &amp; Memory</a></li>
+        <li><a href="#s4"><span class="idx">04</span>Existing-RTL Surface</a></li>
+        <li><a href="#s5"><span class="idx">05</span>Interfaces the DMU Exposes</a></li>
+        <li><a href="#s6"><span class="idx">06</span>v1 Scope vs Deferred</a></li>
+        <li><a href="#s7"><span class="idx">07</span>OPEN Design Space</a></li>
+        <li><a href="#s8"><span class="idx">08</span>Block Diagram Sketch</a></li>
+        <li><a href="#s9"><span class="idx">09</span>For the Implementing Session</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <!-- ============================================================ -->
+      <section id="s0" class="reveal">
+        <h2><span class="num">00</span> How to read this brief</h2>
+        <p class="sub">Two buckets, marked on every claim. Design inside OPEN;
+           do not re-open LOCKED.</p>
+        <div class="call">
+          <div class="lbl">Locked</div>
+          <p><strong>Contract the DMU must honor.</strong> Fixed by the charter
+             (SSOT), the ISA SSOT, and the existing RTL surface already on
+             <code>main</code>. Changing any of these is out of scope for the
+             implementing session; it would ripple into the ISA, the ABI, or the
+             compiler contract.</p>
+        </div>
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Open</div>
+          <p><strong>The implementer designs this.</strong> Per session-decision
+             §M the DMU internals (burst sizing, FIFO / landing-buffer depth,
+             <code>dm_axi</code> error/timeout policy, slot FSM, the precise SPAD
+             arbitration handshake, and the exact descriptor encoding) are
+             deliberately deferred to RTL implementation. Every OPEN item below
+             lists the <strong>constraints it must satisfy</strong>, so the choice
+             is bounded, not blank.</p>
+        </div>
+        <p>Source anchors are cited as <span class="ref">file:line</span> against
+           the tree at <code>origin/main</code>. Primary SSOT: charter §4-§5
+           (<code>docs/charter.md</code>), ISA (<code>mininpu/isa/opcodes.py</code>,
+           <code>mininpu/isa/encoders.py</code>), hardware parameters
+           (<code>mininpu/hwparams.py</code>), and the DMA RTL under
+           <code>npu/src/</code>.</p>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s1" class="reveal">
+        <h2><span class="num">01</span> Role &amp; Doctrine</h2>
+        <p class="sub">Where the DMU sits and the async model it implements.</p>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; placement</div>
+          <p>The DMU <strong>lives in the compute tile</strong>, following the
+             Gemmini <em>LoadController</em> model. The <strong>interface tile
+             stays devmem-only</strong>: it owns the AXI path to off-chip memory,
+             not the SPAD-fill orchestration. Charter §5: "The DMA unit lives in
+             the compute tile (Gemmini LoadController model); the interface tile
+             stays devmem-only." The sequencer keeps the DMU <strong>external</strong>
+             to itself: <code>tile_sequencer</code> exposes <code>dma_slot_done</code>
+             / <code>dmu_idle</code> stubs and <code>dmu.sv</code> is a separate
+             module (session-decision §J).</p>
+        </div>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; async dual-port ping-pong</div>
+          <p>The DMU is <strong>async-only</strong> (session-decision §A; ISA Doc 1
+             §4). An async DMA request runs in the <strong>background, filling SPAD
+             while the sequencer computes</strong> on the compute-side SPAD port
+             (dual-port ping-pong). Charter §5: "an async DMA request (descriptor
+             flag) runs in the background, filling SPAD port A while the sequencer
+             computes on port B." The compute pipeline <strong>never stalls</strong>
+             for the DMU except at an explicit <code>flush.slot</code> fence: the
+             DMU absorbs all SPAD arbitration variability by yielding
+             (session-decision §I).</p>
+        </div>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; completion token</div>
+          <p>Completion is signalled by <strong><code>dma_slot_done[slot]</code></strong>,
+             the VTA-style dependence token. <code>flush.slot</code> is the fence
+             that waits on it. Charter §5 / §4: "Completion =
+             <code>dma_slot_done[slot]</code> (the VTA-style dependence token);
+             <code>flush.slot</code> fences" and "async DMA + <code>dma_slot_done</code>
+             IS in v1 ... must be RTL-verified."</p>
+        </div>
+
+        <h3>Sync vs async</h3>
+        <ul>
+          <li><strong>Async is the only DMU mode in v1.</strong> The former
+              async-mode flag (<code>flags[5]</code> on the DMA opcodes) is retired
+              and is now <strong>reserved-must-be-zero</strong> (ISA Doc 1 §4;
+              session-decision §A). There is no synchronous DMU opcode variant.</li>
+          <li>The host-facing <em>synchronous</em> block transfers (host&lt;-&gt;devmem
+              memcpy) are a <strong>separate concern</strong>, handled by the
+              command processor + copy engine over the AXI-Lite CMD window
+              (charter §4), not by the compute-tile DMU.</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s2" class="reveal">
+        <h2><span class="num">02</span> ISA Surface</h2>
+        <p class="sub">The two DMU opcodes, their operand slots, the fence, and the
+           slot count. All LOCKED (ISA SSOT).</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>op</th><th>opcode</th><th>direction</th><th>touches</th><th>SSOT</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">dmu.load.spm</span></td>
+              <td><code>0x40</code></td>
+              <td>DRAM (bf16) &rarr; SPAD</td>
+              <td>SPAD only</td>
+              <td><span class="ref">opcodes.py:505</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">dmu.store.spm</span></td>
+              <td><code>0x42</code></td>
+              <td>SPAD &rarr; DRAM (bf16)</td>
+              <td>SPAD only</td>
+              <td><span class="ref">opcodes.py:506</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">flush.slot</span></td>
+              <td><code>0x53</code></td>
+              <td>fence (masked stall)</td>
+              <td>per-slot done bits</td>
+              <td><span class="ref">opcodes.py:510</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">halt</span></td>
+              <td><code>0x5F</code></td>
+              <td>terminal drain</td>
+              <td>all slots</td>
+              <td><span class="ref">opcodes.py:512</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; no ACC</div>
+          <p>The DMU <strong>never touches ACC</strong>. The <code>dmu.*.acc</code>
+             opcodes are <strong>removed</strong> (no <code>OP_DMU_*_ACC</code> in
+             the SSOT). ACC is MXU-owned fp32 and never reaches DRAM; async DMA
+             targets the SPAD region only and <code>flush.slot</code> guards SPAD.
+             <span class="ref">opcodes.py:232</span>: "The DMU touches SPAD only
+             (ACC never reaches DRAM)."</p>
+        </div>
+
+        <h3>64-bit encoding, operand slots</h3>
+        <p>The instruction word is the fixed 64-bit format
+           <code>OP[63:56] | FLAGS[55:48] | op0[47:32] | op1[31:16] | op2[15:0]</code>
+           (ISA Doc 1 §3). The DMU opcodes use these slots
+           (<span class="ref">encoders.py:436-548</span>):</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>field</th><th><code>dmu.load.spm</code> (0x40)</th><th><code>dmu.store.spm</code> (0x42)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>op0</code></td><td>SPAD dst row</td><td>SPAD src row</td></tr>
+            <tr><td><code>op1</code></td><td>literal-pool index of <code>dram_addr</code> (IMM_OP1)</td><td>literal-pool index of <code>dram_addr</code> (IMM_OP1)</td></tr>
+            <tr><td><code>op2</code></td><td><code>(mat_rows-1)&lt;&lt;8 | (mat_cols-1)</code>, packed 7+7</td><td>packed shape, or <code>0xFFFF</code> "derive at lowering" sentinel</td></tr>
+            <tr><td>pool adjacency</td><td colspan="2"><code>dram_stride</code> is force-appended at <code>pool[op1+1]</code> so the descriptor-lowering pass (W6) reads addr + stride contiguously</td></tr>
+            <tr><td><code>flags</code></td><td colspan="2">IMM_OP1 set (address is wide); <code>dtype</code> in base flags; <code>flags[5]</code> reserved-must-be-zero (retired async flag)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <ul>
+          <li><strong><code>dram_stride</code> = bytes-per-DRAM-row.</strong> Row
+              <code>r</code> reads <code>dram_addr + r*dram_stride</code>.
+              <code>dram_stride=0</code> is a first-class <strong>broadcast</strong>
+              mode on load (all dst rows filled from one DRAM row - this is how
+              bias is added). <span class="ref">encoders.py:467-490</span>.</li>
+          <li>Inline form only; the W6 <code>assembler.py</code> pass lowers the
+              inline op into a descriptor + trigger. The <strong>exact descriptor
+              format the DMU consumes is OPEN</strong> (see §07).</li>
+        </ul>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; slots &amp; fence</div>
+          <p><strong><code>DMA_SLOT_COUNT = 2</code></strong> independent async
+             slots (<span class="ref">hwparams.py:80</span>).
+             <code>flush.slot</code> takes a 16-bit slot bitmask in <code>op0</code>:
+             bit <em>i</em> set = wait for slot <em>i</em> to drain;
+             <code>flush.slot 0xFFFF</code> waits for every slot. It is the
+             <strong>only</strong> fence primitive (the unmasked <code>flush</code>
+             0x52 is retired). <code>halt</code> drains all outstanding slots then
+             asserts done. <span class="ref">encoders.py:75-88</span>.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s3" class="reveal">
+        <h2><span class="num">03</span> Data Path &amp; Memory</h2>
+        <p class="sub">devmem, the DM word, the AXI bridge, the bandwidth story,
+           and SPAD arbitration priority. All LOCKED.</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>fact</th><th>value</th><th>SSOT</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>device memory</td><td>off-chip <strong>PL-DDR4</strong>, reached via <code>dm_axi_bridge</code> &rarr; <code>m00_axi</code></td><td>charter §5</td></tr>
+            <tr><td>DM word width</td><td><code>DM_DATA_WIDTH = 256</code> bits (8 &times; 32-bit), matching SPAD row width</td><td><span class="ref">hwparams.py:63</span></td></tr>
+            <tr><td>DM address space</td><td><code>DM_ADDR_WIDTH = 27</code> (256-bit words); byte addr = <code>dm_addr &times; 32</code></td><td><span class="ref">hwparams.py:62</span></td></tr>
+            <tr><td>as-built AXI</td><td><strong>32-bit AXI @ 50 MHz</strong> (~200 MB/s, ~1% of DDR peak)</td><td>charter §5</td></tr>
+            <tr><td>SPAD</td><td>1024 &times; 256b = <strong>32 KiB</strong>, 8 banks (<code>row mod 8</code>), bf16</td><td><span class="ref">hwparams.py:52,87</span></td></tr>
+            <tr><td>SPAD read latency</td><td><code>MEM_LATENCY = 2</code> cycles (registered BRAM output)</td><td><span class="ref">hwparams.py:66</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; bandwidth - bus width is the lever</div>
+          <p>The as-built <code>dm_axi_bridge</code> is 32-bit AXI @ 50 MHz. The
+             bottleneck is <strong>bus width, not outstanding depth</strong>. At
+             32b/50 MHz the bandwidth-delay product is ~1 burst, so
+             multiple-outstanding buys ~nothing until the AXI path is widened
+             (toward the 256-bit DM-word width) and/or clocked up. Charter §6 notes
+             the DDR/AXI clock is independent of the compute-tile clock (a CDC at
+             the DMEM boundary lets the AXI side run at the MIG user clock,
+             200-300 MHz), which is the lever that makes the widened path real.
+             <strong>This bounds v1 to single-outstanding</strong> (see §06).</p>
+        </div>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; SPAD arbitration priority</div>
+          <p>SPAD has a compute-side port and a DMU access path. On any structural
+             conflict, <strong>compute has fixed priority and the DMU yields</strong>.
+             Because the DMU is async and <code>flush.slot</code>-gated, yielding
+             never stalls compute. Session-decision §I: "DMU ABSORBS arbitration
+             variability (yields on conflict; it is async/flush-gated), so compute
+             never stalls. Reuse the banked_sram arbiter, priority compute(fixed)
+             &gt; DMU(yields)." The <em>precise handshake</em> (dedicated port A
+             fill vs. a lower-priority compute master on the
+             <code>banked_sram</code> grant arbiter) is OPEN - see §04 and §07.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s4" class="reveal">
+        <h2><span class="num">04</span> Existing-RTL Surface (reuse, do not rebuild)</h2>
+        <p class="sub">Four modules already on <code>main</code> provide most of the
+           mechanism. The DMU orchestrates them; it does not re-implement them.</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>module</th><th>key ports (real)</th><th>already provides</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">dma_engine.sv</span><br><span class="ref">interface_tile</span></td>
+              <td><code>start</code>, <code>mode[3:0]</code>, <code>slot_id[0:0]</code>, <code>done</code>; <code>dma_slot_done[1:0]</code> (sticky), <code>clear_slot_done[1:0]</code>; <code>stream_ready</code>; stream/BRAM control (<code>data_write_en</code>, <code>instr_write_en</code>, <code>start_stream</code>, <code>read_en</code>)</td>
+              <td><strong>2-slot completion tracking.</strong> Per-slot sub-FSM (IDLE/ACTIVE/DONE), round-robin fair-share arbitration between slots, sticky <code>dma_slot_done[i]</code> asserted on completion and held until <code>clear_slot_done[i]</code>. <span class="ref">dma_engine.sv:77-111,170-244</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">dm_axi_bridge.sv</span><br><span class="ref">interface_tile</span></td>
+              <td><code>dm_addr[26:0]</code>, <code>dm_din[255:0]</code>, <code>dm_dout[255:0]</code>, <code>dm_en</code>, <code>dm_we</code>, <code>dm_ack</code> &nbsp;&lt;-&gt;&nbsp; full <code>m_axi</code> master (AR/R/AW/W/B)</td>
+              <td><strong>BRAM-style DM port &rarr; AXI4 burst.</strong> One DM word = one 8-beat INCR burst (<code>arlen/awlen=7</code>, <code>arsize/awsize=2</code>); byte addr = <code>{dm_addr,5'b0}</code>. Single-ID, single-outstanding, in-order. <code>dm_ack</code> = combinational 1-cycle pulse in DONE. The sole <code>m00_axi</code> master. <span class="ref">dm_axi_bridge.sv:35-80,84-107</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">dma_addr_gen.sv</span><br><span class="ref">compute_tile</span></td>
+              <td><code>base_addr[31:0]</code>, <code>row[7:0]</code>, <code>stride[31:0]</code> &rarr; <code>byte_addr[31:0]</code></td>
+              <td><strong>Row byte-address generator (AGU).</strong> Pure combinational <code>base_addr + row*stride</code> (32-bit truncated). Already instantiated twice in the sequencer (foreground DMA row loop + the #222 background async-DMA track). <span class="ref">dma_addr_gen.sv:18-25</span></td>
+            </tr>
+            <tr>
+              <td><span class="mono">spad.sv</span><br><span class="ref">compute_tile</span></td>
+              <td>Port A DMA side: <code>dma_wr_en</code>, <code>dma_wr_data[255:0]</code>, <code>dma_write_pointer</code>, <code>dma_rd_data[255:0]</code>, <code>dma_read_pointer</code>. Port B compute masters: <code>dma_comp_*_b</code> (port 0) + <code>comp1_*_b</code> (port 1), each with <code>*_gnt_b</code></td>
+              <td><strong>8-bank TDP scratchpad + a per-bank grant arbiter.</strong> True dual-port <code>banked_sram</code>: Port A DMA side, Port B carries N arbitrated compute masters with <strong>fixed priority port 0 &gt; port 1</strong> via <code>comp_gnt_v</code> / <code>comp_conflict_bank_o</code> (a lower-priority master advances only on a granted cycle). This grant mechanism is the "compute fixed &gt; DMU yields" primitive. <span class="ref">spad.sv:45-121,128-150</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Note &middot; RTL-vs-target framing</div>
+          <p>The as-built <code>dma_engine.sv</code> lives in the
+             <strong>interface tile</strong> and decodes the host block-transfer
+             modes (stream write/read, IRAM load); its 2-slot machinery and
+             <code>dma_slot_done</code> are the completion mechanism the DMU reuses.
+             The <strong>target</strong> DMU is a compute-tile module
+             (<code>dmu.sv</code>) that drives <code>dma_addr_gen</code> + the
+             <code>dm_*</code> bridge port and the SPAD DMA path. Reuse these ports
+             and the 2-slot/grant primitives; do not rebuild them. How the slot
+             machinery relocates or is re-instantiated inside the compute tile is
+             an implementation choice (§07).</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s5" class="reveal">
+        <h2><span class="num">05</span> Interfaces the DMU Module Must Expose</h2>
+        <p class="sub">Shape is LOCKED; exact bit-encoding is OPEN. The DMU sits
+           between the sequencer, SPAD, and the <code>dm_*</code> bridge port.</p>
+
+        <h3>1. Sequencer descriptor-in</h3>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>field</th><th>meaning</th><th>status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>base</code></td><td>DRAM base byte address (row 0), from the literal pool</td><td><span class="sev good">LOCKED present</span></td></tr>
+            <tr><td>SPAD row</td><td>dst row (load) / src row (store)</td><td><span class="sev good">LOCKED present</span></td></tr>
+            <tr><td><code>length</code> (rows &times; cols)</td><td><code>mat_rows</code>, <code>mat_cols</code> (packed 7+7 in <code>op2</code>)</td><td><span class="sev good">LOCKED present</span></td></tr>
+            <tr><td><code>stride</code></td><td>bytes-per-DRAM-row; <code>0</code> = broadcast (load)</td><td><span class="sev good">LOCKED present</span></td></tr>
+            <tr><td>direction</td><td>load (0x40) vs store (0x42)</td><td><span class="sev good">LOCKED present</span></td></tr>
+            <tr><td><code>slot</code></td><td>which of the 2 async slots this transfer occupies</td><td><span class="sev gap">LOCKED concept, OPEN encoding</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>The field <em>set</em> is fixed by the ISA (§02). The <strong>exact wire
+           format of the descriptor the sequencer hands the DMU</strong> (bit
+           packing, how <code>slot</code> is assigned/carried, how the pool-indexed
+           <code>base</code>/<code>stride</code> are resolved to values) is OPEN
+           (§07).</p>
+
+        <h3>2. SPAD port + arbitration handshake</h3>
+        <ul>
+          <li><strong>LOCKED shape:</strong> a SPAD read/write access path
+              (256-bit rows, <code>MEM_LATENCY=2</code>) with a
+              <strong>yield-on-conflict</strong> handshake; compute has fixed
+              priority.</li>
+          <li><strong>OPEN detail:</strong> whether the DMU uses the dedicated
+              Port A fill path or is wired as a lower-priority master on the
+              Port B <code>banked_sram</code> grant arbiter, and the exact
+              <code>en</code>/<code>gnt</code>/retry protocol (§07).</li>
+        </ul>
+
+        <h3>3. Completion out + clear</h3>
+        <ul>
+          <li><strong>LOCKED:</strong> drive <code>dma_slot_done[1:0]</code>
+              (sticky, one bit per slot) on transfer completion; accept a
+              <code>clear_slot_done[1:0]</code> write-1-to-clear. This is exactly
+              the <code>dma_engine.sv</code> contract
+              (<span class="ref">dma_engine.sv:87-89</span>) and it must be
+              <strong>RTL-verified</strong> in v1 (charter §4).</li>
+        </ul>
+
+        <h3>4. <code>flush.slot</code> handshake</h3>
+        <ul>
+          <li><strong>LOCKED:</strong> expose per-slot status so the sequencer can
+              masked-stall on <code>flush.slot</code> (op0 bitmask) and drain all
+              slots on <code>halt</code>. The sequencer already stubs
+              <code>dma_slot_done</code> / <code>dmu_idle</code> for this.</li>
+          <li><strong>OPEN:</strong> the exact busy/idle signalling and the
+              stall-release timing contract (§07).</li>
+        </ul>
+
+        <h3>5. <code>dm_*</code> to the bridge</h3>
+        <ul>
+          <li><strong>LOCKED:</strong> drive the
+              <code>dm_addr / dm_din / dm_dout / dm_en / dm_we / dm_ack</code>
+              BRAM-style port of <code>dm_axi_bridge</code>
+              (<span class="ref">dm_axi_bridge.sv:35-40</span>); one DM word per
+              handshake, <code>dm_ack</code> ends the transaction. The AGU byte
+              address feeds <code>dm_addr</code> via its
+              <code>[DM_BYTE_SHIFT +: DM_ADDR_WIDTH]</code> slice.</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s6" class="reveal">
+        <h2><span class="num">06</span> v1 Scope vs Deferred</h2>
+        <p class="sub">What v1 must deliver, and what is explicitly out of v1.</p>
+
+        <div class="call">
+          <div class="lbl">Locked &middot; v1 = make-async-real, single-outstanding</div>
+          <p>v1 makes the async path <strong>real and RTL-verified</strong>:
+             <code>dma.load.spm</code> / <code>dma.store.spm</code> run in the
+             background, complete via <code>dma_slot_done[slot]</code>, and are
+             fenced by <code>flush.slot</code>. v1 is <strong>single-outstanding</strong>:
+             one transfer in flight hides the latency. The two slots
+             (<code>DMA_SLOT_COUNT=2</code>) exist in the HW contract, but v1 does
+             not exploit multiple-outstanding, because at 32b/50 MHz the BDP is
+             ~1 burst (§03). Charter §5: "[v1] = make-async-real with
+             single-outstanding (one slot in flight hides latency)."</p>
+        </div>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Deferred &middot; [v1+], out of v1</div>
+          <p><strong>Multiple-outstanding + coalescing + a landing/reorder
+             buffer</strong> are <strong>[v1+]</strong>, layered only after the AXI
+             path is widened toward the 256-bit DM word. The landing/reorder buffer
+             is sized to the bandwidth-delay product (= target BW &times; DDR
+             latency). Charter §5 / §13. These are explicitly <strong>not in v1</strong>
+             and the v1 DMU must not be blocked on them - but its slot/descriptor
+             structure should not preclude them.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s7" class="reveal">
+        <h2><span class="num">07</span> OPEN Design Space</h2>
+        <p class="sub">The implementer's job (session-decision §M). Each item is
+           bounded by the constraints it must satisfy - design within them.</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>OPEN item</th><th>constraints it must satisfy</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Descriptor format / encoding</strong></td>
+              <td>Must carry the §05 field set (base, SPAD row, rows&times;cols, stride, direction, slot). Must be producible by the W6 <code>assembler.py</code> descriptor-lowering pass from the inline 0x40/0x42 form, reading <code>dram_addr</code> at <code>pool[op1]</code> and <code>dram_stride</code> at <code>pool[op1+1]</code>. Broadcast (<code>stride=0</code>) must be representable.</td>
+            </tr>
+            <tr>
+              <td><strong>Slot FSM</strong></td>
+              <td>2 slots (<code>DMA_SLOT_COUNT=2</code>), each IDLE&rarr;ACTIVE&rarr;DONE. Must drive sticky <code>dma_slot_done[i]</code> until <code>clear_slot_done[i]</code>. Must support the <code>flush.slot</code> masked fence and full drain on <code>halt</code>. v1 single-outstanding, but the structure should not preclude [v1+] multiple-outstanding. May reuse the <code>dma_engine.sv</code> round-robin fairness.</td>
+            </tr>
+            <tr>
+              <td><strong>Burst sizing</strong></td>
+              <td>Bounded by the bridge: one DM word = one 8-beat INCR burst, 256-bit word, byte addr = <code>dm_addr&times;32</code>. Row loop iterates <code>base + row*stride</code> via <code>dma_addr_gen</code>. Must respect the single-outstanding, in-order, single-ID bridge (no reordering, one transaction to <code>dm_ack</code>).</td>
+            </tr>
+            <tr>
+              <td><strong>FIFO / landing-buffer depth</strong></td>
+              <td>v1 single-outstanding needs only enough buffering to bridge SPAD-side (<code>MEM_LATENCY=2</code>) and the AXI burst. A landing/reorder buffer sized to the BDP is [v1+] (after AXI widening). Do not oversize for v1; do not preclude the [v1+] buffer.</td>
+            </tr>
+            <tr>
+              <td><strong><code>dm_axi</code> error / timeout policy</strong></td>
+              <td>The bridge accepts/ignores <code>rresp</code>/<code>bresp</code> today (single-ID, in-order). Define how the DMU handles a stalled/never-acked transaction and any error response. Must not silently corrupt SPAD or hang the <code>flush.slot</code> fence. Sim target is a clean cocotbext-axi <code>AxiRam</code> (charter §5), so the policy is about robustness, not a modeled fault.</td>
+            </tr>
+            <tr>
+              <td><strong>Precise SPAD arbitration handshake</strong></td>
+              <td>Compute fixed priority &gt; DMU yields; compute never stalls; the DMU absorbs the variability (async / flush-gated). Reuse the <code>banked_sram</code> grant arbiter (<code>comp_gnt</code> / <code>comp_conflict_bank_o</code>) or the dedicated Port A path. Define the <code>en</code>/<code>gnt</code>/retry protocol and how a yielded DMU beat is re-driven. 256-bit rows, <code>MEM_LATENCY=2</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s8" class="reveal">
+        <h2><span class="num">08</span> Block Diagram Sketch</h2>
+        <p class="sub">Structural layout (information + placement fixed here;
+           aesthetic polish is a later session's job). Descriptor slots &rarr; AGU
+           &rarr; burst/AXI engine &rarr; PL-DDR4, plus SPAD-port arbitration and
+           the <code>dma_slot_done</code> / <code>flush.slot</code> token path.</p>
+
+        <div class="tbl-wrap">
+        <svg viewBox="0 0 980 560" width="100%" style="min-width:760px;font-family:var(--mono, monospace)" role="img" aria-label="DMU block diagram">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--accent-ink)"/>
+            </marker>
+            <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--gap)"/>
+            </marker>
+          </defs>
+          <style>
+            .b{fill:var(--surface);stroke:var(--line-2);stroke-width:1.5}
+            .dmu{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+            .ext{fill:var(--good-soft);stroke:var(--good);stroke-width:1.5}
+            .lbl{fill:var(--ink);font-size:13px;font-weight:600}
+            .sm{fill:var(--muted);font-size:11px}
+            .ttl{fill:var(--accent-ink);font-size:11px;font-weight:700;letter-spacing:.08em}
+            .flow{stroke:var(--accent-ink);stroke-width:1.6;fill:none}
+            .tok{stroke:var(--gap);stroke-width:1.6;fill:none;stroke-dasharray:5 4}
+          </style>
+
+          <!-- Sequencer -->
+          <rect class="b" x="20" y="40" width="150" height="90" rx="9"/>
+          <text class="ttl" x="34" y="64">SEQUENCER</text>
+          <text class="lbl" x="34" y="86">tile_sequencer</text>
+          <text class="sm" x="34" y="104">issues 0x40 / 0x42</text>
+          <text class="sm" x="34" y="118">flush.slot fence (0x53)</text>
+
+          <!-- DMU outer box -->
+          <rect x="230" y="20" width="470" height="330" rx="12" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text class="ttl" x="248" y="42">DMU  (compute-tile,  dmu.sv)</text>
+
+          <!-- Descriptor slots -->
+          <rect class="dmu" x="250" y="60" width="180" height="86" rx="9"/>
+          <text class="lbl" x="264" y="84">Descriptor slots</text>
+          <text class="sm" x="264" y="104">slot 0 / slot 1</text>
+          <text class="sm" x="264" y="120">base, SPAD row, len,</text>
+          <text class="sm" x="264" y="134">stride, dir, slot</text>
+
+          <!-- Slot FSM / arbiter -->
+          <rect class="dmu" x="250" y="170" width="180" height="70" rx="9"/>
+          <text class="lbl" x="264" y="194">Slot FSM  (OPEN)</text>
+          <text class="sm" x="264" y="212">IDLE-ACTIVE-DONE x2</text>
+          <text class="sm" x="264" y="228">round-robin fairness</text>
+
+          <!-- AGU -->
+          <rect class="dmu" x="250" y="262" width="180" height="68" rx="9"/>
+          <text class="lbl" x="264" y="286">AGU  dma_addr_gen</text>
+          <text class="sm" x="264" y="304">base + row*stride</text>
+          <text class="sm" x="264" y="320">(reused, combinational)</text>
+
+          <!-- Burst / AXI engine -->
+          <rect class="dmu" x="470" y="170" width="210" height="160" rx="9"/>
+          <text class="lbl" x="486" y="194">Burst / AXI engine (OPEN)</text>
+          <text class="sm" x="486" y="214">drives dm_* port:</text>
+          <text class="sm" x="486" y="230">dm_addr / dm_din / dm_dout</text>
+          <text class="sm" x="486" y="246">dm_en / dm_we / dm_ack</text>
+          <text class="sm" x="486" y="268">FIFO / landing buf (OPEN)</text>
+          <text class="sm" x="486" y="284">error / timeout (OPEN)</text>
+          <text class="sm" x="486" y="308">v1: single-outstanding,</text>
+          <text class="sm" x="486" y="324">1 DM word = 8-beat burst</text>
+
+          <!-- dm_axi_bridge -->
+          <rect class="ext" x="740" y="150" width="150" height="86" rx="9"/>
+          <text class="ttl" x="754" y="174" fill="var(--good)">INTERFACE TILE</text>
+          <text class="lbl" x="754" y="196">dm_axi_bridge</text>
+          <text class="sm" x="754" y="214">8-beat INCR burst</text>
+          <text class="sm" x="754" y="228">sole m00_axi master</text>
+
+          <!-- PL-DDR4 -->
+          <rect class="ext" x="740" y="270" width="150" height="70" rx="9"/>
+          <text class="lbl" x="754" y="298">PL-DDR4</text>
+          <text class="sm" x="754" y="316">devmem, bf16</text>
+          <text class="sm" x="754" y="330">32b @ 50 MHz (v1)</text>
+
+          <!-- SPAD -->
+          <rect class="ext" x="470" y="410" width="220" height="120" rx="9"/>
+          <text class="ttl" x="486" y="434" fill="var(--good)">COMPUTE-TILE SPAD</text>
+          <text class="lbl" x="486" y="456">spad.sv  (8-bank TDP)</text>
+          <text class="sm" x="486" y="476">Port B: compute (fixed prio)</text>
+          <text class="sm" x="486" y="492">Port A / grant: DMU (yields)</text>
+          <text class="sm" x="486" y="512">256b rows, MEM_LATENCY=2</text>
+
+          <!-- Compute pipeline -->
+          <rect class="b" x="740" y="410" width="150" height="70" rx="9"/>
+          <text class="ttl" x="754" y="434">COMPUTE</text>
+          <text class="sm" x="754" y="456">MXU / VPU / LSU</text>
+          <text class="sm" x="754" y="472">computes on Port B</text>
+
+          <!-- Flows -->
+          <!-- sequencer -> descriptor slots -->
+          <path class="flow" d="M170,88 L246,100" marker-end="url(#arr)"/>
+          <!-- slots -> slot fsm -->
+          <path class="flow" d="M340,146 L340,166" marker-end="url(#arr)"/>
+          <!-- slot fsm -> agu -->
+          <path class="flow" d="M340,240 L340,258" marker-end="url(#arr)"/>
+          <!-- agu -> burst engine (addr) -->
+          <path class="flow" d="M430,290 C450,290 452,250 466,240" marker-end="url(#arr)"/>
+          <!-- slot fsm -> burst engine (control) -->
+          <path class="flow" d="M430,200 L466,200" marker-end="url(#arr)"/>
+          <!-- burst engine -> bridge -->
+          <path class="flow" d="M680,196 L736,193" marker-end="url(#arr)"/>
+          <!-- bridge <-> ddr -->
+          <path class="flow" d="M815,236 L815,266" marker-end="url(#arr)"/>
+          <path class="flow" d="M828,266 L828,236" marker-end="url(#arr)"/>
+          <text class="sm" x="835" y="256">m00_axi</text>
+          <!-- burst engine -> SPAD (fill / drain) -->
+          <path class="flow" d="M560,330 L570,406" marker-end="url(#arr)"/>
+          <text class="sm" x="574" y="372">SPAD fill / drain</text>
+          <!-- SPAD <-> compute -->
+          <path class="flow" d="M690,450 L736,450" marker-end="url(#arr)"/>
+
+          <!-- token path: dma_slot_done back to sequencer -->
+          <path class="tok" d="M250,120 C150,150 60,150 70,132" marker-end="url(#arrg)"/>
+          <text class="sm" x="70" y="168" fill="var(--gap)">dma_slot_done[slot]</text>
+          <text class="sm" x="70" y="182" fill="var(--gap)">token &rarr; flush.slot</text>
+          <!-- clear_slot_done -->
+          <path class="tok" d="M95,196 C160,210 200,180 248,140" marker-end="url(#arrg)"/>
+          <text class="sm" x="60" y="210" fill="var(--gap)">clear_slot_done (W1C)</text>
+        </svg>
+        </div>
+
+        <ul>
+          <li><strong>Green</strong> = existing/external RTL reused as-is
+              (interface tile bridge, PL-DDR4, the SPAD TDP macro, the compute
+              masters). <strong>Teal</strong> = the DMU the session builds; boxes
+              marked <em>(OPEN)</em> are the design space.</li>
+          <li><strong>Dashed amber</strong> = the dependence-token path:
+              <code>dma_slot_done[slot]</code> back to the sequencer where
+              <code>flush.slot</code> consumes it; <code>clear_slot_done</code> is
+              write-1-to-clear.</li>
+          <li>The SPAD arrow is deliberately drawn as a single "fill / drain" path:
+              whether it is the dedicated Port A or a yielding Port B master is
+              OPEN (§07).</li>
+        </ul>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="s9" class="reveal">
+        <h2><span class="num">09</span> For the Implementing Session</h2>
+        <p class="sub">A short checklist: what to read, what is fixed, what to
+           decide, what to test.</p>
+
+        <h3>Read first</h3>
+        <ul>
+          <li><code>docs/charter.md</code> §4-§5 (the SSOT doctrine).</li>
+          <li><code>mininpu/isa/opcodes.py</code> + <code>mininpu/isa/encoders.py</code>
+              (0x40 / 0x42 / 0x53 / 0x5F encodings).</li>
+          <li>The four RTL modules in §04:
+              <code>npu/src/interface_tile/dma_engine.sv</code>,
+              <code>npu/src/interface_tile/dm_axi_bridge.sv</code>,
+              <code>npu/src/compute_tile/dma_addr_gen.sv</code>,
+              <code>npu/src/compute_tile/spad.sv</code> (and
+              <code>npu/src/common/banked_sram.sv</code> for the grant arbiter).</li>
+          <li>The <code>tile_sequencer</code> <code>dma_slot_done</code> /
+              <code>dmu_idle</code> stubs (the DMU is kept external).</li>
+        </ul>
+
+        <h3>Fixed (do not re-open)</h3>
+        <ul>
+          <li>Placement (compute tile), async-only, SPAD-only (no ACC).</li>
+          <li>Opcodes 0x40 / 0x42, <code>flush.slot</code> fence,
+              <code>dma_slot_done[slot]</code> completion, <code>DMA_SLOT_COUNT=2</code>.</li>
+          <li>devmem = PL-DDR4 via <code>dm_axi_bridge</code>&rarr;<code>m00_axi</code>;
+              256-bit DM word; compute-fixed &gt; DMU-yields SPAD priority.</li>
+          <li>v1 = make-async-real, single-outstanding;
+              multiple-outstanding/coalescing/landing-buffer are [v1+].</li>
+        </ul>
+
+        <h3>Decide (the OPEN list, §07)</h3>
+        <ul>
+          <li>Exact descriptor format/encoding; slot FSM; burst sizing; FIFO /
+              landing-buffer depth; <code>dm_axi</code> error/timeout policy; the
+              precise SPAD arbitration handshake.</li>
+        </ul>
+
+        <h3>Tests to write</h3>
+        <ul>
+          <li><strong><code>dma.load.spm</code> round-trip</strong>: preload a
+              cocotbext-axi <code>AxiRam</code> on <code>m00_axi</code>, run
+              <code>dmu.load.spm</code>, assert SPAD rows match (including a
+              <code>stride=0</code> broadcast case and a multi-row strided case).</li>
+          <li><strong><code>dma.store.spm</code> round-trip</strong>: write SPAD,
+              run <code>dmu.store.spm</code>, assert <code>AxiRam</code> contents
+              match (bf16, row-major, strided).</li>
+          <li><strong><code>dma_slot_done</code> token</strong>: assert the sticky
+              per-slot done bit asserts on completion and clears on
+              <code>clear_slot_done</code> (write-1-to-clear); RTL-verified per
+              charter §4.</li>
+          <li><strong><code>flush.slot</code> fence</strong>: a compute op reading
+              a DMU-filled SPAD row after <code>flush.slot &lt;mask&gt;</code> must
+              observe the completed data; before the fence it must not be relied
+              upon. Verify masked (single-slot) and full (<code>halt</code>) drain.</li>
+          <li><strong>Non-stall</strong>: with a DMU transfer in flight, compute
+              Port B access proceeds every cycle (DMU yields on bank conflict).</li>
+        </ul>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Reminder</div>
+          <p>Per the repo DV gate, run the relevant simulation after any RTL change
+             and (if <code>EXEC_DISPATCH</code> is touched)
+             <code>python3 dv/scripts/check_isa_coverage.py</code>. The DMU opcodes
+             already exist in the ISA SSOT, so this brief implies no ISA change -
+             only new RTL + DV.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>mininpu &middot; DMU Design Brief (Doc 4, LOCKED vs OPEN)</span>
+    <span class="mono"><a href="index.html">back to index</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var map={};
+  links.forEach(function(a){var id=a.getAttribute('href').slice(1);var s=document.getElementById(id);if(s){map[id]=a;}});
+  var sections=Object.keys(map).map(function(id){return document.getElementById(id);});
+  if('IntersectionObserver' in window){
+    var spy=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(a){a.classList.remove('active');});
+          var a=map[e.target.id];
+          if(a){a.classList.add('active');}
+        }
+      });
+    },{rootMargin:'-10% 0px -70% 0px',threshold:0});
+    sections.forEach(function(s){spy.observe(s);});
+  }
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var rev=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');rev.unobserve(e.target);}
+      });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    reveals.forEach(function(el){rev.observe(el);});
+  } else {
+    reveals.forEach(function(el){el.classList.add('in');});
+  }
+})();
+</script>
+</body>
+</html>
