@@ -377,6 +377,100 @@
         <p class="sub">Because there is no hardware interlock or scoreboard, the
            per-instruction cycle-accurate <strong>access windows</strong> are a normative
            compiler-hardware contract.</p>
+
+        <h3>5.0 Notation</h3>
+        <p class="sub">Single definition point for every symbol used across this
+           document. <strong>Kind</strong> distinguishes ISA-visible structural constants
+           from RTL / synth-measured implementation values (not locked) from
+           reference/index symbols.</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>symbol</th><th>meaning</th><th>kind</th><th>value / status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>t</code></td>
+              <td>issue cycle of an instruction (reference point for all access windows)</td>
+              <td>reference</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><code>N</code></td>
+              <td>systolic tile dimension (rows/cols of the array; also the whole-tile-row width)</td>
+              <td><strong>STRUCTURAL, ISA-visible</strong></td>
+              <td>8 (baseline)</td>
+            </tr>
+            <tr>
+              <td><code>2N-1</code></td>
+              <td>systolic array fill/drain span</td>
+              <td><strong>STRUCTURAL</strong></td>
+              <td>15 at <code>N=8</code></td>
+            </tr>
+            <tr>
+              <td><code>d</code></td>
+              <td>matmul issue-to-first-X-read offset: matmul reads <code>VREG[X]</code> over <code>[t+d, t+d+N)</code></td>
+              <td>RTL / synth-measured</td>
+              <td>TBD</td>
+            </tr>
+            <tr>
+              <td><code>L_matmul</code></td>
+              <td>matmul latency: issue to ACC written (ACC valid at <code>t+L_matmul</code>)</td>
+              <td>RTL / synth-measured</td>
+              <td>TBD</td>
+            </tr>
+            <tr>
+              <td><code>R_mxu</code></td>
+              <td>the MXU's VREG read PORT used to stream X (a port name, not a latency)</td>
+              <td>port id</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><code>L_ldw</code></td>
+              <td><code>mxu.load.w</code> latency: issue to inactive <code>wbuf</code> loaded</td>
+              <td>RTL / synth-measured</td>
+              <td>~<code>N</code></td>
+            </tr>
+            <tr>
+              <td><code>D_vpu</code></td>
+              <td>VPU pipeline depth = per-row drain latency (result at <code>t+D_vpu</code>); row-pipelined, so throughput stays 1 tile-row/cycle</td>
+              <td>RTL / synth-measured, <strong>NOT a locked constant</strong></td>
+              <td>about 11 (finalized by the fp-pipeline pass)</td>
+            </tr>
+            <tr>
+              <td>MXU PE pipeline depth</td>
+              <td>registered-MAC stages inside each PE (adds to the <code>2N-1</code> fill)</td>
+              <td>RTL / synth-measured</td>
+              <td>TBD</td>
+            </tr>
+            <tr>
+              <td><code>lo</code> / <code>hi</code> / <code>step</code></td>
+              <td>loop lower bound / upper bound / increment (<code>lo</code>, <code>step</code> 8-bit immediate; <code>hi</code> from the literal-pool descriptor)</td>
+              <td>index</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><code>iv</code></td>
+              <td>loop induction variable (per active loop frame)</td>
+              <td>index</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><code>bo[channel]</code></td>
+              <td>per-channel base-offset accumulator; <code>eff_addr = operand_literal + bo[channel]</code></td>
+              <td>state</td>
+              <td>8 channels</td>
+            </tr>
+            <tr>
+              <td><code>m, n, k</code></td>
+              <td>output-row-tile / output-col-tile / contraction tile indices in the 4x4x4 grid</td>
+              <td>index</td>
+              <td>0..3</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
         <ul>
           <li>The contract lives in the ISA but is
             <strong>implementation-versioned</strong>: the structure is fixed now; the
@@ -501,6 +595,76 @@
             <code>W</code> row = <code>16n+4k</code>; bias row = <code>n</code>;
             <code>Y</code> row = <code>16m+4n</code>.</li>
         </ul>
+
+        <h3>7.0 Initial architectural state</h3>
+        <p class="sub">What lives where before the tile-loop runs. Note the dtype
+           boundary: <strong>bf16 in SPAD</strong>, <strong>fp32 in VREG and ACC</strong>
+           (the cast sits at the SPAD-VREG edge).</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>space</th><th>dtype / geometry</th><th>contents before the loop</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">VREG</span></td>
+              <td>fp32, 32 x [8x8]</td>
+              <td><code>X[m][k]</code> tile at id <code>4m+k</code> (ids 0..15); <code>Y</code> scratch at <code>V16</code> - the compute working set</td>
+            </tr>
+            <tr>
+              <td><span class="mono">SPAD</span></td>
+              <td>bf16</td>
+              <td><code>W^T</code> rows at row <code>16n+4k</code>; bias rows at row <code>n</code> (base <code>B_base</code>) - the matmul operands</td>
+            </tr>
+            <tr>
+              <td><span class="mono">LPM</span></td>
+              <td>64b entries</td>
+              <td>the loop descriptors <code>pool[0..2]</code> + any pooled bases (see 7.0b)</td>
+            </tr>
+            <tr>
+              <td><span class="mono">ACC</span></td>
+              <td>fp32, MXU-owned, depth-2</td>
+              <td>empty; seeded per <code>(m,n)</code> block by <code>acc.init</code>, drained by <code>acc.store</code></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h3>7.0b Literal pool contents</h3>
+        <p class="sub">The concrete pool entries this kernel needs, so
+           <code>loop.begin op1 = pool[idx]</code> (referenced in 7.2 as
+           <code>pool[2]={hi=4, k bo-strides}</code>) is grounded. Stride values are taken
+           from the 7.1 <code>loop.end</code> comments and match the 7.3 <code>bo</code>
+           trace.</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>entry</th><th>class</th><th>contents</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>pool[0]</code></td>
+              <td>m-loop descriptor</td>
+              <td><code>{hi=4; bo-stride: bo_X+=4, bo_Ys+=16}</code></td>
+            </tr>
+            <tr>
+              <td><code>pool[1]</code></td>
+              <td>n-loop descriptor</td>
+              <td><code>{hi=4; bo_W+=16, bo_B+=1, bo_Ys+=4}</code></td>
+            </tr>
+            <tr>
+              <td><code>pool[2]</code></td>
+              <td>k-loop descriptor</td>
+              <td><code>{hi=4; bo_X+=1, bo_W+=4}</code></td>
+            </tr>
+            <tr>
+              <td><code>pool[3..]</code></td>
+              <td>pooled bases (launch-patched)</td>
+              <td><code>B_base</code>, <code>W_base</code>, <code>X_base</code>, <code>Y_base</code>; the devmem base is patched at launch</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
 
         <h3>7.1 Static program (body once, 12 static instructions)</h3>
 <pre><code>loop.begin m (iv0,0,4,1)          ; push bo
