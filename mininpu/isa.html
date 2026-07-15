@@ -435,7 +435,7 @@
               <td><code>D_vpu</code></td>
               <td>VPU pipeline depth = per-row drain latency (result at <code>t+D_vpu</code>); row-pipelined, so throughput stays 1 tile-row/cycle</td>
               <td>RTL / synth-measured, <strong>NOT a locked constant</strong></td>
-              <td>about 11 (finalized by the fp-pipeline pass)</td>
+              <td>about 23 (measured after the fp-pipeline pass)</td>
             </tr>
             <tr>
               <td>MXU PE pipeline depth</td>
@@ -483,7 +483,7 @@
             systolic fill <code>2N-1</code>. The VPU pipeline depth <code>D_vpu</code>,
             the MXU PE pipeline depth, the offsets (<code>d</code>, <code>L_matmul</code>),
             and all absolute numbers are <strong>RTL / synth-timing measured</strong>
-            implementation values - <code>D_vpu</code> is currently about 11 (finalized by
+            implementation values - <code>D_vpu</code> is currently about 23 (measured after
             the fp-pipeline pass), NOT an ISA-visible structural constant.</li>
           <li><strong>Throughput-bound, not latency-bound:</strong> these
             per-instruction latencies (including <code>D_vpu</code> and the matmul
@@ -527,7 +527,7 @@
               <td><code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code></td>
               <td><code>VREG</code> (x2 reads for <code>simd</code>, on the two whole-tile-row read ports)</td>
               <td><code>VREG</code> on the <strong>single write port</strong> at <code>t + D_vpu</code></td>
-              <td><code>D_vpu</code> = VPU pipeline depth, <strong>RTL / synth-measured</strong> (currently about 11, finalized by the fp-pipeline pass); an implementation number, not a locked constant. Fixed and uniform across functions (gelu-set), so a result is available at issue + <code>D_vpu</code></td>
+              <td><code>D_vpu</code> = VPU pipeline depth, <strong>RTL / synth-measured</strong> (currently about 23, measured after the fp-pipeline pass); an implementation number, not a locked constant. Fixed and uniform across functions (gelu-set), so a result is available at issue + <code>D_vpu</code></td>
             </tr>
             <tr>
               <td><code>acc.store</code></td>
@@ -554,14 +554,15 @@
         <div class="call" style="border-left-color:var(--gap)">
           <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL / synth-timing measured</div>
           <p><code>d</code>, <code>L_matmul</code>, the MXU PE pipeline depth, <strong>the
-             VPU pipeline depth <code>D_vpu</code></strong> (currently about 11), and all
+             VPU pipeline depth <code>D_vpu</code></strong> (currently about 23, measured
+             after the fp-pipeline pass), and all
              absolute numbers are <strong>TBD (RTL / synth-timing measured)</strong>. Only
              <code>N</code> and <code>2N-1</code> are the ISA-visible concrete structural
              values. All latencies are <strong>FIXED and data-independent</strong> once
              measured, since the no-scoreboard model relies on it:
              <strong>simulation latency must equal synthesis latency</strong> - and a
-             wrong latency (e.g. assuming <code>D_vpu = 9</code> when the RTL is 11)
-             silently miscompiles.</p>
+             wrong locked latency (e.g. assuming <code>D_vpu = 9</code> when the RTL
+             measures ~23) silently miscompiles.</p>
         </div>
       </section>
 
@@ -716,12 +717,18 @@ loop.end  m                        ; iter: bo_X+=4, bo_Ys+=16 | exit: pop</code>
         </div>
 
         <h3>7.4 Cycle-level Gantt for one (m,n) block</h3>
-        <p class="sub">Structural (<code>N=8</code>); all <code>L_*</code> = TBD (RTL-measured).</p>
+        <p class="sub">Structural (<code>N=8</code>); the absolute <code>L_*</code> are
+           implementation-versioned - FIG. 9 below uses the current RTL/synth-measured
+           example latencies.</p>
 <pre><code>cy -&gt;  0    2    4    6    8   10   12   14   16 ...(N=8 units)
 SEQ  : Iai  Ilb  Ilw0 [nop/indep to cover L_ldw] Imm0 Ilw1 Imm1 Ilw2 Imm2 Ilw3 Imm3 Ile ... Ias Ilut Ivs
 wbufA:      [ load W0 =N cy ][ stream mm0 =N cy ][ load W2 ][ stream mm2 ]
 wbufB:                       [ load W1 =N cy  ][ stream mm1 ][ load W3 ][ stream mm3 ]
 ACC  : [init]              +=mm0  +=mm1  +=mm2  +=mm3 -&gt; drain(2N-1) -&gt; acc.store -&gt; gelu -&gt; vreg.store</code></pre>
+
+        <iframe src="figures/fig9_tile_gantt.html" loading="lazy" title="FIG. 9 tile-loop pipeline Gantt" style="width:100%;height:540px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 9 - tile-loop pipeline Gantt for one (m,n) block: SEQ issue stream, weight double-buffer ping-pong (<code>load.w ~ N=8</code> fully hidden), ACC init to <code>+= mm0..mm3</code> (each after fill = <code>2N-1 + PE_LATENCY = 17</code>), then the LSU / VPU tail (<code>acc.store</code> to gelu <code>D_vpu = 23</code> to <code>vreg.store</code>), with the ACC depth-2 overlap. <a href="figures/fig9_tile_gantt.html">open standalone</a></p>
+
         <ul>
           <li>Steady state = <strong>1 matmul / N=8 cy</strong>, <code>load.w</code>
             fully overlapped in the other weight buffer; absolute block time TBD; ACC
