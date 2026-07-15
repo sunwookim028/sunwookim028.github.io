@@ -116,7 +116,7 @@
 
 <div class="wrap">
 <header>
-  <h1>mininpu Compute Tile <span style="font-weight:400;color:var(--muted);font-size:15px">— FIG. 1</span></h1>
+  <h1>mininpu Compute Tile <span style="font-weight:400;color:var(--muted);font-size:15px">- FIG. 1</span></h1>
   <p class="sub">v1 (ISA 0.5.0, 15 opcodes) · decoupled engines (start/done) · distributed address generation · Tile sequencer = pc_iram + dispatch · launch = CP loads IRAM[0], run to halt</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--ctrl-f);border-color:var(--ctrl)"></i>Tile sequencer / control</span>
@@ -138,7 +138,7 @@
 
   <!-- Command plane (external) -->
   <rect class="b-cp" x="48" y="26" width="640" height="52" rx="6"/>
-  <text x="62" y="47" class="ti t-ext" font-size="13">Command plane — CP (external, npu.sv)</text>
+  <text x="62" y="47" class="ti t-ext" font-size="13">Command plane - CP (external, npu.sv)</text>
   <text x="62" y="66" class="d2">command_processor + iram_loader (192): COPY stages binary to DRAM &rarr; LAUNCH DMAs devmem[kbin_addr,size] &rarr; IRAM[0]</text>
   <text x="680" y="44" class="ref" text-anchor="end">190</text>
 
@@ -208,7 +208,7 @@
   <g>
     <rect class="b-mxu" x="876" y="150" width="770" height="256" rx="6"/>
     <text x="892" y="174" class="ti t-mxu" font-size="15">MXU engine</text>
-    <text x="1004" y="174" class="d2">— 8&times;8 systolic · own FSM · bf16&times;bf16 PE, fp32 accum · X fp32&rarr;bf16 cast at input (LOCKED, no PE widening)</text>
+    <text x="1004" y="174" class="d2">- 8&times;8 systolic · own FSM · bf16&times;bf16 PE, fp32 accum · X fp32&rarr;bf16 cast at input (LOCKED, no PE widening)</text>
     <text x="1632" y="172" class="ref" text-anchor="end">130</text>
     <g transform="translate(892,188)">
       <rect x="0" y="0" width="110" height="110" class="inner"/>
@@ -224,11 +224,11 @@
     <rect class="inner" x="1024" y="188" width="608" height="26" rx="3"/>
     <text x="1034" y="206" class="d">weight double-buffer (active / inactive)</text><text x="1626" y="205" class="refs" text-anchor="end">134</text>
     <rect class="inner" x="1024" y="220" width="608" height="26" rx="3"/>
-    <text x="1034" y="238" class="d">WPL — nonblocking mxu.load.w · transB · causal</text><text x="1626" y="237" class="refs" text-anchor="end">136</text>
+    <text x="1034" y="238" class="d">WPL - nonblocking mxu.load.w · transB · causal</text><text x="1626" y="237" class="refs" text-anchor="end">136</text>
     <rect class="agu" x="1024" y="252" width="608" height="26" rx="3"/>
     <text x="1034" y="270" class="d2">addr-gen · base + iv&middot;stride + march (SPAD W / ACC bias)</text><text x="1626" y="269" class="refs" text-anchor="end">137</text>
     <rect class="b-mxu rf" x="892" y="344" width="740" height="48" rx="5"/>
-    <text x="906" y="364" class="ti t-mxu" font-size="13">ACC — 8 col-banks &times; depth 2 (double-buffer) fp32 · MXU-owned (LOCKED)</text>
+    <text x="906" y="364" class="ti t-mxu" font-size="13">ACC - 8 col-banks &times; depth 2 (double-buffer) fp32 · MXU-owned (LOCKED)</text>
     <text x="906" y="382" class="d2">write: PE accumulate + bias-preload (bcast) | read: acc.store &rarr; VREG · FA-O resides in VREG (not ACC)</text>
     <text x="1626" y="363" class="ref" text-anchor="end">138</text>
   </g>
@@ -237,20 +237,20 @@
   <g>
     <rect class="b-vpu" x="876" y="430" width="770" height="256" rx="6"/>
     <text x="892" y="454" class="ti t-vpu" font-size="15">VPU engine</text>
-    <text x="1004" y="454" class="d2">— vector unit · own FSM · touches VREG only · function via flags</text>
+    <text x="1004" y="454" class="d2">- vector unit · own FSM · touches VREG only · function via flags</text>
     <text x="1632" y="452" class="ref" text-anchor="end">140</text>
     <rect class="b-vpu rf" x="892" y="462" width="740" height="46" rx="5"/>
-    <text x="906" y="480" class="ti t-vpu" font-size="12.5">VREG — 32 &times; [8&times;8] fp32 · 8 KiB · banked per-column RF (LOCKED)</text>
+    <text x="906" y="480" class="ti t-vpu" font-size="12.5">VREG - 32 &times; [8&times;8] fp32 · 8 KiB · banked per-column RF (LOCKED)</text>
     <text x="906" y="497" class="d2">2r2w via bank-parallel col-slices: R_mxu X-stream (206) ‖ R_vpu lane / W_mxu acc.store ‖ W_vpu result (2w headroom, 1 min) · col0 = per-row scalars</text>
     <text x="1626" y="479" class="ref" text-anchor="end">142</text>
     <rect class="inner" x="892" y="514" width="170" height="36" rx="3"/>
     <text x="902" y="530" class="d">vpu_cast_unit</text><text x="902" y="545" class="d2">bf16&harr;fp32</text><text x="1054" y="528" class="refs" text-anchor="end">144</text>
     <rect class="inner" x="1070" y="514" width="272" height="36" rx="3"/>
-    <text x="1080" y="530" class="d">reduce — &Sigma;/max &rarr; col0</text><text x="1080" y="545" class="d2">vpu.reduce {sum,max}</text><text x="1334" y="528" class="refs" text-anchor="end">146</text>
+    <text x="1080" y="530" class="d">reduce - &Sigma;/max &rarr; col0</text><text x="1080" y="545" class="d2">vpu.reduce {sum,max}</text><text x="1334" y="528" class="refs" text-anchor="end">146</text>
     <rect class="inner" x="1350" y="514" width="282" height="36" rx="3"/>
-    <text x="1360" y="530" class="d">LUT — exp(e)·rsqrt·gelu</text><text x="1360" y="545" class="d2">vectorized · vpu.lut</text><text x="1624" y="528" class="refs" text-anchor="end">148</text>
+    <text x="1360" y="530" class="d">LUT - exp(e)·rsqrt·gelu</text><text x="1360" y="545" class="d2">vectorized · vpu.lut</text><text x="1624" y="528" class="refs" text-anchor="end">148</text>
     <rect class="inner" x="892" y="556" width="740" height="46" rx="3"/>
-    <text x="902" y="574" class="d">lane &times; N — SIMD lane-ALU (fp_mul / fp_add / fp_max)</text>
+    <text x="902" y="574" class="d">lane &times; N - SIMD lane-ALU (fp_mul / fp_add / fp_max)</text>
     <text x="902" y="591" class="d2">vpu.simd funct{add sub mul max fma mov} &times; bcast{none,row,col,imm} · flags[5]=ACC_TILE</text>
     <text x="1624" y="573" class="refs" text-anchor="end">150</text>
     <rect class="agu" x="892" y="608" width="740" height="28" rx="3"/>
@@ -260,7 +260,7 @@
   <!-- DRAM (off-tile, OUTSIDE the tile boundary) -->
   <rect class="b-ext" x="516" y="742" width="300" height="50" rx="6"/>
   <text x="532" y="764" class="ti t-ext" font-size="12.5">off-tile DRAM (external)</text>
-  <text x="532" y="782" class="d2">HP port 4 B/cy — 8&times; narrower than on-chip 32 B/cy</text>
+  <text x="532" y="782" class="d2">HP port 4 B/cy - 8&times; narrower than on-chip 32 B/cy</text>
   <text x="808" y="762" class="ref" text-anchor="end">170</text>
 
   <!-- ============ FLOWS ============ -->
@@ -293,7 +293,7 @@
 </div>
 
 <div class="card" style="margin-top:16px">
-  <h2>Reference numerals — FIG. 1</h2>
+  <h2>Reference numerals - FIG. 1</h2>
   <ul class="reflist">
     <li><b>100</b> compute tile (IP boundary)</li>
     <li><b>110</b> Tile sequencer (pc_iram + dispatch)</li>
@@ -321,7 +321,7 @@
     <li><b>150</b> lane&times;N SIMD array</li>
     <li class="nw"><b>152</b> VPU addr-gen &Delta;</li>
     <li><b>160</b> DMU (black box behind SPAD)</li>
-    <li><b>162</b> DMU AGU / slots — deferred (black-boxed)</li>
+    <li><b>162</b> DMU AGU / slots - deferred (black-boxed)</li>
     <li><b>170</b> off-tile DRAM / DM bus</li>
     <li><b>190</b> command plane / CP (external)</li>
     <li><b>192</b> iram_loader (DRAM&rarr;IRAM)</li>
@@ -341,13 +341,13 @@
 
 <div class="panels">
   <div class="card">
-    <h2>Instruction word — 64 bit</h2>
+    <h2>Instruction word - 64 bit</h2>
     <div class="fmt">
       <div class="op">OP<b>[63:56]</b></div><div class="fl">FLAGS<b>[55:48]</b></div>
       <div>op0<b>[47:32]</b></div><div>op1<b>[31:16]</b></div><div>op2<b>[15:0]</b></div>
     </div>
     <p class="foot" style="margin-top:12px">Concurrency (130&#8214;140&#8214;160) = decoupled execution: engines self-sequence behind
-    start/done (214); Tile sequencer does not block; <b>no producer-busy scoreboard</b> — fixed, data-independent
+    start/done (214); Tile sequencer does not block; <b>no producer-busy scoreboard</b> - fixed, data-independent
     FU latency is statically scheduled by the compiler, and the <b>only</b> runtime sync is <b>flush.slot + halt-drain</b>.
     Locked concurrency: <b>MXU ‖ VPU 1-tile software pipeline</b> over the shared VREG (dedicated R_mxu/R_vpu/W_mxu/W_vpu
     ports → ZERO same-port collisions, evidence: K=2 GELU trace). <b>No VLIW.</b> Address base =
@@ -355,18 +355,18 @@
     <div class="delta">
       <h2>&Delta; vs current RTL</h2>
       <ul>
-        <li><b>Distribute AGU</b>: MXU / VPU each own <code>base + iv&middot;stride + march</code> (137 / 152); no central AGU. DMU (160) is a <b>black box</b> behind SPAD — its AGU / slots (162) are deferred, not detailed here.</li>
+        <li><b>Distribute AGU</b>: MXU / VPU each own <code>base + iv&middot;stride + march</code> (137 / 152); no central AGU. DMU (160) is a <b>black box</b> behind SPAD - its AGU / slots (162) are deferred, not detailed here.</li>
         <li><b>Fold to Tile sequencer</b> (110): thin issue folds pc + IRAM + decoder + dispatch (<code>pc_iram</code> + iv_reg + descriptor); engine micro-FSMs move into engines.</li>
         <li><b>Launch I/F</b>: drop <code>program_id</code>/<code>kernarg</code> CSRs (retired); CP (190) DMAs binary to IRAM[0] (220), <code>start</code> (222), <code>done</code> (224).</li>
         <li>Restore <code>mxu.acc.init</code> bias-preload (204) into ACC (8 col-banks &times; depth 2, 138).</li>
-        <li>VREG (142) = 32 &times; [8&times;8] fp32 (8 KiB) banked per-column; add VREG&rarr;MXU stream-read with <b>fp32&rarr;bf16 cast at MXU X-input</b> (206, RS) — bf16&times;bf16 PE, fp32 accum.</li>
+        <li>VREG (142) = 32 &times; [8&times;8] fp32 (8 KiB) banked per-column; add VREG&rarr;MXU stream-read with <b>fp32&rarr;bf16 cast at MXU X-input</b> (206, RS) - bf16&times;bf16 PE, fp32 accum.</li>
         <li><code>acc.store</code> (210) ACC&rarr;VREG; add <code>vreg.store</code>; remove VPU&harr;ACC micro-path.</li>
       </ul>
     </div>
   </div>
 
   <div class="card">
-    <h2>ISA 0.5.0 — 15 opcodes</h2>
+    <h2>ISA 0.5.0 - 15 opcodes</h2>
     <div class="ops">
       <div class="grp">MXU · matmul (130)</div>
       <div class="row"><span class="hx">0x00</span><code>mxu.load.w</code><span class="fx">flags[0]=transB</span></div>
@@ -392,9 +392,9 @@
   </div>
 </div>
 
-<p class="foot"><b>Addressing</b> — no central AGU. Tile sequencer (110) broadcasts <code>iv</code> + descriptor; each engine
+<p class="foot"><b>Addressing</b> - no central AGU. Tile sequencer (110) broadcasts <code>iv</code> + descriptor; each engine
 resolves <code>base + iv&middot;stride</code> (137/152/162) and marches intra-instruction. <code>base</code> is a
-compile-baked immediate, host-patched at launch (D4 GRID_LINEAR + pool_base) — not a CSR. Loop bounds stay
+compile-baked immediate, host-patched at launch (D4 GRID_LINEAR + pool_base) - not a CSR. Loop bounds stay
 literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <b>Detail moved out</b>: VPU internals &rarr; FIG.5 &middot; Tile sequencer &rarr; FIG.6 (standalone datapath figures; former FIG.3/FIG.4 here are superseded).</p>
 
 <style>
@@ -413,8 +413,8 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
 </style>
 
 <header style="margin-top:40px">
-  <h1>Concurrency &amp; hazard model <span style="font-weight:400;color:var(--muted);font-size:15px">— FIG. 2</span></h1>
-  <p class="sub">statically-scheduled decoupled access-execute · 1 foreground (blocking) + N background (nonblocking) · no HW reorder — correctness from the instruction stream alone</p>
+  <h1>Concurrency &amp; hazard model <span style="font-weight:400;color:var(--muted);font-size:15px">- FIG. 2</span></h1>
+  <p class="sub">statically-scheduled decoupled access-execute · 1 foreground (blocking) + N background (nonblocking) · no HW reorder - correctness from the instruction stream alone</p>
 </header>
 
 <div class="scroll">
@@ -423,7 +423,7 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
     <marker id="dn" viewBox="0 0 10 10" refX="5" refY="9" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,0 L5,10 z" fill="var(--ctrl)"/></marker>
   </defs>
 
-  <text x="8" y="26" class="ti" font-size="13" fill="var(--muted)">FA software-pipeline — 3 blocks in flight (prefetch j+2 ‖ matmul j+1 ‖ softmax j)</text>
+  <text x="8" y="26" class="ti" font-size="13" fill="var(--muted)">FA software-pipeline - 3 blocks in flight (prefetch j+2 ‖ matmul j+1 ‖ softmax j)</text>
 
   <!-- overlap band -->
   <rect class="band" x="470" y="44" width="330" height="216" rx="6"/>
@@ -446,7 +446,7 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
   <path d="M360,58 L360,66" class="axl" marker-end="url(#dn)"/><text x="360" y="52" class="tk2" text-anchor="middle">mm&#8593;</text>
   <path d="M420,58 L420,66" class="axl" marker-end="url(#dn)"/><text x="424" y="52" class="tk2" text-anchor="start">vpu&#8593;</text>
   <rect class="bar-wait" x="420" y="72" width="560" height="22" rx="4"/>
-  <text x="700" y="87" class="tk2" text-anchor="middle">seq waits on VPU done (foreground) — MXU &amp; DMU detached</text>
+  <text x="700" y="87" class="tk2" text-anchor="middle">seq waits on VPU done (foreground) - MXU &amp; DMU detached</text>
   <path d="M1000,58 L1000,66" class="axl" marker-end="url(#dn)"/><text x="1000" y="52" class="tk2" text-anchor="middle">next&#8593;</text>
 
   <!-- MXU bar -->
@@ -467,10 +467,10 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
   <rect class="busy" x="300" y="270" width="440" height="8" rx="3"/><text x="746" y="278" class="tk2">slot0-busy (async DMA) &rarr; gates flush.slot</text>
 
   <!-- note -->
-  <text x="20" y="308" class="tk2">requires double-buffered ACC / VREG (block j and j+1 on disjoint buffers) — arranged by compiler</text>
+  <text x="20" y="308" class="tk2">requires double-buffered ACC / VREG (block j and j+1 on disjoint buffers) - arranged by compiler</text>
   <text x="20" y="326" class="tk2">rule: issue background (DMA, MXU) first, foreground (VPU) last &rarr; foreground execution overlaps the detached background</text>
-  <text x="20" y="344" class="tk2 t-mxu">mxu.acc.init (bias preload &rarr; ACC) joins nonblocking set — fixed-latency SPAD read</text>
-  <text x="20" y="362" class="tk2 t-vpu">LOCKED: MXU ‖ VPU 1-tile SW-pipeline over shared VREG — dedicated R_mxu/R_vpu/W_mxu/W_vpu → ZERO same-port collisions (K=2 GELU trace); 2 read ports REQUIRED (X-stream ‖ lane read), writes never collide (1 min, 2 headroom)</text>
+  <text x="20" y="344" class="tk2 t-mxu">mxu.acc.init (bias preload &rarr; ACC) joins nonblocking set - fixed-latency SPAD read</text>
+  <text x="20" y="362" class="tk2 t-vpu">LOCKED: MXU ‖ VPU 1-tile SW-pipeline over shared VREG - dedicated R_mxu/R_vpu/W_mxu/W_vpu → ZERO same-port collisions (K=2 GELU trace); 2 read ports REQUIRED (X-stream ‖ lane read), writes never collide (1 min, 2 headroom)</text>
 </svg>
 </div>
 
@@ -478,23 +478,23 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
   <div class="card">
     <h2>Blocking classification</h2>
     <div class="ops">
-      <div class="grp" style="color:var(--mxu)">nonblocking (fire &amp; detach) — 4</div>
+      <div class="grp" style="color:var(--mxu)">nonblocking (fire &amp; detach) - 4</div>
       <div class="row"><span class="hx">0x01</span><code>mxu.matmul</code><span class="fx">&rarr; ACC</span></div>
       <div class="row"><span class="hx">0x00</span><code>mxu.load.w</code><span class="fx">&rarr; weight buffer</span></div>
       <div class="row nw"><span class="hx">0x02</span><code>mxu.acc.init</code><span class="fx">&rarr; ACC (bias) &Delta; MXU nibble</span></div>
       <div class="row"><span class="hx">0x4x</span><code>dmu.*</code><span class="fx">&rarr; SPAD region (slot)</span></div>
-      <div class="grp" style="color:var(--vpu)">blocking / in-order — everything else</div>
+      <div class="grp" style="color:var(--vpu)">blocking / in-order - everything else</div>
       <div class="row"><span class="hx">0x1x</span><code>vpu.*</code><span class="fx">reduce / lut / simd (foreground)</span></div>
       <div class="row"><span class="hx">0x3x</span><code>acc.store · vreg.*</code><span class="fx">register move</span></div>
     </div>
   </div>
 
   <div class="card">
-    <h2>Scoreboard — ELIMINATED &Delta;</h2>
+    <h2>Scoreboard - ELIMINATED &Delta;</h2>
     <p class="foot" style="margin-top:0">Decision: no producer-busy scoreboard, no HW hazard interlock. Fixed-latency (MXU/VPU/reg-move) is <b>statically scheduled by the compiler</b> (recompile-per-config accepted). The <b>only</b> runtime sync is the DMA fence.</p>
     <div class="ops" style="margin-top:8px">
       <div class="row"><span class="fx" style="color:var(--ctrl)">compiler static</span><span class="fx">all fixed-latency deps (pad / fill NOPs)</span></div>
-      <div class="row"><span class="fx" style="color:var(--mxu)">flush.slot</span><span class="fx">DMA completion (slot-done[0..1]) — only runtime sync</span></div>
+      <div class="row"><span class="fx" style="color:var(--mxu)">flush.slot</span><span class="fx">DMA completion (slot-done[0..1]) - only runtime sync</span></div>
       <div class="row nw"><span class="fx">removed &Delta;</span><span class="fx">producer-busy bits {ACC, VREG, wbuf}</span></div>
       <div class="row nw"><span class="fx">removed &Delta;</span><span class="fx"><code>mxu_raw_hazard</code> · WAIT_MXU · SYNC_MXU</span></div>
     </div>
@@ -502,7 +502,7 @@ literal-only (variable trip-count <code>loop.begin.csr</code> dropped). &nbsp; <
       <h2>&Delta; exposed pipeline</h2>
       <ul style="columns:1">
         <li>Correctness from the instruction stream alone; <b>latency owned by the compiler</b>. Binaries recompiled per config (DIM / pipe depth).</li>
-        <li>"CISC" here = compiler-side macros to simplify its instruction selection — a compiler convenience, <b>no hardware / ISA change</b>. IRAM density is out of scope now.</li>
+        <li>"CISC" here = compiler-side macros to simplify its instruction selection - a compiler convenience, <b>no hardware / ISA change</b>. IRAM density is out of scope now.</li>
         <li>Sequencer stalls only on <code>flush.slot</code> / <code>halt</code>-drain. The whole register scoreboard goes with the already-removable <code>mxu_raw_hazard</code>.</li>
       </ul>
     </div>

@@ -73,7 +73,7 @@
   .badge{font-size:9.5px; font-weight:700; fill:var(--new);}
   /* stage boxes inside the lane FU pipeline */
   .stg{fill:color-mix(in srgb, var(--vpu) 15%, var(--chip)); stroke:var(--vpu); stroke-width:1;}
-  .stg-lut{fill:color-mix(in srgb, var(--vpu) 22%, var(--chip)); stroke:var(--vpu); stroke-width:1.1;}
+  .stg-lut{fill:color-mix(in srgb, var(--vpu) 24%, var(--chip)); stroke:var(--vpu); stroke-width:1.1;}
   .regbar{fill:var(--vpu); opacity:.85;}
   .sub-cone{fill:none; stroke:var(--vpu); stroke-width:.8; opacity:.75;}
   .lane-out{fill:none; stroke:var(--vpu); stroke-width:2.4;}
@@ -120,7 +120,7 @@
   </defs>
 
   <!-- =========================================================
-       BROADCAST NET  (our addition) — col0 / scalar -> all lanes
+       BROADCAST NET  (our addition) - col0 / scalar -> all lanes
        ========================================================= -->
   <rect class="b-ext" x="40" y="44" width="150" height="34" rx="5"/>
   <text x="49" y="60" class="d" font-weight="600">scalar / imm / bias</text>
@@ -134,7 +134,7 @@
   <text x="1485" y="42" class="ref" text-anchor="end">550</text>
 
   <!-- =========================================================
-       VREG — vector register file, 2D tile, 32 regs (per-lane banked slices)
+       VREG - vector register file, 2D tile, 32 regs (per-lane banked slices)
        ========================================================= -->
   <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG &mdash; 32 &times; [8&times;8] fp32 (8 KiB) &middot; banked per-column RF &middot; 2r2w (R_mxu ‖ R_vpu / W_mxu ‖ W_vpu) &mdash; LOCKED</text>
   <text x="1485" y="104" class="ref" text-anchor="end">510</text>
@@ -405,7 +405,7 @@
   <text x="1513" y="662" class="badge">sim==synth obligation</text>
 
   <!-- =========================================================
-       CROSS-LANE REDUCE TREE (our addition) — binary tree depth 3
+       CROSS-LANE REDUCE TREE (our addition) - binary tree depth 3
        ========================================================= -->
   <rect class="fu-out" x="196" y="678" width="1303" height="192" rx="8" style="stroke:var(--vpu);stroke-dasharray:5 3;opacity:.85"/>
   <text x="204" y="696" class="ti t-vpu" font-size="12">CROSS-LANE REDUCE TREE &mdash; binary, depth log&#8322;8 = 3 &middot; sum-tree &#8741; max-tree</text>

@@ -1,94 +1,419 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Implementation (Files &amp; Modules) - mininpu</title>
+<style>body{margin:0}</style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav class="topnav">
-  <div class="inner">
-    <a class="brand" href="index.html">mini<span>npu</span></a>
-    <a class="nl" href="isa.html">ISA 0.5.0</a>
-    <a class="nl" href="microarch.html">Microarchitecture</a>
-    <a class="nl" href="implementation.html">Implementation</a>
-    <a class="nl" href="index.html#figures">Figures</a>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">mininpu &middot; Doc 3 of 3 &middot; <span class="sev gap">In progress</span></div>
+    <h1>Implementation (Files &amp; Modules)</h1>
+    <p class="lede">A proposed RTL file / module hierarchy for the compute tile:
+       fold the sequencer, add a DMU engine, and consolidate the VPU. Grounded in the
+       current <code>npu/src/compute_tile/</code> tree.</p>
+    <div class="chips">
+      <span class="chip">Tile sequencer <b>fold</b></span>
+      <span class="chip">new <b>dmu.sv</b></span>
+      <span class="chip">VPU <b>14 to ~5</b></span>
+      <span class="chip">LOC <b>estimates</b></span>
+    </div>
   </div>
-</nav>
+</header>
 
 <div class="wrap">
+  <div class="shell">
 
-  <header class="page">
-    <h1>Implementation (Files &amp; Modules) &nbsp;<span class="pill wip">In progress</span></h1>
-    <p class="sub">Doc 3 of 3 &middot; how the design maps to RTL</p>
-  </header>
+    <nav class="toc" aria-label="Table of contents">
+      <ol>
+        <li><a href="#s1"><span class="idx">01</span>Overview &amp; current tree</a></li>
+        <li><a href="#s2"><span class="idx">02</span>Tile-sequencer implementation</a></li>
+        <li><a href="#s3"><span class="idx">03</span>Proposed module hierarchy</a></li>
+        <li><a href="#s4"><span class="idx">04</span>DMU: semantics &amp; ports</a></li>
+        <li><a href="#s5"><span class="idx">05</span>Milestones &amp; test plan</a></li>
+      </ol>
+    </nav>
 
-  <p>This document maps the microarchitecture onto the RTL file / module hierarchy.
-     Content is split into a <strong style="color:var(--mxu)">LOCKED</strong>
-     section (decided) and a <strong style="color:var(--ctrl)">DECISIONS
-     PENDING</strong> callout.</p>
+    <main>
 
-  <div class="toc">
-    <h4>Contents</h4>
-    <ol>
-      <li><a href="#locked">Locked design</a> - sequencer fold</li>
-      <li><a href="#pending">Decisions pending</a> - DMU internals, VPU refactor, target hierarchy</li>
-    </ol>
+      <div class="call" style="border-left-color:var(--gap)">
+        <div class="lbl" style="color:var(--gap)">Proposal</div>
+        <p>Proposed structure - to be confirmed during implementation. LOC figures are
+           rough estimates, not commitments.</p>
+      </div>
+
+      <section id="s1" class="reveal">
+        <h2><span class="num">01</span> Overview and current tree</h2>
+        <p class="sub">The proposal maps the locked microarchitecture onto RTL modules.
+           Module context (FIG. 1-2):</p>
+
+        <iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute-tile architecture" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 1-2 - compute-tile architecture and unit layout.
+           <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
+
+        <h3>Locked so far</h3>
+        <div class="call">
+          <div class="lbl">Locked &middot; sequencer fold</div>
+          <p>PC and decoder move inside the tile sequencer. The combined unit is the
+             <strong>issue unit</strong>: IRAM <code>4096 x 64b</code> + decoder. The
+             separate <code>pc.sv</code> / <code>decoder.sv</code> / <code>pc_iram.sv</code>
+             are folded in as <strong>reused submodules</strong> (structural fold; detail
+             in Section 2).</p>
+        </div>
+
+        <h3>Current tree (<code>npu/src/compute_tile/</code>)</h3>
+        <ul>
+          <li><strong>Control / issue:</strong> <code>sequencer.sv</code>, <code>pc.sv</code>, <code>pc_iram.sv</code>, <code>decoder.sv</code>, <code>compute_tile.sv</code> (top).</li>
+          <li><strong>MXU:</strong> <code>mxu.sv</code>, <code>mxu_accumulator.sv</code>, <code>pe.sv</code>, <code>systolic.sv</code>, <code>systolic_tb_wrap.sv</code>.</li>
+          <li><strong>VREG:</strong> <code>vec_regfile.sv</code>.</li>
+          <li><strong>VPU:</strong> <code>vpu_ctrl.sv</code>, <code>vpu_lane.sv</code>, <code>vpu_reduce_unit.sv</code>, <code>vpu_cast_unit.sv</code>, <code>vpu_gelu_unit.sv</code>.</li>
+          <li><strong>SPAD / DMA:</strong> <code>spad.sv</code>, <code>dma_addr_gen.sv</code> (no standalone DMU engine today).</li>
+          <li><strong>FP primitives (<code>fpu/</code>):</strong> <code>fp_add.sv</code>, <code>fp_mul.sv</code>, <code>fp_max.sv</code>, <code>fp_reduce_tree.sv</code>, <code>fp_exp2.sv</code> / <code>fp_exp2_bram.sv</code>, <code>fp_recip.sv</code> / <code>fp_recip_bram.sv</code>, <code>fp_rsqrt.sv</code> / <code>fp_rsqrt_bram.sv</code>, <code>fp_tanh_bram.sv</code>, casts (<code>bf16_to_fp32.sv</code>, <code>fp32_to_bf16.sv</code>, <code>fp16_*</code>, <code>fp8e4m3_mul_fp32.sv</code>, <code>bf16_mul_fp32.sv</code>), plus LUT <code>.mem</code> files (<code>exp2_rom.mem</code>, <code>recip_rom.mem</code>, <code>rsqrt_rom.mem</code>).</li>
+          <li><strong>Misc:</strong> <code>perf_counters.sv</code>.</li>
+        </ul>
+      </section>
+
+      <section id="s2" class="reveal">
+        <h2><span class="num">02</span> Tile-sequencer implementation</h2>
+        <p class="sub"><span class="sev gap">Proposal</span> - grounded in the current
+           tree. Today's <code>sequencer.sv</code> is <strong>~1522 LOC</strong> and
+           carries a co-issue / RAW / SYNC interlock that the fully-exposed model
+           <strong>removes</strong>.</p>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Removed: the hardware interlock</div>
+          <p>The current sequencer serializes via a <strong>co-issue sync gate</strong>,
+             a <strong>RAW hazard</strong> check, and <code>SYNC_MXU</code>. The
+             fully-exposed model has <strong>none</strong> of these: the sequencer issues
+             1 instruction/cycle and never stalls except on <code>flush.slot</code> /
+             <code>halt</code>. The compiler owns all hazards via the reservation
+             table.</p>
+        </div>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>module</th><th>file</th><th>status</th><th>role</th><th>key interface</th><th>FSM</th><th>~LOC (est)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tile sequencer</td>
+              <td><code>tile_sequencer.sv</code></td>
+              <td><strong>rewrite</strong> (from <code>sequencer.sv</code>, minus interlock)</td>
+              <td>fetch -&gt; decode -&gt; issue 1/cy, never stalls except <code>flush.slot</code> / <code>halt</code>; per-unit issue bus</td>
+              <td>per-unit issue / decode buses</td>
+              <td><code>IDLE -&gt; FETCH</code> (3-cyc pipe) <code>-&gt; ISSUE</code>, no sync gate</td>
+              <td>~350 (down from 1522)</td>
+            </tr>
+            <tr>
+              <td>PC + decode + IRAM</td>
+              <td><code>pc.sv</code> + <code>decoder.sv</code> + <code>pc_iram.sv</code></td>
+              <td><strong>reuse</strong> (structural fold)</td>
+              <td>PC, IRAM dual-port, field decode, literal-pool redirect mux</td>
+              <td>IRAM <code>4096 x 64b</code> dual-port; decoded fields out</td>
+              <td>-</td>
+              <td>47 + 34 + 159</td>
+            </tr>
+            <tr>
+              <td>Loop control</td>
+              <td><code>loop_ctrl.sv</code></td>
+              <td><strong>new</strong></td>
+              <td>LIFO loop-stack (depth 4) + iv counters + <code>bo[8]</code> base-offset accumulators + stride apply</td>
+              <td><code>loop.begin</code> reads {hi, stride vector} from the pool; <code>loop.end</code> does <code>iv+=step</code> / <code>bo+=stride</code> / branch (bubble 0) / pop</td>
+              <td>push / iterate / pop</td>
+              <td>~250</td>
+            </tr>
+            <tr>
+              <td>Per-unit AGU</td>
+              <td>(in each unit)</td>
+              <td><strong>new</strong> (tiny)</td>
+              <td>adder: <code>eff = operand_literal + bo[channel]</code>, no multiplier</td>
+              <td>literal + <code>bo</code> in; effective address out</td>
+              <td>-</td>
+              <td>tiny</td>
+            </tr>
+            <tr>
+              <td>DMU</td>
+              <td><code>dmu.sv</code></td>
+              <td><strong>new</strong> (moved out of the sequencer)</td>
+              <td>async DMA, 2 slots (<code>DMA_SLOT_COUNT=2</code>); semantics + port per Section 4</td>
+              <td>sequencer descriptor in; <code>dm_axi</code> master; SPAD ports; <code>slot_done[]</code> out</td>
+              <td>per-slot</td>
+              <td>~400</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <ul>
+          <li><strong>Literal pool:</strong> reuse the existing
+            <strong>IRAM-embedded pool machinery</strong> (mature, tested) rather than a
+            separate LPM RAM; the pool is loaded with the kernel image and read in Decode
+            via the redirect mux.</li>
+          <li><strong>DMA outstanding (corrected):</strong> <strong>2 slots</strong>
+            (<code>hwparams DMA_SLOT_COUNT=2</code>), not single-outstanding.</li>
+        </ul>
+
+        <h3>Test plan</h3>
+        <ul>
+          <li><strong>Reuse:</strong> <code>test_pc.py</code>, <code>test_decoder.py</code>.</li>
+          <li><strong>Rewrite:</strong> <code>test_sequencer</code> -&gt; <code>test_tile_sequencer.py</code> - 1/cy no-stall issue, <code>flush.slot</code>, <code>halt</code> drain.</li>
+          <li><strong>New:</strong> <code>test_loop_ctrl.py</code> - nested loops depth 4 + <code>bo</code> stride-accumulation checked against the 32x32 GELU bo-trace oracle.</li>
+          <li><strong>New:</strong> <code>test_bo_addressing.py</code>.</li>
+          <li><strong>Rewrite:</strong> <code>test_coissue</code> - hardware no longer serializes, so verify <strong>no stall</strong> + compiler-driven overlap.</li>
+        </ul>
+      </section>
+
+      <section id="s3" class="reveal">
+        <h2><span class="num">03</span> Proposed module hierarchy</h2>
+        <p class="sub">Current to proposed consolidation. Files marked "new" do not
+           exist yet; the VPU split is a proposal to confirm.</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>module</th><th>file</th><th>role</th><th>key interface</th><th>~LOC (est)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tile sequencer</td>
+              <td><code>tile_sequencer.sv</code> + <code>loop_ctrl.sv</code> (rewrite of <code>sequencer.sv</code>; reuses <code>pc.sv</code> / <code>pc_iram.sv</code> / <code>decoder.sv</code>; detail in Section 2)</td>
+              <td>fetch + decode + issue + iv / loop-frame stack + <code>bo</code> accumulators</td>
+              <td>IRAM <code>4096 x 64b</code>; per-unit issue/decode buses; iv broadcast; loop stack (depth 4)</td>
+              <td>~600</td>
+            </tr>
+            <tr>
+              <td>DMU</td>
+              <td><code>dmu.sv</code> (new; absorbs <code>dma_addr_gen.sv</code>)</td>
+              <td>async DMA engine, devmem to/from SPAD (see Section 4)</td>
+              <td>sequencer descriptor in; <code>dm_axi</code> master; SPAD read/write ports; <code>slot_done[]</code> out</td>
+              <td>~400</td>
+            </tr>
+            <tr>
+              <td>MXU</td>
+              <td><code>mxu.sv</code>, <code>pe.sv</code>, <code>mxu_accumulator.sv</code> (retire <code>systolic.sv</code> / <code>systolic_tb_wrap.sv</code> into <code>mxu.sv</code> + tb)</td>
+              <td>8x8 weight-stationary systolic array; X fp32 to bf16 cast at PE input; 2 weight buffers; ACC-out wiring</td>
+              <td>VREG X read; SPAD W read (<code>mxu.load.w</code>); ACC write; from sequencer: matmul / load.w / acc.init</td>
+              <td>~700</td>
+            </tr>
+            <tr>
+              <td>VREG</td>
+              <td><code>vec_regfile.sv</code></td>
+              <td>32 x [8x8] fp32 tiles, whole-tile-row, 2r1w</td>
+              <td>2 read (<code>R_mxu</code> / <code>R_vpu</code>) + 1 write (whole tile-row)</td>
+              <td>~300</td>
+            </tr>
+            <tr>
+              <td>VPU (top)</td>
+              <td><code>vpu.sv</code> (new top; merges <code>vpu_ctrl.sv</code> + function-select)</td>
+              <td>ctrl + lane array + function-select <code>{reduce | lut | simd}</code></td>
+              <td>VREG <code>R_vpu</code> read / <code>W_vpu</code> write; from sequencer: <code>vpu.reduce / lut / simd</code></td>
+              <td>~350</td>
+            </tr>
+            <tr>
+              <td>VPU lane</td>
+              <td><code>vpu_lane.sv</code> (absorbs <code>vpu_cast_unit.sv</code>)</td>
+              <td>per-lane SIMD datapath</td>
+              <td>lane operands in; result out; uses <code>fp_prims.sv</code></td>
+              <td>~250</td>
+            </tr>
+            <tr>
+              <td>VPU reduce</td>
+              <td><code>vpu_reduce.sv</code> (from <code>vpu_reduce_unit.sv</code>)</td>
+              <td>cross-lane reduce tree (sum / max)</td>
+              <td>lane vector in; per-row scalar out (to col0)</td>
+              <td>~150</td>
+            </tr>
+            <tr>
+              <td>FP LUT ROM</td>
+              <td><code>fp_lut_rom.sv</code> (merges <code>fp_exp2*</code> / <code>fp_recip*</code> / <code>fp_rsqrt*</code> / <code>fp_tanh_bram.sv</code>)</td>
+              <td>exp / rsqrt / gelu LUT; <code>.mem</code> externalized</td>
+              <td>index in; value out; loads <code>*_rom.mem</code></td>
+              <td>~200</td>
+            </tr>
+            <tr>
+              <td>FP primitives</td>
+              <td><code>fp_prims.sv</code> (merges <code>fp_add.sv</code> / <code>fp_mul.sv</code> / <code>fp_max.sv</code> / casts)</td>
+              <td>shared fp_add / fp_mul / fp_max / cast primitives (shared with MXU)</td>
+              <td>operand(s) in; result out</td>
+              <td>~300</td>
+            </tr>
+            <tr>
+              <td>SPAD</td>
+              <td><code>spad.sv</code> (<code>banked_sram</code>, 8 banks)</td>
+              <td>bf16 scratchpad, 8-bank; arbiter priority <strong>compute (fixed) &gt; DMU (yields)</strong></td>
+              <td>compute port (MXU <code>load.w</code> / <code>acc.init</code> + LSU, fixed-latency) + DMU port (async); port0 / port1 reassigned since X is no longer read from SPAD</td>
+              <td>~250</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <p class="sub">The VPU consolidation (14 to ~5 files) merges the current
+           <code>vpu_cast_unit</code> / <code>vpu_ctrl</code> / <code>vpu_gelu_unit</code>
+           / <code>vpu_lane</code> / <code>vpu_reduce_unit</code> plus many
+           <code>fpu/*</code> files; the exact split is the proposal to confirm.</p>
+      </section>
+
+      <section id="s4" class="reveal">
+        <h2><span class="num">04</span> DMU: semantics and ports</h2>
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Deferred &middot; DMU internals</div>
+          <p>DMU internals (burst sizing, FIFO depth, <code>dm_axi</code> error/timeout,
+             arbitration) are deferred and will be finalized during implementation. Only
+             the semantics and the port interface are fixed here.</p>
+        </div>
+
+        <h3>Semantics</h3>
+        <ul>
+          <li>Async DMA between devmem and SPAD; v1 <strong>2 slots</strong> (<code>DMA_SLOT_COUNT=2</code>).</li>
+          <li><code>dmu.load.spm</code> = DRAM to SPAD; <code>dmu.store.spm</code> = SPAD to DRAM.</li>
+          <li>Descriptor = <code>{SPAD row, devmem addr (literal-pool index; stride at pool[idx+1]), shape = (rows-1)&lt;&lt;8 | (cols-1)}</code>.</li>
+          <li>On completion, sets a per-slot <strong>done bit</strong> that <code>flush.slot</code> waits on.</li>
+          <li><code>halt</code> drains all outstanding transfers.</li>
+        </ul>
+
+        <h3>Port interface</h3>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>group</th><th>signals</th><th>direction</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>clock / reset</td><td><code>clk</code>, <code>rst_n</code></td><td>in</td></tr>
+            <tr><td>from sequencer</td><td><code>start</code>, <code>op</code> (load / store), <code>spad_row</code>, <code>devmem_addr</code> (resolved), <code>shape</code>, <code>slot_id</code></td><td>in</td></tr>
+            <tr><td>memory (devmem)</td><td><code>dm_axi</code> master: AR / R / AW / W / B channels</td><td>master</td></tr>
+            <tr><td>SPAD write port</td><td><code>row</code>, <code>data</code>, <code>we</code></td><td>out</td></tr>
+            <tr><td>SPAD read port</td><td><code>row</code>, <code>data</code></td><td>out / in</td></tr>
+            <tr><td>status</td><td><code>slot_done[]</code> (to <code>flush.slot</code>), <code>busy</code></td><td>out</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="s5" class="reveal">
+        <h2><span class="num">05</span> Implementation milestones and test plan</h2>
+        <p class="sub">Bring-up order, the internal stages each instruction group
+           decomposes into, and the unit / integration test at each step. The
+           <strong>32x32 GELU worked example</strong> is the first full-kernel
+           integration test, reachable at <strong>milestone 3</strong> (the DMU is not
+           needed since X / W are SPAD-resident); each block gets a standalone unit test
+           as soon as it lands. Tests run under <strong>Verilator + cocotb</strong> (no
+           iverilog).</p>
+
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>implement</th><th>instructions</th><th>microinstructions (internal stages)</th><th>unit test</th><th>integration test</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0 <span class="sev good">done</span></td>
+              <td><code>loop_ctrl</code>, <code>tile_sequencer</code> skeleton</td>
+              <td><code>loop.begin</code> / <code>loop.end</code>, <code>flush.slot</code>, <code>halt</code></td>
+              <td>F1/F2/F3 -&gt; decode -&gt; issue; <code>loop.begin</code>: pool-descriptor fetch -&gt; push frame -&gt; iv=lo; <code>loop.end</code>: iv+=step, bo+=stride, branch/pop; <code>flush.slot</code>: spin on <code>dma_slot_done</code>; <code>halt</code>: drain</td>
+              <td><code>test_loop_ctrl</code> (bo-oracle vs 32x32 GELU), <code>test_pc</code>, <code>test_decoder</code></td>
+              <td>control path only (unit dispatch stubbed)</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>MXU + ACC</td>
+              <td><code>mxu.load.w</code>, <code>mxu.matmul</code>, <code>mxu.acc.init</code></td>
+              <td><code>load.w</code>: SPAD read -&gt; weight_matrix -&gt; march -&gt; inactive wbuf (<code>trans_b</code> = row-reversal); <code>matmul</code>: X burst (VREG -&gt; x_matrix, fp32-&gt;bf16 cast) -&gt; switch/promote -&gt; systolic run (fill <code>2N-1</code>) -&gt; accumulate (+/-) -&gt; causal fold; <code>acc.init</code>: SPAD bias -&gt; ACC broadcast</td>
+              <td><code>test_mxu</code> / <code>test_pe</code> / <code>test_systolic</code> (Z=X@W^T, causal, trans_b, accumulate, bias)</td>
+              <td>single 8x8 GEMM tile (needs VREG + SPAD)</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>VREG (2D) + LSU</td>
+              <td><code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code></td>
+              <td><code>acc.store</code>: ACC read -&gt; VREG write (fp32); <code>vreg.load</code>: SPAD read -&gt; bf16-&gt;fp32 widen -&gt; VREG write; <code>vreg.store</code>: VREG read -&gt; fp32-&gt;bf16 narrow -&gt; SPAD write; bo-resolved addressing</td>
+              <td><code>test_vec_regfile</code>, cast round-trip</td>
+              <td>8x8 GEMM e2e; 32x32 GEMM kernel (loops + bo + MXU + VREG + LSU + SPAD)</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>VPU</td>
+              <td><code>vpu.reduce</code>, <code>vpu.lut</code>, <code>vpu.simd</code></td>
+              <td><code>reduce</code>: row read -&gt; horizontal tree (sum/max) -&gt; per-row scalar; <code>lut</code>: row read -&gt; exp2 / rsqrt / gelu(poly+tanh) / recip -&gt; write; <code>simd</code>: 2 reads -&gt; fp_mul + fp_add per funct -&gt; broadcast mux -&gt; write; per-function stage latency</td>
+              <td><code>test_vpu</code> (per-function vs fp oracle, LUT tolerance; latency gate = <code>sim == synth</code>)</td>
+              <td>GELU / LayerNorm / softmax; 32x32 GELU(X@W^T+b) worked example e2e</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>SPAD + full-tile integration</td>
+              <td>(all, integrated)</td>
+              <td>SPAD <code>bank = row mod 8</code>; compute fixed-latency, DMU yields on conflict; port arbitration; MXU || VPU overlap microsequencing</td>
+              <td><code>test_banked_sram</code> / <code>test_spad</code> (arbitration, bank access)</td>
+              <td>MXU || VPU overlap (VREG conflict-free verified in RTL), <code>tile_kernel_demo</code> e2e</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>DMU</td>
+              <td><code>dmu.load.spm</code>, <code>dmu.store.spm</code>, <code>flush.slot</code></td>
+              <td>descriptor -&gt; <code>dm_axi</code> burst -&gt; SPAD region write/read -&gt; <code>slot_done</code> set; <code>flush.slot</code> waits slot; async 2 slots; <code>halt</code> drains</td>
+              <td><code>test_async_dma</code>, flush ordering, halt + DMA drain</td>
+              <td>kernels loading X / W from devmem</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>e2e</td>
+              <td>full 15-op kernels</td>
+              <td>full pipeline + nested-loop bo + MXU || VPU || DMU overlap</td>
+              <td>-</td>
+              <td>GPT-2 layer vs ISS oracle</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+    </main>
   </div>
-
-  <!-- ==================== LOCKED ==================== -->
-  <div class="zone locked" id="locked">
-    <div class="zone-head">
-      <span class="pill locked">Locked</span>
-      <h2>Current design</h2>
-    </div>
-
-    <h3>Sequencer fold</h3>
-    <ul>
-      <li>The <strong>PC and decoder move inside the tile sequencer</strong>.</li>
-      <li>The combined unit is renamed <strong>"Tile sequencer"</strong>.</li>
-      <li>It is the <strong>issue unit</strong>: IRAM <code>4096 &times; 64b</code>
-        + decoder.</li>
-    </ul>
-  </div>
-
-  <!-- ==================== PENDING ==================== -->
-  <div class="zone pending" id="pending">
-    <div class="zone-head">
-      <span class="pill wip">Decisions pending</span>
-      <h2>Open items</h2>
-    </div>
-
-    <h3>DMU internals (currently a black box)</h3>
-    <ul>
-      <li>Descriptor slots.</li>
-      <li>Burst behavior.</li>
-      <li><code>dm_axi</code> error / timeout handling.</li>
-      <li>Blocking vs async policy.</li>
-    </ul>
-
-    <h3>VPU file refactor (14 &rarr; 5 files)</h3>
-    <ul>
-      <li>A <strong>proposal, not yet decided</strong>.</li>
-      <li>Which modules merge.</li>
-      <li>Shared FP-primitive location.</li>
-    </ul>
-
-    <h3>Target file / module hierarchy</h3>
-    <ul>
-      <li>Module hierarchy + line counts + interfaces.</li>
-      <li>To be authored <strong>once the above are decided</strong>.</li>
-    </ul>
-  </div>
-
 </div>
 
-<footer class="foot">
-  mininpu &middot; Implementation (Doc 3, WIP) &middot;
-  <a href="index.html">back to index</a>
+<footer>
+  <div class="wrap">
+    <span>mininpu &middot; Implementation (Doc 3, WIP proposal)</span>
+    <span class="mono"><a href="index.html">back to index</a></span>
+  </div>
 </footer>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var map={};
+  links.forEach(function(a){var id=a.getAttribute('href').slice(1);var s=document.getElementById(id);if(s){map[id]=a;}});
+  var sections=Object.keys(map).map(function(id){return document.getElementById(id);});
+  if('IntersectionObserver' in window){
+    var spy=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(a){a.classList.remove('active');});
+          var a=map[e.target.id];
+          if(a){a.classList.add('active');}
+        }
+      });
+    },{rootMargin:'-10% 0px -70% 0px',threshold:0});
+    sections.forEach(function(s){spy.observe(s);});
+  }
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var rev=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');rev.unobserve(e.target);}
+      });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    reveals.forEach(function(el){rev.observe(el);});
+  } else {
+    reveals.forEach(function(el){el.classList.add('in');});
+  }
+})();
+</script>
 
 </body>
 </html>

@@ -1,616 +1,601 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ISA 0.5.0 Specification - mininpu</title>
+<style>body{margin:0}</style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav class="topnav">
-  <div class="inner">
-    <a class="brand" href="index.html">mini<span>npu</span></a>
-    <a class="nl" href="isa.html">ISA 0.5.0</a>
-    <a class="nl" href="microarch.html">Microarchitecture</a>
-    <a class="nl" href="implementation.html">Implementation</a>
-    <a class="nl" href="index.html#figures">Figures</a>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">mininpu &middot; Doc 1 of 3 &middot; <span class="sev good">Locked</span></div>
+    <h1>mininpu Compute-Tile ISA Reference</h1>
+    <p class="lede">Instruction Set Architecture reference for the mininpu
+       matmul/vector accelerator compute tile, version 0.5.0.</p>
+    <div class="chips">
+      <span class="chip"><b>ISA 0.5.0</b></span>
+      <span class="chip"><b>15</b> opcodes</span>
+      <span class="chip"><b>64-bit</b> word</span>
+      <span class="chip">in-order, <b>no interlock</b></span>
+    </div>
   </div>
-</nav>
+</header>
 
 <div class="wrap">
+  <div class="shell">
 
-  <header class="page">
-    <h1>mininpu Compute-Tile ISA Reference &nbsp;<span class="pill locked">Locked</span></h1>
-    <p class="sub">v0.5.0 &middot; Doc 1 of 3</p>
-  </header>
+    <nav class="toc" aria-label="Table of contents">
+      <ol>
+        <li><a href="#s1"><span class="idx">01</span>Overview &amp; Invariants</a></li>
+        <li><a href="#s2"><span class="idx">02</span>State &amp; Geometry</a></li>
+        <li><a href="#s3"><span class="idx">03</span>Instruction Encoding</a></li>
+        <li><a href="#s4"><span class="idx">04</span>Flags &amp; Locked Decisions</a></li>
+        <li><a href="#s5"><span class="idx">05</span>Timing &amp; Reservation Contract</a></li>
+        <li><a href="#s6"><span class="idx">06</span>Compiler Scheduling Contract</a></li>
+        <li><a href="#s7"><span class="idx">07</span>Worked Example: 32x32 GELU</a></li>
+        <li><a href="#s8"><span class="idx">08</span>Deferred / Notes</a></li>
+      </ol>
+    </nav>
 
-  <p>Instruction Set Architecture reference for the mininpu matmul/vector
-     accelerator compute tile.</p>
+    <main>
 
-  <ul>
-    <li><strong>ISA version:</strong> 0.5.0</li>
-    <li><strong>Opcode count:</strong> 15</li>
-    <li><strong>Instruction word:</strong> 64-bit, fixed width</li>
-    <li><strong>Issue model:</strong> in-order, single issue, 1 instruction/cycle</li>
-    <li><strong>Hazard model:</strong> NO hardware interlock, NO producer-busy
-      scoreboard - the compiler owns all hazard avoidance and latency scheduling
-      (see <a href="#s6">Section 6</a>).</li>
-  </ul>
+      <section id="s1" class="reveal">
+        <h2><span class="num">01</span> Overview and Invariants</h2>
+        <p class="sub">A small, statically-scheduled instruction set of 15 opcodes for
+           a matmul/vector accelerator tile.</p>
+        <ul>
+          <li><strong>Issue:</strong> in-order, single issue, 1 instruction/cycle.</li>
+          <li><strong>NO producer-busy scoreboard, NO hardware interlock.</strong> The
+            hardware never stalls a consumer for an in-flight producer and never
+            detects a clobbered in-flight operand.</li>
+          <li><strong>The compiler owns all hazard avoidance</strong>, latency padding,
+            and structural serialization (see <a href="#s6">Section 6</a>).</li>
+          <li><code>flush.slot</code> is the <strong>only runtime sync</strong>
+            primitive.</li>
+          <li><strong>Nonblocking set</strong> = <code>{mxu.matmul, mxu.load.w,
+            mxu.acc.init, async-DMA}</code>; every other op is <strong>blocking</strong>.</li>
+          <li><strong>Instruction word:</strong> 64-bit fixed width; operand storage is
+            fixed per opcode, no runtime type tag.</li>
+          <li><strong>dtype convention:</strong> bf16 in SPAD and DRAM (devmem); fp32 in
+            VREG and ACC.</li>
+          <li><strong>Launch:</strong> a kernel is a binary of NPU assembly; the command
+            processor loads it into <code>IRAM[0]</code> and starts the sequencer, which
+            runs to the terminal <code>halt</code>.</li>
+        </ul>
+      </section>
 
-  <div class="toc">
-    <h4>Contents</h4>
-    <ol>
-      <li><a href="#s1">Overview</a></li>
-      <li><a href="#s2">Architectural State and Geometry</a></li>
-      <li><a href="#s3">Instruction Encoding</a></li>
-      <li><a href="#s4">Flags Summary and LOCKED Decisions</a></li>
-      <li><a href="#s5">Per-Instruction Latency</a></li>
-      <li><a href="#s6">Compiler Scheduling Contract</a></li>
-      <li><a href="#s7">Deferred / Notes</a></li>
-    </ol>
-  </div>
+      <section id="s2" class="reveal">
+        <h2><span class="num">02</span> Architectural State and Geometry</h2>
+        <p class="sub">Four explicitly-addressed data spaces (analogous to CUDA
+           <code>.global</code> / <code>.shared</code> / <code>.reg</code> plus a tensor
+           accumulator), plus MXU weight buffers and control state. No unified
+           addressing: the space is implied by the opcode/operand slot.</p>
 
-  <hr>
+        <iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute-tile architecture" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
+        <p class="sub">FIG. 1-2 - compute-tile architecture: the four data spaces and the datapath spine.
+           <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
 
-  <h2 id="s1">1. Overview</h2>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>space</th><th>role</th><th>addressed by</th><th>geometry</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="mono">devmem</span></td>
+              <td>off-tile DRAM (host-shared, global), bf16</td>
+              <td>byte address via literal-pool index + launch patch</td>
+              <td>256b words (<code>DM_ADDR_WIDTH=27</code>)</td>
+            </tr>
+            <tr>
+              <td><span class="mono">SPAD</span></td>
+              <td>on-chip scratchpad, bf16 (explicitly managed, <strong>NOT a cache</strong>)</td>
+              <td>SPAD row index (10-bit), separate 0-based space</td>
+              <td>1024 x 256b = <strong>32 KiB</strong>, 8 banks (<code>addr % 8</code>)</td>
+            </tr>
+            <tr>
+              <td><span class="mono">VREG</span></td>
+              <td>vector register file, fp32</td>
+              <td>VREG id (5-bit, 0..31)</td>
+              <td><strong>32 x [8x8] fp32 = 8 KiB</strong>, 2D tile, whole-tile-row access (2r1w)</td>
+            </tr>
+            <tr>
+              <td><span class="mono">ACC</span></td>
+              <td>matmul accumulator, fp32 (MXU-owned)</td>
+              <td>ACC bank index; banks {0,1} both used (depth-2 double-buffer)</td>
+              <td><strong>[8x8] fp32 x depth 2 = 512 B</strong>, 8 per-column banks</td>
+            </tr>
+            <tr>
+              <td><span class="mono">wbuf</span></td>
+              <td>weight buffer (MXU, stationary)</td>
+              <td>implicit; <code>mxu.load.w</code> fills inactive, <code>mxu.matmul</code> promotes</td>
+              <td>2 (double buffer)</td>
+            </tr>
+            <tr>
+              <td><span class="mono">control</span></td>
+              <td>PC + induction vars</td>
+              <td>-</td>
+              <td>PC 12-bit; <code>iv_reg</code> x4 (LIFO nest depth 4), 32-bit each</td>
+            </tr>
+            <tr>
+              <td><span class="mono">LPM</span></td>
+              <td>literal pool: on-chip constant / param RAM in the tile sequencer
+                 (baked + launch-patched, read-only to the datapath)</td>
+              <td>pool-index (8-bit, 0..255)</td>
+              <td>256 x 64b = <strong>~2 KiB</strong>; <strong>NOT devmem, NOT SPAD</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
 
-  <p>The mininpu compute tile is a matmul/vector accelerator exposing a small,
-     statically-scheduled instruction set of <strong>15 opcodes</strong>. The
-     programmer-visible pipeline issues <strong>in-order, single issue, at exactly
-     one instruction per cycle</strong>. There is deliberately <strong>no hardware
-     interlock and no producer-busy scoreboard</strong>: the hardware never stalls
-     a consumer waiting for an in-flight producer, and it never detects a write
-     that clobbers an operand still being read. All hazard avoidance, latency
-     padding, and structural-resource serialization are the responsibility of the
-     compiler's static schedule (<a href="#s6">Section 6</a>).</p>
+        <h3>Datapath spine</h3>
+        <div class="ladder">
+          <div class="rung">
+            <div class="node"><span class="k">devmem</span><span class="t">off-tile DRAM, bf16</span></div>
+            <div class="edge"><span class="d">DMU: async DRAM to SPAD copy.</span></div>
+          </div>
+          <div class="rung">
+            <div class="node"><span class="k">SPAD</span><span class="t">on-chip scratchpad, bf16</span></div>
+            <div class="edge"><span class="d">dtype boundary: <code>vreg.load</code> widens bf16 to fp32; <code>vreg.store</code> truncates fp32 to bf16.</span></div>
+          </div>
+          <div class="rung">
+            <div class="node"><span class="k">VREG</span><span class="t">register file, fp32</span></div>
+            <div class="edge"><span class="d">MXU streams X (cast fp32 to bf16 at the PE input); output lands in ACC.</span></div>
+          </div>
+          <div class="rung">
+            <div class="node"><span class="k">ACC</span><span class="t">accumulator, fp32</span></div>
+            <div class="edge"><span class="d"><code>acc.store</code> drains ACC to VREG, exact lossless fp32.</span></div>
+          </div>
+        </div>
 
-  <p>Every instruction is a <strong>64-bit fixed-width word</strong>. Operand
-     storage is fixed by opcode; there is no runtime type tag in the encoding
-     (<a href="#s3">Section 3</a>).</p>
+        <ul>
+          <li><strong>W path:</strong> SPAD to wbuf via <code>mxu.load.w</code> (weights stationary).</li>
+          <li><strong>X path:</strong> VREG to PE array, streamed, cast fp32 to bf16 at the PE input.</li>
+          <li><strong>Output path:</strong> PE array to ACC.</li>
+          <li><strong>dtype boundary</strong> sits only at the SPAD-VREG edge.</li>
+        </ul>
 
-  <p>Data types follow a fixed convention across the memory spaces: <strong>bf16 in
-     SPAD and DRAM (devmem); fp32 in VREG and ACC.</strong> The only
-     dtype-converting instructions are <code>vreg.load</code> (bf16 -&gt; fp32
-     widen on SPAD -&gt; VREG) and <code>vreg.store</code> (fp32 -&gt; bf16
-     truncate on VREG -&gt; SPAD). The MXU casts its streamed X operand fp32 -&gt;
-     bf16 at the PE input; <code>acc.store</code> is an exact, lossless fp32 copy
-     ACC -&gt; VREG.</p>
+        <h3 id="s2-1">2.1 Literal pool (LPM)</h3>
+        <p class="sub">A fifth on-chip element, beside the four data spaces plus
+           <code>wbuf</code> and <code>control</code>. It is the tile's constant store.</p>
+        <ul>
+          <li><strong>Address space:</strong> a separate <strong>pool-index</strong>
+            space, 8-bit index (0..255); <strong>256 x 64b entries (~2 KiB)</strong>;
+            on-chip RAM inside the tile sequencer. <strong>NOT devmem, NOT SPAD.</strong></li>
+          <li><strong>Structure:</strong> an array of 64-bit constant entries. Entry
+            classes: (a) <strong>loop descriptor</strong> = <code>{hi bound, packed
+            bo-stride vector}</code>; (b) <strong>devmem base address</strong>
+            (launch-patched); (c) <strong>scalar immediate</strong>.</li>
+          <li><strong>Access:</strong> read-only to the datapath; read by the sequencer
+            in <strong>Decode</strong>. Written once per launch = compiler-baked
+            constants + command-processor launch patch (devmem bases via
+            <code>program_id</code>/<code>GRID_LINEAR</code> + <code>kernel_args</code>).
+            Part of the kernel image (loaded with the code).</li>
+          <li><strong>Operands that reference it:</strong> <code>loop.begin.op1</code>
+            (hi + adjacent stride vector), <code>dmu.*.op1</code> (devmem base; stride
+            at <code>pool[idx+1]</code>), <code>vpu.simd.op2</code> (immediate when
+            <code>bcast=imm</code>).</li>
+        </ul>
 
-  <p><strong>Launch model:</strong> a kernel is a binary of NPU assembly. At
-     launch, the command processor loads the kernel binary into <code>IRAM[0]</code>
-     and starts the sequencer, which runs to the terminal <code>halt</code>
-     instruction. <code>halt</code> drains all outstanding DMU transfers, then
-     asserts <code>done</code>. Because there is no hardware reorder, speculation,
-     or interlock, program correctness is provable from the instruction stream
-     alone given the fixed, data-independent instruction latencies
-     (<a href="#s5">Section 5</a>); a binary is only valid for the
-     microarchitectural latencies it was compiled against.</p>
+        <h3 id="s2-2">2.2 Addressing model</h3>
+        <ul>
+          <li><strong>Effective address</strong> of a memory/register operand =
+            <code>operand_literal + bo[channel]</code>, where <code>bo</code> is a
+            per-channel <strong>base-offset accumulator</strong> maintained by the
+            sequencer. There is <strong>no address multiplier</strong> in the datapath:
+            the per-unit AGU is just an adder.</li>
+          <li><strong><code>bo</code> is maintained by stride-accumulation over the loop
+            nest:</strong> <code>loop.begin</code> pushes the current <code>bo</code>
+            (LIFO) and loads the loop's stride vector from the pool into the loop frame;
+            each <code>loop.end</code> iteration does <code>bo[ch] += stride[ch]</code>;
+            loop exit pops.</li>
+          <li>So <code>bo[ch] = sum over active loops of (iter * stride)</code>. The
+            induction variable is the loop counter; the address math is the incremental
+            accumulation (equivalent to <code>const + sum(iv*stride)</code> but
+            multiplier-free).</li>
+        </ul>
+      </section>
 
-  <hr>
-
-  <h2 id="s2">2. Architectural State and Geometry</h2>
-
-  <p>The tile exposes <strong>four explicitly-addressed data spaces</strong>
-     (analogous to CUDA <code>.global</code> / <code>.shared</code> /
-     <code>.reg</code> plus a tensor accumulator), plus MXU-internal weight buffers
-     and control state. There is <strong>no unified / generic addressing</strong>:
-     each space has its own address form and the space is implied by the
-     opcode/operand slot.</p>
-
-  <div class="tablewrap">
-  <table>
-    <thead>
-      <tr><th>space</th><th>role</th><th>addressed by</th><th>geometry</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><strong>devmem</strong></td>
-        <td>off-tile DRAM (host-shared, global)</td>
-        <td>byte address via literal-pool index + D4 launch patch</td>
-        <td>4 GB (<code>DM_ADDR_WIDTH=27</code>, 256b words)</td>
-      </tr>
-      <tr>
-        <td><strong>SPAD</strong></td>
-        <td>on-chip scratchpad (shared, explicitly managed, <strong>NOT a cache</strong>)</td>
-        <td>SPAD row index (10-bit)</td>
-        <td>1024 x 256b = <strong>32 KiB</strong>, 8 banks (<code>addr % 8</code>)</td>
-      </tr>
-      <tr>
-        <td><strong>VREG</strong></td>
-        <td>vector register file (fp32)</td>
-        <td>VREG id (5-bit, 0..31)</td>
-        <td><strong>32 x [8x8] fp32 tile = 8 KiB</strong> (2D tile, banked per-column for 2r2w)</td>
-      </tr>
-      <tr>
-        <td><strong>ACC</strong></td>
-        <td>matmul accumulator (fp32, MXU-owned)</td>
-        <td>ACC bank index (1-bit; implicit bank 0 in v1)</td>
-        <td><strong>[8x8] fp32 x depth 2 = 512 B</strong>, organized as 8 per-column banks</td>
-      </tr>
-      <tr>
-        <td><strong>wbuf</strong></td>
-        <td>weight buffer (MXU, stationary)</td>
-        <td>implicit (no operand); <code>mxu.load.w</code> fills inactive, <code>mxu.matmul</code> promotes</td>
-        <td>2 (double buffer)</td>
-      </tr>
-      <tr>
-        <td><strong>control</strong></td>
-        <td>PC + induction vars</td>
-        <td>-</td>
-        <td>PC 12-bit; <code>iv_reg</code> x4 (LIFO nest depth 4), 32-bit each</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-
-  <p><strong>The datapath spine:</strong></p>
-
-<pre><code>devmem  &lt;--DMU--&gt;  SPAD  &lt;--cast--&gt;  VREG  &lt;--&gt;  ACC</code></pre>
-
-  <ul>
-    <li><strong>W path:</strong> SPAD -&gt; wbuf via <code>mxu.load.w</code>
-      (weights are stationary).</li>
-    <li><strong>X path:</strong> VREG -&gt; PE array, streamed (row-stationary
-      hybrid), cast fp32 -&gt; bf16 at the PE input.</li>
-    <li><strong>Output path:</strong> PE array -&gt; ACC.</li>
-  </ul>
-
-  <p>The dtype boundary sits at the SPAD &lt;-&gt; VREG edge: bf16 lives in
-     SPAD/DRAM, fp32 lives in VREG/ACC, and the conversion happens only on
-     <code>vreg.load</code> / <code>vreg.store</code>.</p>
-
-  <hr>
-
-  <h2 id="s3">3. Instruction Encoding</h2>
-
-  <p>Every instruction is a single 64-bit word with a fixed field layout:</p>
-
+      <section id="s3" class="reveal">
+        <h2><span class="num">03</span> Instruction Encoding</h2>
+        <p class="sub">Single 64-bit word, fixed field layout.</p>
 <pre><code> 63        56 55      48 47        32 31        16 15         0
 +-----------+----------+------------+------------+------------+
 |  OP[7:0]  | FLAGS[7:0]|  op0[15:0] |  op1[15:0] |  op2[15:0] |
 +-----------+----------+------------+------------+------------+</code></pre>
+        <ul>
+          <li><code>OP[63:56]</code> - 8-bit opcode.</li>
+          <li><code>FLAGS[55:48]</code> - 8-bit flags byte (per-op; unused bits reserved-must-be-zero).</li>
+          <li><code>op0[47:32]</code> / <code>op1[31:16]</code> / <code>op2[15:0]</code> - three 16-bit operand slots, storage fixed per opcode.</li>
+        </ul>
 
-  <ul>
-    <li><code>OP[63:56]</code> - 8-bit opcode.</li>
-    <li><code>FLAGS[55:48]</code> - 8-bit flags byte (per-op meaning; unused bits
-      are reserved-must-be-zero).</li>
-    <li><code>op0[47:32]</code>, <code>op1[31:16]</code>, <code>op2[15:0]</code> -
-      three 16-bit operand slots.</li>
-  </ul>
+        <h3>3.1 Opcode table (SSOT)</h3>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>opcode</th><th>mnemonic</th><th>op0</th><th>op1</th><th>op2</th>
+              <th>flags</th><th>writeback</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>0x00</code></td><td><code>mxu.load.w</code></td>
+              <td>SPAD row (W tile)</td><td>-</td><td>-</td>
+              <td><code>[0]=transB</code> (reverse weight-row load order)</td>
+              <td>wbuf (inactive)</td>
+            </tr>
+            <tr>
+              <td><code>0x01</code></td><td><code>mxu.matmul</code></td>
+              <td>ACC (<code>acc_out</code>)</td><td>VREG id (X, streamed)</td><td>-</td>
+              <td><code>[0]=accum</code>, <code>[1]=causal</code></td>
+              <td>ACC</td>
+            </tr>
+            <tr>
+              <td><code>0x02</code></td><td><code>mxu.acc.init</code></td>
+              <td>ACC (<code>acc_out</code>)</td><td>SPAD row (bias, 1xN)</td><td>-</td>
+              <td>-</td>
+              <td>ACC (bias broadcast to all rows)</td>
+            </tr>
+            <tr>
+              <td><code>0x10</code></td><td><code>vpu.reduce</code></td>
+              <td>VREG dst</td><td>VREG src</td><td>-</td>
+              <td><code>[0]</code>=0 sum / 1 max</td>
+              <td>VREG (per-row scalar to col0)</td>
+            </tr>
+            <tr>
+              <td><code>0x11</code></td><td><code>vpu.lut</code></td>
+              <td>VREG dst</td><td>VREG src</td><td>-</td>
+              <td><code>[1:0]</code>=0 exp(base-e) / 1 rsqrt / 2 gelu</td>
+              <td>VREG</td>
+            </tr>
+            <tr>
+              <td><code>0x12</code></td><td><code>vpu.simd</code></td>
+              <td>VREG dst</td><td>VREG a</td><td>VREG b (or pool-imm if <code>bcast=imm</code>)</td>
+              <td><code>[4:2]=funct{add,sub,mul,max,fma,mov}</code>, <code>[1:0]=bcast{none,row,col,imm}</code></td>
+              <td>VREG</td>
+            </tr>
+            <tr>
+              <td><code>0x30</code></td><td><code>acc.store</code></td>
+              <td>VREG dst</td><td>ACC src</td><td>-</td>
+              <td>-</td>
+              <td>VREG (fp32 lossless)</td>
+            </tr>
+            <tr>
+              <td><code>0x32</code></td><td><code>vreg.load</code></td>
+              <td>VREG dst</td><td>SPAD row (src)</td><td>-</td>
+              <td>-</td>
+              <td>VREG (bf16 to fp32 widen)</td>
+            </tr>
+            <tr>
+              <td><code>0x33</code></td><td><code>vreg.store</code></td>
+              <td>SPAD row (dst)</td><td>VREG src</td><td>-</td>
+              <td>-</td>
+              <td>SPAD (fp32 to bf16 truncate)</td>
+            </tr>
+            <tr>
+              <td><code>0x40</code></td><td><code>dmu.load.spm</code></td>
+              <td>SPAD row (dst)</td>
+              <td>devmem addr (literal-pool index; stride at <code>pool[idx+1]</code>)</td>
+              <td>shape = <code>(rows-1)&lt;&lt;8 | (cols-1)</code></td>
+              <td><code>[4]=IMM_OP1</code></td>
+              <td>SPAD region</td>
+            </tr>
+            <tr>
+              <td><code>0x42</code></td><td><code>dmu.store.spm</code></td>
+              <td>SPAD row (src)</td><td>devmem addr (pool index)</td>
+              <td>shape (<code>0xFFFF</code> = derive at lowering)</td>
+              <td><code>[4]=IMM_OP1</code></td>
+              <td>DRAM</td>
+            </tr>
+            <tr>
+              <td><code>0x50</code></td><td><code>loop.begin</code></td>
+              <td>iv id</td><td>hi bound (pool index)</td>
+              <td><code>(lo&lt;&lt;8) | step</code>, both 8-bit literals</td>
+              <td><code>[4]=IMM_OP1</code></td>
+              <td>push loop frame, IV=lo</td>
+            </tr>
+            <tr>
+              <td><code>0x51</code></td><td><code>loop.end</code></td>
+              <td>iv id</td><td>-</td><td>-</td>
+              <td>-</td>
+              <td>IV += step; branch to body if IV &lt; hi</td>
+            </tr>
+            <tr>
+              <td><code>0x53</code></td><td><code>flush.slot</code></td>
+              <td>slot bitmask (16-bit immediate)</td><td>-</td><td>-</td>
+              <td>-</td>
+              <td>none (async-DMA region fence)</td>
+            </tr>
+            <tr>
+              <td><code>0x5F</code></td><td><code>halt</code></td>
+              <td>-</td><td>-</td><td>-</td>
+              <td>-</td>
+              <td>none (drain all DMU, then assert <code>done</code>)</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
 
-  <p>Operand storage (which slot holds a SPAD row vs. a VREG id vs. a devmem
-     pool-index, etc.) is <strong>fixed per opcode</strong>; there is no type tag
-     in the word.</p>
+        <h3>3.2 Per-op semantics</h3>
+        <ul>
+          <li><code>mxu.load.w</code> - load W tile from SPAD[<code>op0</code>] into the inactive wbuf; <code>transB</code> reverses row load order; each <code>mxu.matmul</code> consumes exactly one preceding <code>mxu.load.w</code>.</li>
+          <li><code>mxu.matmul</code> - streaming matmul into ACC[<code>op0</code>] from X = VREG[<code>op1</code>] and the active stationary weights (X cast fp32 to bf16 at the PE input):
+<pre><code>acc_out = (accum ? acc_out : 0) + X @ W^T</code></pre>
+            <code>causal</code> masks the output upper triangle. A matmul with no pending <code>mxu.load.w</code> is <strong>illegal</strong>.</li>
+          <li><code>mxu.acc.init</code> - seed ACC[<code>op0</code>] with a 1xN bias from SPAD[<code>op1</code>], broadcast to all rows.</li>
+          <li><code>vpu.reduce</code> - per-row reduce of VREG[<code>op1</code>] to VREG[<code>op0</code>] col0; flag selects sum / max.</li>
+          <li><code>vpu.lut</code> - elementwise unary exp / rsqrt / gelu, VREG to VREG.</li>
+          <li><code>vpu.simd</code> - elementwise ALU (<code>add/sub/mul/max/fma/mov</code>) with broadcast mode <code>none/row/col/imm</code>.</li>
+          <li><code>acc.store</code> - drain ACC[<code>op1</code>] to VREG[<code>op0</code>], exact lossless fp32 (no conversion).</li>
+          <li><code>vreg.load</code> - SPAD[<code>op1</code>] to VREG[<code>op0</code>], widen bf16 to fp32.</li>
+          <li><code>vreg.store</code> - VREG[<code>op1</code>] to SPAD[<code>op0</code>], truncate fp32 to bf16.</li>
+          <li><code>dmu.load.spm</code> - async DRAM to SPAD; async, 2 slots (<code>DMA_SLOT_COUNT=2</code>); region unsafe to consume until a matching <code>flush.slot</code>.</li>
+          <li><code>dmu.store.spm</code> - async SPAD to DRAM; <code>op2=0xFFFF</code> derives shape at lowering.</li>
+          <li><code>loop.begin</code> - push a loop frame on <code>op0</code>, set <code>IV=lo</code> (LIFO, nest depth 4).</li>
+          <li><code>loop.end</code> - <code>IV += step</code>; branch to body while <code>IV &lt; hi</code>, else pop.</li>
+          <li><code>flush.slot</code> - block until the masked DMU slot(s) report done; the only runtime sync.</li>
+          <li><code>halt</code> - drain all outstanding DMU, then assert <code>done</code>; ends the kernel.</li>
+        </ul>
+      </section>
 
-  <h3 id="s3-1">3.1 Opcode table</h3>
+      <section id="s4" class="reveal">
+        <h2><span class="num">04</span> Flags and Locked Decisions</h2>
 
-  <div class="tablewrap">
-  <table>
-    <thead>
-      <tr>
-        <th>opcode</th><th>mnemonic</th><th>op0</th><th>op1</th><th>op2</th>
-        <th>flags</th><th>writeback</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>0x00</code></td><td><code>mxu.load.w</code></td>
-        <td>SPAD row (W tile)</td><td>-</td><td>-</td>
-        <td><code>[0]=transB</code> (reverse weight-row load order)</td>
-        <td>wbuf (inactive)</td>
-      </tr>
-      <tr>
-        <td><code>0x01</code></td><td><code>mxu.matmul</code></td>
-        <td>ACC (<code>acc_out</code>)</td><td>VREG id (X, streamed)</td><td>-</td>
-        <td><code>[0]=accum</code>, <code>[1]=causal</code></td>
-        <td>ACC</td>
-      </tr>
-      <tr>
-        <td><code>0x02</code></td><td><code>mxu.acc.init</code></td>
-        <td>ACC (<code>acc_out</code>)</td><td>SPAD row (bias, 1xN)</td><td>-</td>
-        <td>-</td>
-        <td>ACC (bias broadcast to all rows)</td>
-      </tr>
-      <tr>
-        <td><code>0x10</code></td><td><code>vpu.reduce</code></td>
-        <td>VREG dst</td><td>VREG src</td><td>-</td>
-        <td><code>[0]</code>=0 sum / 1 max</td>
-        <td>VREG (per-row scalar -&gt; col0)</td>
-      </tr>
-      <tr>
-        <td><code>0x11</code></td><td><code>vpu.lut</code></td>
-        <td>VREG dst</td><td>VREG src</td><td>-</td>
-        <td><code>[1:0]</code>=0 exp(base-e) / 1 rsqrt / 2 gelu</td>
-        <td>VREG</td>
-      </tr>
-      <tr>
-        <td><code>0x12</code></td><td><code>vpu.simd</code></td>
-        <td>VREG dst</td><td>VREG a</td><td>VREG b (or pool-imm if <code>bcast=imm</code>)</td>
-        <td><code>[4:2]=funct{add,sub,mul,max,fma,mov}</code>, <code>[1:0]=bcast{none,row,col,imm}</code></td>
-        <td>VREG</td>
-      </tr>
-      <tr>
-        <td><code>0x30</code></td><td><code>acc.store</code></td>
-        <td>VREG dst</td><td>ACC src</td><td>-</td>
-        <td>-</td>
-        <td>VREG (fp32 lossless)</td>
-      </tr>
-      <tr>
-        <td><code>0x32</code></td><td><code>vreg.load</code></td>
-        <td>VREG dst</td><td>SPAD row (src)</td><td>-</td>
-        <td>-</td>
-        <td>VREG (bf16 -&gt; fp32 widen)</td>
-      </tr>
-      <tr>
-        <td><code>0x33</code></td><td><code>vreg.store</code></td>
-        <td>SPAD row (dst)</td><td>VREG src</td><td>-</td>
-        <td>-</td>
-        <td>SPAD (fp32 -&gt; bf16 truncate)</td>
-      </tr>
-      <tr>
-        <td><code>0x40</code></td><td><code>dmu.load.spm</code></td>
-        <td>SPAD row (dst)</td>
-        <td>devmem addr (literal-pool index; stride at <code>pool[idx+1]</code>)</td>
-        <td>shape = <code>(rows-1)&lt;&lt;8 | (cols-1)</code></td>
-        <td><code>[4]=IMM_OP1</code></td>
-        <td>SPAD region</td>
-      </tr>
-      <tr>
-        <td><code>0x42</code></td><td><code>dmu.store.spm</code></td>
-        <td>SPAD row (src)</td><td>devmem addr (pool index)</td>
-        <td>shape (<code>0xFFFF</code> = derive at lowering)</td>
-        <td><code>[4]=IMM_OP1</code></td>
-        <td>DRAM</td>
-      </tr>
-      <tr>
-        <td><code>0x50</code></td><td><code>loop.begin</code></td>
-        <td>iv id</td><td>hi bound (pool index)</td>
-        <td><code>(lo&lt;&lt;8) | step</code>, both 8-bit literals</td>
-        <td><code>[4]=IMM_OP1</code></td>
-        <td>push loop frame, IV=lo</td>
-      </tr>
-      <tr>
-        <td><code>0x51</code></td><td><code>loop.end</code></td>
-        <td>iv id</td><td>-</td><td>-</td>
-        <td>-</td>
-        <td>IV += step; branch to body if IV &lt; hi</td>
-      </tr>
-      <tr>
-        <td><code>0x53</code></td><td><code>flush.slot</code></td>
-        <td>slot bitmask (16-bit immediate)</td><td>-</td><td>-</td>
-        <td>-</td>
-        <td>none (async-DMA region fence)</td>
-      </tr>
-      <tr>
-        <td><code>0x5F</code></td><td><code>halt</code></td>
-        <td>-</td><td>-</td><td>-</td>
-        <td>-</td>
-        <td>none (drain all DMU, then assert <code>done</code>)</td>
-      </tr>
-    </tbody>
-  </table>
+        <div class="call">
+          <div class="lbl">Locked</div>
+          <p><code>flags[5]</code> (<code>ACC_TILE</code>) is <strong>dropped</strong> from <code>vpu.simd</code>; the VPU is VREG-only. Bit 5 is reserved-must-be-zero on all opcodes.</p>
+        </div>
+        <div class="call">
+          <div class="lbl">Locked</div>
+          <p>ACC banks <strong>{0,1} are both used</strong> for depth-2 double-buffering (<code>acc_out</code> / <code>acc_src</code> in <code>[0, ACC_DEPTH=2)</code>). The existing ACC-bank operand field is now <strong>plumbed to select the bank</strong> (no encoding change); an index <code>&gt;= ACC_DEPTH</code> is still an <strong>illegal-op</strong>.</p>
+        </div>
+        <div class="call">
+          <div class="lbl">Locked</div>
+          <p>VREG is a 2D <code>[8x8]</code> fp32 tile (5-bit id unchanged), not a flat vector.</p>
+        </div>
+        <div class="call">
+          <div class="lbl">Locked</div>
+          <p>DMU is <strong>async-only</strong>: the async-mode flag is retired; DMU <code>flags[5]</code> is reserved-must-be-zero.</p>
+        </div>
+
+        <h3>Reserved-must-be-zero</h3>
+        <ul>
+          <li>All unused flag bits on every opcode.</li>
+          <li><code>flags[5]</code> on all opcodes (dropped <code>ACC_TILE</code>).</li>
+          <li>DMU <code>flags[5]</code> (retired async-mode flag).</li>
+        </ul>
+      </section>
+
+      <section id="s5" class="reveal">
+        <h2><span class="num">05</span> Timing and Reservation Contract</h2>
+        <p class="sub">Because there is no hardware interlock or scoreboard, the
+           per-instruction cycle-accurate <strong>access windows</strong> are a normative
+           compiler-hardware contract.</p>
+        <ul>
+          <li>The contract lives in the ISA but is
+            <strong>implementation-versioned</strong>: the structure is fixed now; the
+            absolute offsets are <strong>TBD (RTL-measured)</strong> and locked by the
+            <code>sim == synth</code> requirement.</li>
+          <li>A kernel binary <strong>declares the timing-rev</strong> it was compiled
+            against; a hardware timing-rev mismatch is <strong>rejected / flagged</strong>.
+            This is the concrete form of "recompile if latencies change".</li>
+          <li>The only concrete structural values are <code>N</code> and the systolic
+            fill <code>2N-1</code>. Every other offset below (<code>d</code>,
+            <code>L_matmul</code>, <code>D_vpu</code>, and all absolute numbers) is
+            <strong>TBD (RTL-measured)</strong>.</li>
+        </ul>
+
+        <p class="sub">Structural access windows (offsets symbolic; issue cycle =
+           <code>t</code>):</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>instruction</th><th>reads (port, window)</th><th>writes (port, @cycle)</th><th>notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>mxu.matmul</code></td>
+              <td><code>VREG[X]</code> on <code>R_mxu</code> over <code>[t+d, t+d+N)</code> (1 column/cycle); <code>wbuf(active)</code> implicitly</td>
+              <td><code>ACC</code> at <code>t + L_matmul</code></td>
+              <td>systolic fill = <code>2N-1</code> (structural); <code>VREG[X]</code> is WAR-free only after <code>t+d+N</code></td>
+            </tr>
+            <tr>
+              <td><code>mxu.load.w</code></td>
+              <td><code>SPAD</code> over ~<code>N</code> cycles into <code>wbuf(inactive)</code></td>
+              <td><code>wbuf(inactive)</code></td>
+              <td>double-buffered, so it overlaps the concurrent matmul streaming the other buffer</td>
+            </tr>
+            <tr>
+              <td><code>mxu.acc.init</code></td>
+              <td><code>SPAD</code> bias row</td>
+              <td><code>ACC</code> (broadcast to all rows)</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code></td>
+              <td><code>VREG</code> (x2 reads for <code>simd</code>, on the two whole-tile-row read ports)</td>
+              <td><code>VREG</code> on <code>W_vpu</code> at <code>t + D_vpu</code></td>
+              <td><code>D_vpu</code> = fixed pipeline depth, value TBD</td>
+            </tr>
+            <tr>
+              <td><code>acc.store</code></td>
+              <td><code>ACC</code></td>
+              <td><code>VREG</code> on <code>W_mxu</code></td>
+              <td>exact lossless fp32</td>
+            </tr>
+            <tr>
+              <td><code>vreg.load</code> / <code>vreg.store</code></td>
+              <td>LSU: <code>SPAD</code> &lt;-&gt; <code>VREG</code></td>
+              <td>LSU: <code>SPAD</code> &lt;-&gt; <code>VREG</code></td>
+              <td>bf16 &lt;-&gt; fp32 cast at the boundary</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL-measured</div>
+          <p><code>d</code>, <code>L_matmul</code>, <code>D_vpu</code>, and all absolute
+             numbers are <strong>TBD (RTL-measured)</strong>. <code>N</code> and
+             <code>2N-1</code> are the only concrete structural values. All latencies are
+             <strong>FIXED and data-independent</strong>, since the no-scoreboard model
+             relies on it: <strong>simulation latency must equal synthesis
+             latency.</strong></p>
+        </div>
+      </section>
+
+      <section id="s6" class="reveal">
+        <h2><span class="num">06</span> Compiler Scheduling Contract</h2>
+        <p class="sub">With no interlock and no scoreboard, program correctness depends
+           entirely on the static schedule. The compiler MUST obey every rule.</p>
+        <ul>
+          <li><strong>RAW (latency-respecting placement):</strong> schedule a consumer no earlier than producer-issue + producer-latency; fill gaps with independent ops or NOPs.</li>
+          <li><strong>WAR on inputs is unguarded:</strong> never overwrite a VREG / SPAD row / ACC bank still being read by an in-flight instruction.</li>
+          <li><strong>WAW ordering:</strong> two writes to the same destination must be program-ordered with non-overlapping write windows.</li>
+          <li><strong>Structural hazards:</strong> one matmul at a time; exactly one <code>mxu.load.w</code> per matmul (single inactive wbuf); one VPU op-stream at a time.</li>
+          <li><strong>VREG 2r1w (whole-tile-row):</strong> at most 2 reads + 1 write per cycle; keep the foreground unit's (VPU / LSU) VREG accesses in cycles disjoint from the MXU X-read burst (temporal separation, not banking).</li>
+          <li><strong>DMU ordering:</strong> insert <code>flush.slot</code> before consuming a <code>dmu.load.spm</code> region; ensure producing <code>vreg.store</code>s complete before a <code>dmu.store.spm</code> reads; fence two async DMAs to the same region.</li>
+          <li><strong>ACC discipline:</strong> seed (<code>mxu.acc.init</code> or <code>accum=0</code>), accumulate (<code>accum=1</code>, same bank, in order), drain (<code>acc.store</code>).</li>
+          <li><strong>Loops:</strong> literal-only trip counts (<code>lo</code>/<code>step</code> 8-bit, <code>hi</code> from the pool); nest depth 4 (LIFO); no runtime-data-derived counts.</li>
+          <li><strong>Addressing:</strong> compile-baked (literals + launch-patched pool indices + IV-relative <code>base + iv*stride</code>); no runtime data-dependent addressing in v1.</li>
+          <li><strong>Recompilation:</strong> a binary is valid only for the latencies it was compiled against; recompile if any FU latency, <code>N</code>, or <code>D_vpu</code> changes.</li>
+        </ul>
+      </section>
+
+      <section id="s7" class="reveal">
+        <h2><span class="num">07</span> Worked Example: 32x32 GELU(X @ W^T + b)</h2>
+        <p class="sub">A full tile-loop example. Assume <strong>X already in
+           VREG</strong>, and <strong>W and bias already in SPAD</strong> (DMU excluded).
+           Geometry <code>N=8</code>, so a 32x32 matmul is a <strong>4x4x4 tile
+           grid</strong> (<code>m,n,k</code> in 0..3).</p>
+        <ul>
+          <li><strong>Layout:</strong> <code>X[m][k]</code> at VREG id
+            <code>4m+k</code>; <code>Y</code> scratch <code>VREG16</code>;
+            <code>W</code> row = <code>16n+4k</code>; bias row = <code>n</code>;
+            <code>Y</code> row = <code>16m+4n</code>.</li>
+        </ul>
+
+        <h3>7.1 Static program (body once, 12 static instructions)</h3>
+<pre><code>loop.begin m (iv0,0,4,1)          ; push bo
+  loop.begin n (iv1,0,4,1)        ; push bo
+    acc.init  ACC0, B_base         ; bias row = B_base + bo_B
+    loop.begin k (iv2,0,4,1)      ; push bo
+      load.w  W_base               ; W row   = W_base + bo_W
+      matmul  ACC0, X_base, accum  ; X id    = X_base + bo_X
+    loop.end  k                    ; iter: bo_X+=1, bo_W+=4  | exit: pop
+    acc.store V16, ACC0
+    vpu.lut   V16, V16, gelu
+    vreg.store Y_base, V16         ; Y row   = Y_base + bo_Ys
+  loop.end  n                      ; iter: bo_W+=16, bo_B+=1, bo_Ys+=4 | exit: pop
+loop.end  m                        ; iter: bo_X+=4, bo_Ys+=16 | exit: pop</code></pre>
+
+        <h3>7.2 64-bit encoding (example block m=1, n=2)</h3>
+        <p class="sub">Word = <code>OP[63:56] | FLAGS[55:48] | op0[47:32] | op1[31:16] | op2[15:0]</code>.</p>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>asm</th><th>OP</th><th>FLAGS</th><th>op0</th><th>op1</th><th>op2</th><th>effective addr</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><code>acc.init ACC0,B(n)</code></td><td>02</td><td>00</td><td>0000</td><td>0200</td><td>0000</td><td>bias = 0x200 + bo_B(2) = 0x202</td></tr>
+            <tr><td>2</td><td><code>loop.begin k</code></td><td>50</td><td>10</td><td>0000</td><td>0004</td><td>0001</td><td>hi=4, lo&lt;&lt;8|step=0x0001</td></tr>
+            <tr><td>3</td><td><code>load.w W</code></td><td>00</td><td>00</td><td>0000</td><td>0000</td><td>0000</td><td>W row = 0 + bo_W(0x20) + k*4</td></tr>
+            <tr><td>4</td><td><code>matmul ACC0,X,accum</code></td><td>01</td><td>01</td><td>0000</td><td>0000</td><td>0000</td><td>X id = 0 + bo_X(4) + k = 4..7</td></tr>
+            <tr><td>5</td><td><code>loop.end k</code></td><td>51</td><td>00</td><td>0000</td><td>0000</td><td>0000</td><td>iv+=1, branch if k&lt;4</td></tr>
+            <tr><td>6</td><td><code>acc.store V16,ACC0</code></td><td>30</td><td>00</td><td>0010</td><td>0000</td><td>0000</td><td>-</td></tr>
+            <tr><td>7</td><td><code>vpu.lut V16,V16,gelu</code></td><td>11</td><td>02</td><td>0010</td><td>0010</td><td>0000</td><td>-</td></tr>
+            <tr><td>8</td><td><code>vreg.store Y,V16</code></td><td>33</td><td>00</td><td>0300</td><td>0010</td><td>0000</td><td>Y row = 0x300 + bo_Ys(0x18) = 0x318</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h3>7.3 Base-offset (bo) trace</h3>
+        <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>block (m,n)</th><th>bo_B (init)</th><th>bo_X @k=0..3</th><th>bo_W @k=0..3</th><th>bo_Ys (store)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>(0,0)</td><td>0</td><td>0,1,2,3</td><td>0,4,8,12</td><td>0</td></tr>
+            <tr><td>(0,1)</td><td>1</td><td>0,1,2,3</td><td>16,20,24,28</td><td>4</td></tr>
+            <tr><td>(1,0)</td><td>0</td><td>4,5,6,7</td><td>0,4,8,12</td><td>16</td></tr>
+            <tr><td>(3,3)</td><td>3</td><td>12,13,14,15</td><td>48,52,56,60</td><td>60</td></tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h3>7.4 Cycle-level Gantt for one (m,n) block</h3>
+        <p class="sub">Structural (<code>N=8</code>); all <code>L_*</code> = TBD (RTL-measured).</p>
+<pre><code>cy -&gt;  0    2    4    6    8   10   12   14   16 ...(N=8 units)
+SEQ  : Iai  Ilb  Ilw0 [nop/indep to cover L_ldw] Imm0 Ilw1 Imm1 Ilw2 Imm2 Ilw3 Imm3 Ile ... Ias Ilut Ivs
+wbufA:      [ load W0 =N cy ][ stream mm0 =N cy ][ load W2 ][ stream mm2 ]
+wbufB:                       [ load W1 =N cy  ][ stream mm1 ][ load W3 ][ stream mm3 ]
+ACC  : [init]              +=mm0  +=mm1  +=mm2  +=mm3 -&gt; drain(2N-1) -&gt; acc.store -&gt; gelu -&gt; vreg.store</code></pre>
+        <ul>
+          <li>Steady state = <strong>1 matmul / N=8 cy</strong>, <code>load.w</code>
+            fully overlapped in the other weight buffer; absolute block time TBD; ACC
+            depth-2 lets block <code>j</code> tail overlap block <code>j+1</code>
+            matmul.</li>
+        </ul>
+      </section>
+
+      <section id="s8" class="reveal">
+        <h2><span class="num">08</span> Deferred / Notes</h2>
+        <ul>
+          <li><strong>ACC bank-index operand:</strong> now plumbed for depth-2 double-buffering (banks {0,1}, no encoding change); a deeper ACC depth sweep (&gt; 2) remains deferred (#313 / #262).</li>
+          <li><strong>MXU addressing:</strong> drive path truncates to 13-bit (interim).</li>
+          <li><strong><code>N</code>:</strong> <code>N=8</code> baseline; <code>N</code> is a microarch parameter, NOT ISA-visible (16 is an ISA-invariant sweep target).</li>
+          <li><strong>Implementation gate (not part of this spec):</strong> <code>encoders.py</code> + ISS still carry pre-0.5.0 semantics (<code>acc.store</code> direction, SPAD-X matmul, missing new-op encoders) and MUST be rewritten to match this spec before merge-lock.</li>
+        </ul>
+        <p class="sub"><em>End of mininpu Compute-Tile ISA Reference v0.5.0.</em></p>
+      </section>
+
+    </main>
   </div>
-
-  <h3 id="s3-2">3.2 Per-instruction semantics</h3>
-
-  <p><strong><code>0x00 mxu.load.w</code></strong> - Load a weight tile from SPAD
-     row <code>op0</code> into the <strong>inactive</strong> weight buffer (the MXU
-     keeps two, double-buffered). Weights are stationary; the tile becomes active
-     when the next <code>mxu.matmul</code> promotes it. Flag <code>[0]=transB</code>
-     reverses the weight-row load order (transposed-B load). Each
-     <code>mxu.matmul</code> consumes exactly one preceding
-     <code>mxu.load.w</code>.</p>
-
-  <p><strong><code>0x01 mxu.matmul</code></strong> - Streaming matmul into ACC bank
-     <code>op0</code> using the X operand from VREG id <code>op1</code> and the
-     currently-active stationary weights:</p>
-
-<pre><code>acc_out = (accum ? acc_out : 0) + X_streamed @ W_active^T</code></pre>
-
-  <p>X is read from VREG (fp32) and cast fp32 -&gt; bf16 at the PE input; W is the
-     stationary tile from the most recent <code>mxu.load.w</code>. Flag
-     <code>[0]=accum</code> selects accumulate-into vs. overwrite; flag
-     <code>[1]=causal</code> masks the upper triangle of the output (attention
-     causal mask). A matmul with no pending <code>mxu.load.w</code> is
-     <strong>illegal</strong>.</p>
-
-  <p><strong><code>0x02 mxu.acc.init</code></strong> - Seed ACC bank
-     <code>op0</code> with a bias vector read from SPAD row <code>op1</code> (a
-     <code>1 x N</code> row), broadcast to all rows of the accumulator tile. Used
-     to initialize a K-accumulation with a bias instead of an <code>accum=0</code>
-     first matmul.</p>
-
-  <p><strong><code>0x10 vpu.reduce</code></strong> - Per-row reduction of VREG src
-     <code>op1</code> into VREG dst <code>op0</code>, writing the per-row scalar
-     result into column 0. Flag <code>[0]</code> selects sum (0) or max (1).</p>
-
-  <p><strong><code>0x11 vpu.lut</code></strong> - Elementwise unary LUT/approx over
-     VREG src <code>op1</code> into VREG dst <code>op0</code>. Flag
-     <code>[1:0]</code> selects the function: 0 = <code>exp</code> (base-e), 1 =
-     <code>rsqrt</code>, 2 = <code>gelu</code>.</p>
-
-  <p><strong><code>0x12 vpu.simd</code></strong> - Elementwise SIMD ALU op.
-     <code>op0</code> = dst, <code>op1</code> = operand a, <code>op2</code> =
-     operand b (or a literal-pool immediate when <code>bcast=imm</code>). Flag
-     <code>[4:2]=funct</code> selects <code>{add, sub, mul, max, fma, mov}</code>;
-     flag <code>[1:0]=bcast</code> selects the broadcast mode
-     <code>{none, row, col, imm}</code> for the b operand.</p>
-
-  <p><strong><code>0x30 acc.store</code></strong> - Drain ACC bank <code>op1</code>
-     into VREG dst <code>op0</code>. This is an <strong>exact, lossless fp32</strong>
-     copy (ACC -&gt; VREG); no dtype conversion.</p>
-
-  <p><strong><code>0x32 vreg.load</code></strong> - Load SPAD row <code>op1</code>
-     (bf16) into VREG dst <code>op0</code>, <strong>widening bf16 -&gt; fp32</strong>.
-     This is one of the two dtype-converting instructions.</p>
-
-  <p><strong><code>0x33 vreg.store</code></strong> - Store VREG src <code>op1</code>
-     (fp32) into SPAD row <code>op0</code>, <strong>truncating fp32 -&gt; bf16</strong>.
-     The other dtype-converting instruction.</p>
-
-  <p><strong><code>0x40 dmu.load.spm</code></strong> - Asynchronous DRAM -&gt; SPAD
-     copy. <code>op0</code> = destination SPAD row; <code>op1</code> = devmem source
-     address as a literal-pool index (the DRAM stride is read from
-     <code>pool[idx+1]</code>); <code>op2</code> = shape packed as
-     <code>(rows-1)&lt;&lt;8 | (cols-1)</code>. Flag <code>[4]=IMM_OP1</code> marks
-     <code>op1</code> as immediate. Single-outstanding; the region is not safe to
-     consume until a matching <code>flush.slot</code>.</p>
-
-  <p><strong><code>0x42 dmu.store.spm</code></strong> - Asynchronous SPAD -&gt;
-     DRAM copy. <code>op0</code> = source SPAD row; <code>op1</code> = devmem
-     destination (pool index); <code>op2</code> = shape (<code>0xFFFF</code> means
-     derive the shape at lowering). Flag <code>[4]=IMM_OP1</code> as above.</p>
-
-  <p><strong><code>0x50 loop.begin</code></strong> - Open a loop frame on induction
-     variable <code>op0</code>. <code>op1</code> = hi bound (literal-pool index);
-     <code>op2</code> packs <code>(lo&lt;&lt;8) | step</code> as two 8-bit inline
-     literals. Pushes a loop frame (LIFO, nest depth 4) and sets <code>IV = lo</code>.
-     Flag <code>[4]=IMM_OP1</code>.</p>
-
-  <p><strong><code>0x51 loop.end</code></strong> - Close the loop frame for
-     induction variable <code>op0</code>: <code>IV += step</code>; branch back to
-     the loop body if <code>IV &lt; hi</code>, else fall through and pop the
-     frame.</p>
-
-  <p><strong><code>0x53 flush.slot</code></strong> - Region fence for asynchronous
-     DMU. <code>op0</code> is a 16-bit slot bitmask; the instruction blocks until
-     the indicated DMU slot(s) report done. This is the only runtime
-     synchronization primitive.</p>
-
-  <p><strong><code>0x5F halt</code></strong> - Terminal instruction. Drains all
-     outstanding DMU transfers, then asserts <code>done</code>. Ends kernel
-     execution.</p>
-
-  <hr>
-
-  <h2 id="s4">4. Flags Summary and LOCKED Decisions</h2>
-
-  <h3 id="s4-1">4.1 Locked decisions</h3>
-  <ul>
-    <li><strong><code>flags[5] = ACC_TILE is DROPPED</code> from
-      <code>vpu.simd</code>.</strong> The VPU is VREG-only. Bit 5 is
-      <strong>reserved-must-be-zero on all opcodes</strong>.</li>
-    <li><strong>ACC bank addressing is implicit.</strong> <code>acc_out</code> /
-      <code>acc_src</code> are in <code>[0, ACC_DEPTH=2)</code>; an index
-      <code>&gt;= depth</code> is an <strong>illegal-op</strong>. An explicit bank
-      operand is deferred to issue #313 / the depth sweep #262. v1 uses
-      <strong>bank 0 only</strong>.</li>
-    <li><strong>VREG is a 2D <code>[8x8]</code> fp32 tile.</strong> The encoding is
-      unchanged (5-bit id); the register is a tile, not a flat vector.</li>
-  </ul>
-
-  <h3 id="s4-2">4.2 Reserved-must-be-zero</h3>
-  <ul>
-    <li>All unused flag bits on every opcode.</li>
-    <li><code>flags[5]</code> on all opcodes (dropped <code>ACC_TILE</code>).</li>
-    <li>DMU <code>flags[5]</code> (the async-mode flag is retired -
-      <strong>async is the only mode</strong>).</li>
-  </ul>
-
-  <hr>
-
-  <h2 id="s5">5. Per-Instruction Latency</h2>
-
-  <p>Latencies are <strong>fixed and data-independent</strong> (baseline
-     <code>N=8</code>, <code>D_VPU=12</code>).</p>
-
-  <div class="tablewrap">
-  <table>
-    <thead>
-      <tr><th>op</th><th>latency (issue -&gt; done)</th><th>throughput</th><th>class</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>mxu.load.w</code></td><td>8</td><td>8 / K-tile</td><td>nonblocking (hidden under matmul)</td></tr>
-      <tr><td><code>mxu.acc.init</code></td><td>3</td><td>-</td><td>nonblocking</td></tr>
-      <tr><td><code>mxu.matmul</code></td><td><code>2N-1 = 15</code> fill (once / K-loop) then 8 / K-tile</td><td>8 / K-tile</td><td>nonblocking</td></tr>
-      <tr><td><code>acc.store</code></td><td>9</td><td>-</td><td>blocking</td></tr>
-      <tr><td><code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code></td><td><code>D_VPU + (N-1) = 19</code></td><td>8 / op</td><td>blocking</td></tr>
-      <tr><td><code>vreg.load</code> / <code>vreg.store</code></td><td>9</td><td>-</td><td>blocking</td></tr>
-      <tr><td><code>dmu.load.spm</code> / <code>dmu.store.spm</code></td><td>variable (DRAM; <code>&lt;= 4 B/cy</code> HP port)</td><td>single-outstanding</td><td>nonblocking (async)</td></tr>
-      <tr><td><code>loop.begin</code> / <code>loop.end</code></td><td>1</td><td>-</td><td>control</td></tr>
-      <tr><td><code>flush.slot</code></td><td>variable (waits DMU slot-done)</td><td>-</td><td>blocking (only runtime sync)</td></tr>
-      <tr><td><code>halt</code></td><td>variable (drain)</td><td>-</td><td>terminal</td></tr>
-    </tbody>
-  </table>
-  </div>
-
-  <div class="note">
-    <strong><code>D_VPU = 12</code></strong> is <code>N</code>-invariant and a
-    synth-tunable localparam. All latencies are <strong>FIXED and
-    data-independent</strong> - a hard requirement, since the no-scoreboard model
-    relies on it: <strong>simulation latency must equal synthesis latency.</strong>
-  </div>
-
-  <hr>
-
-  <h2 id="s6">6. Compiler Scheduling Contract</h2>
-
-  <p>Because the tile issues <strong>in-order, one instruction per cycle, with NO
-     hardware interlock and NO scoreboard</strong>, the correctness of a program
-     depends <strong>entirely</strong> on the compiler's static schedule. Program
-     correctness must be provable from the instruction stream alone, independent of
-     microarchitectural timing (given the fixed latencies of
-     <a href="#s5">Section 5</a>). The compiler MUST obey every rule below.</p>
-
-  <h3 id="s6-1">6.1 Latency-respecting placement (RAW)</h3>
-  <p>Schedule any consumer of a result <strong>no earlier than</strong>:</p>
-<pre><code>consumer_issue_cycle &gt;= producer_issue_cycle + producer_latency</code></pre>
-  <p>using the fixed latencies from <a href="#s5">Section 5</a>. Fill the gap with
-     independent instructions or NOPs. A consumer issued too early reads
-     <strong>stale data</strong> - there is no hardware stall to save it.</p>
-
-  <h3 id="s6-2">6.2 WAR on inputs is unguarded</h3>
-  <p>Do <strong>not</strong> overwrite a register / SPAD row / ACC bank that an
-     in-flight instruction is still reading. In particular:</p>
-  <ul>
-    <li>Do not write a VREG that an in-flight <code>mxu.matmul</code> is still
-      streaming as its X operand.</li>
-    <li>Do not overwrite a SPAD weight tile whose <code>mxu.load.w</code> has not
-      finished.</li>
-    <li>Do not overwrite matmul input rows while they are being consumed.</li>
-  </ul>
-  <p>The hardware does not detect any of these anti-dependences; the compiler must
-     keep the write out of the producer's read window.</p>
-
-  <h3 id="s6-3">6.3 WAW ordering</h3>
-  <p>Two writes to the same destination must be <strong>program-ordered</strong>
-     and must <strong>not have overlapping write windows</strong> on the same
-     location. The compiler orders them and spaces them so the later write lands
-     strictly after the earlier one completes.</p>
-
-  <h3 id="s6-4">6.4 Structural hazards (one physical unit)</h3>
-  <p>Each functional unit is a single physical resource; the compiler must
-     serialize uses of the same unit:</p>
-  <ul>
-    <li><strong>MXU:</strong> executes one matmul at a time. Matmuls into the same
-      ACC serialize. At most one <code>mxu.load.w</code> preload is in flight
-      (single inactive weight buffer). Each matmul consumes exactly one preceding
-      <code>mxu.load.w</code> - <strong>a matmul with no pending
-      <code>load.w</code> is ILLEGAL.</strong></li>
-    <li><strong>VPU:</strong> runs one op-stream at a time. The next VPU op's reads
-      may begin only after the current op's read window closes.</li>
-    <li><strong>Throughput:</strong> respect per-op throughput (matmul 8 / K-tile,
-      VPU 8 / op).</li>
-  </ul>
-
-  <h3 id="s6-5">6.5 VREG bank-conflict-free scheduling (2r2w, banked per-column)</h3>
-  <p>VREG exposes <strong>two read ports</strong> (<code>R_mxu</code> = MXU
-     X-stream, <code>R_vpu</code> = VPU lane) and <strong>two write ports</strong>
-     (<code>W_mxu</code> = <code>acc.store</code>, <code>W_vpu</code> = VPU result /
-     <code>vreg.load</code> cast). It is realized as <strong>banked single-ported
-     SRAMs</strong> (bank = function of reg-id), <strong>NOT</strong> a true
-     multiport. The compiler must schedule so that:</p>
-  <ul>
-    <li>the two concurrent <strong>reads</strong> land in <strong>different
-      banks</strong>, and</li>
-    <li>the two concurrent <strong>writes</strong> land in <strong>different
-      banks</strong></li>
-  </ul>
-  <p>with no same-bank same-cycle conflict. This conflict-free banking is exactly
-     what makes the MXU || VPU one-tile software pipeline work.</p>
-
-  <h3 id="s6-6">6.6 DMU / memory ordering via <code>flush.slot</code></h3>
-  <p>DMU transfers are <strong>asynchronous and single-outstanding</strong> (v1).
-     Ordering rules:</p>
-  <ul>
-    <li>Before any instruction <strong>consumes</strong> data that a
-      <code>dmu.load.spm</code> brought into a SPAD region (a <code>vreg.load</code>
-      or <code>mxu.load.w</code> reading that region), insert a
-      <code>flush.slot</code> for that DMA slot.</li>
-    <li>Before a <code>dmu.store.spm</code> <strong>reads</strong> a SPAD region,
-      ensure the producing <code>vreg.store</code> writes have completed.</li>
-    <li><code>halt</code> drains all outstanding DMU.</li>
-    <li>Two asynchronous DMAs to the <strong>same region</strong> must be fenced
-      against each other.</li>
-  </ul>
-
-  <h3 id="s6-7">6.7 ACC discipline</h3>
-  <p>For a K-accumulation:</p>
-  <ol>
-    <li>Issue <code>mxu.acc.init</code> (or an <code>accum=0</code> first matmul) to
-      <strong>seed</strong> the ACC.</li>
-    <li>Issue the accumulating matmuls (<code>accum=1</code>) into the <strong>same
-      ACC bank</strong>, in order.</li>
-    <li>Issue <code>acc.store</code> to <strong>drain</strong> the result to
-      VREG.</li>
-  </ol>
-  <p>ACC depth 2 permits <strong>double-buffering</strong> (drain tile
-     <code>j</code> while tile <code>j+1</code>'s matmul fills the other bank), but
-     only two accumulator tiles are ever resident.</p>
-
-  <h3 id="s6-8">6.8 Loops</h3>
-  <p>Trip counts are <strong>literal-only</strong>: <code>lo</code> and
-     <code>step</code> are 8-bit (0..255) inline literals; <code>hi</code> is a
-     literal-pool value. There is <strong>no runtime-data-derived trip
-     count</strong>. The <code>iv_reg</code> nest depth is <strong>4</strong>
-     (LIFO).</p>
-
-  <h3 id="s6-9">6.9 Addressing</h3>
-  <p>All operand addresses are <strong>compile-baked</strong>:</p>
-  <ul>
-    <li>SPAD rows / VREG ids / ACC banks are literals.</li>
-    <li>devmem addresses are <strong>literal-pool indices patched at launch</strong>
-      (D4 <code>GRID_LINEAR</code> + <code>pool_base</code>).</li>
-    <li>IV-relative addressing (<code>base + iv*stride</code>) uses the
-      sequencer-broadcast induction variable.</li>
-  </ul>
-  <p>There is <strong>NO runtime data-dependent addressing</strong> in v1.</p>
-
-  <h3 id="s6-10">6.10 The MXU || VPU software pipeline</h3>
-  <p>To overlap execution (attention, mixed blocks), the compiler:</p>
-  <ol>
-    <li>Issues the <strong>background nonblocking</strong> ops
-      (<code>mxu.matmul</code>, <code>mxu.load.w</code>, <code>mxu.acc.init</code>,
-      async DMA), then</li>
-    <li>Issues the <strong>foreground blocking</strong> op (VPU /
-      <code>acc.store</code>) so their execution windows overlap, and</li>
-    <li><strong>Double-buffers</strong> the shared VREG tiles so producer and
-      consumer use disjoint registers / banks (see
-      <a href="#s6-5">6.5</a>).</li>
-  </ol>
-  <p>For matmul-heavy blocks (MLP), the VPU is far under-subscribed, so no overlap
-     is needed.</p>
-
-  <h3 id="s6-11">6.11 Determinism / recompilation</h3>
-  <p>There is no hardware reorder, speculation, or interlock. A binary is valid
-     <strong>only</strong> for the microarchitectural latencies it was compiled
-     against. If <code>D_VPU</code>, any FU latency, or <code>N</code> changes,
-     <strong>the kernel must be recompiled.</strong> The compiler is the sole
-     authority on timing.</p>
-
-  <hr>
-
-  <h2 id="s7">7. Deferred / Notes</h2>
-  <ul>
-    <li><strong>ACC bank-index operand:</strong> deferred (#313 / depth sweep
-      #262); v1 uses <strong>bank 0 only</strong>.</li>
-    <li><strong>Full 16-bit SPAD/ACC row addressing:</strong> the MXU drive path
-      currently <strong>truncates to 13-bit</strong> (interim).</li>
-    <li><strong>DMU shape packing:</strong> <code>op2</code> packs both matrix dims
-      as <code>(rows-1)&lt;&lt;8 | (cols-1)</code>; <code>dram_stride</code> lives
-      at <code>pool[idx+1]</code>.</li>
-    <li><strong><code>loop.begin</code> <code>lo</code>/<code>step</code>:</strong>
-      capped at 8 bits (0..255); spill hi-style if a kernel needs &gt; 255.</li>
-    <li><strong><code>N</code>:</strong> <code>N=8</code> is the baseline.
-      <code>N</code> is a <strong>microarch parameter, NOT ISA-visible</strong> (16
-      is an ISA-invariant sweep target).</li>
-    <li><strong>Implementation gate (not part of this spec):</strong> the branch's
-      <code>encoders.py</code> + ISS still carry pre-0.5.0 semantics
-      (<code>acc.store</code> direction, SPAD-X matmul, missing new-op encoders) and
-      must be rewritten to match this spec before the ISA is merge-locked.</li>
-  </ul>
-
-  <hr>
-
-  <p class="sub"><em>End of mininpu Compute-Tile ISA Reference v0.5.0.</em></p>
-
 </div>
 
-<footer class="foot">
-  mininpu &middot; ISA 0.5.0 (Doc 1, locked) &middot;
-  <a href="index.html">back to index</a>
+<footer>
+  <div class="wrap">
+    <span>mininpu &middot; ISA 0.5.0 (Doc 1, locked)</span>
+    <span class="mono"><a href="index.html">back to index</a></span>
+  </div>
 </footer>
+
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var map={};
+  links.forEach(function(a){var id=a.getAttribute('href').slice(1);var s=document.getElementById(id);if(s){map[id]=a;}});
+  var sections=Object.keys(map).map(function(id){return document.getElementById(id);});
+  if('IntersectionObserver' in window){
+    var spy=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(a){a.classList.remove('active');});
+          var a=map[e.target.id];
+          if(a){a.classList.add('active');}
+        }
+      });
+    },{rootMargin:'-10% 0px -70% 0px',threshold:0});
+    sections.forEach(function(s){spy.observe(s);});
+  }
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  if('IntersectionObserver' in window){
+    var rev=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('in');rev.unobserve(e.target);}
+      });
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    reveals.forEach(function(el){rev.observe(el);});
+  } else {
+    reveals.forEach(function(el){el.classList.add('in');});
+  }
+})();
+</script>
 
 </body>
 </html>
