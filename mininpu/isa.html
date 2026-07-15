@@ -433,15 +433,15 @@
             </tr>
             <tr>
               <td><code>D_vpu</code></td>
-              <td>VPU pipeline depth = per-row drain latency (result at <code>t+D_vpu</code>); row-pipelined, so throughput stays 1 tile-row/cycle</td>
+              <td>VPU pipeline depth = per-row drain latency (result at <code>t+D_vpu</code>); row-pipelined for the single-source SIMD ops (1 tile-row/cycle), gelu / exp2 / two-source latency-serial (1 row / D_vpu)</td>
               <td>RTL / synth-measured, <strong>NOT a locked constant</strong></td>
               <td>about 23 (measured after the fp-pipeline pass)</td>
             </tr>
             <tr>
-              <td>MXU PE pipeline depth</td>
+              <td><code>PE_LATENCY</code> (MXU PE pipeline depth)</td>
               <td>registered-MAC stages inside each PE (adds to the <code>2N-1</code> fill)</td>
               <td>RTL / synth-measured</td>
-              <td>TBD</td>
+              <td>2 (measured); matmul fill = <code>2N-1 + PE_LATENCY = 17</code></td>
             </tr>
             <tr>
               <td><code>lo</code> / <code>hi</code> / <code>step</code></td>
@@ -490,9 +490,14 @@
             systolic fill) are <strong>negligible for performance</strong> - the tile is
             throughput-bound, so pipeline depth may grow to meet 200 MHz while throughput
             stays <strong>1 tile-row/cycle (VPU)</strong> and <strong>1 column/cycle
-            (MXU)</strong>. The VPU is <strong>row-pipelined</strong> (1 tile-row issued
-            per cycle, multiple rows in flight); <code>D_vpu</code> is the per-row drain
-            latency, amortized across the tile-loop. The deep fp / reduce-tree pipelining
+            (MXU)</strong>. The VPU is <strong>row-pipelined for the single-source SIMD
+            ops</strong> (<code>scale.bcast</code>, <code>scale.col.bcast</code>,
+            <code>scale.imm</code>, <code>sub.bcast</code>, <code>add.col.bcast</code>): 1
+            tile-row issued per cycle, multiple rows in flight, and <code>D_vpu</code> is
+            the per-row drain latency, amortized across the tile-loop. Row-pipelining is
+            <strong>partial</strong>: <code>gelu</code> / <code>exp2</code> and the
+            two-source ops stay <strong>latency-serial</strong> (each row drains the full
+            <code>D_vpu</code> before the next issues). The deep fp / reduce-tree pipelining
             (combinational <code>fp_mul</code>, registered IEEE <code>fp_add</code>) is
             intended design, not overhead.</li>
         </ul>
@@ -509,7 +514,7 @@
               <td><code>mxu.matmul</code></td>
               <td><code>VREG[X]</code> on <code>R_mxu</code> over <code>[t+d, t+d+N)</code> (1 column/cycle); <code>wbuf(active)</code> implicitly</td>
               <td><code>ACC</code> at <code>t + L_matmul</code></td>
-              <td>fill = <code>2N-1</code> + PE pipeline depth; the PE MAC is registered for 200 MHz (PE latency TBD by synth); <code>VREG[X]</code> is WAR-free only after <code>t+d+N</code></td>
+              <td>the PE MAC is registered for 200 MHz with <code>PE_LATENCY = 2</code> (measured), so fill = <code>2N-1 + PE_LATENCY = 17</code>; <code>VREG[X]</code> is WAR-free only after <code>t+d+N</code></td>
             </tr>
             <tr>
               <td><code>mxu.load.w</code></td>
@@ -553,16 +558,17 @@
 
         <div class="call" style="border-left-color:var(--gap)">
           <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL / synth-timing measured</div>
-          <p><code>d</code>, <code>L_matmul</code>, the MXU PE pipeline depth, <strong>the
-             VPU pipeline depth <code>D_vpu</code></strong> (currently about 23, measured
-             after the fp-pipeline pass), and all
+          <p>The MXU PE pipeline depth is <code>PE_LATENCY = 2</code> (measured), so the
+             matmul fill = <code>2N-1 + PE_LATENCY = 17</code>. <code>d</code>,
+             <code>L_matmul</code>, <strong>the VPU pipeline depth <code>D_vpu</code></strong>
+             (currently about 23, measured after the fp-pipeline pass), and the remaining
              absolute numbers are <strong>TBD (RTL / synth-timing measured)</strong>. Only
              <code>N</code> and <code>2N-1</code> are the ISA-visible concrete structural
              values. All latencies are <strong>FIXED and data-independent</strong> once
              measured, since the no-scoreboard model relies on it:
-             <strong>simulation latency must equal synthesis latency</strong> - and a
-             wrong locked latency (e.g. assuming <code>D_vpu = 9</code> when the RTL
-             measures ~23) silently miscompiles.</p>
+             <strong>simulation latency must equal synthesis latency</strong> - a
+             wrong locked latency (a value that disagrees with the RTL-measured one)
+             silently miscompiles.</p>
         </div>
       </section>
 
@@ -739,11 +745,22 @@ ACC  : [init]              +=mm0  +=mm1  +=mm2  +=mm3 -&gt; drain(2N-1) -&gt; ac
 
       <section id="s8" class="reveal">
         <h2><span class="num">08</span> Deferred / Notes</h2>
+
+        <div class="call" style="border-left-color:var(--gap)">
+          <div class="lbl" style="color:var(--gap)">Status &middot; 0.5.0 is the design target; SSOT cutover pending</div>
+          <p>ISA 0.5.0 is the locked <strong>design target</strong>. The shipped SSOT
+             (<code>mininpu/isa/opcodes.py</code>) is still <strong>0.4.0 / 38-opcode</strong>;
+             the cutover to the 0.5.0 opcode set (incl. <code>acc.init</code>,
+             <code>vpu.lut</code> function-select, <code>vreg.store</code>) plus
+             <code>encoders.py</code> / ISS / <code>npu_isa_pkg.sv</code> regeneration and
+             <code>PE_LATENCY 0 -&gt; 2</code> is <strong>PENDING</strong> (tracked
+             separately; affects the compiler).</p>
+        </div>
+
         <ul>
           <li><strong>ACC buffer-index operand:</strong> now plumbed for depth-2 double-buffering (buffers {0,1}, the depth index, not the 8 per-column banks; no encoding change); a deeper ACC depth sweep (&gt; 2) remains deferred (#313 / #262).</li>
           <li><strong>MXU addressing:</strong> drive path truncates to 13-bit (interim).</li>
-          <li><strong><code>N</code>:</strong> <code>N=8</code> baseline; <code>N</code> is the <strong>systolic tile dimension</strong>, a microarch parameter NOT ISA-visible (<code>N=16</code> is an ISA-invariant sweep target: the same <code>N</code> realized as a wider 16x16 array, not an independent outer tiling factor).</li>
-          <li><strong>Implementation gate (not part of this spec):</strong> <code>encoders.py</code> + ISS still carry pre-0.5.0 semantics (<code>acc.store</code> direction, SPAD-X matmul, missing new-op encoders) and MUST be rewritten to match this spec before merge-lock.</li>
+          <li><strong><code>N</code>:</strong> <code>N=8</code> baseline; <code>N</code> is the <strong>systolic tile dimension</strong>, <strong>ISA-visible but sweepable without an encoding change</strong> (<code>N=16</code> is an ISA-invariant sweep target: the same <code>N</code> realized as a wider 16x16 array, not an independent outer tiling factor).</li>
         </ul>
         <p class="sub"><em>End of mininpu Compute-Tile ISA Reference v0.5.0.</em></p>
       </section>

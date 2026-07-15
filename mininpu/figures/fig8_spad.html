@@ -105,13 +105,12 @@
 <div class="wrap">
 <header>
   <h1>SPAD datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 8</span></h1>
-  <p class="sub">scratchpad memory &middot; 1024 &times; 256b = 32 KiB &middot; bf16 storage &middot; 8 banks (bank = addr%8) &middot; dual-port: Port A = DMU/DRAM, Port B = compute (MXU + VPU, arbitrated)</p>
+  <p class="sub">scratchpad memory &middot; 1024 &times; 256b = 32 KiB &middot; bf16 storage &middot; 8 banks (bank = addr%8) &middot; dual-port: Port A = DMU/DRAM, Port B = compute (MXU + LSU, arbitrated)</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>SPAD array / bank (memory)</span>
     <span><i class="sw" style="background:var(--ext);border-color:var(--ext)"></i>DMU black box / off-tile DRAM</span>
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>MXU master (weight load)</span>
-    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU master (cast load/store)</span>
-    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; redesign vs current RTL</span>
+    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>LSU master (cast load/store)</span>
   </div>
 </header>
 
@@ -276,7 +275,7 @@
   <text x="1300" y="393" class="ti t-mem" font-size="12.5">Port B arbiter</text>
   <text x="1300" y="414" class="d">grants 1 Port-B</text>
   <text x="1300" y="429" class="d">master / cycle</text>
-  <text x="1300" y="452" class="d2">(MXU or VPU) &mdash;</text>
+  <text x="1300" y="452" class="d2">(MXU or LSU) &mdash;</text>
   <text x="1300" y="468" class="d2">one arbitrated port</text>
   <text x="1300" y="484" class="d2">8-bank layout limits</text>
   <text x="1300" y="499" class="d2">conflicts within a</text>
@@ -284,7 +283,7 @@
   <text x="1428" y="360" class="ref" text-anchor="end">870</text>
 
   <!-- =========================================================
-       PORT B MASTERS  (MXU + VPU)
+       PORT B MASTERS  (MXU + LSU)
        ========================================================= -->
   <!-- MXU master -->
   <rect class="b-mxu" x="1470" y="330" width="180" height="98" rx="6"/>
@@ -294,10 +293,10 @@
   <text x="1484" y="411" class="d2">+ bias rows (acc.init &rarr; ACC)</text>
   <text x="1638" y="322" class="ref t-mxu" text-anchor="end" style="fill:var(--mxu)">880</text>
 
-  <!-- VPU master -->
+  <!-- LSU master -->
   <rect class="b-vpu" x="1470" y="470" width="180" height="118" rx="6"/>
-  <text x="1484" y="495" class="ti t-vpu" font-size="13">VPU</text>
-  <text x="1484" y="513" class="d2" style="fill:var(--vpu)">(VREG-only spine)</text>
+  <text x="1484" y="495" class="ti t-vpu" font-size="13">LSU</text>
+  <text x="1484" y="513" class="d2" style="fill:var(--vpu)">(SPAD&harr;VREG unit)</text>
   <text x="1484" y="533" class="d" font-weight="700">vreg.load / vreg.store</text>
   <text x="1484" y="551" class="d2">cast traffic:</text>
   <text x="1484" y="567" class="d2">SPAD &harr; VREG</text>
@@ -311,20 +310,18 @@
   <text x="1445" y="536" class="lbl" style="fill:var(--vpu)">ld / st</text>
 
   <!-- =========================================================
-       DELTA CALLOUTS
+       CALLOUTS
        ========================================================= -->
   <rect class="new-o" x="300" y="588" width="250" height="66" rx="6"/>
-  <text x="310" y="606" class="badge">&Delta; DMU collapsed to a black box</text>
-  <text x="310" y="620" class="badge">on Port A. descriptor slots / AGU /</text>
-  <text x="310" y="634" class="badge">burst engine are DEFERRED &mdash;</text>
+  <text x="310" y="606" class="badge">DMU is a black box on Port A.</text>
+  <text x="310" y="620" class="badge">descriptor slots / AGU /</text>
+  <text x="310" y="634" class="badge">burst engine are DEFERRED,</text>
   <text x="310" y="648" class="badge">not part of the locked SPAD spec.</text>
 
-  <rect class="new-o" x="1286" y="604" width="364" height="80" rx="6"/>
-  <text x="1296" y="622" class="badge">&Delta; Port B LIGHTENED: under VPU = VREG-only,</text>
-  <text x="1296" y="636" class="badge">Port B carries only W-load + cast load/store.</text>
-  <text x="1296" y="650" class="badge">the old ACC-row-stream traffic (2-compute-master</text>
-  <text x="1296" y="664" class="badge">ACC-row bus) is GONE &mdash; much lighter than the</text>
-  <text x="1296" y="678" class="badge">current RTL's Port-B bus.</text>
+  <rect class="new-o" x="1286" y="604" width="364" height="52" rx="6"/>
+  <text x="1296" y="622" class="badge">Port B: the VPU is VREG-only, so Port B</text>
+  <text x="1296" y="636" class="badge">carries only W-load (MXU) + cast load/store</text>
+  <text x="1296" y="650" class="badge">(LSU), one arbitrated master per cycle.</text>
 
   <!-- =========================================================
        PORT SUMMARY (bottom-left legend inside svg)
@@ -337,10 +334,9 @@
   <text x="52" y="684" class="d2">DRAM HP port 4 B/cy (8&times; less)</text>
   <text x="52" y="706" class="d" font-weight="700">Port B &mdash; compute (arb)</text>
   <text x="52" y="722" class="d2">master 1: MXU mxu.load.w</text>
-  <text x="52" y="736" class="d2">master 2: VPU vreg.load/store</text>
+  <text x="52" y="736" class="d2">master 2: LSU vreg.load/store</text>
   <text x="52" y="752" class="d2">arbiter: bank-conflict, 8 banks</text>
   <text x="52" y="774" class="d2" style="fill:var(--mem)">bank = addr % 8 &rarr; 128 wds/bank</text>
-  <text x="52" y="789" class="badge">Port B no longer carries ACC rows</text>
 </svg>
 </div>
 
@@ -357,19 +353,17 @@
     <li><b>860</b> Port B (compute side, arbitrated)</li>
     <li><b>870</b> Port B arbiter (bank-conflict)</li>
     <li><b>880</b> MXU master (mxu.load.w weights + acc.init bias rows)</li>
-    <li><b>890</b> VPU master (vreg.load / vreg.store cast)</li>
+    <li><b>890</b> LSU master (vreg.load / vreg.store cast)</li>
     <li><b>910</b> tile boundary (DRAM is off-tile)</li>
-    <li class="nw"><b>&Delta;830</b> DMU descriptor / AGU / burst deferred</li>
-    <li class="nw"><b>&Delta;860</b> Port B = W-load + cast only (ACC-row bus dropped)</li>
   </ul>
 </div>
 
-<div class="delta">
-  <h2>&Delta; notes vs current RTL</h2>
-  <ul>
-    <li><b>DMU is a black box on Port A.</b> The locked SPAD spec fixes only the <em>port</em>: a 256b DM bus (<code>32 B/cy</code> internal) into Port A, backed by an off-tile DRAM HP port at <code>4 B/cy</code> (8&times; narrower). DMU internals &mdash; descriptor slots, AGU, burst/DMA engine &mdash; are <b>deferred</b> and deliberately not drawn.</li>
-    <li><b>Port B is lightened.</b> Under the VPU = VREG-only spine, Port B's two arbitrated compute masters are just <code>mxu.load.w</code> (bf16 weight tiles) and the VPU <code>vreg.load</code> / <code>vreg.store</code> cast traffic (SPAD&harr;VREG, bf16&harr;fp32). The old <b>ACC-row-stream</b> traffic on the current 2-compute-master ACC-row bus is <b>gone</b> &mdash; Port B is materially lighter.</li>
-    <li><b>8 banks, bank = addr%8.</b> 1024 words / 8 = <code>128 words/bank</code>. Port B grants 1 master / cycle (MXU or VPU); the 8-bank layout limits conflicts within a master's access, keeping arbitration cheap.</li>
+<div class="card" style="margin-top:16px">
+  <h2>SPAD design notes</h2>
+  <ul style="margin:0;padding-left:18px;columns:2;column-gap:26px;font-size:12px;line-height:1.5">
+    <li><b>DMU is a black box on Port A.</b> The locked SPAD spec fixes only the <em>port</em>: a 256b DM bus (<code>32 B/cy</code> internal) into Port A, backed by an off-tile DRAM HP port at <code>4 B/cy</code> (8&times; narrower). DMU internals (descriptor slots, AGU, burst/DMA engine) are <b>deferred</b> and deliberately not drawn.</li>
+    <li><b>Port B (compute).</b> Under the VPU = VREG-only spine, Port B's two arbitrated compute masters are <code>mxu.load.w</code> (bf16 weight tiles, plus the acc.init bias row) and the <b>LSU</b> <code>vreg.load</code> / <code>vreg.store</code> cast traffic (SPAD&harr;VREG, bf16&harr;fp32).</li>
+    <li><b>8 banks, bank = addr%8.</b> 1024 words / 8 = <code>128 words/bank</code>. Port B grants 1 master / cycle (MXU or LSU); the 8-bank layout limits conflicts within a master's access, keeping arbitration cheap.</li>
     <li><b>Packing.</b> A 256b word holds 2 bf16 tile-rows (each tile-row = 8&times;bf16 = 128b); SPAD stores bf16 weights, bf16 activations (X tiles), bias rows, and kernel outputs (Y).</li>
   </ul>
 </div>

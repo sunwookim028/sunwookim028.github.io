@@ -102,18 +102,17 @@
 <div class="wrap">
 <header>
   <h1>mininpu Tile sequencer datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 6</span></h1>
-  <p class="sub">redesign (LOCKED) &middot; thin exposed-pipeline issue front-end &middot; 1 instr/cycle, in-order, valid-shift &middot; NO datapath FSM &middot; NO scoreboard &middot; distributed (per-unit) AGU</p>
+  <p class="sub">LOCKED &middot; thin exposed-pipeline issue front-end &middot; 1 instr/cycle, in-order, valid-shift &middot; NO datapath FSM &middot; NO scoreboard &middot; distributed (per-unit) AGU</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--ctrl-f);border-color:var(--ctrl)"></i>sequencer pipeline / control plane</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>IRAM / literal pool (memory)</span>
     <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>external CP / tile boundary</span>
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>execution-unit descriptor sink</span>
-    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; REMOVED vs current 1522-line sequencer</span>
   </div>
 </header>
 
 <div class="scroll">
-<svg viewBox="0 0 1680 940" role="img" aria-label="Tile sequencer datapath FIG 6">
+<svg viewBox="0 0 1680 1012" role="img" aria-label="Tile sequencer datapath FIG 6">
   <defs>
     <marker id="arw"  viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)"/></marker>
     <marker id="arwn" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--new)"/></marker>
@@ -130,13 +129,6 @@
   <text x="316" y="112" class="d2">literal-pool base + row-stride handed in before start (stable through execution)</text>
   <text x="1026" y="34" class="ref" text-anchor="end">600</text>
 
-  <!-- REMOVED CSRs callout (north, dashed-red) -->
-  <rect class="new-o" x="1060" y="36" width="252" height="86" rx="7"/>
-  <text x="1068" y="55" class="badge">&Delta; REMOVED launch CSRs</text>
-  <text x="1068" y="72" class="badge">program_id_csr</text>
-  <text x="1068" y="88" class="badge">kernel_arg_csr[127:0]</text>
-  <text x="1068" y="112" class="lbl-n" style="font-size:9.5px">entry PC now fixed = IRAM[0]</text>
-
   <!-- CP -> sequencer signals crossing the tile boundary -->
   <path class="fctrl" d="M370,122 L370,196 L200,196 L200,268"/>
   <text x="210" y="188" class="lbl-c">compute_start &rarr; PC</text>
@@ -149,7 +141,7 @@
        TILE SEQUENCER boundary
        ========================================================= -->
   <rect class="tile-o" x="86" y="268" width="1000" height="560" rx="10"/>
-  <text x="98" y="290" class="ti t-ctrl" font-size="13">TILE SEQUENCER  &mdash;  thin exposed-pipeline issue front-end  (folds pc.sv + decoder.sv IN)</text>
+  <text x="98" y="290" class="ti t-ctrl" font-size="13">TILE SEQUENCER  &mdash;  thin exposed-pipeline issue front-end  (reuses pc.sv + decoder.sv + pc_iram.sv + loop_ctrl.sv, separate modules)</text>
   <text x="1074" y="290" class="ref" text-anchor="end">610</text>
   <text x="98" y="307" class="d2">in-order &middot; 1 instr / cycle &middot; valid-shift pipeline &middot; no datapath FSM &middot; no central AGU</text>
 
@@ -159,7 +151,7 @@
   <!-- PC -->
   <rect class="stg" x="120" y="340" width="150" height="220" rx="4"/>
   <text x="132" y="362" class="ti t-ctrl" font-size="12">PC</text>
-  <text x="132" y="382" class="d2">folds pc.sv</text>
+  <text x="132" y="382" class="d2">reuses pc.sv (separate)</text>
   <text x="132" y="402" class="d">PC_enable (advance)</text>
   <text x="132" y="418" class="d">PC_load (jump target)</text>
   <text x="132" y="440" class="d2">entry PC = IRAM[0]</text>
@@ -191,7 +183,7 @@
   <!-- Decode -->
   <rect class="stg" x="546" y="340" width="214" height="220" rx="4"/>
   <text x="558" y="362" class="ti t-ctrl" font-size="12">Decode</text>
-  <text x="558" y="382" class="d2">folds decoder.sv (comb, layout-only)</text>
+  <text x="558" y="382" class="d2">reuses decoder.sv (comb, separate)</text>
   <!-- 64b field split glyph -->
   <rect class="b-ctrl" x="558" y="394" width="190" height="26" rx="3" opacity=".6"/>
   <line x1="586" y1="394" x2="586" y2="420" class="inner"/>
@@ -223,7 +215,7 @@
   <text x="802" y="478" class="d">route by opcode class:</text>
   <text x="802" y="496" class="d2">mxu.* &rarr; MXU &middot; vpu.* &rarr; VPU</text>
   <text x="802" y="512" class="d2">dmu.* / flush.slot &rarr; DMU</text>
-  <text x="802" y="524" class="d2">acc.store / vreg.load / vreg.store (reg-move)</text>
+  <text x="802" y="524" class="d2">acc.store / vreg.load / vreg.store &rarr; LSU</text>
   <text x="802" y="536" class="d2">iv broadcast tapped to ALL units &rarr;</text>
   <text x="1050" y="558" class="refs" text-anchor="end">640</text>
 
@@ -250,12 +242,12 @@
 
   <!-- iv_reg[4] -->
   <rect class="state" x="580" y="628" width="185" height="132" rx="5"/>
-  <text x="592" y="650" class="ti t-ctrl" font-size="12">iv_reg[4]</text>
-  <text x="592" y="669" class="d2">loop induction vars</text>
+  <text x="592" y="650" class="ti t-ctrl" font-size="12">iv_reg[4] + loop_ctrl.sv</text>
+  <text x="592" y="669" class="d2">loop IV + bo[8] accumulators</text>
   <text x="592" y="689" class="d">loop.begin: init / push</text>
-  <text x="592" y="705" class="d">loop.end: step + test</text>
-  <text x="592" y="725" class="d2">4 nested levels</text>
-  <text x="592" y="741" class="d2">iv &rarr; PC reload + descriptor</text>
+  <text x="592" y="705" class="d">loop.end: bo[ch] += stride</text>
+  <text x="592" y="725" class="d2">4 nested levels &middot; bo[8] &rarr; AGU</text>
+  <text x="592" y="741" class="d2">iv / bo &rarr; PC reload + descriptor</text>
   <text x="755" y="756" class="refs" text-anchor="end">650</text>
   <!-- iv -> Issue -->
   <path class="fctrl" d="M700,628 L700,600 L840,600 L840,562"/>
@@ -265,7 +257,7 @@
   <text x="330" y="596" class="lbl-c">iv &rarr; PC (loop.end)</text>
 
   <!-- =========================================================
-       RUNTIME SYNC (the ONLY runtime sync) + REMOVED scoreboard
+       RUNTIME SYNC (the ONLY runtime sync) + no scoreboard
        ========================================================= -->
   <rect class="b-ctrl" x="790" y="628" width="270" height="60" rx="5"/>
   <text x="802" y="648" class="ti t-ctrl" font-size="11.5">runtime sync: flush.slot / halt-drain ONLY</text>
@@ -273,10 +265,10 @@
   <text x="802" y="681" class="d2">halt: drain-all-DMA &rarr; done=1</text>
   <text x="1050" y="626" class="refs" text-anchor="end">690</text>
 
-  <rect class="new-o" x="790" y="696" width="270" height="64" rx="5"/>
-  <text x="800" y="714" class="badge">&Delta; REMOVED &mdash; hazard resolution = NONE</text>
-  <text x="800" y="730" class="badge">no producer-busy scoreboard</text>
-  <text x="800" y="746" class="badge">no WAIT_MXU / SYNC_MXU wait-states</text>
+  <rect class="b-ctrl" x="790" y="696" width="270" height="64" rx="5"/>
+  <text x="800" y="714" class="ti t-ctrl" font-size="11">hazard resolution = NONE</text>
+  <text x="800" y="730" class="d2">no producer-busy scoreboard</text>
+  <text x="800" y="746" class="d2">no WAIT_MXU / SYNC_MXU wait-states</text>
 
   <!-- =========================================================
        DESCRIPTOR BUS -> execution units (distributed AGU)
@@ -286,7 +278,8 @@
   <path class="fctrl" d="M1110,450 L1110,400 L1146,400"/>
   <path class="fctrl" d="M1110,450 L1146,450"/>
   <path class="fctrl" d="M1110,450 L1110,700 L1146,700"/>
-  <line x1="1110" y1="400" x2="1110" y2="700" class="fctrl" style="marker-end:none"/>
+  <path class="fctrl" d="M1110,450 L1110,890 L1146,890"/>
+  <line x1="1110" y1="400" x2="1110" y2="890" class="fctrl" style="marker-end:none"/>
   <text x="1074" y="352" class="ref" text-anchor="end">670</text>
   <text x="1096" y="378" class="lbl-c" transform="rotate(-90 1096 378)">descriptor + start pulse</text>
 
@@ -294,6 +287,7 @@
   <path class="fiv" d="M1052,538 L1080,538 L1080,428 L1146,428"/>
   <path class="fiv" d="M1080,538 L1080,478 L1146,478"/>
   <path class="fiv" d="M1080,538 L1080,728 L1146,728"/>
+  <path class="fiv" d="M1080,538 L1080,918 L1146,918"/>
   <text x="1088" y="560" class="lbl-c">iv BROADCAST &rarr; all units</text>
 
   <!-- ===== MXU unit ===== -->
@@ -301,8 +295,8 @@
   <text x="1158" y="378" class="ti t-mxu" font-size="12.5">MXU  &mdash;  systolic matmul array</text>
   <rect class="agu" x="1158" y="388" width="150" height="104" rx="4"/>
   <text x="1166" y="406" class="d" font-weight="700" fill="var(--ctrl)">addr-gen (local)</text>
-  <text x="1166" y="423" class="d2">base + iv&middot;stride</text>
-  <text x="1166" y="438" class="d2">+ intra-instr march</text>
+  <text x="1166" y="423" class="d2">base + bo[ch]</text>
+  <text x="1166" y="438" class="d2">adder, no multiplier</text>
   <text x="1166" y="460" class="d2">consumes descriptor</text>
   <text x="1166" y="475" class="d2">+ iv, self-sequences</text>
   <text x="1320" y="410" class="d2">start pulse launches the op;</text>
@@ -317,8 +311,8 @@
   <text x="1158" y="544" class="ti t-vpu" font-size="12.5">VPU  &mdash;  vector lane pipeline (FIG. 5)</text>
   <rect class="agu" x="1158" y="554" width="150" height="104" rx="4"/>
   <text x="1166" y="572" class="d" font-weight="700" fill="var(--ctrl)">addr-gen (local)</text>
-  <text x="1166" y="589" class="d2">base + iv&middot;stride</text>
-  <text x="1166" y="604" class="d2">+ intra-instr march</text>
+  <text x="1166" y="589" class="d2">base + bo[ch]</text>
+  <text x="1166" y="604" class="d2">adder, no multiplier</text>
   <text x="1166" y="626" class="d2">VREG row addressing</text>
   <text x="1166" y="641" class="d2">from descriptor + iv</text>
   <text x="1320" y="578" class="d2">vpu.reduce / .lut / .simd</text>
@@ -333,8 +327,8 @@
   <text x="1158" y="710" class="ti t-mem" font-size="12.5">DMU  &mdash;  async data-moving unit</text>
   <rect class="agu" x="1158" y="720" width="150" height="104" rx="4"/>
   <text x="1166" y="738" class="d" font-weight="700" fill="var(--ctrl)">addr-gen (local)</text>
-  <text x="1166" y="755" class="d2">base + iv&middot;stride</text>
-  <text x="1166" y="770" class="d2">+ intra-instr march</text>
+  <text x="1166" y="755" class="d2">base + bo[ch]</text>
+  <text x="1166" y="770" class="d2">adder, no multiplier</text>
   <text x="1166" y="792" class="d2">DRAM &harr; SPAD descriptor</text>
   <text x="1166" y="807" class="d2">walk, slot-tagged</text>
   <text x="1320" y="744" class="d2">async slots; the ONLY unit</text>
@@ -342,12 +336,28 @@
   <text x="1320" y="782" class="d2">flush.slot / halt fence it &rarr;</text>
   <text x="1320" y="800" class="d2">slot-done pulse to runtime</text>
   <text x="1320" y="816" class="d2">sync (690), not a scoreboard</text>
-  <text x="1320" y="832" class="d2" style="font-size:9px" fill="var(--new)">march FSM extracted to dmu.sv</text>
+  <text x="1320" y="832" class="d2" style="font-size:9px">march FSM in dmu.sv</text>
   <text x="1604" y="686" class="ref" text-anchor="end">720</text>
 
   <!-- DMU slot-done back to runtime sync -->
   <path class="flow" d="M1146,760 L1075,760 L1075,672 L1060,672"/>
   <text x="900" y="775" class="lbl">DMU slot-done &rarr; flush.slot / halt</text>
+
+  <!-- ===== LSU unit (4th execution-unit sink) ===== -->
+  <rect class="b-mem" x="1146" y="854" width="470" height="140" rx="6"/>
+  <text x="1158" y="876" class="ti t-mem" font-size="12.5">LSU  &mdash;  load/store unit (lsu.sv)</text>
+  <rect class="agu" x="1158" y="886" width="150" height="98" rx="4"/>
+  <text x="1166" y="904" class="d" font-weight="700" fill="var(--ctrl)">addr-gen (local)</text>
+  <text x="1166" y="921" class="d2">base + bo[ch]</text>
+  <text x="1166" y="936" class="d2">adder, no multiplier</text>
+  <text x="1166" y="958" class="d2">VREG / SPAD / ACC</text>
+  <text x="1166" y="973" class="d2">addressing from descriptor</text>
+  <text x="1320" y="892" class="d2">acc.store (ACC &rarr; VREG),</text>
+  <text x="1320" y="910" class="d2">vreg.load (SPAD &rarr; VREG),</text>
+  <text x="1320" y="928" class="d2">vreg.store (VREG &rarr; SPAD),</text>
+  <text x="1320" y="946" class="d2">owns the bf16 &harr; fp32 casts.</text>
+  <text x="1320" y="970" class="d2">FIXED, data-independent latency</text>
+  <text x="1604" y="852" class="ref" text-anchor="end">730</text>
 
   <!-- =========================================================
        INVARIANT NOTE (bottom-left)
@@ -368,7 +378,7 @@
   <h2>Reference numerals &mdash; FIG. 6</h2>
   <ul class="reflist">
     <li><b>600</b> Command Processor (external): command_processor + iram_loader</li>
-    <li><b>610</b> Tile sequencer (folds pc.sv + decoder.sv)</li>
+    <li><b>610</b> Tile sequencer (reuses pc.sv + decoder.sv + pc_iram.sv + loop_ctrl.sv, separate)</li>
     <li><b>611</b> PC stage (advance / loop-reload)</li>
     <li><b>620</b> IRAM read &mdash; I_bram 4096&times;64b, entry IRAM[0]</li>
     <li><b>630</b> Decode (64b &rarr; op | flags | op0/1/2)</li>
@@ -381,23 +391,20 @@
     <li><b>700</b> MXU sink (fixed-latency)</li>
     <li><b>710</b> VPU sink (fixed-depth D, FIG. 5)</li>
     <li><b>720</b> DMU sink (async slots, only variable unit)</li>
-    <li class="nw"><b>&Delta;600</b> program_id_csr / kernel_arg_csr REMOVED</li>
-    <li class="nw"><b>&Delta;640</b> producer-busy scoreboard REMOVED</li>
-    <li class="nw"><b>&Delta;690</b> WAIT_MXU / SYNC_MXU wait-states REMOVED</li>
-    <li class="nw"><b>&Delta;680</b> central AGU REMOVED (AGU pushed into units)</li>
+    <li><b>730</b> LSU sink (acc.store / vreg.load / vreg.store, casts)</li>
   </ul>
 </div>
 
-<div class="delta">
-  <h2>&Delta; thin / folded / removed vs the current 1522-line god-module sequencer</h2>
-  <ul>
-    <li><b>Folded IN, not orchestrated.</b> <code>pc.sv</code> (47 L) and <code>decoder.sv</code> (34 L) collapse into three pipeline stages of one thin front-end. Today they are separate modules driven by a 1522-line multi-state FSM.</li>
-    <li><b>No datapath FSM.</b> Redesign is a valid-shift exposed pipeline: 1 instr/cycle, in-order. Today: 17-state FSM (IDLE / FETCH_1 / WAIT_MXU / FLUSH_SLOT_WAIT / HALT_STATE / VEC_WAIT_VPU &hellip;) hand-mirroring physical timing.</li>
-    <li><b>Hazard resolution = NONE.</b> Static schedule + fixed, data-independent FU latencies (architecture invariant) make scoreboard-free issue safe. <code>REMOVED</code>: producer-busy scoreboard, <code>WAIT_MXU</code> / <code>SYNC_MXU</code> wait-states.</li>
-    <li><b>Only runtime sync survives.</b> <code>flush.slot</code> spins until DMU async-slot-done; <code>halt</code> drains all DMA then raises <code>done</code>. The DMU is the sole unit with variable completion; everyone else is fixed-latency.</li>
-    <li><b>Distributed AGU.</b> No central address generator: each of MXU / VPU / DMU receives <code>{base,stride,count,flags,iv}</code> + a start pulse and computes <code>base + iv&middot;stride + intra-instr march</code> locally. <code>iv</code> is broadcast to all units.</li>
-    <li><b>Launch CSRs removed.</b> <code>program_id_csr</code> / <code>kernel_arg_csr[127:0]</code> gone; entry PC is fixed at <code>IRAM[0]</code>. The CP just loads I_bram, pulses <code>compute_start</code>, and reads <code>done</code> / <code>instr_ready</code>.</li>
+<div class="card" style="margin-top:16px">
+  <h2>Live sequencer design</h2>
+  <ul style="margin:0;padding-left:18px;columns:2;column-gap:26px;font-size:12px;line-height:1.5">
+    <li><b>Reused as separate modules.</b> <code>pc.sv</code>, <code>decoder.sv</code>, <code>pc_iram.sv</code> and <code>loop_ctrl.sv</code> stay separate modules, sequenced by the thin exposed-pipeline front-end: 1 instr/cycle, in-order, valid-shift, no monolithic multi-state FSM.</li>
+    <li><b>No datapath FSM.</b> A valid-shift exposed pipeline: 1 instr/cycle, in-order, with no per-op micro-state machine.</li>
+    <li><b>Hazard resolution = NONE.</b> Static schedule + fixed, data-independent FU latencies (an architecture invariant) make scoreboard-free issue safe: no producer-busy scoreboard, no <code>WAIT_MXU</code> / <code>SYNC_MXU</code> wait-states.</li>
+    <li><b>Only runtime sync.</b> <code>flush.slot</code> spins until DMU async-slot-done; <code>halt</code> drains all DMA then raises <code>done</code>. The DMU is the sole unit with variable completion; everyone else is fixed-latency.</li>
+    <li><b>Distributed AGU.</b> No central address generator: each of MXU / VPU / DMU / LSU receives <code>{base,stride,count,flags,iv}</code> + a start pulse and computes <code>base + bo[ch]</code> locally with an <b>adder (no multiplier)</b>; the <code>bo[8]</code> base-offset accumulators live in <code>loop_ctrl.sv</code> (<code>bo[ch] += stride</code> at <code>loop.end</code>). <code>iv</code> is broadcast to all units.</li>
+    <li><b>Launch.</b> Entry PC is fixed at <code>IRAM[0]</code>. The CP loads I_bram, pulses <code>compute_start</code>, and reads <code>done</code> / <code>instr_ready</code>.</li>
   </ul>
 </div>
-<p class="foot">FIG. 6 depicts the LOCKED redesign. Grounded in <code>npu/src/compute_tile/{pc,decoder,sequencer,dmu}.sv</code> and <code>npu/src/npu/{command_processor,iram_loader}.sv</code>; dashed-red marks removals vs the current RTL.</p>
+<p class="foot">FIG. 6 depicts the LOCKED design. Grounded in <code>npu/src/compute_tile/{pc,decoder,pc_iram,loop_ctrl,lsu,dmu}.sv</code> and <code>npu/src/npu/{command_processor,iram_loader}.sv</code>.</p>
 </div>

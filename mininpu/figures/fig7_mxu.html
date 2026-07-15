@@ -113,7 +113,6 @@
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>PE / systolic array / ACC compute</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD / ACC storage (memory)</span>
     <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>CAST fp32&rarr;bf16 boundary</span>
-    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; locked resolution vs prior OPEN</span>
     <span>&#9642; active weight buf &middot; &#9643; inactive weight buf</span>
   </div>
 </header>
@@ -175,19 +174,17 @@
   <text x="140" y="426" class="d2">2D tile, per-row</text>
   <text x="140" y="620" class="d2" font-weight="700" fill="var(--mem)">R_mxu read port</text>
   <text x="140" y="635" class="d2">stream 1 row / cyc &rarr;</text>
-  <text x="140" y="820" class="d2" font-weight="700" fill="var(--mem)">W_mxu write port</text>
-  <text x="140" y="835" class="d2">&larr; acc.store (fp32)</text>
+  <text x="140" y="820" class="d2" font-weight="700" fill="var(--mem)">VREG write port (LSU)</text>
+  <text x="140" y="835" class="d2">&larr; acc.store (fp32, LSU)</text>
   <text x="306" y="370" class="ref" text-anchor="end">730</text>
 
   <!-- CAST band -->
   <rect class="castcol" x="316" y="372" width="130" height="512" rx="6"/>
   <text x="325" y="392" class="ti t-ext" font-size="11.5">CAST 8-lane</text>
   <text x="325" y="408" class="d2">fp32 &rarr; bf16</text>
-  <rect class="new-o" x="320" y="416" width="122" height="52" rx="5"/>
-  <text x="326" y="432" class="badge">&Delta; LOCKED = cast</text>
-  <text x="326" y="445" class="badge">at the boundary</text>
-  <text x="326" y="458" class="badge">(was OPEN:</text>
-  <text x="326" y="470" class="badge">widen vs cast)</text>
+  <rect class="new-o" x="320" y="416" width="122" height="40" rx="5"/>
+  <text x="326" y="434" class="badge">LOCKED = cast</text>
+  <text x="326" y="448" class="badge">at the boundary</text>
   <text x="325" y="500" class="d2" style="font-size:9.5px">PEs stay</text>
   <text x="325" y="513" class="d2" style="font-size:9.5px">bf16&times;bf16;</text>
   <text x="325" y="526" class="d2" style="font-size:9.5px">fp32 accumulate</text>
@@ -355,9 +352,9 @@
   <text x="1232" y="1000" class="lbl-m">accum flag: matmul adds over K-tiles into SAME ACC (serialized)</text>
   <text x="1232" y="1016" class="lbl-m">causal: mask upper-triangle to -&infin;</text>
 
-  <!-- acc.store : drain ACC -> VREG (W_mxu, lossless fp32) -->
+  <!-- acc.store : LSU drains ACC -> VREG (single write port, lossless fp32) -->
   <path class="fm" d="M452,1030 C300,1030 218,980 218,888"/>
-  <text x="150" y="1055" class="lbl-m">acc.store: ACC &rarr; VREG (W_mxu, fp32 LOSSLESS)</text>
+  <text x="150" y="1055" class="lbl-m">acc.store (LSU): ACC &rarr; VREG (single write port, fp32 LOSSLESS)</text>
   <text x="1232" y="1032" class="ref">770</text>
 
   <!-- =========================================================
@@ -393,7 +390,6 @@
   <text x="1312" y="632" class="d2" style="font-size:9px">fp_mul / fp_add in the MAC =</text>
   <text x="1312" y="646" class="d2" style="font-size:9px">SHARED FP modules, also</text>
   <text x="1312" y="660" class="d2" style="font-size:9px">instantiated in the VPU lane.</text>
-  <text x="1312" y="674" class="d2" style="font-size:9px">fp_max: not in MXU (PLANNED).</text>
   <text x="1312" y="712" class="d2" style="font-size:9.5px">registered pass-through both axes: 1 hop / cycle (systolic)</text>
 
   <!-- =========================================================
@@ -430,7 +426,7 @@
   <text x="142" y="1098" class="ti t-mxu" font-size="11">Ports &amp; timing</text>
   <text x="142" y="1116" class="d2">&bull; SPAD-read: weights only, LOW rate (load.w) + bias row for acc.init</text>
   <text x="142" y="1132" class="d2">&bull; VREG-read R_mxu: X stream (fp32 &rarr; cast &rarr; bf16 W-edge, 1 row/cyc)</text>
-  <text x="142" y="1148" class="d2">&bull; VREG-write W_mxu: acc.store drains ACC &rarr; VREG (fp32 lossless)</text>
+  <text x="142" y="1148" class="d2">&bull; VREG-write (LSU): acc.store drains ACC &rarr; VREG (fp32 lossless)</text>
   <text x="142" y="1164" class="d2">&bull; latency = N-fill(8) + K-stream, fixed &middot; matmul NONBLOCKING &middot; FA output O lives in VREG (ACC stays depth 2)</text>
 </svg>
 </div>
@@ -441,7 +437,7 @@
     <li><b>700</b> SPAD &mdash; weight source (low-rate) + acc.init bias row</li>
     <li><b>710</b> weight double-buffer load network (shift down columns)</li>
     <li><b>720</b> per-PE weight double-buffer (active / inactive + promote)</li>
-    <li><b>730</b> VREG (fp32) &mdash; X source, R_mxu rd / W_mxu wr</li>
+    <li><b>730</b> VREG (fp32) &mdash; X source, R_mxu rd / LSU wr (acc.store)</li>
     <li><b>740</b> CAST 8-lane fp32 &rarr; bf16 (boundary)</li>
     <li><b>750</b> 8&times;8 = 64 PE systolic array</li>
     <li><b>751</b> PE MAC (bf16&times;bf16 &rarr; fp32 partial, + psum_in)</li>
@@ -451,22 +447,18 @@
     <li><b>761</b> mxu.acc.init (bias broadcast preload)</li>
     <li><b>762</b> accum flag (K-tile accumulate, same ACC, serialized)</li>
     <li><b>763</b> causal (upper-triangle mask &rarr; -&infin;)</li>
-    <li><b>770</b> acc.store drain &rarr; VREG (W_mxu, lossless)</li>
-    <li class="nw"><b>&Delta;740</b> fp32-X resolved = CAST at boundary (was OPEN)</li>
-    <li class="nw"><b>&Delta;730</b> X now from VREG, not SPAD</li>
-    <li class="nw"><b>&Delta;760</b> output to ACC, not SPAD</li>
-    <li class="nw"><b>&Delta;761</b> acc.init added (bias preload)</li>
+    <li><b>770</b> acc.store drain &rarr; VREG (LSU, lossless)</li>
   </ul>
 </div>
 
-<div class="delta">
-  <h2>&Delta; locked MXU vs prior design</h2>
-  <ul>
-    <li><b>X source moved to VREG.</b> X now streams from <code>VREG</code> (fp32) via the <code>R_mxu</code> read port, no longer fetched from SPAD. SPAD is now weight-only (plus the acc.init bias row).</li>
-    <li><b>fp32-X into 16-bit PEs = CAST at the boundary (LOCKED).</b> The former OPEN choice (widen PEs vs cast) resolves to an explicit 8-lane <code>fp32 &rarr; bf16</code> CAST at the west edge. PEs stay <code>bf16&times;bf16</code>; accumulation stays fp32.</li>
-    <li><b>Output drains to ACC, not SPAD.</b> Each systolic column drains its partial sums into its own ACC bank; <code>acc.store</code> is the only path back to VREG (fp32 lossless via <code>W_mxu</code>).</li>
+<div class="card" style="margin-top:16px">
+  <h2>MXU design notes (locked)</h2>
+  <ul style="margin:0;padding-left:18px;columns:2;column-gap:26px;font-size:12px;line-height:1.5">
+    <li><b>X source = VREG.</b> X streams from <code>VREG</code> (fp32) via the <code>R_mxu</code> read port; SPAD is weight-only (plus the acc.init bias row).</li>
+    <li><b>fp32-X into bf16 PEs = CAST at the boundary (LOCKED).</b> An explicit 8-lane <code>fp32 &rarr; bf16</code> CAST at the west edge; PEs stay <code>bf16&times;bf16</code>, accumulation stays fp32.</li>
+    <li><b>Output drains to ACC.</b> Each systolic column drains its partial sums into its own ACC bank; <code>acc.store</code> is the only path back to VREG (fp32 lossless, driven by the <b>LSU</b>).</li>
     <li><b>ACC = 8 banks &times; depth 2.</b> One bank per column, double-buffered fp32, MXU-owned. <code>accum</code> folds K-tiles into the same ACC (serialized); <code>causal</code> masks the upper triangle. FA output <code>O</code> lives in VREG, so ACC stays depth 2.</li>
-    <li><b>+ mxu.acc.init.</b> New op broadcast-preloads a SPAD bias row into ALL rows of ACC before a matmul, so matmul accumulates onto bias.</li>
+    <li><b>mxu.acc.init.</b> Broadcast-preloads a SPAD bias row into ALL rows of ACC before a matmul, so matmul accumulates onto bias.</li>
     <li><b>Weight double-buffer.</b> <code>mxu.load.w</code> fills the INACTIVE buffer while a matmul runs on the ACTIVE one; a matmul start implicitly PROMOTES inactive &rarr; active. <code>transB</code> reverses weight-row load order. Nonblocking; fixed latency = N-fill(8) + K-stream.</li>
   </ul>
 </div>

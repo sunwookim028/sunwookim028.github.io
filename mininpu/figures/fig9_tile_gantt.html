@@ -68,7 +68,7 @@
 <div class="wrap">
 <header>
   <h1>mininpu tile-loop pipeline Gantt <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 9</span></h1>
-  <p class="sub">one (m,n) block of the 32x32 GELU worked example (ISA 7.4) &middot; N=8 &middot; weight double-buffer ping-pong &middot; ACC depth-2 tail overlap &middot; steady state = 1 matmul / N=8 cy, load.w fully hidden</p>
+  <p class="sub">one (m,n) block of the 32x32 GELU worked example (ISA 0.5.0) &middot; N=8 &middot; weight double-buffer ping-pong &middot; ACC depth-2 tail overlap &middot; steady state = 1 matmul / N=8 cy, load.w fully hidden</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--ctrl-f);border-color:var(--ctrl)"></i>SEQ issue / control (ctrl)</span>
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>MXU matmul stream / ACC accumulate (mxu)</span>
@@ -164,7 +164,7 @@
 
   <!-- ===== VPU: gelu, D_vpu = 23 drain ===== -->
   <rect class="b-vpu" x="981" y="240" width="345" height="30" rx="3"/>
-  <text class="bt t-vpu" x="988" y="259">vpu.lut gelu (D_vpu = 23, per-row drain)</text>
+  <text class="bt t-vpu" x="988" y="259">vpu.lut gelu (D_vpu = 23, latency-serial: 1 row / D_vpu, not row-pipelined)</text>
 
   <!-- ===== LSU: acc.store -> (gelu) -> vreg.store ===== -->
   <rect class="b-mem" x="831" y="288" width="150" height="30" rx="3"/>
@@ -189,7 +189,11 @@
   <code>2N-1 + PE_LATENCY = 15 + 2 = 17</code>. The <b>ACC depth-2 double-buffer</b> lets
   block <code>j</code>'s drain / store tail (<code>acc.store</code> to gelu to
   <code>vreg.store</code>) overlap block <code>j+1</code>'s matmul (dashed bar).
-  <code>D_vpu = 23</code> (VPU gelu drain) and the <code>LSU = 10</code> tail latencies are
-  per-block drain, amortized across the tile-loop, not on the throughput critical path.
+  The gelu here is <code>vpu.lut</code>, which is <b>latency-serial</b> (each row drains
+  the full <code>D_vpu = 23</code> before the next issues, not freely row-pipelined like
+  the single-source SIMD ops). It is hidden only because the ACC depth-2 buffer overlaps
+  this <code>acc.store</code> to gelu to <code>vreg.store</code> tail (plus the
+  <code>LSU = 10</code> latency) with block <code>j+1</code>'s matmul, so on an MXU-bound
+  tile-loop it stays off the throughput critical path.
 </p>
 </div>

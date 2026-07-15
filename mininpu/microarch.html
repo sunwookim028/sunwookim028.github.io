@@ -46,6 +46,11 @@
          <span class="sev good">Locked</span> design and a
          <span class="sev gap">Decisions pending</span> section (still-open items).</p>
 
+      <p class="sub"><strong>Version context:</strong> ISA 0.5.0 is the design target;
+         the shipped SSOT (<code>opcodes.py</code>) is still 0.4.0 and the cutover
+         (0.5.0 opcodes, <code>PE_LATENCY 0 -&gt; 2</code>) is pending. See the
+         <a href="isa.html#s8">ISA 0.5.0 status note</a>.</p>
+
       <section id="s1" class="reveal">
         <h2><span class="num">01</span> Overview</h2>
         <p class="sub">Top-level compute tile: the devmem-SPAD-VREG-ACC spine plus the
@@ -138,13 +143,17 @@
              serial critical path. So <strong>pipeline depth may grow freely to meet
              timing</strong> while <strong>throughput stays 1 tile-row/cycle (VPU) and 1
              column/cycle (MXU)</strong>.</p>
-          <p><strong>This rests on row-pipelining.</strong> The VPU is a fixed-depth
-             pipeline that <strong>issues 1 tile-row/cycle with multiple rows in
-             flight</strong> (rows overlapped); <code>D_vpu</code> is only the drain
-             latency of a single row, paid once and hidden behind the following rows,
-             hence negligible. softmax / LayerNorm are dependent reduction chains within a
-             row, but the <strong>tile-loop supplies the row-level parallelism</strong>
-             the pipeline consumes, so the pipe stays full.</p>
+          <p><strong>This rests on row-pipelining, which is partial.</strong> The
+             <strong>single-source SIMD ops</strong> (<code>scale.bcast</code>,
+             <code>scale.col.bcast</code>, <code>scale.imm</code>, <code>sub.bcast</code>,
+             <code>add.col.bcast</code>) stream at <strong>1 tile-row/cycle with multiple
+             rows in flight</strong> (rows overlapped); for them <code>D_vpu</code> is only
+             the drain latency of a single row, paid once and hidden behind the following
+             rows, hence negligible. <strong>gelu / exp2 and the two-source ops stay
+             latency-serial</strong> (each row drains the full <code>D_vpu</code> before the
+             next issues). softmax / LayerNorm are dependent reduction chains within a row,
+             but the <strong>tile-loop supplies the row-level parallelism</strong> the
+             pipeline consumes, so for the streamable ops the pipe stays full.</p>
           <p>The level-wise reduce-tree pipelining and the deep fp pipelines are
              <strong>intended design, not overhead</strong>: fp arithmetic follows
              standard pipelined designs (FloPoCo-style; <code>fp_mul</code> combinational,
@@ -211,7 +220,8 @@
                <strong>Lane = column, row-serial</strong>: one 256-bit tile-row per
                cycle, 8 columns in parallel (the natural structure for the per-row
                reductions in softmax / LayerNorm). Throughput = 1 tile-row/cycle
-               (row-pipelined, multiple rows in flight).</p>
+               (row-pipelined, multiple rows in flight) for the single-source SIMD ops;
+               gelu / exp2 / two-source ops are latency-serial (1 row / D_vpu).</p>
             <p><strong>Pipeline depth <code>D_vpu</code> is RTL / synth-measured</strong>
                (currently about 23 (measured after the fp-pipeline pass)), an implementation
                number, NOT an ISA-visible structural constant. <code>fp_mul</code> stays
@@ -230,8 +240,7 @@
           <div class="card">
             <h3>VREG</h3>
             <p><strong>32 x [8x8] fp32 = 8 KiB.</strong> Whole-tile-row access (256-bit),
-               <strong>2 read + 1 write</strong> ports (<code>vec_regfile</code> style;
-               2r1w baseline).</p>
+               <strong>2 read + 1 write</strong> ports (2r1w baseline).</p>
             <p>No banking: MXU / VPU / LSU conflicts are avoided by
                <strong>temporal separation</strong> (foreground VREG access scheduled
                outside the short MXU X-read burst). See the realization subsection.</p>
@@ -289,14 +298,19 @@
 
         <h3>VPU pipeline</h3>
         <p class="sub"><span class="sev good">Locked structure</span> - fixed-depth,
-           row-pipelined vector pipeline; the depth <code>D_vpu</code> is
+           partially row-pipelined vector pipeline (single-source SIMD ops stream;
+           gelu / exp2 / two-source stay latency-serial); the depth <code>D_vpu</code> is
            RTL / synth-measured (currently about 23, measured after the fp-pipeline
            pass), not a locked constant.</p>
         <ul>
           <li><strong>Structure:</strong> 8 lanes (lane = column), row-serial at one
             256-bit tile-row per cycle, throughput 1 tile-row/cycle
             (<strong>row-pipelined</strong>: multiple tile-rows in flight, 1 issued per
-            cycle, each draining after <code>D_vpu</code> cycles). <code>fp_mul</code>
+            cycle, each draining after <code>D_vpu</code> cycles) <strong>for the
+            single-source SIMD ops only</strong> (<code>scale.bcast</code>,
+            <code>scale.col.bcast</code>, <code>scale.imm</code>, <code>sub.bcast</code>,
+            <code>add.col.bcast</code>); gelu / exp2 / two-source ops are latency-serial
+            (1 row / <code>D_vpu</code>). <code>fp_mul</code>
             stays <strong>combinational</strong> (DSP), but an IEEE <code>fp_add</code> is
             <strong>registered</strong> (1+ pipeline stages, standard FloPoCo-style: a
             single combinational IEEE fp_add is ~11 ns and misses the 5 ns / 200 MHz
@@ -311,10 +325,6 @@
             reservation window is single. <code>D_vpu</code> is an implementation number,
             in the same bucket as <code>L_matmul</code> and the PE pipeline depth, NOT an
             ISA-visible structural constant (unlike <code>N</code> and <code>2N-1</code>).</li>
-          <li><strong>Replaces the old single-cycle combinational gelu chain</strong>
-            (which synthesized to ~126 logic levels / ~36 ns and fails 200 MHz). The
-            pipelined VPU splits that chain into registered stages, each under the 5 ns
-            budget.</li>
         </ul>
         <iframe src="figures/fig5_vpu.html" loading="lazy" title="FIG. 5 VPU datapath" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
         <p class="sub">FIG. 5 - VPU datapath: 8-lane fixed-depth pipeline (lane = column, row-serial), combinational <code>fp_mul</code> + registered IEEE <code>fp_add</code>, level-wise pipelined reduce tree.
@@ -337,7 +347,7 @@
             8-wide vector RF to 2D tiles; <code>hwparams VREG_SIZE 8 -&gt; 64</code>).
             Access granularity is a <strong>whole tile-row (256-bit)</strong>.</li>
           <li><strong>Ports: 2 read + 1 write</strong> (whole tile-row), matching the
-            <code>vec_regfile</code> style. A 2nd write port is a sizing option only if
+            whole-tile-row 2r1w RF. A 2nd write port is a sizing option only if
             two writes ever need to be concurrent; tail sub-ops are dependency-serial, so
             <strong>2r1w is the baseline</strong>.</li>
           <li><strong>MXU X read:</strong> the MXU reads its X tile from VREG in a short

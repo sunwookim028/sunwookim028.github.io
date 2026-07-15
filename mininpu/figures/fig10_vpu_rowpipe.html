@@ -66,7 +66,7 @@
 <div class="wrap">
 <header>
   <h1>mininpu VPU row-pipelining Gantt <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 10</span></h1>
-  <p class="sub">8-row tile through the D_vpu = 23-deep VPU pipeline &middot; latency-serial (before) vs row-pipelined (after) &middot; same cycle axis &middot; D_vpu is the per-row DRAIN latency, amortized across the tile-loop</p>
+  <p class="sub">8-row tile through the D_vpu = 23-deep VPU pipeline &middot; latency-serial (gelu / exp2 / two-source ops) vs row-pipelined (single-source SIMD ops only) &middot; same cycle axis &middot; D_vpu is the per-row DRAIN latency, amortized across the tile-loop</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>one tile-row in the VPU pipeline (D_vpu = 23 deep)</span>
     <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>pipeline-drained (all rows done)</span>
@@ -87,7 +87,7 @@
   <line class="grid" x1="1438" y1="60" x2="1438" y2="362"/>
 
   <!-- ============ TOP band: latency-serial (before) ============ -->
-  <text class="band" x="150" y="50">latency-serial (before): each row waits the full drain, 8 x D_vpu=23 = 184 cy</text>
+  <text class="band" x="150" y="50">latency-serial (gelu / exp2 / two-source ops): each row waits the full drain, 8 x D_vpu=23 = 184 cy</text>
   <text class="thru" x="1438" y="50" text-anchor="end">throughput ~1 row / 23 cy</text>
 
   <rect class="b-vpu-o" x="150"  y="66"  width="161" height="11" rx="2"/><text class="rl" x="154" y="74">row0</text>
@@ -103,10 +103,10 @@
   <text class="donel" x="1432" y="176" text-anchor="end">184 cy (pipeline mostly empty)</text>
 
   <!-- contrast note between the bands -->
-  <text class="glab" x="150" y="206">same cycle axis below: the row-pipelined schedule finishes ~6x sooner by keeping all 8 rows in flight at once</text>
+  <text class="glab" x="150" y="206">same cycle axis below: for the single-source SIMD ops the row-pipelined schedule finishes ~6x sooner by keeping all 8 rows in flight at once</text>
 
   <!-- ============ BOTTOM band: row-pipelined (after) ============ -->
-  <text class="band" x="150" y="228">row-pipelined (after): 1 row issued/cy, all 8 rows in flight across the 23 stages, drain cy23..30 -&gt; ~8 + 23 = 31 cy</text>
+  <text class="band" x="150" y="228">row-pipelined (single-source SIMD ops): 1 row issued/cy, all 8 rows in flight across the 23 stages, drain cy23..30 -&gt; ~8 + 23 = 31 cy</text>
   <text class="thru" x="1438" y="228" text-anchor="end">throughput ~1 row / cy</text>
 
   <!-- D_vpu bracket over the first pipelined row -->
@@ -145,7 +145,12 @@
   (<code>8 x 23 = 184 cy</code>) and leaves the 23 stages mostly empty. The
   <b>row-pipelined</b> schedule (bottom) issues one tile-row per cycle, so all 8 rows are
   in flight across the pipeline at once; the whole tile drains in <code>~8 + 23 = 31 cy</code>
-  (<b>~1 row/cy</b>). This is why <code>D_vpu</code> is negligible for performance: it is
+  (<b>~1 row/cy</b>). For those ops <code>D_vpu</code> is negligible for performance: it is
   paid once per tile and hidden behind the following rows, amortized across the tile-loop.
+  <b>Row-pipelining is partial:</b> only the 5 single-source SIMD ops
+  (<code>scale.bcast</code>, <code>scale.col.bcast</code>, <code>scale.imm</code>,
+  <code>sub.bcast</code>, <code>add.col.bcast</code>) stream this way. <b>gelu</b>,
+  <b>exp2</b>, and the two-source ops stay in the latency-serial regime (top): each row
+  drains the full <code>D_vpu</code> before the next issues.
 </p>
 </div>

@@ -102,12 +102,11 @@
 <div class="wrap">
 <header>
   <h1>mininpu VPU datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 5</span></h1>
-  <p class="sub">redesign (LOCKED) &middot; fixed-depth cross-row-pipelined vector unit &middot; N=8 lanes (BANKING=8) &middot; one function-select pipeline: {reduce | LUT | SIMD lane-ALU} &middot; VPU=VREG-only &middot; VREG banked per-column, 2r2w</p>
+  <p class="sub">LOCKED &middot; fixed-depth vector unit (partial cross-row pipelining: single-source SIMD ops stream; gelu / exp2 / two-source latency-serial) &middot; N=8 lanes (BANKING=8) &middot; one function-select pipeline: {reduce | LUT | SIMD lane-ALU} &middot; VPU=VREG-only &middot; VREG 2r1w async whole-tile-row RF</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU lane FU / pipeline</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD (memory)</span>
     <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>cast / scalar source</span>
-    <span><i class="sw" style="background:transparent;border-color:var(--new);border-style:dashed"></i>&Delta; redesign vs current RTL</span>
   </div>
 </header>
 
@@ -136,17 +135,17 @@
   <!-- =========================================================
        VREG - vector register file, 2D tile, 32 regs (per-lane banked slices)
        ========================================================= -->
-  <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG &mdash; 32 &times; [8&times;8] fp32 (8 KiB) &middot; banked per-column RF &middot; 2r2w (R_mxu ‖ R_vpu / W_mxu ‖ W_vpu) &mdash; LOCKED</text>
+  <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG &mdash; 32 &times; [8&times;8] fp32 (8 KiB) &middot; 2r1w async whole-tile-row RF (256-bit) &mdash; LOCKED</text>
   <text x="1485" y="104" class="ref" text-anchor="end">510</text>
   <!-- port annotation -->
-  <text x="40" y="150" class="d2">rd A · R_mxu</text>
-  <text x="40" y="170" class="d2">rd B · R_vpu</text>
-  <text x="40" y="190" class="d2">wr ×2 · W_mxu/W_vpu</text>
+  <text x="40" y="150" class="d2">rd A · MXU X</text>
+  <text x="40" y="170" class="d2">rd B · VPU / LSU</text>
+  <text x="40" y="190" class="d2">wr · LSU / VPU</text>
   <rect class="new-o" x="1035" y="112" width="460" height="94" rx="7"/>
-  <text x="1485" y="128" class="badge" text-anchor="end">LOCKED: banked per-column RF (not monolithic, not true multiport)</text>
-  <text x="1485" y="144" class="badge" text-anchor="end">8 col-slices: col across 32 regs &times; 8 rows = 256 fp32 words each</text>
-  <text x="1485" y="160" class="badge" text-anchor="end">each slice banked by reg-id into 1r1w banks · bank count synth-tuned</text>
-  <text x="1485" y="176" class="badge" text-anchor="end">2r2w = bank parallelism + static conflict-free schedule (was OPEN, now locked)</text>
+  <text x="1485" y="128" class="badge" text-anchor="end">LOCKED: 2r1w async whole-tile-row RF (256-bit access granularity)</text>
+  <text x="1485" y="144" class="badge" text-anchor="end">2 read + 1 write shared by MXU-X / VPU-lane / LSU</text>
+  <text x="1485" y="160" class="badge" text-anchor="end">conflict-free by temporal separation, NOT banking</text>
+  <text x="1485" y="176" class="badge" text-anchor="end">2nd write port = sizing option only (tail sub-ops dependency-serial)</text>
 
   <!-- =========================================================
        LANE ARRAY  (8 columns)  +  FUNCTION-SELECT FU band outline
@@ -165,12 +164,6 @@
   <text x="40" y="451"  class="d2">s3 &larr; row r+2</text>
   <text x="40" y="543"  class="d2">s4 &larr; row r+1</text>
   <text x="40" y="634"  class="d2">s5 &larr; row r &rarr; wb</text>
-  <rect class="new-o" x="36" y="690" width="150" height="78" rx="6"/>
-  <text x="44" y="708" class="badge">&Delta; TODAY: ZERO</text>
-  <text x="44" y="722" class="badge">cross-row pipelining.</text>
-  <text x="44" y="736" class="badge">one row fully drains</text>
-  <text x="44" y="750" class="badge">before next starts</text>
-  <text x="44" y="764" class="badge">(16-56 cyc/tile &rarr; 8+D)</text>
 
   <!-- ================= per-lane columns ================= -->
   <!-- Lane geometry: laneX(i)=200+165*i, width 140; stage box x=laneX+8 w=124 -->
@@ -181,8 +174,8 @@
   <text x="214" y="128" class="d" font-weight="700" fill="var(--mem)">VREG col 0</text>
   <text x="214" y="144" class="d2">owns elem column 0</text>
   <text x="214" y="160" class="d2">reg[0..31][row][0]</text>
-  <text x="214" y="182" class="d2">R_mxu ‖ R_vpu&rarr;s0</text>
-  <text x="214" y="197" class="d2">W_vpu&larr;s5 ‖ W_mxu</text>
+  <text x="214" y="182" class="d2">2 rd ports &rarr; s0</text>
+  <text x="214" y="197" class="d2">1 wr port &larr; s5</text>
   <!-- read/write port arrows -->
   <path class="flow" d="M240,206 L240,262"/>
   <path class="flow" d="M262,206 L262,262"/>
@@ -230,7 +223,7 @@
   <text x="379" y="128" class="d" font-weight="700" fill="var(--mem)">VREG col 1</text>
   <text x="379" y="144" class="d2">owns elem column 1</text>
   <text x="379" y="182" class="d2">2 rd &rarr; s0</text>
-  <text x="379" y="197" class="d2">2 wr &larr; s5 / W_mxu</text>
+  <text x="379" y="197" class="d2">1 wr &larr; s5</text>
   <path class="flow" d="M405,206 L405,262"/>
   <path class="flow" d="M427,206 L427,262"/>
 
@@ -377,26 +370,13 @@
   <!-- "identical FU x8" caption -->
   <text x="1013" y="240" class="d2" text-anchor="middle" style="font-size:11px">identical function-select FU pipeline &times; 8  (L0..L7, one elem-column each)</text>
 
-  <!-- ============ Delta callouts on stages (right rail) ============ -->
-  <rect class="new-o" x="1505" y="365" width="160" height="52" rx="6"/>
-  <text x="1513" y="382" class="badge">&Delta; s2 fp_mul today is</text>
-  <text x="1513" y="395" class="badge">COMBINATIONAL (latency</text>
-  <text x="1513" y="408" class="badge">ignored) &rarr; register it</text>
-
-  <rect class="new-o" x="1505" y="424" width="160" height="50" rx="6"/>
-  <text x="1513" y="440" class="badge">fp_mul / fp_add (s2/s3) =</text>
-  <text x="1513" y="452" class="badge">SHARED FP modules, also</text>
-  <text x="1513" y="464" class="badge">in MXU &middot; fp_max PLANNED</text>
-
-  <rect class="new-o" x="1505" y="482" width="160" height="120" rx="6"/>
-  <text x="1513" y="500" class="badge">&Delta; s4 gelu = #217</text>
-  <text x="1513" y="514" class="badge">129-logic-level comb</text>
-  <text x="1513" y="528" class="badge">cone, forces 50 MHz.</text>
-  <text x="1513" y="542" class="badge">redesign splits into</text>
-  <text x="1513" y="556" class="badge">pipe stages &rarr; target</text>
-  <text x="1513" y="570" class="badge">clock. PLANNED (not yet):</text>
-  <text x="1513" y="584" class="badge">drop recip (=rsqrt&sup2;);</text>
-  <text x="1513" y="598" class="badge">add fp_max {max}</text>
+  <!-- ============ Stage notes (right rail) ============ -->
+  <text x="1513" y="382" class="d2" style="font-size:9.5px">s2 fp_mul + s3 fp_add:</text>
+  <text x="1513" y="396" class="d2" style="font-size:9.5px">shared FP modules, also</text>
+  <text x="1513" y="410" class="d2" style="font-size:9.5px">instantiated in the MXU.</text>
+  <text x="1513" y="500" class="d2" style="font-size:9.5px">s4 gelu (#217): tanh cone</text>
+  <text x="1513" y="514" class="d2" style="font-size:9.5px">split into registered pipe</text>
+  <text x="1513" y="528" class="d2" style="font-size:9.5px">stages to meet the clock.</text>
 
   <rect class="new-o" x="1505" y="611" width="160" height="62" rx="6"/>
   <text x="1513" y="626" class="badge">INVARIANT (locked): fixed,</text>
@@ -444,7 +424,7 @@
 
   <!-- writeback of reduce result -> VREG col0 (element r) : route left up -->
   <path class="fbc" d="M822,859 C120,859 120,150 202,140"/>
-  <text x="130" y="850" class="lbl-v">reduce result &rarr; VREG col0 (elem r) &middot; via W_vpu (1 of 2 write ports)</text>
+  <text x="130" y="850" class="lbl-v">reduce result &rarr; VREG col0 (elem r) &middot; via the single VREG write port (shared with LSU)</text>
   <!-- broadcast of col0 -> broadcast net (up) -->
   <path class="fbc" d="M848,844 C848,110 130,110 130,78"/>
   <text x="150" y="98" class="lbl-v">col0[r] &rarr; BROADCAST NET (feed next row)</text>
@@ -453,9 +433,9 @@
        CAST + MEMORY SUBSYSTEM
        ========================================================= -->
   <rect class="b-ext" x="200" y="905" width="1295" height="54" rx="6"/>
-  <text x="212" y="927" class="ti t-ext" font-size="12.5">CAST unit &mdash; bf16 &harr; fp32</text>
-  <text x="420" y="927" class="d">the ONLY VREG &harr; SPAD path (vreg.load / vreg.store) &middot; 8 elem/cyc</text>
-  <text x="420" y="945" class="d2">FU never touches ACC/SPAD directly &mdash; VPU = VREG-only; all memory traffic is cast load/store</text>
+  <text x="212" y="927" class="ti t-ext" font-size="12.5">LSU (load/store unit) &mdash; cast bf16 &harr; fp32</text>
+  <text x="420" y="927" class="d">owns the VREG &harr; SPAD path (vreg.load / vreg.store) + acc.store &middot; 8 elem/cyc</text>
+  <text x="420" y="945" class="d2">VPU FU never touches ACC/SPAD directly &mdash; VPU = VREG-only; SPAD&harr;VREG moves go through the LSU (a separate execution unit)</text>
   <text x="1485" y="903" class="ref" text-anchor="end">540</text>
 
   <rect class="b-mem" x="120" y="985" width="1440" height="80" rx="6"/>
@@ -491,8 +471,8 @@
   <h2>Reference numerals &mdash; FIG. 5</h2>
   <ul class="reflist">
     <li><b>500</b> Memory subsystem &mdash; SPAD (256b row, bf16)</li>
-    <li><b>510</b> VREG (32 &times; [8&times;8] fp32, 8 KiB, banked per-column, 2r2w)</li>
-    <li><b>510 LOCKED</b> banked per-column RF, 2r2w via bank parallelism + static conflict-free schedule</li>
+    <li><b>510</b> VREG (32 &times; [8&times;8] fp32, 8 KiB, 2r1w async whole-tile-row)</li>
+    <li><b>510 LOCKED</b> 2r1w async RF, conflict-free by temporal separation (not banking)</li>
     <li class="nw"><b>R_mxu</b> X-stream fp32&rarr;bf16 cast at MXU input (LOCKED, see FIG.1)</li>
     <li><b>520</b> Function-select FU (fixed depth D)</li>
     <li><b>521</b> s0 VREG read</li>
@@ -502,27 +482,21 @@
     <li><b>525</b> s4 LUT (exp2 / rsqrt / gelu-tanh cone)</li>
     <li><b>526</b> s5 result select &rarr; writeback</li>
     <li><b>530</b> cross-lane reduce tree (depth 3)</li>
-    <li><b>540</b> cast unit (bf16 &harr; fp32)</li>
+    <li><b>540</b> LSU (cast &middot; vreg.load/store &middot; acc.store)</li>
     <li><b>550</b> broadcast net (col0 / scalar fanout)</li>
     <li><b>560</b> scalar / imm / bias source</li>
-    <li class="nw"><b>&Delta;523</b> today fp_mul combinational</li>
-    <li class="nw"><b>&Delta;525</b> gelu #217 129-level cone @50 MHz</li>
-    <li class="nw"><b>525 PLANNED</b> unify LUTs &rarr; fp_lut_rom.sv + .mem; drop recip; add fp_max (not yet built)</li>
-    <li class="nw"><b>&Delta;520</b> today: zero cross-row pipelining</li>
-    <li class="nw"><b>&Delta;510</b> ACC_ROW ops dropped (VREG-only, #303)</li>
   </ul>
 </div>
 
-<div class="delta">
-  <h2>&Delta; redesign vs current RTL</h2>
-  <ul>
-    <li><b>Real pipeline, latencies honored.</b> Today: combinational datapath + retrofitted registers (the &ldquo;Fix 1-16&rdquo; timing campaign); FSM <code>stage_cnt</code> hand-mirrors physical register depth (fragile sim/synth invariant, drift bugs). Redesign: <code>sim == synth</code>.</li>
-    <li><b>gelu pipelined.</b> Today: single 129-logic-level combinational cone (#217, forces 50 MHz). Redesign: split into pipe stages inside s4 &rarr; target clock.</li>
-    <li><b>Cross-row streaming.</b> Today: ZERO cross-row pipelining &mdash; one row fully drains before the next (16-56 cyc/tile). Redesign: 1 row/cycle streamed &rarr; <code>8 + D</code> cyc.</li>
-    <li><b>VREG-only, W_vpu = 1 of 2 write ports.</b> Today: separate BRAM Port-B writeback mux + in-place <code>ACC_ROW</code> ops (#303). Redesign: VPU FU drives 1 of the VREG's 2 write ports (W_vpu), <code>ACC_ROW</code> dropped; FU touches VREG only (cast is the sole memory path).</li>
-    <li><b>VREG banking LOCKED.</b> Banked per-column RF: 8 col-slices (one per lane), each = that column across 32 regs &times; 8 rows (256 fp32 words). Each slice serves 2 rd (R_mxu X-stream, R_vpu lane) + 2 wr (W_mxu acc.store, W_vpu result), banked by reg-id into simple 1r1w banks; the static schedule keeps concurrent reads on different banks and concurrent writes on different banks (conflict-free) &rarr; 2r2w without a true 2r2w SRAM. Bank count synth-tuned. (was OPEN monolithic-vs-per-lane; now locked.)</li>
-    <li><b>MXU X-input cast (LOCKED).</b> The R_mxu read streams VREG fp32; an 8-lane <code>fp32&rarr;bf16</code> cast sits at the MXU X-stream input (bf16&times;bf16 PEs, fp32 accumulate &mdash; no PE widening). Shown in FIG.1; VREG stays fp32 (VPU format).</li>
-    <li><b>LUT ROMs PLANNED (not yet built).</b> Today = 4 inline-initial ROMs (exp2 / rsqrt / tanh / recip). PLANNED redesign target: unify into <code>fp_lut_rom.sv</code> with externalized <code>.mem</code> tables, drop recip (= rsqrt&sup2;), and instantiate <code>fp_max</code> for <code>vpu.simd {max}</code>.</li>
+<div class="card" style="margin-top:16px">
+  <h2>Design notes (locked)</h2>
+  <ul style="margin:0;padding-left:18px;columns:2;column-gap:26px;font-size:12px;line-height:1.5">
+    <li><b>Real pipeline, latencies honored.</b> The FU is a real fixed-depth pipeline under <code>sim == synth</code>: the reservation depth equals the physical register depth.</li>
+    <li><b>gelu pipelined.</b> The gelu tanh cone is split into registered pipe stages inside s4 to meet the target clock.</li>
+    <li><b>Partial cross-row streaming.</b> The single-source SIMD ops stream at 1 row/cycle (<code>~8 + D_vpu</code> cyc for an 8-row tile); gelu / exp2 / two-source ops stay latency-serial (1 row / <code>D_vpu</code>).</li>
+    <li><b>VREG-only, single write port.</b> The VPU FU shares the VREG's single write port (temporal separation with the LSU) and touches VREG only; the LSU is the sole SPAD&harr;VREG path.</li>
+    <li><b>VREG conflict model LOCKED.</b> 2r1w async whole-tile-row RF (256-bit): 2 read + 1 write ports shared by the MXU X-stream, the VPU lane read, and the LSU. Conflict-freedom is by <b>temporal separation, NOT banking</b>: the MXU reads its X tile in a short ~<code>N</code>-cycle burst, and the compiler schedules foreground VPU/LSU VREG access outside that window. A 2nd write port is a sizing option only (tail sub-ops are dependency-serial).</li>
+    <li><b>MXU X-input cast (LOCKED).</b> The R_mxu read streams VREG fp32; an 8-lane <code>fp32&rarr;bf16</code> cast sits at the MXU X-stream input (bf16&times;bf16 PEs, fp32 accumulate, no PE widening). Shown in FIG.1; VREG stays fp32 (VPU format).</li>
     <li><b>Function-select, not 3 datapaths.</b> ISA <code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code> map to one opcode-selected pipeline (reduce tree | LUT stage | SIMD lane-ALU), not parallel units.</li>
   </ul>
 </div>
