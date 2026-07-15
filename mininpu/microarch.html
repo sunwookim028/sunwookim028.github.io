@@ -51,13 +51,8 @@
         <p class="sub">Top-level compute tile: the devmem-SPAD-VREG-ACC spine plus the
            MXU, VPU, and tile sequencer.</p>
 
-        <iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute-tile architecture" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 1-2 - compute-tile architecture and unit layout.
-           <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
-        <p class="sub"><strong>Note:</strong> this figure predates the current VREG
-           model. The VREG is a whole-tile-row 2r1w register file (column-banking was
-           superseded); see the VREG realization subsection for the current model. Figure
-           refresh is tracked separately.</p>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text above
+           for the current model.</p>
 
         <h3>Datapath spine</h3>
         <div class="ladder">
@@ -109,11 +104,16 @@
                and <code>bo[ch] += stride[ch]</code> at each <code>loop.end</code>. Full
                rule: the <a href="isa.html#s2-2">ISA addressing model</a>.</p>
           </div>
-          <div class="card">
+          <div class="card" id="lpm">
             <h3>Literal pool (LPM)</h3>
             <p>On-chip param RAM in the sequencer (<strong>~256 x 64b</strong>),
                <strong>pool-index</strong> space, baked + launch-patched, read in
                <strong>Decode</strong>.</p>
+            <p><strong>Realization:</strong> reuse the mature
+               <strong>IRAM-embedded literal-pool machinery</strong> (loaded with the
+               kernel image, read in Decode via the redirect mux), <strong>not a new
+               separate RAM</strong> (see the
+               <a href="implementation.html#s2">implementation note</a>).</p>
             <p>Holds loop descriptors (hi + stride vector), devmem bases, and scalar
                immediates. See the <a href="isa.html#s2-1">ISA literal-pool
                section</a>.</p>
@@ -152,7 +152,7 @@
           <li><strong>Nonblocking ops</strong> (<code>mxu.matmul</code>, <code>mxu.load.w</code>, <code>mxu.acc.init</code>, async-DMA) run in background FUs: the sequencer issues them in 1 cycle and proceeds. The compiler overlaps them (e.g. a background matmul concurrent with a foreground VPU op) and double-buffers the shared VREG tiles.</li>
           <li><strong>Completion:</strong> compute nonblocking ops are fixed-latency, so they need NO fence (compiler-timed). async-DMA is variable-latency, so the compiler inserts <code>flush.slot</code> before any consumer of the DMA'd region.</li>
           <li><strong>Structural single-instance limits:</strong> 1 MXU (matmuls serialize), 1 inactive weight buffer (at most 1 <code>load.w</code> preload ahead), <strong>2 outstanding DMA slots</strong> (<code>DMA_SLOT_COUNT=2</code>; <code>flush.slot</code>'s bitmask selects among them, async-only).</li>
-          <li><strong>Latencies:</strong> per-op X latency is TBD (RTL-measured); the only structurally-fixed value is the systolic fill = <code>2N-1</code>.</li>
+          <li><strong>Latencies:</strong> the structurally-fixed values are the systolic fill = <code>2N-1</code>, the VPU pipeline depth <code>D_vpu = 9</code>, and the registered-PE MAC; the absolute offsets (<code>d</code>, <code>L_matmul</code>, PE pipeline depth) are TBD (RTL / synth-timing measured).</li>
         </ul>
 
         <iframe src="figures/fig6_sequencer.html" loading="lazy" title="FIG. 6 tile sequencer" style="width:100%;height:700px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
@@ -171,19 +171,30 @@
                <strong>bf16 x bf16 to fp32 accumulate</strong>, <strong>2 weight
                buffers</strong> (active / inactive double-buffer).</p>
             <p>X streams from <strong>VREG</strong>, cast fp32 to bf16 at the PE input
-               (no separate X input buffer). Output to <strong>ACC</strong>. RS-hybrid
-               (row-stationary hybrid) dataflow.</p>
+               (no separate X input buffer). Output to <strong>ACC</strong>.
+               <strong>Weight-stationary</strong> dataflow.</p>
+            <p><strong>PE MAC is registered for 200 MHz</strong> (PE latency to be
+               confirmed by synth); systolic fill = <code>2N-1</code> plus the PE
+               pipeline depth.</p>
           </div>
           <div class="card">
             <h3>VPU</h3>
-            <p><strong>Streaming pipeline</strong>, <strong>8 lanes</strong>,
+            <p><strong>Fixed uniform-depth pipeline</strong>, <strong>8 lanes</strong>,
                function-select <code>{reduce | lut | simd}</code>.
-               <strong>Lane = column, row-serial</strong>: one tile-row per cycle, 8
-               columns in parallel (the natural structure for the per-row reductions in
-               softmax / LayerNorm).</p>
-            <p><strong>Per-function pipeline depth</strong> (RTL-measured, not uniform);
-               reuses the <code>fpu/*</code> primitives (exp2 / rsqrt / tanh / recip BRAM
-               LUTs, <code>fp_mul</code> / <code>fp_add</code>).</p>
+               <strong>Lane = column, row-serial</strong>: one 256-bit tile-row per
+               cycle, 8 columns in parallel (the natural structure for the per-row
+               reductions in softmax / LayerNorm). Throughput = 1 tile-row/cycle.</p>
+            <p><strong>Uniform pipeline depth <code>D_vpu = 9</code>.</strong>
+               <code>fp_mul</code> and <code>fp_add</code> stay
+               <strong>combinational</strong> (each single fp op fits under the
+               5 ns / 200 MHz budget); pipeline <strong>registers sit between the fp
+               ops</strong>. The deepest function is <strong>gelu</strong>
+               (~6 <code>fp_mul</code> + 2 <code>fp_add</code> + the tanh BRAM lookup
+               &asymp; 9 stages), which sets <code>D_vpu</code>; the other functions
+               (reduce tree, exp2 BRAM, rsqrt, simd) are padded to the same depth so the
+               reservation window is single. Reuses the <code>fpu/*</code> primitives
+               (exp2 / rsqrt / tanh / recip BRAM LUTs, <code>fp_mul</code> /
+               <code>fp_add</code>).</p>
           </div>
           <div class="card">
             <h3>VREG</h3>
@@ -218,6 +229,11 @@
             <h3>Loop control</h3>
             <p><code>loop.end</code> branch bubble = <strong>0</strong>: a counted loop
                with a precomputed target.</p>
+            <p><strong>Full-unroll is infeasible</strong> (the unrolled GPT-2 static
+               instruction count far exceeds the 4096-deep IRAM; <code>N=16</code> tiling
+               gives about 8x fewer tiles), so outer tiling must be in-kernel nested
+               loops driven by the <a href="#s1">base-offset (bo) accumulators</a> (full
+               rule: the <a href="isa.html#s2-2">ISA addressing model</a>).</p>
           </div>
           <div class="card">
             <h3>Conflict model</h3>
@@ -231,26 +247,37 @@
           </div>
         </div>
 
-        <h3>MXU (FIG. 7)</h3>
-        <iframe src="figures/fig7_mxu.html" loading="lazy" title="FIG. 7 MXU systolic array" style="width:100%;height:820px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 7 - 8x8 weight-stationary systolic array, X cast at the PE input, double-buffered weights, output to ACC.
-           <a href="figures/fig7_mxu.html">open standalone</a></p>
+        <h3>MXU</h3>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text above
+           for the current model.</p>
 
-        <h3>VPU (FIG. 5)</h3>
-        <iframe src="figures/fig5_vpu.html" loading="lazy" title="FIG. 5 VPU streaming pipeline" style="width:100%;height:780px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 5 - fixed-depth streaming vector pipeline, 8 lanes, function-select {reduce | lut | simd}.
-           <a href="figures/fig5_vpu.html">open standalone</a></p>
-        <p class="sub"><strong>Note:</strong> this figure predates the current VREG
-           model. The VREG is a whole-tile-row 2r1w register file (column-banking was
-           superseded); see the VREG realization subsection for the current model. Figure
-           refresh is tracked separately.</p>
+        <h3>VPU pipeline</h3>
+        <p class="sub"><span class="sev good">Locked</span> - fixed uniform-depth vector
+           pipeline, <code>D_vpu = 9</code>.</p>
+        <ul>
+          <li><strong>Structure:</strong> 8 lanes (lane = column), row-serial at one
+            256-bit tile-row per cycle, throughput 1 tile-row/cycle. <code>fp_mul</code>
+            and <code>fp_add</code> stay <strong>combinational</strong> (each single fp
+            op fits under the 5 ns / 200 MHz budget); pipeline <strong>registers sit
+            between the fp ops</strong>. Each pipeline stage is a single combinational fp
+            op, kept under 5 ns (to be confirmed by the 200 MHz synth-timing gate).</li>
+          <li><strong>Depth is set by gelu:</strong> the deepest function is gelu
+            (~6 <code>fp_mul</code> + 2 <code>fp_add</code> + the tanh BRAM lookup
+            &asymp; 9 stages), which fixes <code>D_vpu = 9</code>; the other functions
+            (reduce tree, exp2 BRAM, rsqrt, simd) are padded to the same depth so the
+            reservation window is single.</li>
+          <li><strong>Replaces the old single-cycle combinational gelu chain</strong>
+            (which synthesized to ~126 logic levels / ~36 ns and fails 200 MHz). The
+            pipelined VPU splits that chain into single-fp-op stages, each under 5 ns.</li>
+        </ul>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text above
+           for the current model.</p>
 
-        <h3>SPAD (FIG. 8)</h3>
-        <iframe src="figures/fig8_spad.html" loading="lazy" title="FIG. 8 SPAD datapath" style="width:100%;height:720px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 8 - 32 KiB bf16 scratchpad, 8 banks, dual-port (DMU vs compute).
-           <a href="figures/fig8_spad.html">open standalone</a></p>
+        <h3>SPAD</h3>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text above
+           for the current model.</p>
 
-        <h3>VREG realization (whole-tile-row RF + MXU-burst temporal separation)</h3>
+        <h3 id="vreg">VREG realization (whole-tile-row RF + MXU-burst temporal separation)</h3>
         <p class="sub"><span class="sev good">Locked</span> - resolved model.</p>
         <ul>
           <li><strong>Physical model:</strong> VREG = 32 registers, each an
@@ -274,9 +301,9 @@
           <p>Keep the MXU X-read burst and any concurrent VPU / LSU VREG access in
              <strong>disjoint cycles</strong>. The MXU burst is a small fraction of the
              matmul, so the foreground unit has VREG to itself otherwise. Tail ordering
-             is handled by the scheduler; there is no fixed <code>D_vpu</code> phase
-             requirement (the VPU has per-function pipeline depths, e.g. gelu ~4,
-             exp2 ~6).</p>
+             is handled by the scheduler. The VPU has a single fixed pipeline depth
+             (<code>D_vpu = 9</code>, uniform across functions), so a VPU result is
+             available at issue + <code>D_vpu</code>.</p>
         </div>
 
         <h3>MXU: reuse vs change vs the existing RTL</h3>
@@ -360,8 +387,8 @@
         <p class="sub">Absolute cycle counts and roofline ratios are deliberately
            omitted here: they are latency-dependent and therefore
            <strong>TBD (RTL-measured)</strong> under the <code>sim == synth</code>
-           contract. Only <code>N</code> and the systolic fill <code>2N-1</code> are
-           structurally fixed.</p>
+           contract. Only <code>N</code>, the systolic fill <code>2N-1</code>, and the
+           VPU depth <code>D_vpu = 9</code> are structurally fixed.</p>
       </section>
 
       <section id="s5" class="reveal">
@@ -370,12 +397,14 @@
 
         <div class="call" style="border-left-color:var(--gap)">
           <div class="lbl" style="color:var(--gap)">Pending &middot; reservation-window offsets</div>
-          <p>The exact reservation numbers (<code>d</code>, <code>L_matmul</code>,
-             <code>D_vpu</code>, and all absolute offsets in the
+          <p>The remaining reservation offsets (<code>d</code>, <code>L_matmul</code>,
+             the MXU PE pipeline depth, and the absolute numbers in the
              <a href="isa.html#s5">ISA timing contract</a>) are <strong>pending
-             RTL</strong> and must be <strong>sim == synth verified</strong>. Only
-             <code>N</code> and the systolic fill <code>2N-1</code> are structurally
-             fixed today.</p>
+             RTL / synth-timing</strong> and must be <strong>sim == synth
+             verified</strong>. The VPU pipeline depth is now <strong>locked</strong>
+             (<code>D_vpu = 9</code>, structural); <code>N</code>, the systolic fill
+             <code>2N-1</code>, and <code>D_vpu = 9</code> are the structurally-fixed
+             values.</p>
         </div>
 
         <div class="call" style="border-left-color:var(--gap)">

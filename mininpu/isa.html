@@ -74,9 +74,8 @@
            accumulator), plus MXU weight buffers and control state. No unified
            addressing: the space is implied by the opcode/operand slot.</p>
 
-        <iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute-tile architecture" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 1-2 - compute-tile architecture: the four data spaces and the datapath spine.
-           <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text below
+           for the current model.</p>
 
         <div class="tbl-wrap">
         <table>
@@ -249,7 +248,7 @@
             <tr>
               <td><code>0x11</code></td><td><code>vpu.lut</code></td>
               <td>VREG dst</td><td>VREG src</td><td>-</td>
-              <td><code>[1:0]</code>=0 exp(base-e) / 1 rsqrt / 2 gelu</td>
+              <td><code>[1:0]</code>=0 exp2 / 1 rsqrt / 2 gelu / 3 recip</td>
               <td>VREG</td>
             </tr>
             <tr>
@@ -328,7 +327,7 @@
             <code>causal</code> masks the output upper triangle. A matmul with no pending <code>mxu.load.w</code> is <strong>illegal</strong>.</li>
           <li><code>mxu.acc.init</code> - seed ACC[<code>op0</code>] with a 1xN bias from SPAD[<code>op1</code>], broadcast to all rows.</li>
           <li><code>vpu.reduce</code> - per-row reduce of VREG[<code>op1</code>] to VREG[<code>op0</code>] col0; flag selects sum / max.</li>
-          <li><code>vpu.lut</code> - elementwise unary exp / rsqrt / gelu, VREG to VREG.</li>
+          <li><code>vpu.lut</code> - elementwise unary exp2 / rsqrt / gelu / recip, VREG to VREG.</li>
           <li><code>vpu.simd</code> - elementwise ALU (<code>add/sub/mul/max/fma/mov</code>) with broadcast mode <code>none/row/col/imm</code>.</li>
           <li><code>acc.store</code> - drain ACC[<code>op1</code>] to VREG[<code>op0</code>], exact lossless fp32 (no conversion).</li>
           <li><code>vreg.load</code> - SPAD[<code>op1</code>] to VREG[<code>op0</code>], widen bf16 to fp32.</li>
@@ -383,10 +382,11 @@
           <li>A kernel binary <strong>declares the timing-rev</strong> it was compiled
             against; a hardware timing-rev mismatch is <strong>rejected / flagged</strong>.
             This is the concrete form of "recompile if latencies change".</li>
-          <li>The only concrete structural values are <code>N</code> and the systolic
-            fill <code>2N-1</code>. Every other offset below (<code>d</code>,
-            <code>L_matmul</code>, <code>D_vpu</code>, and all absolute numbers) is
-            <strong>TBD (RTL-measured)</strong>.</li>
+          <li>The concrete structural values are <code>N</code>, the systolic fill
+            <code>2N-1</code>, and the VPU pipeline depth <code>D_vpu = 9</code>. The
+            remaining offsets (<code>d</code>, <code>L_matmul</code>, and the MXU PE
+            pipeline depth) plus all absolute numbers are <strong>TBD (RTL /
+            synth-timing measured)</strong>.</li>
         </ul>
 
         <p class="sub">Structural access windows (offsets symbolic; issue cycle =
@@ -401,7 +401,7 @@
               <td><code>mxu.matmul</code></td>
               <td><code>VREG[X]</code> on <code>R_mxu</code> over <code>[t+d, t+d+N)</code> (1 column/cycle); <code>wbuf(active)</code> implicitly</td>
               <td><code>ACC</code> at <code>t + L_matmul</code></td>
-              <td>systolic fill = <code>2N-1</code> (structural); <code>VREG[X]</code> is WAR-free only after <code>t+d+N</code></td>
+              <td>fill = <code>2N-1</code> + PE pipeline depth; the PE MAC is registered for 200 MHz (PE latency TBD by synth); <code>VREG[X]</code> is WAR-free only after <code>t+d+N</code></td>
             </tr>
             <tr>
               <td><code>mxu.load.w</code></td>
@@ -419,7 +419,7 @@
               <td><code>vpu.reduce</code> / <code>vpu.lut</code> / <code>vpu.simd</code></td>
               <td><code>VREG</code> (x2 reads for <code>simd</code>, on the two whole-tile-row read ports)</td>
               <td><code>VREG</code> on <code>W_vpu</code> at <code>t + D_vpu</code></td>
-              <td><code>D_vpu</code> = fixed pipeline depth, value TBD</td>
+              <td><code>D_vpu = 9</code> (fixed uniform pipeline depth; gelu fp-op chain, one fp op per stage; per-stage &lt; 5 ns confirmed by synth-timing at 200 MHz)</td>
             </tr>
             <tr>
               <td><code>acc.store</code></td>
@@ -438,13 +438,13 @@
         </div>
 
         <div class="call" style="border-left-color:var(--gap)">
-          <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL-measured</div>
-          <p><code>d</code>, <code>L_matmul</code>, <code>D_vpu</code>, and all absolute
-             numbers are <strong>TBD (RTL-measured)</strong>. <code>N</code> and
-             <code>2N-1</code> are the only concrete structural values. All latencies are
-             <strong>FIXED and data-independent</strong>, since the no-scoreboard model
-             relies on it: <strong>simulation latency must equal synthesis
-             latency.</strong></p>
+          <div class="lbl" style="color:var(--gap)">TBD &middot; offsets RTL / synth-timing measured</div>
+          <p><code>d</code>, <code>L_matmul</code>, the MXU PE pipeline depth, and all
+             absolute numbers are <strong>TBD (RTL / synth-timing measured)</strong>.
+             <code>N</code>, <code>2N-1</code>, and <code>D_vpu = 9</code> are the
+             concrete structural values. All latencies are <strong>FIXED and
+             data-independent</strong>, since the no-scoreboard model relies on it:
+             <strong>simulation latency must equal synthesis latency.</strong></p>
         </div>
       </section>
 

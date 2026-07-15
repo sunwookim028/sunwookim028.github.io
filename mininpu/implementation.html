@@ -51,9 +51,9 @@
         <p class="sub">The proposal maps the locked microarchitecture onto RTL modules.
            Module context (FIG. 1-2):</p>
 
-        <iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute-tile architecture" style="width:100%;height:760px;border:1px solid var(--line);border-radius:12px;background:var(--surface)"></iframe>
-        <p class="sub">FIG. 1-2 - compute-tile architecture and unit layout.
-           <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
+        <p class="sub">Diagram deferred to the presentation refresh; see the text below
+           and the <a href="microarch.html">microarchitecture reference</a> for the
+           current model.</p>
 
         <h3>Locked so far</h3>
         <div class="call">
@@ -153,7 +153,8 @@
           <li><strong>Literal pool:</strong> reuse the existing
             <strong>IRAM-embedded pool machinery</strong> (mature, tested) rather than a
             separate LPM RAM; the pool is loaded with the kernel image and read in Decode
-            via the redirect mux.</li>
+            via the redirect mux (see the
+            <a href="microarch.html#lpm">microarch LPM card</a>).</li>
           <li><strong>DMA outstanding (corrected):</strong> <strong>2 slots</strong>
             (<code>hwparams DMA_SLOT_COUNT=2</code>), not single-outstanding.</li>
         </ul>
@@ -203,9 +204,16 @@
             <tr>
               <td>VREG</td>
               <td><code>vec_regfile.sv</code></td>
-              <td>32 x [8x8] fp32 tiles, whole-tile-row, 2r1w</td>
+              <td>32 x [8x8] fp32 tiles, whole-tile-row; <strong>2r1w, conflict-free via temporal separation</strong> (see the <a href="microarch.html#vreg">microarch VREG realization</a>)</td>
               <td>2 read (<code>R_mxu</code> / <code>R_vpu</code>) + 1 write (whole tile-row)</td>
               <td>~300</td>
+            </tr>
+            <tr>
+              <td>LSU</td>
+              <td><code>lsu.sv</code> (new)</td>
+              <td>load/store unit: <code>acc.store</code> (ACC-&gt;VREG fp32), <code>vreg.load</code> (SPAD-&gt;VREG bf16-&gt;fp32), <code>vreg.store</code> (VREG-&gt;SPAD fp32-&gt;bf16); owns the SPAD&lt;-&gt;VREG casts</td>
+              <td>ACC read; SPAD read/write; VREG read/write; from sequencer: <code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code></td>
+              <td>~200</td>
             </tr>
             <tr>
               <td>VPU (top)</td>
@@ -339,7 +347,7 @@
               <td>3</td>
               <td>VPU</td>
               <td><code>vpu.reduce</code>, <code>vpu.lut</code>, <code>vpu.simd</code></td>
-              <td><code>reduce</code>: row read -&gt; horizontal tree (sum/max) -&gt; per-row scalar; <code>lut</code>: row read -&gt; exp2 / rsqrt / gelu(poly+tanh) / recip -&gt; write; <code>simd</code>: 2 reads -&gt; fp_mul + fp_add per funct -&gt; broadcast mux -&gt; write; per-function stage latency</td>
+              <td><code>reduce</code>: row read -&gt; horizontal tree (sum/max) -&gt; per-row scalar; <code>lut</code>: row read -&gt; exp2 / rsqrt / gelu(poly+tanh) / recip -&gt; write; <code>simd</code>: 2 reads -&gt; fp_mul + fp_add per funct -&gt; broadcast mux -&gt; write; uniform pipeline depth <code>D_vpu = 9</code> (functions padded to a single depth, gelu-set)</td>
               <td><code>test_vpu</code> (per-function vs fp oracle, LUT tolerance; latency gate = <code>sim == synth</code>)</td>
               <td>GELU / LayerNorm / softmax; 32x32 GELU(X@W^T+b) worked example e2e</td>
             </tr>
