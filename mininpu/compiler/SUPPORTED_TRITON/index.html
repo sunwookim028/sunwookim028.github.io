@@ -1,0 +1,1329 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Minimal extensible compiler framework — Triton to a custom NPU ISA.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/compiler/SUPPORTED_TRITON/">
+      
+      
+        <link rel="prev" href="../COMPILER_ARCHITECTURE/">
+      
+      
+        <link rel="next" href="../MEMORY_BUDGET/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+    
+    
+      
+        <title>Supported Triton - mininpu-compiler</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#supported-triton-constructs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="mininpu-compiler" class="md-header__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu-compiler
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Supported Triton
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="mininpu-compiler" class="md-nav__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu-compiler
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Charter / Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPILER_ARCHITECTURE/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compiler Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Supported Triton
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Supported Triton
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-supported-tl-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Supported tl.* primitives
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-linalgtonpu-rewrite-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. LinalgToNPU rewrite patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. LinalgToNPU rewrite patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matmul-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matmul (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fill-initialise-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fill / initialise (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reductions-accvreg-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reductions ACC→VREG (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flashattention-vector-ops-m3-acc-vreg" class="md-nav__link">
+    <span class="md-ellipsis">
+      FlashAttention vector ops (M3) - ACC ↔ VREG
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#casts-m3-m4a" class="md-nav__link">
+    <span class="md-ellipsis">
+      Casts (M3 + M4a)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#element-wise-acc-ops-m4a-rmsnorm-swiglu-rope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Element-wise ACC ops (M4a - RMSNorm, SwiGLU, RoPE)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-ad-hoc-linalggeneric-matcher-in-nputoasmcpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Ad-hoc linalg.generic matcher in NPUToAsm.cpp
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_BUDGET/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Memory Budget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GLOSSARY/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossary
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../isa/npu-isa/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISA narrative
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-supported-tl-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Supported tl.* primitives
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-linalgtonpu-rewrite-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. LinalgToNPU rewrite patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. LinalgToNPU rewrite patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matmul-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matmul (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fill-initialise-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fill / initialise (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reductions-accvreg-m3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reductions ACC→VREG (M3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flashattention-vector-ops-m3-acc-vreg" class="md-nav__link">
+    <span class="md-ellipsis">
+      FlashAttention vector ops (M3) - ACC ↔ VREG
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#casts-m3-m4a" class="md-nav__link">
+    <span class="md-ellipsis">
+      Casts (M3 + M4a)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#element-wise-acc-ops-m4a-rmsnorm-swiglu-rope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Element-wise ACC ops (M4a - RMSNorm, SwiGLU, RoPE)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-ad-hoc-linalggeneric-matcher-in-nputoasmcpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Ad-hoc linalg.generic matcher in NPUToAsm.cpp
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="supported-triton-constructs">Supported Triton Constructs<a class="headerlink" href="#supported-triton-constructs" title="Permanent link">&para;</a></h1>
+<p><strong>SSOT - compile surface.</strong> This file is the authoritative record of what the
+NPU compiler can and cannot lower from Triton. Peer to <code>charter.md</code>
+(roadmap/design SSOT) and the sibling <code>mininpu/isa/opcodes.py</code> (ISA SSOT).
+Defects/gaps are tracked as GitHub issues, not here.</p>
+<p>What the NPU compiler can and cannot lower from Triton source. Use this as a
+pre-flight checklist before writing a new kernel.</p>
+<hr />
+<h2 id="1-supported-tl-primitives">1. Supported <code>tl.*</code> primitives<a class="headerlink" href="#1-supported-tl-primitives" title="Permanent link">&para;</a></h2>
+<p>These primitives are <strong>empirically validated</strong> through the 9 atom kernels in
+<code>test/e2e/triton_validate/kernels/</code> (matmul, fa_fwd_causal_gqa, fa_fwd_noncausal,
+rmsnorm, rmsnorm_multitile, swiglu, rope, kv_cache, decode_attn;
+<code>gptq_matmul</code> is excluded, it bypasses <code>LinalgToNPU</code> via a Builder-based
+program). Any usage pattern found in those kernels
+compiles and produces correct output; other usage patterns are untested.</p>
+<table>
+<thead>
+<tr>
+<th>Primitive</th>
+<th>Notes</th>
+<th>Validated by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tl.program_id(axis)</code></td>
+<td>Grid coordinate; axes 0, 1, 2 all work</td>
+<td>all kernels</td>
+</tr>
+<tr>
+<td><code>tl.arange(0, N)</code></td>
+<td>Constant range; <code>N</code> must be <code>tl.constexpr</code></td>
+<td>all kernels</td>
+</tr>
+<tr>
+<td><code>tl.constexpr</code> parameters</td>
+<td>Compile-time specialisation</td>
+<td>all kernels</td>
+</tr>
+<tr>
+<td><code>tl.load(ptr, mask, other)</code></td>
+<td>mask/other supported; <code>cache_modifier</code> ignored</td>
+<td>all kernels</td>
+</tr>
+<tr>
+<td><code>tl.store(ptr, val, mask)</code></td>
+<td>mask supported</td>
+<td>all kernels</td>
+</tr>
+<tr>
+<td><code>tl.zeros((M, N), dtype)</code></td>
+<td>Initialises ACC tile</td>
+<td>matmul, fa, rmsnorm_mt</td>
+</tr>
+<tr>
+<td><code>tl.full((M, N), val, dtype)</code></td>
+<td>Constant fill</td>
+<td>fa</td>
+</tr>
+<tr>
+<td><code>tl.dot(a, b, acc=…)</code></td>
+<td>Both <code>acc</code> and non-<code>acc</code> forms</td>
+<td>matmul, fa</td>
+</tr>
+<tr>
+<td><code>tl.trans(a)</code></td>
+<td>Transposes a 2D block (key projection)</td>
+<td>fa</td>
+</tr>
+<tr>
+<td><code>tl.max(x, axis=1)</code></td>
+<td>Row-reduce max</td>
+<td>fa</td>
+</tr>
+<tr>
+<td><code>tl.sum(x, axis=1)</code></td>
+<td>Row-reduce sum</td>
+<td>fa, rmsnorm, rmsnorm_mt</td>
+</tr>
+<tr>
+<td><code>tl.maximum(a, b)</code></td>
+<td>Element-wise max (online-softmax update)</td>
+<td>fa</td>
+</tr>
+<tr>
+<td><code>tl.where(cond, x, y)</code></td>
+<td>Only the FA causal-mask pattern compiles (see §4)</td>
+<td>fa</td>
+</tr>
+<tr>
+<td><code>tl.math.exp2(x)</code></td>
+<td>Element-wise exp₂</td>
+<td>fa, swiglu</td>
+</tr>
+<tr>
+<td><code>tl.sqrt(x)</code></td>
+<td>Element-wise sqrt (via <code>math.sqrt</code> in linalg)</td>
+<td>rmsnorm, rmsnorm_mt</td>
+</tr>
+<tr>
+<td><code>.to(tl.float16/.float32)</code></td>
+<td>Type cast (truncf / extf)</td>
+<td>all kernels</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Untested / known not to compile:</strong> <code>tl.exp</code>, <code>tl.log</code>, <code>tl.minimum</code>,
+<code>tl.softmax</code>, <code>tl.reshape</code>, <code>tl.broadcast_to</code>, <code>tl.cat</code>, <code>tl.atomic_*</code>,
+<code>tl.cdiv</code>, <code>tl.dot</code> without <code>acc=</code> and with non-constexpr K, <code>tl.where</code>
+outside the FA causal-mask pattern.</p>
+<hr />
+<h2 id="2-linalgtonpu-rewrite-patterns">2. <code>LinalgToNPU</code> rewrite patterns<a class="headerlink" href="#2-linalgtonpu-rewrite-patterns" title="Permanent link">&para;</a></h2>
+<p>These 21 patterns in <code>compiler/lib/Conversion/LinalgToNPU/LinalgToNPU.cpp</code>
+convert named <code>linalg</code> ops and specific <code>linalg.generic</code> body shapes to <code>npu.*</code>
+dialect ops. Every op matched here will be correctly lowered to assembly.</p>
+<h3 id="matmul-m3">Matmul (M3)<a class="headerlink" href="#matmul-m3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>linalg op</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MatmulLowering</code></td>
+<td><code>linalg.matmul</code> (C += A @ B)</td>
+<td><code>npu.matmul_tile</code></td>
+<td>:97</td>
+</tr>
+<tr>
+<td><code>MatmulTransposeBLowering</code></td>
+<td><code>linalg.matmul_transpose_b</code></td>
+<td><code>npu.matmul_tile{transB}</code></td>
+<td>:118</td>
+</tr>
+</tbody>
+</table>
+<p><code>accumulate</code> flag is set when C is defined by <code>memref.alloc</code> (on-chip ACC), not
+when it is a function argument (DRAM). The distinction is purely structural.</p>
+<h3 id="fill-initialise-m3">Fill / initialise (M3)<a class="headerlink" href="#fill-initialise-m3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>linalg op</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FillLowering</code></td>
+<td><code>linalg.fill</code> 2D f32 with zero</td>
+<td><code>npu.vec_zero_acc</code></td>
+<td>:138</td>
+</tr>
+<tr>
+<td><code>FillLowering</code></td>
+<td><code>linalg.fill</code> 1D f32 with constant</td>
+<td><code>npu.vec_movi</code></td>
+<td>:138</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reductions-accvreg-m3">Reductions ACC→VREG (M3)<a class="headerlink" href="#reductions-accvreg-m3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>linalg op</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ReduceMaxLowering</code></td>
+<td><code>linalg.reduce{maximumf}</code> 2D→1D</td>
+<td><code>npu.vec_rowmax</code></td>
+<td>:175</td>
+</tr>
+<tr>
+<td><code>ReduceSumLowering</code></td>
+<td><code>linalg.reduce{addf}</code> 2D→1D</td>
+<td><code>npu.vec_rowsum</code></td>
+<td>:206</td>
+</tr>
+</tbody>
+</table>
+<p>Only <code>maximumf</code> and <code>addf</code> reduction bodies are matched. <code>minimumf</code>, <code>mulf</code>,
+and other reducers fall through to the ad-hoc matcher (§3) or emit nothing.</p>
+<h3 id="flashattention-vector-ops-m3-acc-vreg">FlashAttention vector ops (M3) - ACC ↔ VREG<a class="headerlink" href="#flashattention-vector-ops-m3-acc-vreg" title="Permanent link">&para;</a></h3>
+<p>These patterns lower the element-wise tile ops used in online-softmax.</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th><code>linalg.generic</code> body</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VecMaximumLowering</code></td>
+<td>1D×1D→1D <code>maximumf</code></td>
+<td><code>npu.vec_maximum</code></td>
+<td>:235</td>
+</tr>
+<tr>
+<td><code>SubBcastLowering</code></td>
+<td>2D − 1D(row) → 2D <code>subf</code></td>
+<td><code>npu.vec_sub_bcast</code></td>
+<td>:260</td>
+</tr>
+<tr>
+<td><code>Exp2AccLowering</code></td>
+<td>2D → 2D <code>math.exp2</code></td>
+<td><code>npu.vec_exp2</code></td>
+<td>:285</td>
+</tr>
+<tr>
+<td><code>Exp2VregLowering</code></td>
+<td>1D → 1D <code>math.exp2</code></td>
+<td><code>npu.vec_exp2_vreg</code></td>
+<td>:312</td>
+</tr>
+<tr>
+<td><code>ScaleBcastLowering</code></td>
+<td>2D × 1D(row) → 2D <code>mulf</code></td>
+<td><code>npu.vec_scale_bcast</code></td>
+<td>:335</td>
+</tr>
+<tr>
+<td><code>DivBcastLowering</code></td>
+<td>2D / 1D(row) → 2D <code>divf</code></td>
+<td><code>npu.vec_div_bcast</code></td>
+<td>:363</td>
+</tr>
+<tr>
+<td><code>SubVregLowering</code></td>
+<td>1D − 1D → 1D <code>subf</code></td>
+<td><code>npu.vec_sub_vreg</code></td>
+<td>:417</td>
+</tr>
+<tr>
+<td><code>FmaVregLowering</code></td>
+<td>3×1D → 1D <code>mulf+addf</code> (FMA)</td>
+<td><code>npu.vec_fma</code></td>
+<td>:443</td>
+</tr>
+<tr>
+<td><code>CopyVregLowering</code></td>
+<td><code>memref.copy</code> 1D f32</td>
+<td><code>npu.vec_copy_vreg</code></td>
+<td>:481</td>
+</tr>
+</tbody>
+</table>
+<h3 id="casts-m3-m4a">Casts (M3 + M4a)<a class="headerlink" href="#casts-m3-m4a" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th><code>linalg.generic</code> body</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TruncF32F16Lowering</code></td>
+<td>2D → 2D <code>arith.truncf</code> f32→f16</td>
+<td><code>npu.cast_f32_f16</code></td>
+<td>:388</td>
+</tr>
+<tr>
+<td><code>ExtendF16F32Lowering</code></td>
+<td>2D → 2D <code>arith.extf</code> f16→f32</td>
+<td><code>npu.cast_f16_f32</code></td>
+<td>:504</td>
+</tr>
+</tbody>
+</table>
+<h3 id="element-wise-acc-ops-m4a-rmsnorm-swiglu-rope">Element-wise ACC ops (M4a - RMSNorm, SwiGLU, RoPE)<a class="headerlink" href="#element-wise-acc-ops-m4a-rmsnorm-swiglu-rope" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th><code>linalg.generic</code> body</th>
+<th>npu op</th>
+<th>File:line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MulAccLowering</code></td>
+<td>2D × 2D → 2D <code>mulf</code></td>
+<td><code>npu.vec_mul_acc</code></td>
+<td>:532</td>
+</tr>
+<tr>
+<td><code>AddAccLowering</code></td>
+<td>2D + 2D → 2D <code>addf</code></td>
+<td><code>npu.vec_add_acc</code></td>
+<td>:557</td>
+</tr>
+<tr>
+<td><code>SubAccLowering</code></td>
+<td>2D − 2D → 2D <code>subf</code></td>
+<td><code>npu.vec_sub_acc</code></td>
+<td>:582</td>
+</tr>
+<tr>
+<td><code>ScaleColBcastLowering</code></td>
+<td>2D × 1D(col) → 2D <code>mulf</code></td>
+<td><code>npu.vec_scale_col_bcast</code></td>
+<td>:607</td>
+</tr>
+<tr>
+<td><code>RsqrtVregLowering</code></td>
+<td>1D → 1D <code>math.rsqrt</code></td>
+<td><code>npu.vec_rsqrt</code></td>
+<td>:636</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> <code>SiluAccLowering</code> is declared (:28) but not added to the pipeline
+(:657-660). The SwiGLU <code>silu</code> folding is handled ad-hoc in the translator (§3).
+This is tracked in #10.</p>
+<hr />
+<h2 id="3-ad-hoc-linalggeneric-matcher-in-nputoasmcpp">3. Ad-hoc <code>linalg.generic</code> matcher in <code>NPUToAsm.cpp</code><a class="headerlink" href="#3-ad-hoc-linalggeneric-matcher-in-nputoasmcpp" title="Permanent link">&para;</a></h2>
+<p>The <code>translateOp()</code> ad-hoc body matcher in
+<code>compiler/lib/Translation/NPUToAsm/NPUToAsm.cpp</code> matches a second set of
+<code>linalg.generic</code> bodies <strong>directly to assembly</strong>, bypassing the dialect layer.
+This was the historical entry-point before <code>LinalgToNPU</code> grew its pattern set;
+some patterns here predate their dialect equivalents. The split is tracked in</p>
+<h1 id="10-as-architectural-debt-per-branch-line-numbers-are">10 as architectural debt. (Per-branch line numbers are<a class="headerlink" href="#10-as-architectural-debt-per-branch-line-numbers-are" title="Permanent link">&para;</a></h1>
+<p>omitted - the file has been split/grown; grep <code>translateOp</code> for the branch.)</p>
+<table>
+<thead>
+<tr>
+<th>Body pattern</th>
+<th>Emitted as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zero-operand (pass-through)</td>
+<td>handle alias (no emit)</td>
+</tr>
+<tr>
+<td><code>arith.truncf</code> f32→f16</td>
+<td><code>cast.f32.f16</code></td>
+</tr>
+<tr>
+<td><code>arith.extf</code> f16→f32 (2D)</td>
+<td><code>cast.f16.f32</code></td>
+</tr>
+<tr>
+<td><code>arith.extf</code> f16→f32 (1D, VREG)</td>
+<td><code>cast.f16.f32.vreg</code></td>
+</tr>
+<tr>
+<td><code>arith.mulf</code> with row-bcast</td>
+<td><code>vec.scale.bcast</code></td>
+</tr>
+<tr>
+<td><code>arith.mulf</code> with col-bcast</td>
+<td><code>vec.scale.col.bcast</code></td>
+</tr>
+<tr>
+<td>SwiGLU: <code>silu(gate)*up</code> multi-op chain</td>
+<td><code>vec.silu</code> (folded)</td>
+</tr>
+<tr>
+<td><code>arith.mulf</code> 2D × constant</td>
+<td><code>vec.scale.imm</code></td>
+</tr>
+<tr>
+<td><code>arith.mulf</code> 2D general</td>
+<td><code>vec.mul.acc</code></td>
+</tr>
+<tr>
+<td><code>arith.mulf</code> 1D general</td>
+<td><code>vec.mul.vreg</code></td>
+</tr>
+<tr>
+<td><code>arith.subf</code> 2D with row-bcast RHS</td>
+<td><code>vec.sub.bcast</code></td>
+</tr>
+<tr>
+<td><code>arith.subf</code> 2D general</td>
+<td><code>vec.sub.acc</code></td>
+</tr>
+<tr>
+<td><code>arith.subf</code> 1D general</td>
+<td><code>vec.sub.vreg</code></td>
+</tr>
+<tr>
+<td><code>arith.addf</code> RMSNorm bias fold</td>
+<td><code>vec.fma.imm</code> (folded)</td>
+</tr>
+<tr>
+<td><code>arith.addf</code> 1D general</td>
+<td><code>vec.add.vreg</code></td>
+</tr>
+<tr>
+<td><code>arith.addf</code> 2D general</td>
+<td><code>vec.add.acc</code></td>
+</tr>
+<tr>
+<td>RMSNorm: <code>1/sqrt(mean(x²))</code> chain</td>
+<td><code>vec.fma.imm</code> + <code>vec.rsqrt</code> (folded)</td>
+</tr>
+<tr>
+<td><code>arith.divf</code> 2D with row-bcast denom</td>
+<td><code>vec.div.bcast</code></td>
+</tr>
+<tr>
+<td><code>math.sqrt</code> 1D</td>
+<td>marks <code>sqrtMarked</code>, no emit</td>
+</tr>
+<tr>
+<td><code>math.exp2</code> 2D</td>
+<td><code>vec.exp2</code></td>
+</tr>
+<tr>
+<td><code>math.exp2</code> 1D</td>
+<td><code>vec.exp2.vreg</code></td>
+</tr>
+<tr>
+<td><code>arith.select</code> (FA causal mask)</td>
+<td>handle alias to qk (no emit)</td>
+</tr>
+<tr>
+<td><code>arith.maxnumf</code> 1D</td>
+<td><code>vec.maximum</code></td>
+</tr>
+<tr>
+<td>Any other body</td>
+<td><strong>silent no-op</strong> - see §4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-supported-linalg-named-ops-and-scf-constructs">4. Supported <code>linalg</code> named ops and <code>scf</code> constructs<a class="headerlink" href="#4-supported-linalg-named-ops-and-scf-constructs" title="Permanent link">&para;</a></h2>
+<h3 id="linalg-named-ops-matched"><code>linalg</code> named ops matched<a class="headerlink" href="#linalg-named-ops-matched" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Op</th>
+<th>Lowered to</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linalg.matmul</code></td>
+<td><code>npu.matmul_tile</code></td>
+<td><code>LinalgToNPU.cpp:97</code></td>
+</tr>
+<tr>
+<td><code>linalg.matmul_transpose_b</code></td>
+<td><code>npu.matmul_tile{transB}</code></td>
+<td><code>LinalgToNPU.cpp:118</code></td>
+</tr>
+<tr>
+<td><code>linalg.fill</code> (2D f32 zero)</td>
+<td><code>npu.vec_zero_acc</code></td>
+<td><code>LinalgToNPU.cpp:138</code></td>
+</tr>
+<tr>
+<td><code>linalg.fill</code> (1D f32 const)</td>
+<td><code>npu.vec_movi</code></td>
+<td><code>LinalgToNPU.cpp:138</code></td>
+</tr>
+<tr>
+<td><code>linalg.reduce{maximumf}</code> 2D→1D</td>
+<td><code>npu.vec_rowmax</code></td>
+<td><code>LinalgToNPU.cpp:175</code></td>
+</tr>
+<tr>
+<td><code>linalg.reduce{addf}</code> 2D→1D</td>
+<td><code>npu.vec_rowsum</code></td>
+<td><code>LinalgToNPU.cpp:206</code></td>
+</tr>
+<tr>
+<td><code>memref.copy</code> 1D f32</td>
+<td><code>npu.vec_copy_vreg</code></td>
+<td><code>LinalgToNPU.cpp:481</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Not matched:</strong> <code>linalg.matmul_transpose_a</code>, <code>linalg.batch_matmul</code>,
+<code>linalg.conv_*</code>, <code>linalg.transpose</code>, <code>linalg.copy</code>. Any <code>linalg.reduce</code> with
+a reducer other than <code>maximumf</code> or <code>addf</code> falls through.</p>
+<h3 id="scf-constructs"><code>scf</code> constructs<a class="headerlink" href="#scf-constructs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scf.for</code> with literal bounds</td>
+<td>Lowers to <code>loop.begin … loop.end</code></td>
+</tr>
+<tr>
+<td><code>scf.for</code> with <code>outer_iv * N</code> bound</td>
+<td>Supported; becomes <code>hi=pid_m*BLOCK_N</code> in assembly</td>
+</tr>
+<tr>
+<td><code>scf.for</code> iter_args (loop-carried ACC/VREG)</td>
+<td>Handled via in-place handle alias (<code>NPUToAsm.cpp</code>, <code>translateOp</code>)</td>
+</tr>
+<tr>
+<td><code>scf.yield</code></td>
+<td>Implicit terminator; no emit</td>
+</tr>
+<tr>
+<td><code>scf.if</code></td>
+<td><strong>Not supported</strong> - no match in either lowering file</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-what-does-not-compile">5. What does not compile<a class="headerlink" href="#5-what-does-not-compile" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Construct</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Non-tile-aligned shapes (<code>M % BLOCK_M ≠ 0</code>)</td>
+<td>Host must pad; kernel assumes aligned shapes</td>
+</tr>
+<tr>
+<td><code>scf.if</code></td>
+<td>No match in <code>LinalgToNPU</code> or <code>NPUToAsm</code></td>
+</tr>
+<tr>
+<td><code>tl.where</code> outside the FA causal-mask pattern</td>
+<td>Generic <code>arith.select</code> silently aliases without emit</td>
+</tr>
+<tr>
+<td><code>linalg.batch_matmul</code>, <code>linalg.conv_*</code></td>
+<td>No pattern</td>
+</tr>
+<tr>
+<td><code>linalg.reduce{minimumf}</code>, <code>{mulf}</code>, etc.</td>
+<td>No pattern for reducers other than <code>maximumf</code>/<code>addf</code></td>
+</tr>
+<tr>
+<td><code>arith.maxnumf</code> 2D</td>
+<td>Only 1D matched (<code>NPUToAsm.cpp</code>, <code>translateOp</code>)</td>
+</tr>
+<tr>
+<td>Multi-headed GQA with <code>H_KV &gt; 1</code></td>
+<td><code>fa_fwd_causal_gqa.py:33</code> hardcodes <code>H_KV=1</code></td>
+</tr>
+<tr>
+<td><code>tl.exp</code>, <code>tl.log</code>, <code>tl.minimum</code></td>
+<td>Not lowered to any ISA op</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-formerly-silent-failure-modes-now-hard-errors">6. Formerly-silent failure modes (now hard errors)<a class="headerlink" href="#6-formerly-silent-failure-modes-now-hard-errors" title="Permanent link">&para;</a></h2>
+<p>These paths used to succeed while producing garbage. <strong>W9 turned every one into a
+hard error</strong> (<code>emitOpError</code> + failed translation), so <code>npu-translate</code> now fails
+loudly instead of emitting junk - this is what makes Gate 2 ("zero silent
+no-ops") enforceable. Symbol anchors below (line numbers omitted; the translator
+was split into <code>NPUToAsm.cpp</code> / <code>PhysAllocPass.cpp</code> / <code>LinearAddrAnalysis.cpp</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Where (file, symbol)</th>
+<th>Formerly-silent case</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NPUToAsm.cpp</code>, <code>translateOp</code></td>
+<td>Unknown <code>linalg.generic</code> body - was no emit</td>
+<td>Hard error</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp</code>, <code>runPhysAlloc</code>/<code>linearScan</code></td>
+<td>Phys-alloc overflow - was silent <code>base=0</code> → <code>spm_row=0</code></td>
+<td>Hard error</td>
+</tr>
+<tr>
+<td><code>LinearAddrAnalysis.cpp</code>, <code>buildRCAddrStr</code></td>
+<td>Unresolved DRAM/RC address - was literal <code>"?"</code></td>
+<td>Hard error</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp</code>, <code>translateOp</code></td>
+<td>Unknown <code>npu.*</code> op - was <code>; TODO: &lt;opname&gt;</code></td>
+<td>Hard error</td>
+</tr>
+<tr>
+<td><code>LinalgToNPU.cpp</code></td>
+<td>Shape mismatch - returns <code>failure()</code></td>
+<td>Op survives to translator, hard-errors there</td>
+</tr>
+</tbody>
+</table>
+<p>Tracked as closed (W9).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.suggest", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>

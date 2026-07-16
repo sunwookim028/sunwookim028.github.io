@@ -1,0 +1,1181 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Minimal extensible compiler framework — Triton to a custom NPU ISA.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/compiler/QUALITY_AUDIT/">
+      
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+    
+    
+      
+        <title>Quality Audit: mininpu-compiler - mininpu-compiler</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quality-audit-mininpu-compiler" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="mininpu-compiler" class="md-header__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu-compiler
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quality Audit: mininpu-compiler
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="mininpu-compiler" class="md-nav__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu-compiler
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Charter / Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../COMPILER_ARCHITECTURE/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compiler Architecture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SUPPORTED_TRITON/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supported Triton
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_BUDGET/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Memory Budget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GLOSSARY/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossary
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../isa/npu-isa/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISA narrative
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executive summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-dimension-health" class="md-nav__link">
+    <span class="md-ellipsis">
+      Per-dimension health
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prioritized-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prioritized findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prioritized findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blocker" class="md-nav__link">
+    <span class="md-ellipsis">
+      Blocker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high" class="md-nav__link">
+    <span class="md-ellipsis">
+      High
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-posture-clarified-2026-07-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deployment posture (clarified 2026-07-08)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium" class="md-nav__link">
+    <span class="md-ellipsis">
+      Medium
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low" class="md-nav__link">
+    <span class="md-ellipsis">
+      Low
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deferred-needs-owner-decision-appendix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deferred / needs-owner-decision appendix
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#appendix-improvement-pass-applied-2026-07-08" class="md-nav__link">
+    <span class="md-ellipsis">
+      Appendix: Improvement pass applied (2026-07-08)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Appendix: Improvement pass applied (2026-07-08)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-deferred-items-need-owner-decision-not-auto-applied" class="md-nav__link">
+    <span class="md-ellipsis">
+      Top deferred items (need owner decision, not auto-applied)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="quality-audit-mininpu-compiler">Quality Audit: mininpu-compiler<a class="headerlink" href="#quality-audit-mininpu-compiler" title="Permanent link">&para;</a></h1>
+<p>Scope: the compiler-side repo only (Triton to custom NPU ISA, MLIR based). The
+sibling <code>mininpu</code> ISS/simulator package and its <code>hwparams.py</code>/<code>opcodes.py</code> SSOTs
+are out of scope and are referenced only as the authority the compiler must agree
+with.</p>
+<h2 id="executive-summary">Executive summary<a class="headerlink" href="#executive-summary" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The compiler tree has a genuinely clean, recognizable out-of-tree MLIR skeleton:
+  TableGen <code>npu</code> dialect, <code>include</code>/<code>lib</code>/<code>tools</code> layering, <code>npu-opt</code> as an
+  <code>MlirOptMain</code> driver, <code>npu-translate</code> as an <code>MlirTranslateMain</code> hook, idiomatic
+  <code>add_mlir_library</code> targets, and an excellent "why" comment culture (W9/D2b/D4
+  rationale).</li>
+<li>Two issues rise above the rest and should be fixed first:</li>
+<li>CI is broken: the <code>e2e-tests</code> job calls a nonexistent <code>make triton-test-tutorial</code>
+     target (blocker), and both jobs <code>pip install</code> a <code>mininpu</code> dependency that is not
+     resolvable on a stock runner (high).</li>
+<li>A latent correctness hazard: <code>PhysAllocPass::getPhysProfile()</code> still implements
+     the removed <code>NPU_PROFILE</code> mechanism and defaults to <code>DIM=16 / VREG_COUNT=32</code>,
+     contradicting the <code>DIM=8 / VREG_COUNT=8</code> hardware SSOT, so the allocator can hand
+     out physically-invalid VREG indices.</li>
+<li>The strongest "not yet a real MLIR project" signals are structural, not buggy:
+  no lit infrastructure (a hand-rolled bash FileCheck runner stands in and is not run
+  in CI), and real compiler work (physical allocation, linear-address analysis) living
+  inside the translation library instead of as <code>npu-opt</code> passes, producing a ~1494-line
+  translator with self-admitted parallel dispatch chains.</li>
+<li>The dialect is small and readable, but its defining invariant (three memory banks:
+  ACC = rank-2 f32, SPM = rank-2 f16, VREG = rank-1 f32) is enforced by hand-written
+  C++ verifiers on only 5 of 26 ops while every operand is the loose <code>AnyMemRef</code>.
+  This is the top MLIR-idiom improvement available.</li>
+<li>Documentation is well organized with real SSOT discipline, but has a verifiable
+  staleness cluster around decode-step attention (shipped and tested, still documented
+  as unimplemented/planned in two files), a fully fictional README <code>demo/chat.py</code>
+  section, and several stale <code>GLOSSARY.md</code> cross-references and counts.</li>
+<li>The bulk of the remaining backlog is low-risk hygiene, doc accuracy, and safe code
+  cleanups that can be auto-applied.</li>
+</ul>
+<h2 id="per-dimension-health">Per-dimension health<a class="headerlink" href="#per-dimension-health" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Health</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repository hygiene</td>
+<td>Good</td>
+<td><code>.gitignore</code> thorough; no build/pycache artifacts tracked; two real gaps: tracked dangling symlink, missing LICENSE.</td>
+</tr>
+<tr>
+<td>Build / CI infra</td>
+<td>Needs work</td>
+<td>CI references a missing Make target (blocker) and an unresolvable <code>mininpu</code> dep (high); requirements/pyproject drift; host-specific fallback paths.</td>
+</tr>
+<tr>
+<td>MLIR dialect (NPU.td)</td>
+<td>Fair</td>
+<td>Clean and readable, but bank invariants live in C++ verifiers on 5/26 ops; loose <code>AnyMemRef</code>; coarse op-level effects; dead <code>causal</code> attr.</td>
+</tr>
+<tr>
+<td>MLIR conversion (LinalgToNPU)</td>
+<td>Healthy</td>
+<td>No findings surfaced beyond the shared translation/layering concerns; conversion split is idiomatic.</td>
+</tr>
+<tr>
+<td>MLIR translation (NPUToAsm)</td>
+<td>Needs work</td>
+<td>~1100-line <code>translateOp</code>; dead <code>NPU_PROFILE</code> geometry (correctness hazard); parallel dispatch chains with divergent <code>isDRAM</code>; inconsistent immediate formatting; residual silent-drop paths.</td>
+</tr>
+<tr>
+<td>Python driver + tests</td>
+<td>Fair</td>
+<td>Driver well documented; boilerplate duplicated across e2e tests; no unit coverage of driver logic; no subprocess timeouts; inconsistent test-package layout.</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td>Fair</td>
+<td>Strong SSOT discipline; decode-attn staleness cluster; fictional README demo section; several stale GLOSSARY xrefs/counts.</td>
+</tr>
+<tr>
+<td>MLIR expert lens</td>
+<td>Needs work</td>
+<td>No lit; allocation/addr-analysis inside translation not as passes; dead geometry contradicts SSOT; no <code>Passes.td</code>/generated docs; no negative FileCheck coverage.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="prioritized-findings">Prioritized findings<a class="headerlink" href="#prioritized-findings" title="Permanent link">&para;</a></h2>
+<h3 id="blocker">Blocker<a class="headerlink" href="#blocker" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>file:line</th>
+<th>Issue</th>
+<th>Recommendation</th>
+<th>fix_class</th>
+<th>effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.github/workflows/ci.yml:104</code></td>
+<td><code>e2e-tests</code> job runs <code>make triton-test-tutorial</code>, a target that does not exist (single fixed geometry removed the prod/tutorial split). Job fails every run.</td>
+<td>Delete the stale step; single geometry means nothing to run twice.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+</tbody>
+</table>
+<h3 id="high">High<a class="headerlink" href="#high" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>file:line</th>
+<th>Issue</th>
+<th>Recommendation</th>
+<th>fix_class</th>
+<th>effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.github/workflows/ci.yml:29</code></td>
+<td>Both jobs <code>pip install -r requirements.txt</code>, which pins <code>mininpu&gt;=0.4.0</code> not on PyPI, with no index/git source configured. Unresolvable on a stock runner.</td>
+<td>Check out the sibling <code>mininpu</code> and <code>pip install -e &lt;path&gt;</code>, or add a <code>git+https://...@&lt;tag&gt;</code> source, or publish wheels reachable by CI.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp:52</code> (+ <code>NPUToAsm.cpp:66-67</code>)</td>
+<td><code>getPhysProfile()</code> keeps the removed <code>NPU_PROFILE</code> mechanism; default <code>{dim=16, vreg=32}</code> contradicts the <code>DIM=8 / VREG=8</code> SSOT. Allocator can emit VREG indices the frozen ISA cannot encode. Correctness hazard, not just stale text.</td>
+<td>Delete <code>getPhysProfile()</code>/<code>PhysProfile</code> and the env lookup; source <code>DIM/SPM_ROWS/ACC_ROWS/VREG_COUNT</code> from the hwparams SSOT (generated header or hardcoded DIM=8 with a pointer comment). Fix the arch-header note.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>NPU.td:36</code></td>
+<td>All 26 ops use loose <code>AnyMemRef</code>; the dialect-defining three-bank constraint lives in hand-written C++ verifiers wired to only 5 ops. Least idiomatic ODS pattern.</td>
+<td>Define <code>NPU_AccMemRef</code>/<code>NPU_SpmMemRef</code>/<code>NPU_VregMemRef</code> TypeConstraints and use them in <code>arguments</code>; add <code>AllShapesMatch</code> on elementwise binaries; delete the per-bank C++ checks.</td>
+<td>semantic-defer</td>
+<td>L</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:255</code></td>
+<td><code>translateOp</code> is a single ~1100-line function; the <code>linalg.generic</code> body matcher (710-1073) is a ~360-line nested if/else mixing SiLU fold, RMSNorm fold, broadcast, causal elision, general elementwise. Top maintainability liability.</td>
+<td>Decompose by op family into free functions over <code>(Operation, TranslatorState)</code>; keep <code>translateOp</code> a thin dispatcher; makes fold helpers unit-testable.</td>
+<td>semantic-defer</td>
+<td>L</td>
+</tr>
+<tr>
+<td><code>scripts/run-filecheck-tests.sh:1</code></td>
+<td>FileCheck tests use a hand-rolled bash runner (only <code>%s</code>, pipes RUN lines to <code>/dev/null</code>, discards diagnostics) and are not run in CI. Strongest "not a real MLIR project" signal.</td>
+<td>Add <code>compiler/test/lit.cfg.py</code> + <code>lit.site.cfg.py.in</code>, register <code>check-npu</code> via <code>add_lit_testsuite</code>, run with <code>llvm-lit</code>, wire into <code>ci.yml</code>; retire the bash runner.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deployment-posture-clarified-2026-07-08">Deployment posture (clarified 2026-07-08)<a class="headerlink" href="#deployment-posture-clarified-2026-07-08" title="Permanent link">&para;</a></h3>
+<p>The <code>ci.yml:29</code> finding above and the "published wheels" option in the deferred
+appendix were written assuming a public-PyPI target. That is not the actual
+deployment model, and the finding's severity/framing should be read accordingly:</p>
+<ul>
+<li>Distribution is internal only: a minimal group of about 50 users, via an
+  internal/shared-server artifact (a self-contained <code>linux_x86_64</code> wheel or the
+  bundled binaries), not public PyPI.</li>
+<li>The sibling <code>mininpu</code> runtime is likewise not published to PyPI; only the
+  compiler-needed subset is shared internally alongside this package.</li>
+<li>Because of this, manylinux/PyPI-tag honesty work is not a project goal, and
+  the <code>mininpu</code> resolution gap in the public GitHub Actions CI job (which
+  cannot reach an internal source on a bare runner) is a deprioritized optional
+  mirror, not a release blocker. The internal artifact is smoke-tested against
+  <code>mininpu</code> installed from source (see <code>scripts/smoke-wheel.sh</code>), which is the
+  path that matters for real distribution.</li>
+<li>Concrete <code>mininpu</code> subset decided: the compiler ships only the runtime it
+  needs (<code>isa</code>, <code>core</code>, <code>asm</code>, <code>iss</code>, <code>hwparams</code>), excluding <code>cost/</code>, <code>abi.py</code>,
+  and <code>ip_packaging.py</code>. <code>scripts/stage-mininpu-subset.sh</code> operationalizes this
+  (verified import closure; local <code>dist/</code> staging today, shared-server path TBD).</li>
+</ul>
+<h3 id="medium">Medium<a class="headerlink" href="#medium" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>file:line</th>
+<th>Issue</th>
+<th>Recommendation</th>
+<th>fix_class</th>
+<th>effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NPUToAsm.cpp:46</code></td>
+<td><code>linalg.generic</code> semantics re-matched in the translator via an ad-hoc second body matcher parallel to LinalgToNPU (layering violation; adding an op needs synced edits in two dyn_cast chains).</td>
+<td>Move SiLU/RMSNorm/causal-mask matchers into LinalgToNPU patterns; make a surviving tensor-body <code>linalg.generic</code> a hard pass error; collapse the two dispatch chains into one visitor.</td>
+<td>semantic-defer</td>
+<td>L</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:28</code></td>
+<td>Physical allocation and linear-addr analysis run as free functions inside the <code>--to-asm</code> hook, yielding a 1494-line translator; allocation result cannot be FileCheck'd as MLIR.</td>
+<td>Promote <code>PhysAllocPass</code>/<code>LinearAddrAnalysis</code> to real <code>OperationPass&lt;func::FuncOp&gt;</code> passes that annotate ops (<code>spm_row</code>/<code>acc_row</code>/<code>vreg</code>/<code>addr</code>); reduce NPUToAsm to a printer.</td>
+<td>semantic-defer</td>
+<td>L</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp:220</code></td>
+<td>Two parallel dyn_cast chains (walkOp vs translateOp) must be hand-synced; their <code>isDRAM</code> helpers already diverged (translator unwraps ReinterpretCast+SubView, alloc unwraps only SubView).</td>
+<td>Hoist one shared <code>isDRAM</code> into <code>NPUAsmInternal.h</code>; longer term drive liveness and emission from a single op description.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>NPU.td:28</code></td>
+<td>Coarse op-level <code>MemoryEffects&lt;[MemRead, MemWrite]&gt;</code> loses per-operand read/write dataflow (matmul reads A/B, RMW C; vec_add_acc reads acc_a/acc_b, writes acc_dst).</td>
+<td>Attach effects to operands via <code>Arg&lt;..., [MemRead]&gt;</code>/<code>[MemWrite]</code>; drop the op-level trait.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>NPU.td:41</code></td>
+<td><code>MatmulTileOp</code> <code>causal</code> attribute is undocumented and never set by lowering; <code>mm.getCausal()</code> is always false. Real causal state lives in a separate <code>causalMatmuls</code> side-table.</td>
+<td>Pick one SSOT: wire causal through the attribute and retire the side-table (and document it), or remove the dead attribute.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>NPUDialect.cpp:22</code></td>
+<td>Only 5 of 26 ops set <code>hasVerifier=1</code>; 21 ops accept malformed operands despite documented bank invariants.</td>
+<td>After ODS type constraints land, add <code>hasVerifier=1</code> + small shared checks only where cross-operand shape relations exist (broadcast, row-reduce, fma).</td>
+<td>code-safe</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:998</code></td>
+<td>Residual silent-drop paths (linalg.reduce unknown body 519-522, unsupported divf 998, 2D maxnumf 1055) contradict the stated "zero silent no-ops" W9 invariant.</td>
+<td>Route these through <code>emitOpError</code> + <code>translationFailed</code>, or document each as a legitimate no-emit alias.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:432</code></td>
+<td>Immediates formatted inconsistently across emitters (hardcoded <code>imm=1.000000e+00</code> vs default stream <code>imm=1</code> vs <code>to_string</code>), making <code>.s</code> output non-uniform and fragile.</td>
+<td>Introduce one <code>formatImm(double)</code> helper and a uniform operand/kwarg builder; use everywhere.</td>
+<td>code-safe</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>test/e2e/sim_validate/test_gemm_e2e.py:14</code></td>
+<td>Compiler-locate/skip/subprocess boilerplate copy-pasted across 4 e2e test files instead of <code>conftest.py</code>.</td>
+<td>Move <code>skip_no_compiler</code> and a shared <code>run_compiler(mlir, asm)</code> into <code>conftest.py</code> (or <code>test/e2e/_pipeline_helpers.py</code>); import in all four.</td>
+<td>code-safe</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>mininpu_compiler/compile.py:260</code></td>
+<td>Pipeline <code>subprocess.run</code> calls have no <code>timeout=</code>; a hung tool wedges the whole test/CI run with no diagnostic.</td>
+<td>Add a generous <code>timeout=</code> to each pipeline call and raise <code>RuntimeError('&lt;tool&gt; timed out after Ns')</code> on <code>TimeoutExpired</code>.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>mininpu_compiler/compile.py:46</code></td>
+<td>No unit tests exercise the driver's branchy logic (<code>_find_tool</code> precedence, <code>_newer_libstdcpp_dir</code>, compile cache, CLI parsing); only reached transitively by skipped e2e tests.</td>
+<td>Add <code>test/unit/test_compile_driver.py</code> with monkeypatch/tmp fakes covering tool resolution order, cache hit/miss/clear, and <code>_cli_main</code> arg parsing.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>.antigravitycli/4794d343-...json</code></td>
+<td>Tracked file is a symlink (git mode 120000) to <code>~/.gemini/...</code> outside the repo; dangling here, would leak another tool's local config elsewhere. Introduced incidentally.</td>
+<td><code>git rm</code> it and add <code>.antigravitycli/</code> to <code>.gitignore</code>.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>pyproject.toml:12</code></td>
+<td><code>license = {text = "MIT"}</code> but no LICENSE/COPYING file exists; a common packaging/legal blocker for PyPI distribution.</td>
+<td>Add an MIT <code>LICENSE</code> file at repo root.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>requirements.txt:1</code></td>
+<td>Duplicates and drifts from pyproject deps (<code>triton&gt;=3.0</code> vs pinned <code>==3.4.0</code>); adds demo deps with no pyproject extra, so <code>.[dev]</code> alone gives no working demo.</td>
+<td>Make pyproject the sole SSOT: add a <code>demo</code> extra; delete requirements.txt or reduce to <code>-e .[dev,demo]</code>; drop the divergent triton pin.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>compiler/include/NPU/CMakeLists.txt:1</code></td>
+<td>No <code>Passes.td</code>/<code>-gen-pass-decls</code> and no <code>add_mlir_doc</code> (<code>-gen-op-doc</code>/<code>-gen-dialect-doc</code>); passes hand-registered, op catalog maintained by hand in <code>isa/npu-isa.md</code>.</td>
+<td>Add <code>Passes.td</code> with <code>-gen-pass-decls</code> and a <code>registerNPUPasses()</code> header; add <code>add_mlir_doc</code> targets so the op reference is generated from NPU.td.</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>compiler/test/Conversion/LinalgToNPU/linalgtonpu.mlir:1</code></td>
+<td>No negative/verifier FileCheck coverage despite four ops declaring <code>hasVerifier=1</code>; zero <code>-verify-diagnostics</code>/<code>not</code> cases; only happy-path mnemonic assertions.</td>
+<td>Once lit is wired, add <code>-verify-diagnostics</code> cases per verifier and <code>not npu-translate</code> cases for documented hard errors (phys-alloc overflow, unresolved DRAM addr, unmatched body).</td>
+<td>semantic-defer</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>docs/SUPPORTED_TRITON.md:197</code></td>
+<td>Section 5 says N=1 decode-step attention is unimplemented ("decode loop runs in numpy"); it actually ships and is tested (<code>decode_attn.py</code>, <code>test_decode_attn</code>). Contradicts README.</td>
+<td>Remove the row from section 5; add <code>decode_attn</code> to the validated list in section 1.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>isa/npu-isa.md:283</code></td>
+<td>Lines 283-284 (Planned) and 311-312 (Known gaps #11) describe decode-step attention as future work; it already ships and is validated.</td>
+<td>Move the bullet to Completed; update/remove known-gap #11.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>README.md:204</code></td>
+<td>Lines 204-281 document <code>demo/chat.py</code> / <code>python -m demo.chat</code> as a working feature, but no <code>demo/</code> dir exists; the Makefile itself flags it as a placeholder.</td>
+<td>Gate the whole section behind a "planned / not yet landed" banner matching the Makefile, or move it to a roadmap doc until the file lands.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>docs/charter.md:48</code></td>
+<td>References GitHub issue #120, which does not exist; the actual tracking issue is #11 (dialect&lt;-&gt;ISA drift test).</td>
+<td>Fix the reference to #11.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>GLOSSARY.md:91</code></td>
+<td>Atom-kernel count disagrees across docs (7 vs 7 vs 8 vs actual 9-10 files); "multi-iv DMA" entry (line 35) describes a v1.3+ deferred, not-shipped feature as present-tense.</td>
+<td>Recount kernels and use one number in README/SUPPORTED_TRITON/GLOSSARY/isa; note gptq_matmul is excluded (bypasses LinalgToNPU); add a "deferred to v1.3+" caveat to multi-iv DMA.</td>
+<td>docs</td>
+<td>M</td>
+</tr>
+<tr>
+<td><code>GLOSSARY.md:21</code></td>
+<td>Cites <code>isa/npu-isa.md</code> sections <code>§1/§3/§5/§7/§8/§8.3</code> that do not exist (that file has no numbered sections).</td>
+<td>Replace the <code>§N</code> citations with the actual Markdown header text, or add numbered headers to <code>isa/npu-isa.md</code>.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>GLOSSARY.md:74</code></td>
+<td>Claims lit/FileCheck is "not yet used, tracked in #10"; both false: FileCheck tests exist under <code>compiler/test/</code> and run via <code>make lit-test</code>, and #10 is an unrelated lowering issue.</td>
+<td>Update the entry to say FileCheck tests exist and run via <code>make lit-test</code>; drop the #10 pointer.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+</tbody>
+</table>
+<h3 id="low">Low<a class="headerlink" href="#low" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>file:line</th>
+<th>Issue</th>
+<th>Recommendation</th>
+<th>fix_class</th>
+<th>effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NPUToAsm.cpp:363</code></td>
+<td>Dead loop-bound computation: <code>getConstI64</code> results and <code>loScale</code>/<code>stepScale</code> computed then <code>(void)</code>-cast; only axis flags used.</td>
+<td>Delete <code>getConstI64</code>, the lo/hi/step locals, and drop the unused <code>renderBound</code> outputs.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp:130</code></td>
+<td><code>FirstFitBank::getBase</code> has no callers anywhere.</td>
+<td>Remove it, or add a test if it is intended contract.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:379</code></td>
+<td>Handle-aliasing pattern with an unexplained <code>_v</code> temporary copied inline ~8 times; the temp guards a DenseMap-invalidation hazard nobody documents.</td>
+<td>Extract <code>state.aliasHandle(dst, src)</code> with a one-line invalidation comment; replace the inline copies.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:214</code></td>
+<td>Deprecated <code>PointerUnion</code> <code>is&lt;&gt;/get&lt;&gt;</code> API used (also <code>LinearAddrAnalysis.cpp:185</code>); reads as legacy and will warn/break on LLVM bump.</td>
+<td>Switch to free <code>isa&lt;&gt;/cast&lt;&gt;/dyn_cast&lt;&gt;</code>, consistent with the rest of the codebase.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp:154</code></td>
+<td><code>int dim = 16;</code> magic default (overwritten by <code>runPhysAlloc</code>) is inconsistent with DIM=8 and duplicates the profile default.</td>
+<td>Initialize <code>dim</code> from the geometry SSOT (with the getPhysProfile fix), or make it a required ctor arg.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPUDialect.cpp:68</code></td>
+<td><code>VecRowmaxOp::verify</code> and <code>VecRowsumOp::verify</code> are byte-identical; will drift.</td>
+<td>Extract <code>verifyRowReduce(op, accSrc, vregDst)</code> and call from both.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>scripts/activate.sh:74</code></td>
+<td><code>--export</code> mode re-implements a hardcoded libstdc++ two-path check instead of reusing <code>libstdcpp-dir.sh</code> (the documented SSOT); paths can disagree.</td>
+<td>Have the <code>--export</code> branch call <code>libstdcpp-dir.sh</code> like the interactive branch.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>pytest.ini:1</code></td>
+<td>pytest config split across <code>pytest.ini</code> and <code>pyproject.toml</code> (two sources of truth for <code>testpaths</code>).</td>
+<td>Consolidate into <code>[tool.pytest.ini_options]</code> and drop <code>pytest.ini</code> unless a tool needs it.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>mininpu_compiler/compile.py:199</code></td>
+<td><code>_kernel_to_ttir</code> duplicates ~30 lines of <code>_kernel_to_linalg</code>'s TTIR-construction logic verbatim.</td>
+<td>Extract <code>_build_ttir_module(kernel_fn, constexpr_args, shapes)</code>; call from both.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>mininpu_compiler/compile.py:522</code></td>
+<td>RESOLVED in this branch (commit <code>fe6cd60</code>): <code>_cli_main</code> now wraps the compile call in <code>try/except RuntimeError</code>, prints <code>ERROR: {e}</code>, and calls <code>sys.exit(1)</code>.</td>
+<td>No further action.</td>
+<td>code-safe</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPU.td:8</code></td>
+<td>Unused <code>AttrTypeBase.td</code> include (dialect defines no custom attrs/types); <code>NPU_Dialect</code> has no <code>description</code>.</td>
+<td>Remove the include; add a short <code>let description</code> summarizing the three banks and ISA mapping.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>test/e2e/sim_validate/:-1</code></td>
+<td>Missing <code>__init__.py</code> (siblings have one) forces per-file <code>sys.path.insert(REPO_ROOT)</code> in ~3 files.</td>
+<td>Add <code>test/e2e/sim_validate/__init__.py</code> and drop the <code>sys.path.insert</code> boilerplate.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>Makefile:51</code></td>
+<td>FileCheck fallback bakes in a personal host path <code>/scratch/$USER/triton/.../FileCheck</code>; silently resolves to a nonexistent path elsewhere.</td>
+<td>Fall back to a repo-relative build path (e.g. <code>build/mlir/bin/FileCheck</code>) first, or error with instructions to set <code>FILECHECK=</code>.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>scripts/activate.sh:27</code></td>
+<td>Triton source-dir reuse hardcodes <code>$HOME/brg-scratch/triton</code>, dead host-specific logic in a shared script.</td>
+<td>Move to a personal override env var (e.g. <code>NPU_LOCAL_TRITON_SRC</code>) instead of a hardcoded path.</td>
+<td>hygiene</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPU.td:200</code></td>
+<td><code>VecMoviOp</code> summary references <code>vreg_dst[0:rows]</code> but <code>rows</code> is not an operand/attr (shape-derived).</td>
+<td>Reword to <code>vreg_dst[i] = imm for all i (broadcast immediate)</code>.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>NPUToAsm.cpp:202</code></td>
+<td><code>dramAddr</code> comment claims the bogus <code>?</code> "never reaches assembly", but it is streamed to <code>os</code> before failure is checked (buffer merely discarded).</td>
+<td>Reword the comment, or restructure so <code>dramAddr</code> short-circuits before streaming on failure.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>PhysAllocPass.cpp:279</code></td>
+<td>Comment typo <code>vec.mowi</code> for the <code>vec.movi</code> handler.</td>
+<td>Fix to <code>vec.movi</code>.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>compiler/test/Conversion/LinalgToNPU/linalgtonpu.mlir:30</code></td>
+<td>Banner comment references nonexistent mnemonic <code>npu.vec_mowi</code>.</td>
+<td>Change to <code>npu.vec_movi</code>.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>Makefile:47</code></td>
+<td>lit-test comment claims a lit fallback ("uses lit if installed, falls back") that does not exist; the rule always runs the bash script.</td>
+<td>Correct the comment, or make the target actually prefer <code>llvm-lit</code> (best done with the lit-adoption change).</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md:-1</code></td>
+<td><code>make lit-test</code> missing from the Quick commands table though it is a real working target.</td>
+<td>Add <code>make lit-test  # compiler FileCheck/.mlir tests</code> to the table.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>GLOSSARY.md:57</code></td>
+<td>Stale line citation <code>LinalgToNPU.cpp:664</code>; the symbol is now at line 708.</td>
+<td>Update to 708, or cite the symbol name only.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>README.md:1</code></td>
+<td>No CONTRIBUTING.md for external contributors (info exists in CLAUDE.md/README).</td>
+<td>Optional: add a short CONTRIBUTING.md pointing to CLAUDE.md Quick commands/Conventions, or skip if not yet accepting contributors.</td>
+<td>docs</td>
+<td>S</td>
+</tr>
+<tr>
+<td><code>mininpu_compiler/compile.py:321</code></td>
+<td>Deprecated no-op <code>profile</code> param collides in name with a live, unrelated test-fixture <code>profile</code> concept (<code>TILES['tutorial']</code>), confusing readers.</td>
+<td>Rename the live fixture concept to <code>tile_config</code>/<code>fixture_profile</code>; consider dropping the dead compiler-side param in a follow-up.</td>
+<td>semantic-defer</td>
+<td>S</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deferred-needs-owner-decision-appendix">Deferred / needs-owner-decision appendix<a class="headerlink" href="#deferred-needs-owner-decision-appendix" title="Permanent link">&para;</a></h2>
+<p>These require judgement, cross-repo coordination, or architectural change and should
+NOT be auto-applied:</p>
+<ul>
+<li>CI <code>mininpu</code> dependency resolution (<code>ci.yml:29</code>): needs a decision on how the sibling
+  repo is made installable in the public GitHub Actions CI job (checkout + editable
+  install, or an internal git/index source). Not a public wheel: see "Deployment
+  posture" above. Deprioritized: internal distribution does not depend on this CI job.
+  Cross-repo.</li>
+<li>Geometry SSOT reconciliation (<code>PhysAllocPass.cpp:52</code>, <code>NPUToAsm.cpp:66-67</code>,
+  <code>PhysAllocPass.cpp:154</code>): removing <code>NPU_PROFILE</code> and sourcing <code>DIM/SPM_ROWS/ACC_ROWS/
+  VREG_COUNT</code> from <code>hwparams.py</code> (ideally a generated header) changes emitted allocation
+  behavior; verify against the frozen ISA/sim before landing.</li>
+<li><code>translateOp</code> decomposition (<code>NPUToAsm.cpp:255</code>) and hoisting allocation/addr-analysis
+  into real <code>npu-opt</code> passes (<code>NPUToAsm.cpp:28</code>, <code>PhysAllocPass.cpp:220</code>): large refactors
+  that alter the pass/translation boundary; land incrementally with FileCheck coverage.</li>
+<li>Dialect type-constraint rework (<code>NPU.td:36</code>), per-operand memory effects (<code>NPU.td:28</code>),
+  and the <code>causal</code>-attribute SSOT decision (<code>NPU.td:41</code>): behavioral ODS changes; sequence
+  after they unblock the <code>hasVerifier</code> coverage work.</li>
+<li>lit adoption (<code>run-filecheck-tests.sh:1</code>) + negative FileCheck coverage
+  (<code>linalgtonpu.mlir:1</code>) + <code>Passes.td</code>/generated docs (<code>CMakeLists.txt:1</code>): the "real MLIR
+  project" structural upgrade; best done as one coordinated change.</li>
+<li>linalg.generic matcher relocation into LinalgToNPU (<code>NPUToAsm.cpp:46</code>): resolves the
+  layering leak but changes where lowering failures surface; needs owner sign-off.</li>
+<li>Driver unit-test suite (<code>compile.py:46</code>) and the <code>profile</code> param rename/removal
+  (<code>compile.py:321</code>): low risk individually but touch public-ish CLI/test surface.</li>
+</ul>
+<h2 id="appendix-improvement-pass-applied-2026-07-08">Appendix: Improvement pass applied (2026-07-08)<a class="headerlink" href="#appendix-improvement-pass-applied-2026-07-08" title="Permanent link">&para;</a></h2>
+<p>The audit findings were acted on in four commits on branch <code>chore/quality-audit-improvements</code> (landed off <code>master</code>, not merged):</p>
+<ul>
+<li><code>docs:</code> doc-accuracy pass + MIT LICENSE + CONTRIBUTING.md (decode_attn shipped-state fixes, atom-kernel count reconciled to 9, GLOSSARY citations, gated unlanded README demo).</li>
+<li><code>build:</code> dependency SSOT in pyproject (unified triton==3.4.0, demo extra), removed tracked <code>.antigravitycli</code> session artifact, folded pytest config into pyproject (deleted pytest.ini), Makefile FileCheck path, activate.sh de-hardcoding, dropped stale CI step, new docs/DEPENDENCIES.md.</li>
+<li><code>refactor (python):</code> compile.py <code>_build_ttir_module</code> dedup, subprocess timeouts, CLI RuntimeError handling; test package <code>__init__</code> + removed redundant sys.path inserts; shared conftest <code>skip_no_compiler</code>/<code>run_compiler</code> helpers.</li>
+<li><code>refactor (C++/MLIR):</code> NPU.td dialect description + unused include drop, <code>verifyRowReduce</code> dedup, <code>formatImm</code>/<code>aliasHandle</code> helpers, dead loop-bound removal, deprecated <code>PointerUnion is&lt;&gt;/get&lt;&gt;</code> -&gt; <code>isa&lt;&gt;/cast&lt;&gt;</code>, named default-dim constant flagging the DIM=8 SSOT reconciliation.</li>
+</ul>
+<p>Verification in this environment (Ubuntu 24.04, 32 cores):
+- MLIR toolchain built from the pinned LLVM commit; <code>make build</code> compiles npu-opt and npu-translate cleanly (exit 0).
+- <code>make lit-test</code>: 2 passed, 0 failed (FileCheck golden output for the LinalgToNPU and NPUToAsm tests is byte-identical, confirming the C++ refactors preserved emitted assembly).
+- <code>make e2e-test</code>: 6 passed, 6 failed, 30 skipped. All 6 failures are pre-existing and originate in the sibling <code>mininpu</code> package (<code>mininpu/asm/_alloc/liveness.py</code> raising "use of 'rN' without prior def"), not in this repo's compiler. They are unchanged by this branch.
+- Python test collection is identical before and after (209 tests); no new failures introduced.</p>
+<h3 id="top-deferred-items-need-owner-decision-not-auto-applied">Top deferred items (need owner decision, not auto-applied)<a class="headerlink" href="#top-deferred-items-need-owner-decision-not-auto-applied" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Sibling <code>mininpu</code> skew blocks the e2e/sim suite (liveness rejects currently-emitted assembly). This is the single biggest blocker to a green test run and must be resolved in the <code>mininpu</code> repo (or the compiler's emitted handle/def ordering reconciled with the new liveness contract).</li>
+<li>NPU_PROFILE remnant in PhysAllocPass defaults dim to 16 while the hardware SSOT is DIM=8: source geometry from hwparams and delete getPhysProfile/PhysProfile.</li>
+<li>Adopt real <code>lit</code> (lit.cfg.py + llvm-lit) and retire the hand-rolled bash FileCheck runner; wire into CI.</li>
+<li>Decompose the 1500-line NPUToAsm translator into per-op-family emitters; consider promoting PhysAllocPass/LinearAddrAnalysis to attribute-annotating passes.</li>
+<li>Tighten the dialect: NPU-specific memref TypeConstraints in ODS replacing loose AnyMemRef; move body-pattern matchers (SiLU/RMSNorm/causal-mask) from the translator into LinalgToNPU patterns.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.suggest", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>

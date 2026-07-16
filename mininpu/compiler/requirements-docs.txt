@@ -1,0 +1,4 @@
+# Documentation site toolchain (Material for MkDocs).
+# Used by `make docs` / `make docs-serve` and the docs CI workflow
+# (.github/workflows/docs.yml). Pinned for reproducible builds.
+mkdocs-material==9.5.44
