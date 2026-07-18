@@ -2,26 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://sunwookim028.github.io/mininpu/index.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
-         <loc>https://sunwookim028.github.io/mininpu/dmu.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <loc>https://sunwookim028.github.io/mininpu/runtime.html</loc>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
-         <loc>https://sunwookim028.github.io/mininpu/gpt2_kernels.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <loc>https://sunwookim028.github.io/mininpu/compute_tile/dmu.html</loc>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
-         <loc>https://sunwookim028.github.io/mininpu/implementation.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <loc>https://sunwookim028.github.io/mininpu/compute_tile/gpt2_kernels.html</loc>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
-         <loc>https://sunwookim028.github.io/mininpu/isa.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <loc>https://sunwookim028.github.io/mininpu/compute_tile/implementation.html</loc>
+         <lastmod>2026-07-18</lastmod>
     </url>
     <url>
-         <loc>https://sunwookim028.github.io/mininpu/microarch.html</loc>
-         <lastmod>2026-07-16</lastmod>
+         <loc>https://sunwookim028.github.io/mininpu/compute_tile/isa.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/compute_tile/microarch.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/figures/index.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/figures/tikz/index.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/index.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/introduction.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/lab1-vpu.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/lab2-systolic.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/lab3-dma.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/lab4-kernels.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/labs/lab5-serving.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/abi.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/architecture.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/compute_tile.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/control_plane.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/data_movement.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/dmu.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/host_interface.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/interface_tile.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/isa.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/memory_tile.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/mxu.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/sequencer.html</loc>
+         <lastmod>2026-07-18</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/reference/vpu.html</loc>
+         <lastmod>2026-07-18</lastmod>
     </url>
 </urlset>

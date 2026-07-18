@@ -107,21 +107,24 @@
   <!-- X read -->
   <rect class="stg-mem" x="24" y="60" width="188" height="118" rx="6"/>
   <text class="stitle t-mem" x="34" y="82">1 &middot; X burst-read</text>
-  <text class="d" x="34" y="102">X tile from VREG 2D RF</text>
+  <text class="d" x="34" y="102">X tile from VREG (as-built 2D RF)</text>
   <text class="d" x="34" y="118">fp32, N=8 rows</text>
   <text class="d2" x="34" y="136">short read burst; VREG</text>
   <text class="d2" x="34" y="150">temporally separate from</text>
   <text class="d2" x="34" y="164">the VPU tile-row port</text>
   <path class="flow" d="M212,119 L236,119"/>
 
-  <!-- cast -->
+  <!-- cast + x_matrix staging. The cast is at the VREG read port, NOT at the
+       PE/west input: fp32_to_bf16 is instanced on vreg_rd_data and S_LOAD_X
+       flops the post-cast row into the bf16 x_matrix staging buffer, which is
+       what the west edge streams from in S_RUN. -->
   <rect class="stg-cast" x="238" y="60" width="150" height="118" rx="6"/>
-  <text class="stitle t-new" x="248" y="82">2 &middot; cast</text>
+  <text class="stitle t-new" x="248" y="82">2 &middot; cast &rarr; x_matrix</text>
   <text class="d" x="248" y="102">fp32 -&gt; bf16</text>
-  <text class="d" x="248" y="118">at PE west input</text>
-  <text class="d2" x="248" y="136">combinational,</text>
-  <text class="d2" x="248" y="150">per element</text>
-  <text class="d2" x="248" y="164">weights preloaded bf16</text>
+  <text class="d" x="248" y="118">at the VREG read port</text>
+  <text class="d2" x="248" y="136">comb; S_LOAD_X flops it</text>
+  <text class="d2" x="248" y="150">into x_matrix (bf16 stg),</text>
+  <text class="d2" x="248" y="164">N=8 cyc; W preloaded bf16</text>
   <path class="flow" d="M388,119 L412,119"/>
 
   <!-- systolic array -->

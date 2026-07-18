@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="mininpu compute-tile documentation: ISA reference, reference microarchitecture, implementation, DMU design brief, and GPT-2 kernels.">
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
       
       
       
-        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/implementation.html">
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/compute_tile/implementation.html">
       
       
         <link rel="prev" href="microarch.html">
@@ -22,19 +22,19 @@
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Doc 3 Implementation - mininpu Compute-Tile Documentation</title>
+        <title>Doc 3 Implementation - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="index.html" title="mininpu Compute-Tile Documentation" class="md-header__button md-logo" aria-label="mininpu Compute-Tile Documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            mininpu Compute-Tile Documentation
+            mininpu documentation
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -218,13 +218,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="index.html" title="mininpu Compute-Tile Documentation" class="md-nav__button md-logo" aria-label="mininpu Compute-Tile Documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    mininpu Compute-Tile Documentation
+    mininpu documentation
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -236,7 +236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         
   
   
@@ -263,14 +263,14 @@
   
   
     <li class="md-nav__item">
-      <a href="isa.html" class="md-nav__link">
+      <a href="../runtime.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Doc 1 ISA
+    Host Runtime
   
 
     
@@ -285,6 +285,88 @@
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
   
@@ -309,9 +391,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
     
@@ -533,9 +616,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -560,9 +644,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -576,6 +661,719 @@
     
   
     Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/control_plane.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/host_interface.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
   
 
     
@@ -794,6 +1592,7 @@ tile (milestone #16). Each file carries a disposition and its source branch.</p>
 <li>SSOT to <strong>generated .sv</strong></li>
 <li>integration <strong>#16</strong></li>
 </ul>
+<!-- markdownlint-disable-next-line MD036 -->
 <p><strong>Contents</strong></p>
 <ol>
 <li><a href="#s1">Overview &amp; current tree</a></li>
@@ -857,7 +1656,7 @@ on top of it (detail in Section 2).</p>
     <tr><td><code>systolic_tb_wrap.sv</code></td><td>DV-only packed-port harness (not synth)</td><td>keep</td><td>main</td></tr>
 
     <tr><td>VREG</td>
-      <td><code>vreg_rf.sv</code></td><td>32 &times; [8&times;8] fp32 2r1w whole-tile-row RF; <strong>shared by MXU-X, LSU, VPU</strong></td><td>new</td><td>vreg/feat-2d-rf (also rtl/feat-lsu, mxu/feat-vreg-x)</td></tr>
+      <td><code>vreg_rf.sv</code></td><td>2r1w RF; <strong>shared by MXU-X, LSU, VPU</strong>. As-built 32 &times; [8&times;8] fp32 whole-tile-row; <strong>design target is flat 1D</strong> (ruling #385 §5 #1), reworked in B</td><td>new</td><td>vreg/feat-2d-rf (also rtl/feat-lsu, mxu/feat-vreg-x)</td></tr>
 
     <tr><td>LSU</td>
       <td><code>lsu.sv</code></td><td><code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code> + SPAD&lt;-&gt;VREG casts</td><td>new</td><td>rtl/feat-lsu</td></tr>
@@ -879,8 +1678,8 @@ on top of it (detail in Section 2).</p>
 </table>
 </div>
 <h2 id="s2">02 Tile-sequencer implementation<a class="headerlink" href="#s2" title="Permanent link">&para;</a></h2>
-<p>The as-built <code>tile_sequencer.sv</code> + <code>loop_ctrl.sv</code>
-+ <code>tile_agu_pkg.sv</code> (sequencer/feat-scaffold) implement the compute-tile
+<p>The as-built <code>tile_sequencer.sv</code> + <code>loop_ctrl.sv</code> + <code>tile_agu_pkg.sv</code>
+(sequencer/feat-scaffold) implement the compute-tile
 control plane: fetch / decode / single-issue with no hardware interlock.</p>
 <div class="admonition warning">
 <p class="admonition-title">Fully-exposed: no hardware interlock</p>
@@ -985,16 +1784,16 @@ Per <strong>DECISION 2</strong> the VPU ships as <strong>separate files</strong>
     <tr>
       <td>MXU</td>
       <td><code>mxu.sv</code>, <code>pe.sv</code>, <code>mxu_accumulator.sv</code>, <code>systolic.sv</code></td>
-      <td>8x8 weight-stationary systolic array; X read from <strong>VREG</strong> (fp32-&gt;bf16 cast at PE input); 2 weight buffers; <code>acc_bank</code></td>
+      <td>8x8 weight-stationary systolic array; X read from <strong>VREG</strong> (fp32-&gt;bf16 cast at the VREG read port); 2 weight buffers; <code>acc_bank</code></td>
       <td>VREG X read (port A); SPAD W read (<code>mxu.load.w</code>); ACC write; from sequencer: matmul / load.w / acc.init / trans_b / causal / accumulate</td>
       <td>cherry-pick: B timing (<code>SKEW=3</code>) + mxu-vreg-x X-source</td>
     </tr>
     <tr>
       <td>VREG</td>
       <td><code>vreg_rf.sv</code></td>
-      <td>32 &times; [8&times;8] fp32 tiles, whole-tile-row; <strong>2r1w, conflict-free via temporal separation</strong> (see the <a href="microarch.md#vreg">microarch VREG realization</a>)</td>
+      <td><strong>2r1w, conflict-free via temporal separation</strong> (locked). Shape: as-built 32 &times; [8&times;8] fp32 tiles, whole-tile-row (<code>tile_top.sv:396</code>); <strong>design target flat 1D</strong> per ruling #385 §5 #1 (see the <a href="microarch.html#vreg">microarch VREG realization</a>)</td>
       <td>read A = MXU-X, read B = LSU; single write shared by LSU and VPU (time-shared); <strong>VPU R_vpu read + shared write</strong></td>
-      <td>new vreg/feat-2d-rf. <strong>DECISION 1</strong>: VPU wired onto this shared RF</td>
+      <td>new vreg/feat-2d-rf (branch name predates the 1D ruling; the flat-1D rework lands in B). <strong>DECISION 1</strong> (design target, not yet built): VPU wired onto this shared RF - today <code>vpu_ctrl.sv:1316</code> still instantiates its own 1D <code>vec_regfile</code></td>
     </tr>
     <tr>
       <td>LSU</td>
@@ -1068,7 +1867,7 @@ generated <code>.sv</code> / <code>.tcl</code> carry a
   </thead>
 <tbody>
     <tr>
-      <td><code>mininpu/isa/*</code> (<code>ISA_VERSION 0.5.0</code>)</td>
+      <td><code>mininpu/isa/*</code> (as-built <code>ISA_VERSION 0.4.0</code>; the 0.5.0 spec cutover is pending, see the generated <a href="../reference/isa.html">ISA Reference</a>)</td>
       <td><code>opcodes.py</code> (frozen <code>OP_*</code>, <code>FIELDS_INSTR</code>, <code>FLAG_*</code>), <code>encoders.py</code>, <code>numeric.py</code>, <code>exp_lut.py</code>, <code>semantics.py</code></td>
       <td><code>npu/src/npu/npu_isa_pkg.sv</code></td>
     </tr>
@@ -1153,7 +1952,13 @@ and the X-from-VREG MXU datapath.</p>
 <li><strong>VPU on <code>vreg_rf</code>:</strong> per DECISION 1, the VPU uses
   the <code>R_vpu</code> read port + the shared single write port (time-shared
   with LSU). Required for the worked-example e2e (<code>acc.store -&gt;
-  gelu -&gt; vreg.store</code> all on V16).</li>
+  gelu -&gt; vreg.store</code> all on V16). The <code>gelu</code> here is the <strong>as-built fused
+  <code>vpu.gelu</code> (0x1D)</strong> backed by <code>vpu_gelu_unit.sv</code>; ISA 0.5.0 has <strong>no gelu
+  LUT slot</strong> and decomposes it instead (owner ruling
+  <a href="https://github.com/sunwookim028/mininpu/issues/385">#385</a> §5 #7). The
+  decomposition sequence is rework-B work; the milestone below exercises the
+  shipped fused op, and what it verifies is the port/latency structure of the
+  tail, which the decomposition does not change.</li>
 <li><strong>LSU-SPAD RL=2:</strong> align to real <code>MEM_LATENCY=2</code>,
   generalize <code>rd_data_q</code> to an RL-deep shift register (LSU latency
   9 -&gt; 10), re-run <code>test_lsu</code>.</li>
@@ -1281,7 +2086,7 @@ SPAD / VREG-resident, so the DMU is not needed). Tests run under
       <td>5</td>
       <td>32x32 GELU worked example e2e</td>
       <td><code>GELU(X@W^T + b)</code> full kernel: loops + bo + MXU + VPU + LSU</td>
-      <td>tile_sequencer -&gt; loop/bo -&gt; load.w / matmul -&gt; acc.store -&gt; vpu gelu -&gt; vreg.store, all on V16</td>
+      <td>tile_sequencer -&gt; loop/bo -&gt; load.w / matmul -&gt; acc.store -&gt; vpu gelu (as-built fused 0x1D; 0.5.0 decomposes it, rework B) -&gt; vreg.store, all on V16</td>
       <td>tiered: microinstr / single-op (fill) / op-pair / kernel block</td>
       <td>full 32x32 GELU vs NumPy oracle</td>
     </tr>
@@ -1297,7 +2102,7 @@ SPAD / VREG-resident, so the DMU is not needed). Tests run under
 </table>
 </div>
 <hr />
-<p>mininpu &middot; Implementation (Doc 3, as-built + #16 integration) &middot; <a href="index.html">back to index</a></p>
+<p>mininpu &middot; Implementation (Doc 3, as-built + #16 integration) &middot; <a href="../index.html">back to index</a></p>
 
 
 
@@ -1393,11 +2198,19 @@ SPAD / VREG-resident, so the DMU is not needed). Tests run under
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
       
     
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
   </body>
 </html>

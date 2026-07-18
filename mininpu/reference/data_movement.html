@@ -10,25 +10,31 @@
       
       
       
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/reference/data_movement.html">
       
+      
+        <link rel="prev" href="architecture.html">
+      
+      
+        <link rel="next" href="control_plane.html">
       
       
         
       
       
-      <link rel="icon" href="/mininpu/assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>mininpu documentation</title>
+        <title>Data Movement - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="/mininpu/assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="/mininpu/assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -47,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL("/mininpu/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -71,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#mininpu-data-movement-end-to-end-integration" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -83,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/mininpu/index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -103,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Data Movement
             
           </span>
         </div>
@@ -207,7 +218,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/mininpu/index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -225,7 +236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/index.html" class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         
   
   
@@ -252,7 +263,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/runtime.html" class="md-nav__link">
+      <a href="../runtime.html" class="md-nav__link">
         
   
   
@@ -331,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compute_tile/isa.html" class="md-nav__link">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
         
   
   
@@ -359,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compute_tile/microarch.html" class="md-nav__link">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
         
   
   
@@ -387,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compute_tile/implementation.html" class="md-nav__link">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
         
   
   
@@ -415,7 +426,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compute_tile/dmu.html" class="md-nav__link">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
         
   
   
@@ -443,7 +454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compute_tile/gpt2_kernels.html" class="md-nav__link">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
         
   
   
@@ -475,8 +486,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -487,11 +500,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
@@ -512,7 +525,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -530,7 +543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/architecture.html" class="md-nav__link">
+      <a href="architecture.html" class="md-nav__link">
         
   
   
@@ -555,10 +568,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/mininpu/reference/data_movement.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="data_movement.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -574,6 +614,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-dataflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end dataflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#five-step-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Five-step walkthrough
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-unit-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-unit detail
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -586,7 +679,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/control_plane.html" class="md-nav__link">
+      <a href="control_plane.html" class="md-nav__link">
         
   
   
@@ -614,7 +707,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/host_interface.html" class="md-nav__link">
+      <a href="host_interface.html" class="md-nav__link">
         
   
   
@@ -642,7 +735,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/abi.html" class="md-nav__link">
+      <a href="abi.html" class="md-nav__link">
         
   
   
@@ -670,7 +763,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/isa.html" class="md-nav__link">
+      <a href="isa.html" class="md-nav__link">
         
   
   
@@ -698,7 +791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/interface_tile.html" class="md-nav__link">
+      <a href="interface_tile.html" class="md-nav__link">
         
   
   
@@ -726,7 +819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/compute_tile.html" class="md-nav__link">
+      <a href="compute_tile.html" class="md-nav__link">
         
   
   
@@ -754,7 +847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/memory_tile.html" class="md-nav__link">
+      <a href="memory_tile.html" class="md-nav__link">
         
   
   
@@ -782,7 +875,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/sequencer.html" class="md-nav__link">
+      <a href="sequencer.html" class="md-nav__link">
         
   
   
@@ -810,7 +903,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/mxu.html" class="md-nav__link">
+      <a href="mxu.html" class="md-nav__link">
         
   
   
@@ -838,7 +931,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/vpu.html" class="md-nav__link">
+      <a href="vpu.html" class="md-nav__link">
         
   
   
@@ -866,7 +959,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/reference/dmu.html" class="md-nav__link">
+      <a href="dmu.html" class="md-nav__link">
         
   
   
@@ -953,7 +1046,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/index.html" class="md-nav__link">
+      <a href="../labs/index.html" class="md-nav__link">
         
   
   
@@ -981,7 +1074,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/introduction.html" class="md-nav__link">
+      <a href="../labs/introduction.html" class="md-nav__link">
         
   
   
@@ -1009,7 +1102,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab1-vpu.html" class="md-nav__link">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
         
   
   
@@ -1037,7 +1130,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab2-systolic.html" class="md-nav__link">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
         
   
   
@@ -1065,7 +1158,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab3-dma.html" class="md-nav__link">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
         
   
   
@@ -1093,7 +1186,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab4-kernels.html" class="md-nav__link">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
         
   
   
@@ -1121,7 +1214,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab5-serving.html" class="md-nav__link">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
         
   
   
@@ -1156,7 +1249,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/figures/index.html" class="md-nav__link">
+      <a href="../figures/index.html" class="md-nav__link">
         
   
   
@@ -1193,6 +1286,49 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#end-to-end-dataflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end dataflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#five-step-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Five-step walkthrough
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-unit-detail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-unit detail
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1205,8 +1341,113 @@
               
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/data_movement.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose and the deck bullets were BOTH carried over in
+     source order; the deck bullets sit in the collapsed "Slide summary"
+     blocks. Figures are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-data-movement-end-to-end-integration">mininpu: Data Movement: End-to-End Integration<a class="headerlink" href="#mininpu-data-movement-end-to-end-integration" title="Permanent link">&para;</a></h1>
+<p>How bytes travel from the host to the compute datapath and back, told as a single worked forward-pass step for a GPT-2 BF16 layer. The four units (host interface, interface tile, command processor, compute tile) and the four named inter-unit interfaces (COPY, LAUNCH, DMEM, FABRIC) are defined in <code>docs/charter.md</code> §3; per-unit mechanics are covered in the individual unit docs. This document is the integration map, not the mechanics reference.</p>
+<h2 id="end-to-end-dataflow">End-to-end dataflow<a class="headerlink" href="#end-to-end-dataflow" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>COPY</strong> (CP ↔ host interface): H2D fills devmem with BF16 weights, activations, and the kernel binary; D2H returns results.</li>
+<li><strong>LAUNCH</strong> (CP ↔ compute tile): CP loads <code>devmem[kbin_addr, kbin_size]</code> into IRAM, then pulses <code>compute_start</code>.</li>
+<li><strong>DMEM</strong> (compute tile ↔ interface tile): the DMA unit streams devmem ↔ SPAD; async slot lets Port A fill while Port B computes.</li>
+<li><strong>FABRIC</strong> (host interface ↔ interface tile): AXI4 bulk data path between the copy engine and PL-DDR4.</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>dm-flow</code></p>
+<p><img alt="dm-flow" src="../figures/tikz/dm-flow.svg" /></p>
+<p>End-to-end dataflow for one GPT-2 BF16 forward-pass step. The four units are the host, the command processor (<code>command_processor.sv</code>), the host interface / copy engine, the interface tile / devmem (PL-DDR4), and the compute tile (IRAM + SPAD + MXU/VPU). The four named inter-unit interfaces are COPY (CP ↔ copy engine), LAUNCH (CP ↔ compute tile), FABRIC (copy engine ↔ interface tile, AXI4), and DMEM (compute tile ↔ interface tile, <code>dm_*</code> req/ack). The step-by-step walkthrough follows.</p>
+</div>
+<p>The diagram locates all five data-movement steps in the four-unit picture. Steps 1 and 5 are COPY + FABRIC (host ↔ devmem); step 2 is LAUNCH (which includes a binary-load sub-step over DMEM); steps 3 and 4 are DMEM (devmem ↔ SPAD) and in-SPAD compute.</p>
+<h2 id="five-step-walkthrough">Five-step walkthrough<a class="headerlink" href="#five-step-walkthrough" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ol>
+<li><strong>H2D copy.</strong> Host writes COPY descriptors {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir=H2D</code>} and rings the doorbell. CP routes each to the copy engine (COPY interface); the copy engine DMAs PS-DDR → PL-DDR4 over FABRIC (HP port + MIG). Transfers: BF16 weight matrix, BF16 activation vector, kernel binary. Host polls <code>instr_ready</code> after each transfer.</li>
+<li><strong>Kernel launch.</strong> Host writes a LAUNCH descriptor {<code>kbin_addr:64</code>, <code>kbin_size:32</code>} and rings the doorbell. CP loads <code>devmem[kbin_addr, kbin_size]</code> into tile IRAM via DMEM (binary-load mini-DMA), then pulses <code>compute_start</code>. Entry point is IRAM[0]; v1 has no runtime kernargs (addresses are compile-baked).</li>
+<li><strong>DMA loads: devmem → SPAD.</strong> The sequencer executes <code>dmu.load.spm</code> instructions; the DMA unit asserts <code>dm_en</code> on the DMEM interface. The interface tile's <code>dm_axi_bridge</code> issues AXI4 INCR bursts on <code>m00_axi</code> (PL-DDR4) and fills SPAD Port A. With the async flag, Port A fills while the sequencer computes on Port B (double-buffer ping-pong; see compute_tile doc). <code>dma_slot_done[slot]</code> signals completion; <code>flush.slot</code> fences.</li>
+<li><strong>MXU/VPU compute.</strong> With data in SPAD, the sequencer dispatches <code>mxu.load.w</code> + <code>mxu.matmul</code> to the MXU (weight-stationary 8×8 systolic) and VPU ops (<code>vpu.rowmax</code>, <code>vpu.exp2</code>, <code>vpu.scale.bcast</code>, <code>vpu.gelu</code>, …) for LayerNorm, attention softmax, and feed-forward on SPAD / ACC. BF16 storage throughout; FP32 accumulation.</li>
+<li><strong>Store + D2H copy.</strong> <code>dmu.store.spm</code> instructions write BF16 results SPAD → devmem over DMEM. On <code>halt</code>, <code>instr_ready</code> asserts. The host then issues a COPY descriptor with <code>dir=D2H</code>; the copy engine DMAs devmem → host buffer over FABRIC. The result is available in the udmabuf region.</li>
+</ol>
+</details>
+<p><strong>Step 1 --- H2D copy.</strong> The host allocates udmabuf regions and copies BF16 weights, the BF16 activation vector, and the kernel binary into them. It then writes COPY descriptors {<code>host_phys:64</code>, <code>dev_addr:32</code>, <code>len:32</code>, <code>dir=H2D</code>} to the CMD window and rings the self-clearing doorbell (<code>slv_reg0[4]</code>). The CP latches each descriptor on the doorbell edge and routes it to the copy engine via the COPY interface (<code>start</code>/<code>done</code>). The copy engine (AXI CDMA) DMAs PS-DDR → PL-DDR4 directly over FABRIC (HP port + MIG); Linux is not in the transfer loop. The host polls <code>instr_ready</code> between transfers. Full COPY descriptor layout and CMD-window register map: <a href="control_plane.html">control_plane</a>.</p>
+<p><strong>Step 2 --- Kernel launch.</strong> The host writes a LAUNCH descriptor {<code>kbin_addr:64</code>, <code>kbin_size:32</code>} and rings the doorbell. The CP loads <code>devmem[kbin_addr, kbin_size]</code> into the compute tile's IRAM via a binary-load mini-DMA over the DMEM interface (new RTL), then pulses <code>compute_start</code>; <code>done</code> = <code>instr_ready</code>. The sequencer begins executing from IRAM[0]. v1 operand addresses are compile-baked as immediates (adjusted by the D4 patch table and <code>pool_base</code>). No runtime kernargs in v1. Details: <a href="control_plane.html">control_plane</a>.</p>
+<p><strong>Step 3 --- DMA loads: devmem to SPAD.</strong> Inside the kernel, <code>dmu.load.spm</code> instructions (with the async flag) cause the DMA unit to assert <code>dm_en</code> on the DMEM interface. The interface tile's <code>dm_axi_bridge</code> issues AXI4 INCR bursts on <code>m00_axi</code> and fills SPAD Port A. With the async flag, Port A fills concurrently while the sequencer computes on Port B (the double-buffer ping-pong pattern). Completion is signalled by <code>dma_slot_done[slot]</code>; <code>flush.slot</code> provides the fence. The DMA unit lives in the compute tile; the interface tile is devmem-only (no buffer logic). DMEM protocol and async slot mechanics: <a href="interface_tile.html">interface_tile</a> and <a href="compute_tile.html">compute_tile</a>.</p>
+<p><strong>Step 4 --- MXU/VPU compute.</strong> With operands in SPAD, the sequencer dispatches the per-layer compute sequence: <code>mxu.load.w</code> then <code>mxu.matmul</code> to the MXU (8×8 weight-stationary systolic array; the load/compute split lets the next weight tile preload while the current tile computes); VPU ops for LayerNorm (<code>vpu.rsqrt</code>, <code>vpu.fma.imm</code>, <code>vpu.scale.col.bcast</code>), attention softmax (<code>vpu.rowmax</code>, <code>vpu.sub.bcast</code>, <code>vpu.scale.imm</code>, <code>vpu.exp2</code>, <code>vpu.rowsum</code>, <code>vpu.div.bcast</code>), and feed-forward GELU (<code>vpu.gelu</code>). BF16 storage throughout; ACC is always FP32. Register load/store ops (<code>acc.store</code>, <code>acc.load</code>) bridge between BF16 SPAD and the FP32 ACC register file at layer boundaries. ISA details: <code>mininpu/isa</code> and <a href="mxu.html">mxu</a>, <a href="vpu.html">vpu</a>.</p>
+<p><strong>Step 5 --- Store and D2H copy.</strong> <code>dmu.store.spm</code> instructions write BF16 results from SPAD back to devmem over DMEM. When <code>halt</code> executes, <code>instr_ready</code> asserts. The host then issues a COPY descriptor with <code>dir=D2H</code>; the copy engine DMAs devmem → the udmabuf host buffer over FABRIC. The result is available in host memory for the next layer's H2D or for the final logit read.</p>
+<h2 id="per-unit-detail">Per-unit detail<a class="headerlink" href="#per-unit-detail" title="Permanent link">&para;</a></h2>
+<p><strong>Table: per-unit mechanics reference: interface names, owning units, and SSOT files.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Interface / unit</strong></th>
+<th><strong>Detail in</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COPY descriptor layout, CMD window, doorbell, <code>instr_ready</code></td>
+<td><a href="control_plane.html">control_plane</a> (<code>command_processor.sv</code>)</td>
+</tr>
+<tr>
+<td>FABRIC path: copy engine, AXI CDMA, HP port, udmabuf</td>
+<td><a href="host_interface.html">host_interface</a></td>
+</tr>
+<tr>
+<td>DMEM protocol: <code>dm_axi_bridge</code>, AXI4 burst, <code>dm_en</code>/<code>dm_ack</code></td>
+<td><a href="interface_tile.html">interface_tile</a></td>
+</tr>
+<tr>
+<td>Async DMA: <code>dma_slot_done</code>, <code>flush.slot</code>, Port A/B ping-pong</td>
+<td><a href="compute_tile.html">compute_tile</a></td>
+</tr>
+<tr>
+<td>MXU systolic array (<code>mxu.load.w</code> + <code>mxu.matmul</code>)</td>
+<td><a href="mxu.html">mxu</a></td>
+</tr>
+<tr>
+<td>VPU pipeline (LayerNorm, softmax, GELU, register load/store)</td>
+<td><a href="vpu.html">vpu</a></td>
+</tr>
+<tr>
+<td>ISA opcodes, encodings, operand fields</td>
+<td><code>mininpu/isa</code> (SSOT)</td>
+</tr>
+<tr>
+<td>ABI register map, COPY/LAUNCH field widths</td>
+<td><code>mininpu/abi.py</code> (SSOT)</td>
+</tr>
+<tr>
+<td>Memory sizes (<code>devmem</code>, IRAM, SPAD), bus widths</td>
+<td><code>npu/src/npu/npu_config_pkg.sv</code></td>
+</tr>
+</tbody>
+</table>
+<p>Numbers owned by code (<code>mininpu/isa</code>, <code>abi.py</code>, <code>npu_config_pkg.sv</code>) are cited above; they are not restated in this integration doc.</p>
+<p><strong>Versioning note.</strong> The host-to-CP interface (write-only CMD window, self-clearing doorbell, <code>instr_ready</code> polling) is invariant across v1/v2/v3. What changes across versions: v1 = single tile, sequential (host-mediated depth-1); v2 = copy engine running concurrently with the compute tile (chip-level concurrency, real command ring, multiple-outstanding + per-command completion); v3 = multi-tile with a work distributor. See <code>docs/charter.md</code> §§4--5, 10.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1224,6 +1465,44 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="architecture.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Architecture">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Architecture
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="control_plane.html" class="md-footer__link md-footer__link--next" aria-label="Next: Control Plane">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Control Plane
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -1251,13 +1530,13 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "/mininpu/", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "/mininpu/assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
   
-      <script src="/mininpu/assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="/mininpu/javascripts/mathjax.js"></script>
+        <script src="../javascripts/mathjax.js"></script>
       
     
   <script

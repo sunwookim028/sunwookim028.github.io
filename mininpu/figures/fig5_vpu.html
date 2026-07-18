@@ -102,7 +102,7 @@
 <div class="wrap">
 <header>
   <h1>mininpu VPU datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 5</span></h1>
-  <p class="sub">LOCKED &middot; fixed-depth vector unit (partial cross-row pipelining: single-source SIMD ops stream; gelu / exp2 / two-source latency-serial) &middot; N=8 lanes (BANKING=8) &middot; one function-select pipeline: {reduce | LUT | SIMD lane-ALU} &middot; VPU=VREG-only &middot; VREG 2r1w async whole-tile-row RF</p>
+  <p class="sub">LOCKED &middot; fixed-depth vector unit (partial cross-row pipelining: single-source SIMD ops stream; gelu / exp2 / two-source latency-serial) &middot; N=8 lanes (BANKING=8) &middot; one function-select pipeline: {reduce | LUT | SIMD lane-ALU} &middot; VPU=VREG-only &middot; VREG 2r1w async RF (LOCKED); whole-tile-row granularity is as-built</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU lane FU / pipeline</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD (memory)</span>
@@ -133,16 +133,17 @@
   <text x="1485" y="42" class="ref" text-anchor="end">550</text>
 
   <!-- =========================================================
-       VREG - vector register file, 2D tile, 32 regs (per-lane banked slices)
+       VREG - vector register file, 32 regs (per-lane banked slices).
+       Design target = flat 1D (owner ruling #385 §5 #1); as-built = 2D tile.
        ========================================================= -->
-  <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG &mdash; 32 &times; [8&times;8] fp32 (8 KiB) &middot; 2r1w async whole-tile-row RF (256-bit) &mdash; LOCKED</text>
+  <text x="40" y="104" class="ti t-mem" font-size="12.5">VREG - flat 1D fp32 RF, 32 regs (design target, rework B) &middot; as-built: 32 &times; [8&times;8] fp32 (8 KiB), 2r1w async whole-tile-row (256-bit)</text>
   <text x="1485" y="104" class="ref" text-anchor="end">510</text>
   <!-- port annotation -->
   <text x="40" y="150" class="d2">rd A · MXU X</text>
   <text x="40" y="170" class="d2">rd B · VPU / LSU</text>
   <text x="40" y="190" class="d2">wr · LSU / VPU</text>
   <rect class="new-o" x="1035" y="112" width="460" height="94" rx="7"/>
-  <text x="1485" y="128" class="badge" text-anchor="end">LOCKED: 2r1w async whole-tile-row RF (256-bit access granularity)</text>
+  <text x="1485" y="128" class="badge" text-anchor="end">LOCKED: 2r1w async RF, conflict-free by temporal separation &middot; as-built granularity: whole tile-row (256-bit)</text>
   <text x="1485" y="144" class="badge" text-anchor="end">2 read + 1 write shared by MXU-X / VPU-lane / LSU</text>
   <text x="1485" y="160" class="badge" text-anchor="end">conflict-free by temporal separation, NOT banking</text>
   <text x="1485" y="176" class="badge" text-anchor="end">2nd write port = sizing option only (tail sub-ops dependency-serial)</text>
@@ -152,7 +153,7 @@
        ========================================================= -->
   <!-- Functional-Unit band outline (horizontal band of FUs) -->
   <rect class="fu-out" x="196" y="256" width="1303" height="404" rx="8"/>
-  <text x="204" y="250" class="ti t-vpu" font-size="12">FUNCTION-SELECT FU  &mdash;  fixed-depth pipeline D (sized at synth, gelu-driven, #217)</text>
+  <text x="204" y="250" class="ti t-vpu" font-size="12">FUNCTION-SELECT FU  -  fixed-depth pipeline D (sized at synth; as-built 0.4.0 gelu-driven, #217)</text>
   <text x="1495" y="250" class="ref" text-anchor="end">520</text>
 
   <!-- cross-row streaming legend (left rail, aligned to stages) -->
@@ -471,7 +472,7 @@
   <h2>Reference numerals &mdash; FIG. 5</h2>
   <ul class="reflist">
     <li><b>500</b> Memory subsystem &mdash; SPAD (256b row, bf16)</li>
-    <li><b>510</b> VREG (32 &times; [8&times;8] fp32, 8 KiB, 2r1w async whole-tile-row)</li>
+    <li><b>510</b> VREG (design target: flat 1D fp32 RF, 32 regs; as-built: 32 &times; [8&times;8] fp32, 8 KiB, 2r1w async whole-tile-row)</li>
     <li><b>510 LOCKED</b> 2r1w async RF, conflict-free by temporal separation (not banking)</li>
     <li class="nw"><b>R_mxu</b> X-stream fp32&rarr;bf16 cast at MXU input (LOCKED, see FIG.1)</li>
     <li><b>520</b> Function-select FU (fixed depth D)</li>

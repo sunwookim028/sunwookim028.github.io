@@ -85,6 +85,8 @@
   .array-out{fill:none; stroke:var(--mxu); stroke-width:2.4;}
   .castcol{fill:var(--ext-f); stroke:var(--ext); stroke-width:1.2;}
   .vregcol{fill:var(--mem-f); stroke:var(--mem); stroke-width:1.2;}
+  /* x_matrix: the bf16 X staging buffer between the CAST and the west edge */
+  .stgcol{fill:color-mix(in srgb, var(--mxu) 10%, var(--chip)); stroke:var(--mxu); stroke-width:1.4;}
   .accbank{fill:var(--mem-f); stroke:var(--mem); stroke-width:1.4;}
   .accslot{fill:color-mix(in srgb, var(--mxu, var(--mxu)) 12%, var(--chip)); stroke:var(--mxu); stroke-width:.9;}
   .card{border:1px solid var(--line); border-radius:10px; background:var(--chip); padding:14px 16px;}
@@ -108,11 +110,11 @@
 <div class="wrap">
 <header>
   <h1>mininpu MXU datapath <span style="font-weight:400;color:var(--muted);font-size:15px">&mdash; FIG. 7</span></h1>
-  <p class="sub">weight-stationary systolic array (RS-hybrid: W stationary, X row-streamed) &middot; N=8 &rarr; 8&times;8 = 64 PE &middot; bf16&times;bf16&rarr;fp32 MAC &middot; ACC = 8 per-column banks &times; depth 2 (fp32) &middot; X streamed from VREG (cast at boundary, LOCKED) &middot; N=8 baseline; datapath parameterized (N=16 = ISA-invariant sweep)</p>
+  <p class="sub">weight-stationary systolic array (RS-hybrid: W stationary, X row-streamed) &middot; N=8 &rarr; 8&times;8 = 64 PE &middot; bf16&times;bf16&rarr;fp32 MAC &middot; ACC = 8 per-column banks &times; depth 2 (fp32) &middot; X burst-read from VREG (cast at the VREG read port &rarr; bf16 x_matrix staging buffer, LOCKED) &middot; N=8 baseline; datapath parameterized (N=16 = ISA-invariant sweep)</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>PE / systolic array / ACC compute</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>VREG / SPAD / ACC storage (memory)</span>
-    <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>CAST fp32&rarr;bf16 boundary</span>
+    <span><i class="sw" style="background:var(--ext-f);border-color:var(--ext)"></i>CAST fp32&rarr;bf16 at VREG rd port</span>
     <span>&#9642; active weight buf &middot; &#9643; inactive weight buf</span>
   </div>
 </header>
@@ -166,42 +168,74 @@
   <text x="1176" y="358" class="d2" text-anchor="middle" style="font-size:8.5px">psum=0</text>
 
   <!-- =========================================================
-       VREG  (X source, fp32)  +  CAST 8-lane fp32 -> bf16
+       VREG (X source, fp32) -> CAST 8-lane fp32 -> bf16 (at the VREG
+       read port) -> x_matrix bf16 staging buffer -> array west edge.
+       The CAST is NOT adjacent to the array: the x_matrix staging
+       buffer sits between them (mxu.sv: fp32_to_bf16 is instanced on
+       vreg_rd_data; S_LOAD_X flops the post-cast row into x_matrix;
+       S_RUN streams the W-edge out of x_matrix, never out of VREG).
        ========================================================= -->
-  <rect class="vregcol" x="130" y="372" width="176" height="512" rx="6"/>
-  <text x="140" y="392" class="ti t-mem" font-size="12">VREG (fp32)</text>
-  <text x="140" y="410" class="d2">X operand source</text>
-  <text x="140" y="426" class="d2">2D tile, per-row</text>
-  <text x="140" y="620" class="d2" font-weight="700" fill="var(--mem)">R_mxu read port</text>
-  <text x="140" y="635" class="d2">stream 1 row / cyc &rarr;</text>
-  <text x="140" y="820" class="d2" font-weight="700" fill="var(--mem)">VREG write port (LSU)</text>
-  <text x="140" y="835" class="d2">&larr; acc.store (fp32, LSU)</text>
-  <text x="306" y="370" class="ref" text-anchor="end">730</text>
+  <rect class="vregcol" x="20" y="372" width="176" height="512" rx="6"/>
+  <text x="30" y="392" class="ti t-mem" font-size="12">VREG (fp32)</text>
+  <text x="30" y="410" class="d2">X operand source</text>
+  <text x="30" y="426" class="d2">as-built 2D tile, per-row</text>
+  <text x="30" y="620" class="d2" font-weight="700" fill="var(--mem)">R_mxu read port</text>
+  <text x="30" y="635" class="d2">read 1 row / cyc &rarr;</text>
+  <text x="30" y="650" class="d2" style="font-size:9px">busy for N=8 cyc only</text>
+  <text x="30" y="820" class="d2" font-weight="700" fill="var(--mem)">VREG write port (LSU)</text>
+  <text x="30" y="835" class="d2">&larr; acc.store (fp32, LSU)</text>
+  <text x="196" y="370" class="ref" text-anchor="end">730</text>
 
-  <!-- CAST band -->
-  <rect class="castcol" x="316" y="372" width="130" height="512" rx="6"/>
-  <text x="325" y="392" class="ti t-ext" font-size="11.5">CAST 8-lane</text>
-  <text x="325" y="408" class="d2">fp32 &rarr; bf16</text>
-  <rect class="new-o" x="320" y="416" width="122" height="40" rx="5"/>
-  <text x="326" y="434" class="badge">LOCKED = cast</text>
-  <text x="326" y="448" class="badge">at the boundary</text>
-  <text x="325" y="500" class="d2" style="font-size:9.5px">PEs stay</text>
-  <text x="325" y="513" class="d2" style="font-size:9.5px">bf16&times;bf16;</text>
-  <text x="325" y="526" class="d2" style="font-size:9.5px">fp32 accumulate</text>
+  <!-- CAST band : sits ON the VREG read port, upstream of x_matrix -->
+  <rect class="castcol" x="208" y="372" width="110" height="512" rx="6"/>
+  <text x="216" y="392" class="ti t-ext" font-size="11.5">CAST 8-lane</text>
+  <text x="216" y="408" class="d2">fp32 &rarr; bf16</text>
+  <rect class="new-o" x="212" y="416" width="102" height="40" rx="5"/>
+  <text x="218" y="434" class="badge">LOCKED = cast</text>
+  <text x="218" y="448" class="badge">at VREG rd port</text>
+  <text x="216" y="500" class="d2" style="font-size:9.5px">PEs stay</text>
+  <text x="216" y="513" class="d2" style="font-size:9.5px">bf16&times;bf16;</text>
+  <text x="216" y="526" class="d2" style="font-size:9.5px">fp32 accumulate</text>
   <!-- 8 cast lane ticks -->
-  <rect class="regbar" x="322" y="540" width="118" height="4" rx="1"/>
-  <text x="325" y="558" class="d2" style="font-size:9px">lane0 &rarr; row0</text>
-  <text x="325" y="572" class="d2" style="font-size:9px">lane1 &rarr; row1</text>
-  <text x="325" y="586" class="d2" style="font-size:9px">&#8942;  (one per</text>
-  <text x="325" y="600" class="d2" style="font-size:9px">systolic row)</text>
-  <text x="325" y="614" class="d2" style="font-size:9px">lane7 &rarr; row7</text>
-  <text x="446" y="370" class="ref" text-anchor="end">740</text>
+  <rect class="regbar" x="214" y="540" width="98" height="4" rx="1"/>
+  <text x="216" y="558" class="d2" style="font-size:9px">lane0 &rarr; row0</text>
+  <text x="216" y="572" class="d2" style="font-size:9px">lane1 &rarr; row1</text>
+  <text x="216" y="586" class="d2" style="font-size:9px">&#8942;  (one per</text>
+  <text x="216" y="600" class="d2" style="font-size:9px">systolic row)</text>
+  <text x="216" y="614" class="d2" style="font-size:9px">lane7 &rarr; row7</text>
+  <text x="318" y="370" class="ref" text-anchor="end">740</text>
 
-  <!-- VREG R_mxu -> CAST -->
-  <path class="fm" d="M306,628 L316,628"/>
-  <text x="240" y="600" class="lbl-m">R_mxu fp32 stream</text>
+  <!-- x_matrix : bf16 staging buffer between the CAST and the west edge -->
+  <rect class="stgcol" x="330" y="372" width="116" height="512" rx="6"/>
+  <text x="338" y="392" class="ti t-mxu" font-size="11">x_matrix</text>
+  <text x="338" y="408" class="d2" style="font-size:9.5px">X staging buffer</text>
+  <text x="338" y="422" class="d2" style="font-size:9.5px">N&times;N bf16 flops</text>
+  <rect class="new-o" x="334" y="432" width="108" height="40" rx="5"/>
+  <text x="340" y="450" class="badge">post-cast bf16</text>
+  <text x="340" y="464" class="badge">NOT fp32</text>
+  <text x="338" y="500" class="d2" style="font-size:9px">S_LOAD_X fills it</text>
+  <text x="338" y="513" class="d2" style="font-size:9px">in exactly N=8 cyc,</text>
+  <text x="338" y="526" class="d2" style="font-size:9px">then &rarr; S_RUN.</text>
+  <text x="338" y="548" class="d2" style="font-size:9px">VREG is RELEASED</text>
+  <text x="338" y="561" class="d2" style="font-size:9px">after that burst:</text>
+  <text x="338" y="574" class="d2" style="font-size:9px">S_RUN streams the</text>
+  <text x="338" y="587" class="d2" style="font-size:9px">W-edge from HERE,</text>
+  <text x="338" y="600" class="d2" style="font-size:9px">not from VREG.</text>
+  <text x="338" y="622" class="d2" style="font-size:9px">&rArr; VREG conflicts</text>
+  <text x="338" y="635" class="d2" style="font-size:9px">avoided by TEMPORAL</text>
+  <text x="338" y="648" class="d2" style="font-size:9px">separation, not by</text>
+  <text x="338" y="661" class="d2" style="font-size:9px">banking.</text>
+  <text x="446" y="370" class="ref" text-anchor="end">745</text>
 
-  <!-- CAST -> array west edge : 8 rows, one per cycle -->
+  <!-- VREG R_mxu (fp32) -> CAST -->
+  <path class="fm" d="M196,628 L208,628"/>
+  <text x="100" y="600" class="lbl-m" text-anchor="middle">R_mxu fp32</text>
+
+  <!-- CAST (bf16) -> x_matrix : S_LOAD_X, 1 row / cycle, N=8 cycles -->
+  <path class="fx" d="M318,628 L330,628"/>
+  <text x="324" y="700" class="lbl-m" text-anchor="middle" transform="rotate(-90 324 700)">S_LOAD_X: bf16, 1 row / cyc</text>
+
+  <!-- x_matrix -> array west edge : 8 rows, one per cycle (S_RUN) -->
   <path class="fx" d="M446,404 L456,404"/>
   <path class="fx" d="M446,468 L456,468"/>
   <path class="fx" d="M446,532 L456,532"/>
@@ -210,7 +244,8 @@
   <path class="fx" d="M446,724 L456,724"/>
   <path class="fx" d="M446,788 L456,788"/>
   <path class="fx" d="M446,852 L456,852"/>
-  <text x="360" y="700" class="lbl-m">bf16 X, one row / cycle &rarr; W-edge</text>
+  <text x="338" y="700" class="d2" style="font-size:9px">S_RUN &rarr; W-edge:</text>
+  <text x="338" y="713" class="d2" style="font-size:9px">bf16 X, 1 row / cyc</text>
 
   <!-- =========================================================
        8 x 8 SYSTOLIC PE ARRAY
@@ -314,7 +349,7 @@
   <!-- COL 0 psum N->S (representative full column) -->
   <polyline class="fp" points="504,366 504,436 504,500 504,564 504,628 504,692 504,756 504,820 504,884"/>
 
-  <!-- other rows: west-edge already fed by cast arrows; other cols: south drain arrows below -->
+  <!-- other rows: west-edge already fed by the x_matrix arrows; other cols: south drain arrows below -->
 
   <!-- =========================================================
        COLUMN DRAIN -> ACC  (8 columns)
@@ -422,12 +457,12 @@
   <!-- =========================================================
        PORTS + LATENCY summary (bottom-left)
        ========================================================= -->
-  <rect class="inner" x="130" y="1078" width="700" height="98" rx="6" style="opacity:1;stroke:var(--mxu)"/>
-  <text x="142" y="1098" class="ti t-mxu" font-size="11">Ports &amp; timing</text>
-  <text x="142" y="1116" class="d2">&bull; SPAD-read: weights only, LOW rate (load.w) + bias row for acc.init</text>
-  <text x="142" y="1132" class="d2">&bull; VREG-read R_mxu: X stream (fp32 &rarr; cast &rarr; bf16 W-edge, 1 row/cyc)</text>
-  <text x="142" y="1148" class="d2">&bull; VREG-write (LSU): acc.store drains ACC &rarr; VREG (fp32 lossless)</text>
-  <text x="142" y="1164" class="d2">&bull; latency = N-fill(8) + K-stream, fixed &middot; matmul NONBLOCKING &middot; FA output O lives in VREG (ACC stays depth 2)</text>
+  <rect class="inner" x="20" y="1078" width="810" height="98" rx="6" style="opacity:1;stroke:var(--mxu)"/>
+  <text x="32" y="1098" class="ti t-mxu" font-size="11">Ports &amp; timing</text>
+  <text x="32" y="1116" class="d2">&bull; SPAD-read: weights only, LOW rate (load.w) + bias row for acc.init</text>
+  <text x="32" y="1132" class="d2">&bull; VREG-read R_mxu: X burst (fp32 &rarr; cast at the read port &rarr; bf16 x_matrix, 1 row/cyc, N=8 cyc); W-edge then streams from x_matrix</text>
+  <text x="32" y="1148" class="d2">&bull; VREG-write (LSU): acc.store drains ACC &rarr; VREG (fp32 lossless)</text>
+  <text x="32" y="1164" class="d2">&bull; latency = N-fill(8) + K-stream, fixed &middot; matmul NONBLOCKING &middot; FA output O lives in VREG (ACC stays depth 2)</text>
 </svg>
 </div>
 
@@ -438,7 +473,8 @@
     <li><b>710</b> weight double-buffer load network (shift down columns)</li>
     <li><b>720</b> per-PE weight double-buffer (active / inactive + promote)</li>
     <li><b>730</b> VREG (fp32) &mdash; X source, R_mxu rd / LSU wr (acc.store)</li>
-    <li><b>740</b> CAST 8-lane fp32 &rarr; bf16 (boundary)</li>
+    <li><b>740</b> CAST 8-lane fp32 &rarr; bf16, at the VREG R_mxu read port</li>
+    <li><b>745</b> <code>x_matrix</code>: N&times;N bf16 X staging buffer (post-cast); the W-edge streams from here, not from VREG</li>
     <li><b>750</b> 8&times;8 = 64 PE systolic array</li>
     <li><b>751</b> PE MAC (bf16&times;bf16 &rarr; fp32 partial, + psum_in)</li>
     <li><b>752</b> PE X pass-through (W &rarr; E, registered)</li>
@@ -454,8 +490,9 @@
 <div class="card" style="margin-top:16px">
   <h2>MXU design notes (locked)</h2>
   <ul style="margin:0;padding-left:18px;columns:2;column-gap:26px;font-size:12px;line-height:1.5">
-    <li><b>X source = VREG.</b> X streams from <code>VREG</code> (fp32) via the <code>R_mxu</code> read port; SPAD is weight-only (plus the acc.init bias row).</li>
-    <li><b>fp32-X into bf16 PEs = CAST at the boundary (LOCKED).</b> An explicit 8-lane <code>fp32 &rarr; bf16</code> CAST at the west edge; PEs stay <code>bf16&times;bf16</code>, accumulation stays fp32.</li>
+    <li><b>X source = VREG.</b> X is burst-read from <code>VREG</code> (fp32) via the <code>R_mxu</code> read port; SPAD is weight-only (plus the acc.init bias row).</li>
+    <li><b>fp32-X into bf16 PEs = CAST at the VREG read port (LOCKED).</b> An explicit 8-lane <code>fp32 &rarr; bf16</code> CAST sits <b>at the <code>R_mxu</code> read port</b>, upstream of the bf16 <code>x_matrix</code> staging buffer (<b>not</b> at the systolic-array west edge and <b>not</b> at the PE input). The PEs receive bf16 already staged in <code>x_matrix</code> and multiply <code>bf16&times;bf16</code>; accumulation stays fp32.</li>
+    <li><b><code>x_matrix</code> = bf16 X staging buffer.</b> <code>S_LOAD_X</code> fills the N&times;N buffer from the post-cast read port in exactly N=8 cycles, then unconditionally enters <code>S_RUN</code>, which streams the west edge <b>out of <code>x_matrix</code></b>. VREG is therefore touched only for that bounded N-cycle burst: that <b>temporal separation</b> (not banking) is what avoids VREG port conflicts, and it is what the compiler scheduling rule relies on.</li>
     <li><b>Output drains to ACC.</b> Each systolic column drains its partial sums into its own ACC bank; <code>acc.store</code> is the only path back to VREG (fp32 lossless, driven by the <b>LSU</b>).</li>
     <li><b>ACC = 8 banks &times; depth 2.</b> One bank per column, double-buffered fp32, MXU-owned. <code>accum</code> folds K-tiles into the same ACC (serialized); <code>causal</code> masks the upper triangle. FA output <code>O</code> lives in VREG, so ACC stays depth 2.</li>
     <li><b>mxu.acc.init.</b> Broadcast-preloads a SPAD bias row into ALL rows of ACC before a matmul, so matmul accumulates onto bias.</li>

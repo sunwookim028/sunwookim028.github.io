@@ -1,0 +1,1891 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/reference/control_plane.html">
+      
+      
+        <link rel="prev" href="data_movement.html">
+      
+      
+        <link rel="next" href="host_interface.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Control Plane - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mininpu-control-plane" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Control Plane
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 2 Microarch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 3 Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 4 DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="control_plane.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#command-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command processor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-descriptor-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two descriptor kinds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descriptor-word-map-decided-32-bytes-8u32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor word map (DECIDED, 32 bytes / 8×u32)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#completion-and-backpressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Completion and backpressure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abi-78-cutover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ABI 7→8 cutover
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inter-unit-interface-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inter-unit interface names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-precedents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design precedents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-items-and-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open items and roadmap
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="host_interface.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#command-processor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command processor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Command path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-two-descriptor-kinds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two descriptor kinds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#descriptor-word-map-decided-32-bytes-8u32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor word map (DECIDED, 32 bytes / 8×u32)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#completion-and-backpressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Completion and backpressure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#abi-78-cutover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ABI 7→8 cutover
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inter-unit-interface-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inter-unit interface names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-precedents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design precedents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-items-and-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open items and roadmap
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/control_plane.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose and the deck bullets were BOTH carried over in
+     source order; the deck bullets sit in the collapsed "Slide summary"
+     blocks. Figures are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-control-plane">mininpu: Control Plane<a class="headerlink" href="#mininpu-control-plane" title="Permanent link">&para;</a></h1>
+<p><strong>Status.</strong> <strong>DECIDED</strong> (this doc): the <code>command_processor.sv</code> factoring, COPY/LAUNCH descriptor kinds and v1 active fields, the concrete descriptor byte-offset map (32 bytes / 8×u32, W0..W7), the <code>kernarg_ptr</code> and <code>grid</code> fields as reserved for [serving]/[v3], the IRAM-load-from-devmem RTL requirement, the ABI 7→8 cutover, and the function-named interfaces (LAUNCH / COPY / DMEM / FABRIC). <strong>OPEN</strong>: the device/compiler kernarg-buffer layout ([serving]) is opaque to this device.</p>
+<p>The <strong>control plane</strong> is the device-side front-end that translates host commands into tile actions. It is realized by a persistent hardware module, <code>command_processor.sv</code>, which absorbs all of the today-scattered command-handling logic. The host API initiates every command (kernel launches and host↔device memcpys) through the command processor in <strong>all</strong> versions, using the same write-only CMD window and self-clearing doorbell over AXI4-Lite. <strong>v1</strong> is single-tile, chip-level sequential (charter §4): the host issues one command at a time (COPY then LAUNCH). Within-tile async DMA with <code>dma_slot_done</code> and <code>flush.slot</code> is a v1 feature (the copy engine and compute tile do not overlap at the chip level in v1; the FABRIC interface is single-master). <strong>v2</strong> adds chip-level concurrency: the copy engine runs concurrently with the compute tile (the async-memcpy API: COPY does not block a concurrent LAUNCH). The CMD window is kept; COPY requests become asynchronous. <strong>v3</strong> adds multi-tile support with a work distributor. The <strong>[serving]</strong> tag (KV-cache / paging / FlashAttention) is a <em>capability axis</em> orthogonal to the v1/v2/v3 hardware-scaling axis: these are ISA/ABI-reserved features, not a version number. An on-chip MCU is an <em>orthogonal</em> complexity lever: introduce one when FSM control state warrants simplification, not as a version milestone. This document covers the command path, the two descriptor kinds (COPY and LAUNCH), the concrete descriptor byte-offset map, the completion and backpressure protocol, and the ABI_VERSION 7→8 cutover. It records the industry precedent corpus in the permanent design record. The authoritative register map is <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>); this document cites it and does not restate it.</p>
+<h2 id="command-processor">Command processor<a class="headerlink" href="#command-processor" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>Persistent hardware unit:</strong> <code>command_processor.sv</code> (v1/v2/v3). Absorbs: doorbell flop + auto-clear, arbiter/dispatch FSM, compute start/done handshake. DMA/MT sub-FSMs stay in their tiles; CP only drives <code>*_start</code>, consumes <code>*_done</code>.</li>
+<li><strong>v1 (single tile, chip-sequential):</strong> host API initiates commands via the CP over AXI4-Lite (CMD window + doorbell). Within-tile async DMA already v1. NVDLA / Google TPU v1 precedent: §7.</li>
+<li><strong>v2 (chip-level concurrency):</strong> copy engine | compute tile; COPY becomes async (async-memcpy API); CMD window kept. Control MCU: orthogonal option, not the defining feature.</li>
+<li><strong>v3 (multi-tile):</strong> work distributor maps commands to multiple compute tiles.</li>
+<li><strong>LAUNCH interface:</strong> <code>start</code>/<code>done</code> to compute tile. <strong>COPY interface:</strong> <code>start</code>/<code>done</code> to copy engine.</li>
+</ul>
+</details>
+<p>The command processor is a <strong>persistent device-side hardware unit</strong>, factored into its own module <code>command_processor.sv</code>. It absorbs all of the logic that is today scattered across the AXI4-Lite slave: the doorbell flop and auto-clear (<code>npu_slave_axi_lite.v</code>), the arbiter and dispatch always-block (<code>npu.sv</code> lines 344--418: <code>latched_mode</code>, <code>*_running</code>/<code>*_start</code>, the route case, <code>instr_ready_w</code>), and the compute start/done handshake (<code>compute_ctrl.sv</code>). DMA and MT sub-FSMs remain in their own tiles; the CP only drives <code>*_start</code> and consumes <code>*_done</code>.</p>
+<p>The host API initiates every command (kernel launches and host↔device memcpys) via the command processor in <strong>all</strong> versions. The CP module is <strong>invariant</strong>; what changes across versions is chip-level capability:</p>
+<ul>
+<li><strong>v1 (single tile, chip-sequential):</strong> the host C/C++ runtime writes packed descriptors into the CMD window and asserts the doorbell over AXI4-Lite. The chip executes one command at a time (depth-1, host-mediated sequencing). Within-tile async DMA (<code>dma_slot_done</code>/<code>flush.slot</code>) is already a v1 feature. NVDLA and Google TPU v1 validate this starting point (§7): NVDLA "headless" (a CPU manages the unit over a config bus, double-buffering config to overlap layers); TPU v1 (ISCA 2017: a passive PCIe coprocessor where the host pushes instructions into a FIFO, described as "closer to an FPU coprocessor than a GPU").</li>
+<li><strong>v2 (chip-level concurrency):</strong> the copy engine runs concurrently with the compute tile (overlapping memcpy and kernel execution). The CMD window is kept; COPY requests become asynchronous so copy overlaps compute (the async-memcpy API). An on-chip MCU is an <em>orthogonal</em> option: introduce one (PicoRV32 / VexRiscv candidate) when CP control state complexity warrants simplification; the MCU is not what defines v2. Tenstorrent Blackhole illustrates the value of on-chip RISC-V cores for data-movement orchestration at scale; whether to adopt that pattern is a complexity/scalability judgement, not a versioning milestone.</li>
+<li><strong>v3 (multi-tile):</strong> a work distributor maps commands to multiple compute tiles, routing a 2D grid of work.</li>
+</ul>
+<p>The proposed <strong>port list</strong> for <code>command_processor.sv</code>:</p>
+<ul>
+<li>AXI4-Lite slave port: the host writes it in all versions (CMD window write, doorbell write, <code>instr_ready</code>/<code>dma_slot_done</code> read). If an MCU is added it lives <em>inside</em> the command processor (the FSM is replaced or augmented by the MCU); it does not drive this port from outside.</li>
+<li><strong>LAUNCH interface</strong> (to compute tile): <code>compute_start</code>, <code>compute_done</code> (= <code>instr_ready</code>), and the decoded LAUNCH descriptor (<code>kbin_addr[63:0]</code>, <code>kbin_size[31:0]</code>).</li>
+<li><strong>COPY interface</strong> (to host interface / copy engine): <code>dma_start</code>, <code>dma_done</code>, and the decoded COPY descriptor (<code>host_phys[63:0]</code>, <code>dev_addr[31:0]</code>, <code>len[31:0]</code>, <code>dir[1:0]</code>).</li>
+<li>Device memory read port (for IRAM binary load, devmem→IRAM pre-launch).</li>
+<li><code>instr_ready</code> and <code>dma_slot_done</code> aggregation (from tiles, exposed as RO CSRs over the AXI4-Lite slave).</li>
+</ul>
+<h2 id="command-path">Command path<a class="headerlink" href="#command-path" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Host writes one <strong>encoded descriptor</strong> (32 bytes / 8×u32) into the write-only CMD window (<code>W0..W7</code>), then asserts the doorbell (<code>slv_reg0[4]</code>).</li>
+<li>CP <strong>latches the entire window atomically on the doorbell edge</strong> and decodes: COPY (<code>OPC</code>=0) or LAUNCH (<code>OPC</code>=1).</li>
+<li><strong>LAUNCH:</strong> CP loads the kernel binary from device memory into IRAM (devmem→IRAM, always-load in v1, NEW RTL), then pulses <code>compute_start</code> (LAUNCH interface).</li>
+<li><strong>COPY:</strong> CP drives the copy engine command port (COPY interface) with {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>}.</li>
+<li>Completion: poll <code>instr_ready</code> (all-idle) + <code>dma_slot_done</code> (async DMA). Backpressure: host API returns <code>-EBUSY</code> if not idle.</li>
+</ul>
+</details>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>cp-cmdpath</code></p>
+<p><img alt="cp-cmdpath" src="../figures/tikz/cp-cmdpath.svg" /></p>
+</div>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>cp-cmdpath</code></p>
+<p><img alt="cp-cmdpath" src="../figures/tikz/cp-cmdpath.svg" /></p>
+<p>Command path: the host writes an encoded descriptor into the write-only CMD window (32 bytes / 8×u32, depth-1) and rings the self-clearing doorbell; the command processor (<code>command_processor.sv</code>) latches and decodes on the doorbell edge, routes by kind: LAUNCH to the compute tile (LAUNCH interface) or COPY to the copy engine (COPY interface). The host polls <code>instr_ready</code> and <code>dma_slot_done</code> as RO registers over the same AXI4-Lite port. Register map owned by <code>mininpu/abi.py</code>.</p>
+</div>
+<p>The host drives the device over <strong>AXI4-Lite</strong>: it writes one packed command descriptor (32 bytes / 8×u32) into the write-only CMD window (<code>W0..W7</code>) and then asserts the <strong>self-clearing doorbell</strong> (<code>slv_reg0[4]</code>, <code>DOORBELL_BIT</code> in <code>abi.py</code>). The CP <strong>latches the entire window atomically on the doorbell edge</strong>, so the host may only have one outstanding command at a time; the next command must wait until <code>instr_ready</code> is asserted.</p>
+<p>On decoding a <strong>LAUNCH</strong>, the CP (1) reads the kernel binary from device memory (devmem byte address <code>kbin_addr</code>, length <code>kbin_size</code>) into the compute tile's IRAM (entry point = IRAM[0]), always loading on every LAUNCH in v1 (no resident-skip), then (2) pulses <code>compute_start</code> over the LAUNCH interface. This devmem→IRAM load is <strong>new RTL</strong>: today the sequencer jumps into already-resident IRAM; the CP will need a small pre-launch mini-DMA and a mux over who drives <code>dm_addr</code> during the load phase.</p>
+<p>On decoding a <strong>COPY</strong>, the CP drives the copy-engine command port over the COPY interface with {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>}; the copy engine (AXI CDMA) moves data host memory ↔ device memory directly over the AXI FABRIC (Linux not in the transfer loop, SMMU bypass via udmabuf phys-direct).</p>
+<p>Completion is host-pollable via the same AXI4-Lite port: <code>instr_ready</code> (RO, 0x04 in <code>abi.py</code>) and <code>dma_slot_done</code> (RO, 0x20). <strong>Backpressure:</strong> the host API reads <code>instr_ready</code> before each command and returns <code>-EBUSY</code> if the device is not ready, replacing the former silent-drop. Polling in v1; a UIO interrupt (when <code>instr_ready</code> rises) is an additive later feature.</p>
+<h2 id="the-two-descriptor-kinds">The two descriptor kinds<a class="headerlink" href="#the-two-descriptor-kinds" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>COPY</strong> (<code>OPC</code>=0): {<code>host_phys</code>:64, <code>dev_addr</code>:32, <code>len</code>:32, <code>dir</code>:2}. Subsumes old WRITE_BRAM / READ_BRAM / WRITE_IRAM.</li>
+<li><strong>LAUNCH</strong> (<code>OPC</code>=1) v1 active fields: {<code>kbin_addr</code>:64, <code>kbin_size</code>:32}. CP loads devmem→IRAM, then pulses <code>compute_start</code>.</li>
+<li><strong>v1 has NO runtime kernargs.</strong> Operand addresses are compile-baked as immediates; adjusted at launch by the grid-linear launch patch (<code>abi.py</code> D4): the compiler emits placeholder immediates and a patch table after the program; the runtime IRAM-patches the grid-linear values in place at launch.</li>
+<li><code>kernarg_ptr</code>:64 is <em>reserved</em> [serving] (HSA kernarg_address style, future devmem kernarg buffer). <code>grid_x/y</code> are <em>reserved</em> [v3]. [serving] is a <em>capability axis</em> (KV-cache/FlashAttention), not a version.</li>
+<li>HSA AQL <code>kernel_dispatch</code> + NVMe SQE shape: same two-kind model justifies the field assignments.</li>
+</ul>
+</details>
+<p>Two kinds of command descriptor ride the CMD window; the <code>OPC</code> bits in <code>W0</code> distinguish them:</p>
+<ul>
+<li><strong>COPY (<code>OPC</code>=0).</strong> carries {<code>host_phys</code>:64, <code>dev_addr</code>:32, <code>len</code>:32, <code>dir</code>:4}. The <code>dir</code> field (<code>W0[7:4]</code>) distinguishes H2D (host→device DRAM) and D2H (device DRAM→host); the binary load into IRAM is no longer a separate COPY kind but is instead executed by the CP's own devmem→IRAM loader during a LAUNCH. The <code>host_phys</code> is the 64-bit physical address of the udmabuf buffer (SMMU bypass; the host writes the udmabuf <code>dma_addr</code> here). This subsumes the old <code>WRITE_BRAM</code>, <code>READ_BRAM</code>, and <code>WRITE_IRAM</code> modes and their per-field CSRs (<code>addr_devmem</code>, <code>addr_ram</code>, <code>length</code>).</li>
+<li><strong>LAUNCH (<code>OPC</code>=1).</strong> The v1 <strong>active</strong> fields are:<ul>
+<li><code>kbin_addr</code>:64 --- device-memory byte base address of the kernel binary.</li>
+<li><code>kbin_size</code>:32 --- size of the kernel binary in bytes.
+Kernel identity is this direct devmem reference (base+size); not a slot index, not a hardcoded kernel type, not a registry. On LAUNCH the CP loads devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into the tile IRAM (entry = IRAM[0]), then pulses <code>compute_start</code>. Always-load in v1; no resident-skip.
+<strong>v1 has no runtime kernargs.</strong> Operand device-memory addresses are compile-baked into the binary as immediates and adjusted at launch by the grid-linear launch patch (<code>abi.py</code> section D4): the compiler emits placeholder immediates and a patch table appended after the program; at launch the runtime IRAM-patches the grid-linear values in place. The only runtime scalar-arg path (<code>kernel_arg</code> CSRs feeding <code>loop.begin.csr</code> 0x55) is [serving]-RESERVED, not v1.
+The <code>kernarg_ptr</code>:64 field (<code>W4..W5</code>) is <strong>reserved [serving]</strong>: a spec-forward slot for a future devmem kernarg buffer (HSA <code>kernarg_address</code> style, opaque layout owned by the compiler), unused in v1. The <code>grid_x/y</code> fields (<code>W6..W7</code>) are <strong>reserved [v3]</strong>: for future 2D multi-tile work distribution, unused in v1 (single tile = degenerate grid). The <strong>[serving]</strong> tag is a capability axis (KV-cache / paging / FlashAttention) orthogonal to the v1/v2/v3 hardware-scaling axis: these are ISA/ABI-reserved features, not a version number. The device/compiler kernarg-buffer layout is [serving] and opaque to the device.</li>
+</ul>
+</li>
+</ul>
+<p>The two-kind model matches the shape used by HSA AQL (<code>kernel_dispatch</code> packet: <code>kernel_object</code> handle + <code>kernarg_address</code> + grid/workgroup + <code>completion_signal</code>) and NVMe SQE (two submission queue entry kinds with a common header + opcode).</p>
+<h2 id="descriptor-word-map-decided-32-bytes-8u32">Descriptor word map (DECIDED, 32 bytes / 8×u32)<a class="headerlink" href="#descriptor-word-map-decided-32-bytes-8u32" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>32 bytes / 8×u32, little-endian, write-only.</strong> CMD window kept in v1 and v2; v2 makes COPY async (copy engine | compute tile).</li>
+<li><strong>W0 (shared header):</strong> <code>OPC[3:0]</code> (0=COPY, 1=LAUNCH); <code>DIR/TGT[7:4]</code> (COPY: 0=H2D, 1=D2H); <code>[31:8]</code> reserved.</li>
+<li><strong>COPY payload:</strong> W1--2 = <code>host_phys[63:0]</code>; W3 = <code>dev_addr[31:0]</code>; W4 = <code>len[31:0]</code>; W5..W7 reserved.</li>
+<li><strong>LAUNCH payload:</strong> W1--2 = <code>kbin_addr[63:0]</code>; W3 = <code>kbin_size[31:0]</code>; W4--5 = <code>kernarg_ptr[63:0]</code> [serving]; W6--7 = <code>grid_x/y</code> [v3].</li>
+<li>SSOT: <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>).</li>
+</ul>
+</details>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>cp-descriptor</code></p>
+<p><img alt="cp-descriptor" src="../figures/tikz/cp-descriptor.svg" /></p>
+</div>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>cp-descriptor</code></p>
+<p><img alt="cp-descriptor" src="../figures/tikz/cp-descriptor.svg" /></p>
+<p>COPY and LAUNCH descriptor word maps (W0..W7, 32 bytes, little-endian). Both share W0 (header: <code>OPC[3:0]</code>, <code>DIR/TGT[7:4]</code>). COPY carries <code>host_phys</code> (W1--W2), <code>dev_addr</code> (W3), <code>len</code> (W4), W5--W7 reserved; LAUNCH carries <code>kbin_addr</code> (W1--W2), <code>kbin_size</code> (W3), <code>kernarg_ptr</code> (W4--W5, reserved [serving]), <code>grid_x/y</code> (W6--W7, reserved [v3]). SSOT: <code>mininpu/abi.py</code>.</p>
+</div>
+<p>The descriptor word layout is <strong>DECIDED</strong>: 32 bytes / 8×u32 (<code>W0..W7</code>), little-endian, write-only. The CMD window is kept in both v1 and v2; the [v2] change is making COPY async (copy engine | compute tile), not a transport change.</p>
+<p><strong>Field legend --- COPY descriptor.</strong></p>
+<p><strong>Table: COPY descriptor word map (W0..W7, 32 bytes).</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Bits</th>
+<th>Word</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPC</code></td>
+<td>4</td>
+<td>W0[3:0]</td>
+<td>Opcode: 0 = COPY</td>
+</tr>
+<tr>
+<td><code>DIR/TGT</code></td>
+<td>4</td>
+<td>W0[7:4]</td>
+<td>Direction: 0 = H2D (host→device), 1 = D2H</td>
+</tr>
+<tr>
+<td>(reserved)</td>
+<td>24</td>
+<td>W0[31:8]</td>
+<td>Write zero</td>
+</tr>
+<tr>
+<td><code>host_phys</code></td>
+<td>64</td>
+<td>W1--W2</td>
+<td>Physical byte address of udmabuf buffer</td>
+</tr>
+<tr>
+<td><code>dev_addr</code></td>
+<td>32</td>
+<td>W3</td>
+<td>Absolute device-memory physical byte address</td>
+</tr>
+<tr>
+<td><code>len</code></td>
+<td>32</td>
+<td>W4</td>
+<td>Transfer byte count</td>
+</tr>
+<tr>
+<td>(reserved)</td>
+<td></td>
+<td>W5--W7</td>
+<td>Write zero</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Field legend --- LAUNCH descriptor.</strong></p>
+<p><strong>Table: LAUNCH descriptor word map (W0..W7, 32 bytes).</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Bits</th>
+<th>Word</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPC</code></td>
+<td>4</td>
+<td>W0[3:0]</td>
+<td>Opcode: 1 = LAUNCH</td>
+</tr>
+<tr>
+<td>(reserved)</td>
+<td></td>
+<td>W0[31:4]</td>
+<td>Write zero</td>
+</tr>
+<tr>
+<td><code>kbin_addr</code></td>
+<td>64</td>
+<td>W1--W2</td>
+<td>Devmem byte base of kernel binary</td>
+</tr>
+<tr>
+<td><code>kbin_size</code></td>
+<td>32</td>
+<td>W3</td>
+<td>Kernel binary size in bytes</td>
+</tr>
+<tr>
+<td><code>kernarg_ptr</code></td>
+<td>64</td>
+<td>W4--W5</td>
+<td>Reserved [serving]: future devmem kernarg buffer</td>
+</tr>
+<tr>
+<td><code>grid_x</code></td>
+<td>32</td>
+<td>W6</td>
+<td>Reserved [v3]: 2D work-distribution X</td>
+</tr>
+<tr>
+<td><code>grid_y</code></td>
+<td>32</td>
+<td>W7</td>
+<td>Reserved [v3]: 2D work-distribution Y</td>
+</tr>
+</tbody>
+</table>
+<p>The descriptor layout above is <strong>DECIDED</strong>: W0..W7, 32 bytes / 8×u32, fields and bit positions are frozen. The SSOT for the register map and version history is <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>).</p>
+<h2 id="completion-and-backpressure">Completion and backpressure<a class="headerlink" href="#completion-and-backpressure" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong><code>instr_ready</code></strong> (RO, 0x04): combinational all-idle flag (= <code>dma_engine_idle AND compute_ctrl_idle</code>); also the <strong>pollable-full</strong> check. Host MUST see it high before writing a new command.</li>
+<li><strong><code>dma_slot_done</code></strong> (RO, 0x20): async-DMA slot completion bitmask; bit i set when the async-flagged DMA for slot i completes. Cleared on <code>flush.slot</code> exit.</li>
+<li><strong>Backpressure:</strong> host API returns <code>-EBUSY</code> after the pollable-full check. Replaces the former silent-drop.</li>
+<li><strong>Minimal v1 ABI surface:</strong> CMD window + doorbell + <code>instr_ready</code> + <code>dma_slot_done</code>. No new register needed.</li>
+</ul>
+</details>
+<p>There are two completion channels in v1, and they are distinct:</p>
+<ul>
+<li><strong><code>instr_ready</code>.</strong> (RO, <code>abi.py</code> offset 0x04, <code>regmap_pkg.sv</code>). A <strong>combinational all-idle flag</strong>: it is 1 when every sub-FSM is idle (<code>dma_engine_idle AND compute_ctrl_idle</code>). This is <em>also</em> the <strong>pollable-full</strong> check: the host API reads <code>instr_ready</code> before writing a new command and returns <code>-EBUSY</code> if it is 0 (i.e. the depth-1 slot is occupied). The host must not assert the doorbell unless <code>instr_ready</code>=1. There is no separate "slot full" register.</li>
+<li><strong><code>dma_slot_done</code>.</strong> (RO, offset 0x20). An <strong>async-DMA slot completion bitmask</strong>: bit i is set when the async-flagged (<code>dmu.load.spm</code> with the async flag) DMA for slot i completes in the background. The compute tile's <code>flush.slot 0x53</code> instruction fences on this bit (blocking the sequencer until the slot bit is set), then clears it. The host can also read it as a debug CSR. Async DMA is a confirmed v1 requirement ("make-async-real", charter §5).</li>
+</ul>
+<p><strong>Backpressure</strong> is the host-API return value: the C/C++ runtime wrapper polls <code>instr_ready</code> before each command and returns <code>-EBUSY</code> if the device is not ready. This replaces the former silent-drop (<code>npu.sv</code> mutex: a second doorbell while busy was silently ignored). No new ABI register is required. <strong>Polling in v1</strong>; a UIO interrupt (signalled when <code>instr_ready</code> rises) is an additive later feature. The <strong>minimal v1 ABI surface</strong> is: CMD window + doorbell + <code>instr_ready</code> + <code>dma_slot_done</code>. The registers <code>abi_version</code>, <code>build_info</code>, and the performance counters (<code>perf_cnt_cycles</code>, <code>perf_cnt_instrs</code>) are deferred (additive later).</p>
+<h2 id="abi-78-cutover">ABI 7→8 cutover<a class="headerlink" href="#abi-78-cutover" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>One deliberate clean cutover.</strong> New C/C++ runtime; no back-compat burden.</li>
+<li><strong>Retired:</strong> per-field CSRs (<code>npu_mode</code> / <code>addr_*</code> / <code>length</code> / <code>kernel_arg_0..3</code> / <code>program_id</code> / <code>pool_base</code>); the <code>NpuMode</code> mode enum (modes 1--8); the kernel registry (<code>PROGRAM_IDS</code>); the no-op v7 rename.</li>
+<li><strong>New:</strong> encoded 2-kind CMD window (32 bytes / 8×u32, W0..W7); 64-bit <code>host_phys</code> in COPY; <code>kbin_addr</code>/<code>kbin_size</code> in LAUNCH.</li>
+<li><strong>Deferred (additive):</strong> <code>abi_version</code> CSR; <code>build_info</code>; perf counters; phase-bit completion ring (future work).</li>
+<li>SSOT: <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>). Gate: <code>make -C npu abi-snapshot</code> must pass.</li>
+</ul>
+</details>
+<p>The ABI bump from version 7 to 8 is a <strong>single, deliberate clean cutover</strong>: the new C/C++ runtime (PetaLinux + UIO + udmabuf) has no back-compatibility burden with the former PYNQ <code>NpuDriver</code>. The following are <strong>retired</strong> in v8:</p>
+<ul>
+<li>The per-field CSRs: <code>npu_mode</code> (0x00), <code>addr_devmem</code> (0x10), <code>addr_mt</code> (0x14), <code>length</code> (0x18), <code>kernel_arg_0..3</code> (0x24--0x30), <code>program_id_csr</code> (0x34), <code>pool_base</code> (0x38). Replaced by the packed CMD window.</li>
+<li>The <code>NpuMode</code> enum (modes 1--8: WRITE_BRAM, READ_BRAM, COMPUTE, WRITE_IRAM, DM_TO_MT, MT_TO_DM, MT_TO_SPAD, SPAD_TO_MT) and the associated per-mode doorbell protocol.</li>
+<li>The kernel registry (<code>PROGRAM_IDS</code> dict in <code>abi.py</code>, <code>PROGRAM_REGISTRY_MAGIC</code>, program-registry IRAM header). The kernel decomposition is owned by <code>mininpu-inference</code> / the compiler, not the ABI.</li>
+<li>The no-op v7 rename (<code>npu_mode</code>→<code>npu_mode</code>, naming-only).</li>
+</ul>
+<p>The following are <strong>new</strong> in v8: the encoded 2-kind CMD window (32 bytes / 8×u32, W0..W7, word map described above); the 64-bit <code>host_phys</code> field in the COPY descriptor; the <code>kbin_addr</code>/<code>kbin_size</code> fields in the LAUNCH descriptor. The following are <strong>deferred</strong> (additive later): the <code>abi_version</code> RO CSR; <code>build_info</code>; performance counters; the phase-bit completion ring (future work). The authoritative register map and version history are in <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>); the CI gate is <code>make -C npu abi-snapshot</code> (snapshot hash must match).</p>
+<h2 id="inter-unit-interface-names">Inter-unit interface names<a class="headerlink" href="#inter-unit-interface-names" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Interfaces are named by <strong>function</strong>, not by opaque letter (B1--B4 retired). Compact tag if a short label is needed: lowercase i1--i4.</li>
+<li><strong>LAUNCH</strong> (i1): command processor ↔ compute tile. <code>compute_start</code> / <code>compute_done</code> + decoded LAUNCH fields.</li>
+<li><strong>COPY</strong> (i2): command processor ↔ host interface (copy engine). <code>dma_start</code> / <code>dma_done</code> + decoded COPY fields.</li>
+<li><strong>DMEM</strong> (i3): compute tile ↔ interface tile. DMA-unit load/store <code>dm_*</code> req/ack port.</li>
+<li><strong>FABRIC</strong> (i4): host interface ↔ interface tile. AXI4 data path into device memory; copy-engine data path.</li>
+</ul>
+</details>
+<p>The four inter-unit interfaces are named by <strong>function</strong>. The old "B1--B4" labels are retired ("B" was unexplained; "L" collides with the architecture Level 1/2/3 notation). Compact tag if needed: lowercase i1--i4.</p>
+<ul>
+<li><strong>LAUNCH (i1).</strong> Command processor ↔ compute tile: <code>compute_start</code> / <code>compute_done</code> plus the decoded LAUNCH descriptor (<code>kbin_addr</code>, <code>kbin_size</code>). <code>compute_done</code> = <code>instr_ready</code> (combinational all-idle). The CP performs the devmem→IRAM load before asserting <code>compute_start</code>.</li>
+<li><strong>COPY (i2).</strong> Command processor ↔ host interface (copy engine): <code>dma_start</code> / <code>dma_done</code> plus the decoded COPY descriptor (<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>). The copy engine (AXI CDMA) drives the FABRIC interface.</li>
+<li><strong>DMEM (i3).</strong> Compute tile ↔ interface tile: the DMA-unit load/store <code>dm_*</code> req/ack port. The DMA unit inside the compute tile issues load/store transactions; the interface tile serves them from/into device memory (PL-DDR4).</li>
+<li><strong>FABRIC (i4).</strong> Host interface ↔ interface tile: standard AXI4. v1 = single-master mux (copy engine or compute tile DMEM path); data path into and out of device memory over the fabric. The copy engine data path (H2D/D2H) is the primary v1 use of FABRIC.</li>
+</ul>
+<h2 id="design-precedents">Design precedents<a class="headerlink" href="#design-precedents" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>Command processor:</strong> NVDLA (host-managed, headless); Google TPU ISCA 2017 (passive coprocessor, host pushes to FIFO); NVIDIA GPFIFO + doorbell + PBDMA; AMD CPF/CPC + ACE compute queues; <strong>HSA AQL</strong> <code>kernel_dispatch</code> (kernel object + kernarg_address + grid + completion); <strong>NVMe</strong> SQ + tail doorbell + phase-bit completion (v2 scale target).</li>
+<li><strong>Decoupled access/execute:</strong> VTA/TVM (Fetch/LOAD/COMPUTE/STORE + dependence tokens); Gemmini (decoupled load/store/execute + ROB).</li>
+<li><strong>Contemporary NPUs:</strong> AMD XDNA2 AIE-ML (same 3-tier tile taxonomy); Tenstorrent Tensix / Blackhole (RISC-V per-tile control, on-chip CP progression); Meta MTIA v2 (dual RISC-V per PE, 128 GB LPDDR5).</li>
+</ul>
+</details>
+<p><strong>Control plane / command processor.</strong> <strong>NVDLA "headless"</strong>: the host CPU manages the unit over a config bus (write config → activate → wait IRQ), with double-buffered config to overlap layers. This matches our v1: the host API initiates commands through the device's command processor. <strong>Google TPU (ISCA 2017)</strong>: a passive PCIe coprocessor; the host pushes instructions into a FIFO buffer; ≈a dozen CISC ops. Google described it as "closer to an FPU coprocessor than a GPU." Both NVDLA and TPU validate a host-initiated command model as a viable production starting point. <strong>NVIDIA</strong>: Host Interface / pushbuffer + GPFIFO ring + doorbell + PBDMA; GigaThread / Compute Work Distributor distributes thread-blocks to SMs. The GPFIFO model (ring + tail doorbell + channel arbitration) informs future ring extensions. <strong>AMD</strong>: Command Processor (CPF fetch / CPC decode); ACE/HWS compute queues; SPI / workgroup-manager maps workgroups to CUs. Command Processor + ring drain = the ring-drain firmware loop a future on-chip MCU would run. <strong>HSA AQL <code>kernel_dispatch</code></strong>: <code>kernel_object</code> handle + grid/workgroup dimensions + <code>kernarg_address</code> + <code>completion_signal</code>. The LAUNCH descriptor adopts this shape; the reserved <code>kernarg_ptr</code> field (W4--W5) is the [serving] analog of <code>kernarg_address</code>. The AQL packet structure and phase-bit ready-flag inform the CMD-window design; mininpu uses a 32-byte window (8×u32) sized to the v1 field set. <strong>NVMe</strong>: 64-byte SQE + 4-byte header + tail doorbell + CQE phase-bit completion. The COPY descriptor adopts the NVMe SQE shape; the NVMe model informs the command encoding and future ring extensions. <strong>VTA/TVM</strong>: Fetch → LOAD/COMPUTE/STORE dependency-token queues; decoupled access/execute. The <code>dma_slot_done</code> / <code>flush.slot</code> mechanism (async DMA with a dependence token) follows the VTA model. <strong>Gemmini</strong>: decoupled load/store/execute + ROB; the compute tile's internal DMA unit (Gemmini LoadController model) implements the same pattern.</p>
+<p><strong>Contemporary discrete NPUs.</strong> <strong>AMD XDNA2 (AIE-ML)</strong>: 2D grid of AI Engine tiles with the same three-tier taxonomy as mininpu: compute tiles (VLIW/SIMD + ≈32 KB local memory), memory tiles (on-chip L2 staging), and interface/shim tiles to the SoC; data moved by DMA over a stream-switch interconnect. The taxonomy correspondence is direct: our <code>compute_tile</code> / <code>memory_tile</code> (deferred) / <code>interface_tile</code>. <strong>Tenstorrent Tensix</strong>: each core has 5 RISC-V "baby cores" (one data-in, one data-out, three driving UNPACK/MATH/PACK) plus ≈1.3 MB SRAM and dual routers on a 2D-torus NoC. Blackhole adds 16 "big" RISC-V cores that manage their own data movement without host roundtrips, exactly the host-CP → on-chip-MCU progression in mininpu's roadmap. <strong>Meta MTIA v2</strong>: 8×8 grid of 64 PEs, each PE a dual RISC-V (scalar control + vector) coordinating functional blocks; 256 MB shared on-chip L2; 128 GB LPDDR5 off-chip device memory over a 16-channel crossbar. Validates the RISC-V-per-tile control model, on-chip staging tier, and off-chip DRAM as primary device-memory backing, at scale.</p>
+<h2 id="open-items-and-roadmap">Open items and roadmap<a class="headerlink" href="#open-items-and-roadmap" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>OPEN:</strong> Device/compiler kernarg-buffer layout ([serving]) is opaque to this device (device carries only the <code>kernarg_ptr</code> address, W4--W5).</li>
+<li><strong>DECIDED:</strong> all descriptor fields and bit positions (W0..W7, 32 bytes). Interface naming (LAUNCH/COPY/DMEM/FABRIC). CP module factoring.</li>
+<li><strong>v2:</strong> chip-level concurrency (copy engine | compute tile; async-memcpy API). CMD window kept; COPY becomes async. Implicit future work at this tier: DRAM ring, multiple-outstanding, per-command completion. Control MCU: orthogonal option (add when complexity warrants). One planned ABI bump (v8→9).</li>
+<li><strong>v3:</strong> multi-tile + work distributor; PCIe host interface; HBM interface tile; NoC.</li>
+</ul>
+</details>
+<p><strong>Open.</strong> The device/compiler kernarg-buffer layout ([serving]) is opaque to this device; the device side only carries the <code>kernarg_ptr</code> address (W4--W5). All descriptor fields, byte positions, and the W0..W7 encoding are DECIDED.</p>
+<p><strong>v2 roadmap.</strong> The defining v2 change is <strong>chip-level concurrency</strong>: the copy engine runs concurrently with the compute tile (the async-memcpy API: a COPY does not block a concurrent LAUNCH). The CMD window is kept; COPY requests become asynchronous, enabling copy | compute overlap. Implicit future work at this tier: a real DRAM command ring, multiple-outstanding commands, per-command completion (phase-bit). An on-chip MCU (PicoRV32 / VexRiscv candidate) is an <em>orthogonal</em> option: introduce one when CP control state complexity warrants simplification. One planned ABI bump (v8→9).</p>
+<p><strong>v3 roadmap.</strong> Multi-tile + work distributor; PCIe host interface replacing AXI4-Lite; HBM interface tile; NoC for tile-to-tile data movement. The LAUNCH interface generalizes to a grid of tiles with a work distributor (one-to-many); the COPY interface generalizes to PCIe DMA.</p>
+<p><strong>Where to read next.</strong> The compute tile's DMU and <code>flush.slot</code> fence are detailed in <a href="dmu.html">dmu</a> and <a href="sequencer.html">sequencer</a>. The four-unit decomposition and interface naming (LAUNCH/COPY/DMEM/FABRIC) are in <a href="architecture.html">architecture</a>. The ISA encoding of the async-DMA async flag and <code>flush.slot</code> (0x53) is in <code>mininpu/isa</code>. The register map and ABI snapshot gate are in <code>mininpu/abi.py</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="data_movement.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Data Movement">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Data Movement
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="host_interface.html" class="md-footer__link md-footer__link--next" aria-label="Next: Host Interface">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Host Interface
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>

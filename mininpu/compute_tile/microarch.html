@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="mininpu compute-tile documentation: ISA reference, reference microarchitecture, implementation, DMU design brief, and GPT-2 kernels.">
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
       
       
       
-        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/microarch.html">
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/compute_tile/microarch.html">
       
       
         <link rel="prev" href="isa.html">
@@ -22,19 +22,19 @@
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Doc 2 Microarch - mininpu Compute-Tile Documentation</title>
+        <title>Doc 2 Microarch - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -53,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -94,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="index.html" title="mininpu Compute-Tile Documentation" class="md-header__button md-logo" aria-label="mininpu Compute-Tile Documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +108,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            mininpu Compute-Tile Documentation
+            mininpu documentation
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -218,13 +218,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="index.html" title="mininpu Compute-Tile Documentation" class="md-nav__button md-logo" aria-label="mininpu Compute-Tile Documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    mininpu Compute-Tile Documentation
+    mininpu documentation
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -236,7 +236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
+      <a href="../index.html" class="md-nav__link">
         
   
   
@@ -263,14 +263,14 @@
   
   
     <li class="md-nav__item">
-      <a href="isa.html" class="md-nav__link">
+      <a href="../runtime.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Doc 1 ISA
+    Host Runtime
   
 
     
@@ -285,6 +285,88 @@
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
   
   
     
@@ -665,9 +747,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -692,9 +775,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -719,9 +803,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -735,6 +820,719 @@
     
   
     Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/control_plane.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/host_interface.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
   
 
     
@@ -1101,7 +1899,7 @@
 
 <h1 id="reference-microarchitecture">Reference Microarchitecture<a class="headerlink" href="#reference-microarchitecture" title="Permanent link">&para;</a></h1>
 <p>mininpu &middot; Doc 2 of 3 &middot; In progress</p>
-<p>The datapath that implements ISA 0.5.0: fully-exposed 4-stage pipeline, per-unit AGU, MXU / VPU / VREG / ACC / SPAD, and the compiler-timed overlap model. Locked design plus the still-open decisions.</p>
+<p>The datapath specified against ISA 0.5.0 (as-built RTL is 0.4.0; cutover pending): fully-exposed 4-stage pipeline, per-unit AGU, MXU / VPU / VREG / ACC / SPAD, and the compiler-timed overlap model. Locked design plus the still-open decisions.</p>
 <ul>
 <li>1 instr/cycle, <strong>no scoreboard</strong></li>
 <li>pipeline <strong>F D X W</strong></li>
@@ -1117,13 +1915,16 @@
 <li><a href="#s4">Overlap &amp; roofline</a></li>
 <li><a href="#s5">Decisions pending</a></li>
 </ol>
-<p>This document describes the compute-tile microarchitecture behind <a href="isa.html">ISA 0.5.0</a>. Content is split into a Locked design and a Decisions pending section (still-open items).</p>
-<p><strong>Version context:</strong> ISA 0.5.0 is the design target; the shipped SSOT (<code>opcodes.py</code>) is still 0.4.0 and the cutover (0.5.0 opcodes, <code>PE_LATENCY 0 -&gt; 2</code>) is pending. See the <a href="isa.html#s8">ISA 0.5.0 status note</a>.</p>
+<p>This document describes the compute-tile microarchitecture specified against <a href="isa.html">ISA 0.5.0</a>. Content is split into a Locked design and a Decisions pending section (still-open items).</p>
+<div class="admonition info">
+<p class="admonition-title">Spec vs RTL as-built</p>
+<p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. This page specifies the datapath against 0.5.0; the RTL on <code>main</code> does <strong>not</strong> implement it yet (the cutover also carries <code>PE_LATENCY 0 -&gt; 2</code>). See the <a href="isa.html#s8">status note</a>, and the generated <a href="../reference/isa.html">ISA Reference</a> for the as-built set.</p>
+</div>
 <h2 id="s1">01 Overview<a class="headerlink" href="#s1" title="Permanent link">&para;</a></h2>
 <p>Top-level compute tile: the devmem-SPAD-VREG-ACC spine plus the MXU, VPU, and tile sequencer.</p>
-<iframe src="figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute tile architecture" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig1_2_compute_tile.html" loading="lazy" title="FIG. 1-2 compute tile architecture" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 1-2 - compute-tile datapath overview: the devmem to SPAD to VREG to ACC spine plus the MXU, VPU, and tile sequencer. <a href="figures/fig1_2_compute_tile.html">open standalone</a></p>
+<p>FIG. 1-2 - compute-tile datapath overview: the devmem to SPAD to VREG to ACC spine plus the MXU, VPU, and tile sequencer. <a href="../figures/fig1_2_compute_tile.html">open standalone</a></p>
 <h3 id="datapath-spine">Datapath spine<a class="headerlink" href="#datapath-spine" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>devmem</strong>: off-tile DRAM (global)<ul>
@@ -1135,7 +1936,7 @@
 </ul>
 </li>
 <li><strong>VREG</strong>: vector register file, fp32<ul>
-<li><em>MXU streams X (cast fp32 to bf16 at PE); output to ACC.</em></li>
+<li><em>MXU burst-reads X (cast fp32 to bf16 at the VREG read port, into the bf16 <code>x_matrix</code> staging buffer); output to ACC.</em></li>
 </ul>
 </li>
 <li><strong>ACC</strong>: matmul accumulator, fp32<ul>
@@ -1193,24 +1994,35 @@
 <li><strong>Structural single-instance limits:</strong> 1 MXU (matmuls serialize), 1 inactive weight buffer (at most 1 <code>load.w</code> preload ahead), <strong>2 outstanding DMA slots</strong> (<code>DMA_SLOT_COUNT=2</code>; <code>flush.slot</code>'s bitmask selects among them, async-only).</li>
 <li><strong>Latencies:</strong> the structurally-fixed values are <code>N</code> and the systolic fill = <code>2N-1</code>; the VPU pipeline depth <code>D_vpu</code>, the registered-PE MAC / PE pipeline depth, and the absolute offsets (<code>d</code>, <code>L_matmul</code>) are <strong>RTL / synth-timing measured</strong> implementation numbers (<code>D_vpu</code> currently about 23 (measured after the fp-pipeline pass)), NOT ISA-visible structural constants.</li>
 </ul>
-<iframe src="figures/fig6_sequencer.html" loading="lazy" title="FIG. 6 tile sequencer" style="width:100%;height:700px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig6_sequencer.html" loading="lazy" title="FIG. 6 tile sequencer" style="width:100%;height:700px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 6 - tile sequencer: IRAM + folded PC/decoder, iv broadcast, loop-frame stack. <a href="figures/fig6_sequencer.html">open standalone</a></p>
+<p>FIG. 6 - tile sequencer: IRAM + folded PC/decoder, iv broadcast, loop-frame stack. <a href="../figures/fig6_sequencer.html">open standalone</a></p>
 <h2 id="s3">03 Functional units and memories<a class="headerlink" href="#s3" title="Permanent link">&para;</a></h2>
 <p>Locked - unit geometry and roles.</p>
 <h3 id="mxu">MXU<a class="headerlink" href="#mxu" title="Permanent link">&para;</a></h3>
 <p><strong>8x8 weight-stationary systolic</strong> array, <strong>bf16 x bf16 to fp32 accumulate</strong>, <strong>2 weight buffers</strong> (active / inactive double-buffer).</p>
-<p>X streams from <strong>VREG</strong>, cast fp32 to bf16 at the PE input (no separate X input buffer). Output to <strong>ACC</strong>. <strong>Weight-stationary</strong> dataflow.</p>
+<p>X is burst-read from <strong>VREG</strong> (<code>N</code> tile-rows, 1 tile-row/cycle), cast fp32 to bf16 at the VREG read port, into the MXU's bf16 <code>x_matrix</code> staging buffer; the array then streams X from <code>x_matrix</code> and does not touch VREG for the rest of the matmul. Output to <strong>ACC</strong>. <strong>Weight-stationary</strong> dataflow.</p>
 <p><strong>PE MAC is registered for 200 MHz</strong> (PE latency to be confirmed by synth); systolic fill = <code>2N-1</code> plus the PE pipeline depth.</p>
 <h3 id="vpu">VPU<a class="headerlink" href="#vpu" title="Permanent link">&para;</a></h3>
 <p><strong>Fixed-depth pipeline</strong>, <strong>8 lanes</strong>, function-select <code>{reduce | lut | simd}</code>. <strong>Lane = column, row-serial</strong>: one 256-bit tile-row per cycle, 8 columns in parallel (the natural structure for the per-row reductions in softmax / LayerNorm). Throughput = 1 tile-row/cycle (row-pipelined, multiple rows in flight) for the single-source SIMD ops; gelu / exp2 / two-source ops are latency-serial (1 row / D_vpu).</p>
-<p><strong>Pipeline depth <code>D_vpu</code> is RTL / synth-measured</strong> (currently about 23 (measured after the fp-pipeline pass)), an implementation number, NOT an ISA-visible structural constant. <code>fp_mul</code> stays <strong>combinational</strong> (maps to a DSP), but an IEEE <code>fp_add</code> is <strong>registered</strong> (1+ pipeline stages, standard FloPoCo-style: a single combinational IEEE fp_add is ~11 ns and misses the 5 ns / 200 MHz budget); the reduce-sum tree is <strong>level-wise pipelined</strong> and each BRAM-read to compute cone is registered. <code>D_vpu</code> is therefore the <strong>sum of registered stages</strong> (RTL-measured), not an fp-op count. The deepest function (gelu) sets it; the other functions (reduce tree, exp2 BRAM, rsqrt, simd) align to the same depth so the reservation window is single. Reuses the <code>fpu/*</code> primitives (exp2 / rsqrt / tanh / recip BRAM LUTs, <code>fp_mul</code> / <code>fp_add</code>).</p>
+<p><strong>Pipeline depth <code>D_vpu</code> is RTL / synth-measured</strong> (currently about 23 (measured after the fp-pipeline pass)), an implementation number, NOT an ISA-visible structural constant. <code>fp_mul</code> stays <strong>combinational</strong> (maps to a DSP), but an IEEE <code>fp_add</code> is <strong>registered</strong> (1+ pipeline stages, standard FloPoCo-style: a single combinational IEEE fp_add is ~11 ns and misses the 5 ns / 200 MHz budget); the reduce-sum tree is <strong>level-wise pipelined</strong> and each BRAM-read to compute cone is registered. <code>D_vpu</code> is therefore the <strong>sum of registered stages</strong> (RTL-measured), not an fp-op count. Whatever its value, it is the <strong>uniform issue-to-write terminal for every function</strong> (reduce tree, exp2 BRAM, rsqrt, simd all align to it), so the reservation window is single. Reuses the <code>fpu/*</code> primitives (exp2 / rsqrt / tanh / recip BRAM LUTs, <code>fp_mul</code> / <code>fp_add</code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Open: which function sets <code>D_vpu</code> under ISA 0.5.0</p>
+<p>The measured <code>23</code> is pinned to the <strong>as-built 0.4.0</strong> datapath, where the
+depth-setting function is the fused <code>vpu.gelu</code> (<code>OP_VPU_GELU = 0x1D</code>) and every
+shorter op is padded up to it (<code>vpu_ctrl.sv:417</code>, <code>:436-446</code>). ISA 0.5.0
+<strong>retires <code>gelu</code></strong> as an opcode (it decomposes), so the uniform terminal would be
+set by the next-deepest surviving function and <strong>may be smaller than 23</strong>. The
+new value is <strong>not yet measured</strong> and is not asserted here; it is an output of the
+0.5.0 cutover plus the pending gelu-decomposition design (see the
+<a href="isa.html#s8">ISA 0.5.0 status note</a>). Do not treat <code>23</code> as a 0.5.0 number.</p>
+</div>
 <h3 id="vreg_1">VREG<a class="headerlink" href="#vreg_1" title="Permanent link">&para;</a></h3>
-<p><strong>32 x [8x8] fp32 = 8 KiB.</strong> Whole-tile-row access (256-bit), <strong>2 read + 1 write</strong> ports (2r1w baseline).</p>
+<p><strong>Design target: 32 flat 1D fp32 vector registers</strong> (<code>VREG_SIZE = N</code>; owner ruling <a href="https://github.com/sunwookim028/mininpu/issues/385">#385</a> §5 #1). <strong>As-built: 32 x [8x8] fp32 = 8 KiB</strong> with whole-tile-row access (256-bit). <strong>2 read + 1 write</strong> ports (2r1w baseline) either way. See the <a href="#vreg">realization subsection</a>.</p>
 <p>No banking: MXU / VPU / LSU conflicts are avoided by <strong>temporal separation</strong> (foreground VREG access scheduled outside the short MXU X-read burst). See the realization subsection.</p>
 <h3 id="acc">ACC<a class="headerlink" href="#acc" title="Permanent link">&para;</a></h3>
 <p><strong>[8x8] fp32 x depth 2 = 512 B.</strong> <strong>8 per-column banks</strong> (the physical column organization: one accumulator column per systolic column). Separately, <strong>ACC buffers {0,1}</strong> are both used for depth-2 double-buffering; the ACC <strong>buffer</strong> field (the depth index) selects the buffer, not a column bank.</p>
-<p><strong>Depth-2 double-buffer:</strong> the second buffer overlaps a block's drain/store tail (<code>acc.store</code> &rarr; gelu &rarr; <code>vreg.store</code>) with the next block's matmul.</p>
+<p><strong>Depth-2 double-buffer:</strong> the second buffer overlaps a block's drain/store tail (<code>acc.store</code> &rarr; <code>vpu.lut</code> &rarr; <code>vreg.store</code>) with the next block's matmul.</p>
 <h3 id="spad">SPAD<a class="headerlink" href="#spad" title="Permanent link">&para;</a></h3>
 <p><strong>bf16</strong> storage. Separate, <strong>0-based on-chip address space</strong> (like CUDA <code>.shared</code>). 32 KiB, 8 banks.</p>
 <h3 id="lsu-loadstore-unit">LSU (load/store unit)<a class="headerlink" href="#lsu-loadstore-unit" title="Permanent link">&para;</a></h3>
@@ -1222,43 +2034,56 @@
 <p>No runtime interlock or scoreboard: the compiler <strong>statically avoids</strong> all VREG / SPAD port and bank conflicts using the reservation table (see the <a href="isa.html#s5">ISA timing contract</a>); <code>sim == synth</code> is mandatory.</p>
 <p>Optional <strong>debug-only conflict detector</strong> flags same-port / same-bank same-cycle access in debug builds (no stall): an optional bring-up aid, not part of the shipping datapath.</p>
 <h3 id="shared-fp-primitives">Shared fp primitives<a class="headerlink" href="#shared-fp-primitives" title="Permanent link">&para;</a></h3>
-<iframe src="figures/fig11_fp_primitives.html" loading="lazy" title="FIG. 11 shared fp primitives pipeline stages" style="width:100%;height:560px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig11_fp_primitives.html" loading="lazy" title="FIG. 11 shared fp primitives pipeline stages" style="width:100%;height:560px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 11 - shared fp primitives, stage/latency view: <code>fp_add</code> LATENCY=2 (<code>{align+add}</code> | <code>{normalize}</code> | <code>{pack}</code>, LUT/CARRY8) and <code>fp_mul</code> LATENCY=2 (<code>{unpack}</code> | <code>{DSP48}</code> | <code>{round+pack}</code>). The atoms every unit below is built from. <a href="figures/fig11_fp_primitives.html">open standalone</a></p>
+<p>FIG. 11 - shared fp primitives, stage/latency view: <code>fp_add</code> LATENCY=2 (<code>{align+add}</code> | <code>{normalize}</code> | <code>{pack}</code>, LUT/CARRY8) and <code>fp_mul</code> LATENCY=2 (<code>{unpack}</code> | <code>{DSP48}</code> | <code>{round+pack}</code>). The atoms every unit below is built from. <a href="../figures/fig11_fp_primitives.html">open standalone</a></p>
 <h3 id="mxu_1">MXU<a class="headerlink" href="#mxu_1" title="Permanent link">&para;</a></h3>
-<iframe src="figures/fig7_mxu.html" loading="lazy" title="FIG. 7 MXU datapath" style="width:100%;height:780px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig7_mxu.html" loading="lazy" title="FIG. 7 MXU datapath" style="width:100%;height:780px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 7 - MXU datapath: 8x8 weight-stationary systolic array, 2 weight buffers, X streamed from VREG (cast to bf16 at the PE input), output to ACC. <a href="figures/fig7_mxu.html">open standalone</a></p>
-<iframe src="figures/fig12_mxu_pipeline.html" loading="lazy" title="FIG. 12 MXU matmul pipeline stages" style="width:100%;height:720px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<p>FIG. 7 - MXU datapath: 8x8 weight-stationary systolic array, 2 weight buffers, X burst-read from VREG (cast to bf16 at the VREG read port, into the bf16 <code>x_matrix</code> staging buffer), output to ACC. <a href="../figures/fig7_mxu.html">open standalone</a></p>
+<iframe src="../figures/fig12_mxu_pipeline.html" loading="lazy" title="FIG. 12 MXU matmul pipeline stages" style="width:100%;height:720px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 12 - MXU matmul pipeline, stage/latency view: X burst-read (VREG) to fp32-&gt;bf16 cast to 8x8 systolic array (SKEW = PE_LATENCY+1 = 3, per-PE MAC = combinational fp_mul + registered fp_add L=2) to <code>mxu_accumulator</code> causal-fold RMW to ACC. Reservation offsets d(r) = 2N + 3r, PE_LAT = 5. Structural figure is FIG. 7, tile-loop Gantt FIG. 9. <a href="figures/fig12_mxu_pipeline.html">open standalone</a></p>
+<p>FIG. 12 - MXU matmul pipeline, stage/latency view: X burst-read (VREG) to fp32-&gt;bf16 cast at the VREG read port to the bf16 <code>x_matrix</code> staging buffer to 8x8 systolic array (SKEW = PE_LATENCY+1 = 3, per-PE MAC = combinational fp_mul + registered fp_add L=2) to <code>mxu_accumulator</code> causal-fold RMW to ACC. Reservation offsets d(r) = 2N + 3r, PE_LAT = 5. Structural figure is FIG. 7, tile-loop Gantt FIG. 9. <a href="../figures/fig12_mxu_pipeline.html">open standalone</a></p>
 <h3 id="vpu-pipeline">VPU pipeline<a class="headerlink" href="#vpu-pipeline" title="Permanent link">&para;</a></h3>
 <p>Locked structure - fixed-depth, partially row-pipelined vector pipeline (single-source SIMD ops stream; gelu / exp2 / two-source stay latency-serial); the depth <code>D_vpu</code> is RTL / synth-measured (currently about 23, measured after the fp-pipeline pass), not a locked constant.</p>
 <ul>
 <li><strong>Structure:</strong> 8 lanes (lane = column), row-serial at one 256-bit tile-row per cycle, throughput 1 tile-row/cycle (<strong>row-pipelined</strong>: multiple tile-rows in flight, 1 issued per cycle, each draining after <code>D_vpu</code> cycles) <strong>for the single-source SIMD ops only</strong> (<code>scale.bcast</code>, <code>scale.col.bcast</code>, <code>scale.imm</code>, <code>sub.bcast</code>, <code>add.col.bcast</code>); gelu / exp2 / two-source ops are latency-serial (1 row / <code>D_vpu</code>). <code>fp_mul</code> stays <strong>combinational</strong> (DSP), but an IEEE <code>fp_add</code> is <strong>registered</strong> (1+ pipeline stages, standard FloPoCo-style: a single combinational IEEE fp_add is ~11 ns and misses the 5 ns / 200 MHz budget); the reduce-sum tree is <strong>level-wise pipelined</strong> and each BRAM-read to compute cone is registered.</li>
-<li><strong>Depth is RTL-measured, set by gelu:</strong> <code>D_vpu</code> is the <strong>sum of the registered stages</strong> along the deepest function (gelu: <code>fp_mul</code> / registered <code>fp_add</code> chain + the tanh BRAM lookup), measured from RTL / synth (currently about 23, measured after the fp-pipeline pass), <strong>not</strong> a hand-counted fp-op total; the other functions (reduce tree, exp2 BRAM, rsqrt, simd) align to the same depth so the reservation window is single. <code>D_vpu</code> is an implementation number, in the same bucket as <code>L_matmul</code> and the PE pipeline depth, NOT an ISA-visible structural constant (unlike <code>N</code> and <code>2N-1</code>).</li>
+<li><strong>Depth is RTL-measured, set by the deepest function:</strong> <code>D_vpu</code> is the <strong>sum of the registered stages</strong> along the deepest function, measured from RTL / synth, <strong>not</strong> a hand-counted fp-op total; every other function aligns to the same terminal so the reservation window is single. <strong>As-built 0.4.0:</strong> the deepest function is the fused <code>vpu.gelu</code> (<code>fp_mul</code> / registered <code>fp_add</code> chain + the tanh BRAM lookup) and <code>D_vpu = 23</code> (<code>vpu_ctrl.sv:417</code>, measured after the fp-pipeline pass). Under <strong>ISA 0.5.0 <code>gelu</code> is retired</strong>, so the depth-setter becomes the next-deepest surviving function and <code>D_vpu</code> <strong>may drop below 23</strong>; that value is unmeasured (see the open note in the VPU section above). <code>D_vpu</code> is an implementation number, in the same bucket as <code>L_matmul</code> and the PE pipeline depth, NOT an ISA-visible structural constant (unlike <code>N</code> and <code>2N-1</code>).</li>
+<li><strong>Latency vs occupancy - distinct quantities.</strong> <code>D_vpu = 23</code> is the <strong>issue-to-write latency terminal</strong>, uniform across every ACC_ROW function (<code>ST_ROW_EXP2 == ST_ROW_GELU == ST_ROW_PLAIN == ST_ROW_TWO == D_VPU</code>, <code>vpu_ctrl.sv:436-446</code>). The per-row FSM <strong>occupancy is 24 cycles</strong> = latency 23 + 1 reset cycle (<code>stage_cnt</code> runs 0..23 inclusive, then resets on row advance: <code>vpu_ctrl.sv:1153-1161</code>). An 8-row latency-serial op therefore occupies <code>8 x 24 = 192</code> cycles, not <code>8 x 23</code>. Both numbers are correct; do not conflate them.</li>
 </ul>
-<iframe src="figures/fig5_vpu.html" loading="lazy" title="FIG. 5 VPU datapath" style="width:100%;height:760px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig5_vpu.html" loading="lazy" title="FIG. 5 VPU datapath" style="width:100%;height:760px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 5 - VPU datapath: 8-lane fixed-depth pipeline (lane = column, row-serial), combinational <code>fp_mul</code> + registered IEEE <code>fp_add</code>, level-wise pipelined reduce tree. <a href="figures/fig5_vpu.html">open standalone</a></p>
-<iframe src="figures/fig10_vpu_rowpipe.html" loading="lazy" title="FIG. 10 VPU row-pipelining Gantt" style="width:100%;height:560px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<p>FIG. 5 - VPU datapath: 8-lane fixed-depth pipeline (lane = column, row-serial), combinational <code>fp_mul</code> + registered IEEE <code>fp_add</code>, level-wise pipelined reduce tree. <a href="../figures/fig5_vpu.html">open standalone</a></p>
+<iframe src="../figures/fig10_vpu_rowpipe.html" loading="lazy" title="FIG. 10 VPU row-pipelining Gantt" style="width:100%;height:560px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 10 - VPU row-pipelining: latency-serial (8 x D_vpu = 184 cy) vs row-pipelined (~8 + 23 = 31 cy) schedules for an 8-row tile through the <code>D_vpu = 23</code> pipeline; <code>D_vpu</code> is the per-row drain, amortized across the tile-loop. <a href="figures/fig10_vpu_rowpipe.html">open standalone</a></p>
-<iframe src="figures/fig13_vpu_pipeline.html" loading="lazy" title="FIG. 13 VPU pipeline uniform D_vpu terminal" style="width:100%;height:720px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<p>FIG. 10 - VPU row-pipelining: latency-serial (8 x D_vpu = 184 cy) vs row-pipelined (~8 + 23 = 31 cy) schedules for an 8-row tile through the <code>D_vpu = 23</code> pipeline; <code>D_vpu</code> is the per-row drain, amortized across the tile-loop. <a href="../figures/fig10_vpu_rowpipe.html">open standalone</a></p>
+<iframe src="../figures/fig13_vpu_pipeline.html" loading="lazy" title="FIG. 13 VPU pipeline uniform D_vpu terminal" style="width:100%;height:720px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 13 - VPU pipeline to the uniform <code>D_vpu = 23</code> terminal, stage/latency view: per-function depths within the 23-cycle envelope (gelu ~22-stage sets it; exp2 = 5, reduce-tree = 9, single-src SIMD shallow, all padded to 23). The 5 single-source SIMD ops are row-pipelined; gelu / exp2 / two-source ops stay latency-serial. <a href="figures/fig13_vpu_pipeline.html">open standalone</a></p>
+<p>FIG. 13 - VPU pipeline to the uniform <code>D_vpu = 23</code> terminal, stage/latency view, <strong>as-built 0.4.0</strong>: per-function depths within the 23-cycle envelope (the fused gelu, ~22 stages, sets it; exp2 = 5, reduce-tree = 9, single-src SIMD shallow, all padded to 23). The 5 single-source SIMD ops are row-pipelined; gelu / exp2 / two-source ops stay latency-serial. 0.5.0 retires the fused gelu, so the depth-setter changes at the cutover. <a href="../figures/fig13_vpu_pipeline.html">open standalone</a></p>
 <h3 id="spad_1">SPAD<a class="headerlink" href="#spad_1" title="Permanent link">&para;</a></h3>
-<iframe src="figures/fig8_spad.html" loading="lazy" title="FIG. 8 SPAD datapath" style="width:100%;height:700px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig8_spad.html" loading="lazy" title="FIG. 8 SPAD datapath" style="width:100%;height:700px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 8 - SPAD datapath: 32 KiB, 8 banks (<code>bank = row mod 8</code>), bf16; compute clients fixed-latency, the DMU yields on a bank conflict so compute never stalls. <a href="figures/fig8_spad.html">open standalone</a></p>
+<p>FIG. 8 - SPAD datapath: 32 KiB, 8 banks (<code>bank = row mod 8</code>), bf16; compute clients fixed-latency, the DMU yields on a bank conflict so compute never stalls. <a href="../figures/fig8_spad.html">open standalone</a></p>
 <h3 id="lsu-pipeline">LSU pipeline<a class="headerlink" href="#lsu-pipeline" title="Permanent link">&para;</a></h3>
-<iframe src="figures/fig14_lsu_pipeline.html" loading="lazy" title="FIG. 14 LSU 10-cycle pipeline" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig14_lsu_pipeline.html" loading="lazy" title="FIG. 14 LSU 10-cycle pipeline" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 14 - LSU pipeline, stage/latency view: FIXED LATENCY = ROWS + SPAD_RD_LATENCY = 8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath, read tile-row r on cycle r, write RL=2 later, and own the bf16 &harr; fp32 casts. <a href="figures/fig14_lsu_pipeline.html">open standalone</a></p>
+<p>FIG. 14 - LSU pipeline, stage/latency view: FIXED LATENCY = ROWS + SPAD_RD_LATENCY = 8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath, read tile-row r on cycle r, write RL=2 later, and own the bf16 &harr; fp32 casts. <a href="../figures/fig14_lsu_pipeline.html">open standalone</a></p>
 <h3 id="vreg">VREG realization (whole-tile-row RF + MXU-burst temporal separation)<a class="headerlink" href="#vreg" title="Permanent link">&para;</a></h3>
-<p>Locked - resolved model.</p>
+<p>Resolved model. The 2r1w / temporal-separation half is <strong>locked</strong>; the register
+shape is a <strong>design target</strong> (rework B), not a lock.</p>
 <ul>
-<li><strong>Physical model:</strong> VREG = 32 registers, each an <strong>[8x8] fp32 tile</strong> (the paper design lifts the current 1D 8-wide vector RF to 2D tiles; <code>hwparams VREG_SIZE 8 -&gt; 64</code>). Access granularity is a <strong>whole tile-row (256-bit)</strong>.</li>
+<li><strong>Physical model (design target):</strong> VREG = 32 registers, each a <strong>flat 1D fp32
+  vector</strong> (<code>hwparams VREG_SIZE = N</code>, already 1D). The earlier "each register is an
+  [8x8] fp32 tile / <code>VREG_SIZE 8 -&gt; 64</code>" model is <strong>withdrawn</strong>: its load-bearing
+  premise (that the MXU streams tiles directly from VRegs) is false for this design,
+  since the MXU bursts X into its own <code>x_matrix</code> staging buffer. Owner ruling
+  <a href="https://github.com/sunwookim028/mininpu/issues/385">#385</a> §5 #1; rationale in
+  <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a> Decision B.</li>
+<li><strong>As-built:</strong> the elaborated tile datapath is still <strong>2D</strong> - <code>tile_top.sv:396</code>
+  instantiates <code>vreg_rf</code> (32 x [8x8] fp32, 8 KiB) at a <strong>whole tile-row (256-bit)</strong>
+  access granularity. (<code>vpu_ctrl.sv:1316</code> separately instantiates the 1D
+  <code>vec_regfile</code>, 32 x 8 fp32; unifying the VPU onto the shared RF is the
+  <code>DECISION 1</code> follow-on.) The flat-1D rework lands in <strong>rework B</strong>.</li>
 <li><strong>Ports: 2 read + 1 write</strong> (whole tile-row), matching the whole-tile-row 2r1w RF. A 2nd write port is a sizing option only if two writes ever need to be concurrent; tail sub-ops are dependency-serial, so <strong>2r1w is the baseline</strong>.</li>
 <li><strong>MXU X read:</strong> the MXU reads its X tile from VREG in a short burst (~<code>N</code> cycles) into its <code>x_matrix</code> staging buffer, then does not touch VREG for the rest of the matmul.</li>
 <li><strong>Conflict avoidance = temporal separation, not banking:</strong> the compiler schedules the foreground unit's (VPU / LSU) VREG accesses outside the MXU X-read burst window. Both windows are short, so this is easily schedulable.</li>
@@ -1367,9 +2192,9 @@
 <li><strong>MLP / matmul-heavy blocks are MXU-bound.</strong></li>
 <li><strong>Tiny devmem matmuls are DRAM-BW-bound</strong> (bounded by the HP-port DRAM bandwidth, not on-chip compute).</li>
 </ul>
-<iframe src="figures/fig9_tile_gantt.html" loading="lazy" title="FIG. 9 tile-loop pipeline Gantt" style="width:100%;height:540px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+<iframe src="../figures/fig9_tile_gantt.html" loading="lazy" title="FIG. 9 tile-loop pipeline Gantt" style="width:100%;height:540px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
 
-<p>FIG. 9 - tile-loop pipeline Gantt for one (m,n) block: weight double-buffer ping-pong (<code>load.w</code> fully hidden), ACC depth-2 tail overlap, steady state 1 matmul / N=8 cy. Canonical home: <a href="isa.html#s7">ISA 7.4</a>. <a href="figures/fig9_tile_gantt.html">open standalone</a></p>
+<p>FIG. 9 - tile-loop pipeline Gantt for one (m,n) block: weight double-buffer ping-pong (<code>load.w</code> fully hidden), ACC depth-2 tail overlap, steady state 1 matmul / N=8 cy. Canonical home: <a href="isa.html#s7">ISA 7.4</a>. <a href="../figures/fig9_tile_gantt.html">open standalone</a></p>
 <p>Absolute cycle counts and roofline ratios are deliberately omitted here: they are latency-dependent and therefore <strong>TBD (RTL-measured)</strong> under the <code>sim == synth</code> contract. Only <code>N</code> and the systolic fill <code>2N-1</code> are structurally fixed; the VPU depth <code>D_vpu</code> is RTL-measured (currently about 23, measured after the fp-pipeline pass), like <code>L_matmul</code> and the PE pipeline depth.</p>
 <h2 id="s5">05 Decisions pending<a class="headerlink" href="#s5" title="Permanent link">&para;</a></h2>
 <p>Still-open items.</p>
@@ -1387,7 +2212,7 @@
 </div>
 <hr />
 <p>mininpu &middot; Reference Microarchitecture (Doc 2, WIP)</p>
-<p><a href="index.html">back to index</a></p>
+<p><a href="../index.html">back to index</a></p>
 
 
 
@@ -1423,7 +2248,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="isa.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Doc 1 ISA">
+          <a href="isa.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Doc 1 ISA design target [proposed]">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1433,7 +2258,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Doc 1 ISA
+                Doc 1 ISA design target [proposed]
               </div>
             </div>
           </a>
@@ -1483,11 +2308,19 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
       
     
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
   </body>
 </html>

@@ -1,0 +1,1553 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/reference/host_interface.html">
+      
+      
+        <link rel="prev" href="control_plane.html">
+      
+      
+        <link rel="next" href="abi.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Host Interface - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mininpu-host-interface" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Host Interface
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 2 Microarch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 3 Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 4 DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="control_plane.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="host_interface.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#host-interface-data-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host-interface data path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-memcpy-flow-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The memcpy flow (v1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#os-drivers-and-cache-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS, drivers, and cache model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-and-portability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime and portability
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#host-interface-data-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host-interface data path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-memcpy-flow-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The memcpy flow (v1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#os-drivers-and-cache-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS, drivers, and cache model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runtime-and-portability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runtime and portability
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/host_interface.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose and the deck bullets were BOTH carried over in
+     source order; the deck bullets sit in the collapsed "Slide summary"
+     blocks. Figures are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-host-interface">mininpu: Host Interface<a class="headerlink" href="#mininpu-host-interface" title="Permanent link">&para;</a></h1>
+<p>The <strong>host interface</strong> is the host-memory connection unit in the four-unit mininpu (charter §3). Its sole active element in v1 is a device-owned <strong>copy engine</strong> (an off-the-shelf AXI CDMA IP) that services COPY descriptors issued by the command processor over the <strong>COPY</strong> interface. On receipt of a COPY descriptor {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>}, the copy engine DMAs directly between PS-DDR (host system memory, via the Zynq PS HP port) and PL-DDR4 (device memory, via the interface tile over <strong>FABRIC</strong>) over the AXI fabric. Linux is not in the transfer loop. This document covers the data path, the memcpy flow, the v1 runtime (PetaLinux + UIO + udmabuf), and the portability rationale. The authoritative ABI surface is owned by <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>); this document cites it without restating it.</p>
+<h2 id="host-interface-data-path">Host-interface data path<a class="headerlink" href="#host-interface-data-path" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>Copy engine (AXI CDMA)</strong>: services COPY {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>} from the command processor over the <strong>COPY</strong> interface; AXI4 master into PS-DDR (HP port) and into PL-DDR4 (<strong>FABRIC</strong>).</li>
+<li><strong>Linux is NOT in the loop</strong>: udmabuf phys-direct (SMMU bypass); no host-side DMA engine.</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>hi-datapath</code></p>
+<p><img alt="hi-datapath" src="../figures/tikz/hi-datapath.svg" /></p>
+</div>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>hi-datapath</code></p>
+<p><img alt="hi-datapath" src="../figures/tikz/hi-datapath.svg" /></p>
+<p>Host-interface data path. The host (PS-DDR, PetaLinux / UIO / udmabuf) writes a COPY descriptor and rings the doorbell; the command processor decodes it and issues a <strong>COPY</strong> descriptor to the copy engine over the COPY interface. The copy engine (AXI CDMA) DMAs between PS-DDR (host system memory, via the HP port) and PL-DDR4 (device memory, via the interface tile over <strong>FABRIC AXI4</strong>) directly over the AXI fabric. Linux is not in the transfer loop; PS-DDR buffers are udmabuf allocations (contiguous physical, SMMU bypass).</p>
+</div>
+<p>The host interface unit sits between the command processor (which issues COPY descriptors over the COPY interface) and the interface tile (which owns the device-memory controller over FABRIC). Its sole active element is the <strong>copy engine</strong>: an off-the-shelf <strong>AXI CDMA</strong> IP configured as an AXI4 master on both sides of the fabric. On the host side it drives the Zynq PS HP port, a high-performance AXI4 slave port into PS-DDR; on the device side it drives <strong>FABRIC</strong>, the AXI4 link to the interface tile's <code>dm_axi_bridge</code>, which converts to <code>m00_axi</code> INCR bursts into the PL-DDR4 MIG. Both ports are standard AXI4 INCR burst; the CDMA manages the transfer autonomously once its source address, destination address, and byte count registers are written. The host does not drive any AXI master for bulk data: it is a command-and-poll model. The interface tile is covered in its own document; DMEM (compute tile to interface tile) and the device-memory controller internals are not part of the host interface unit.</p>
+<h2 id="the-memcpy-flow-v1">The memcpy flow (v1)<a class="headerlink" href="#the-memcpy-flow-v1" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ol>
+<li>Host allocates a <strong>udmabuf</strong> buffer: contiguous physical region (CMA); kernel returns <code>host_phys</code>.</li>
+<li>Host polls <code>instr_ready == 1</code> (CP idle), writes COPY descriptor {<code>kind=COPY</code>, <code>dir</code>, <code>host_phys:64</code>, <code>dev_addr</code>, <code>len</code>} to the CMD window, rings the self-clearing <strong>doorbell</strong>.</li>
+<li>Command processor latches the CMD window on the doorbell edge; issues a <strong>COPY</strong> descriptor to the copy engine over the COPY interface.</li>
+<li>Copy engine programs the AXI CDMA (<code>SA</code>/<code>DA</code>/<code>BTT</code>) and releases it; CDMA DMAs PS-DDR ↔ PL-DDR4 over the AXI fabric autonomously. <strong>Both <code>SA</code> and <code>DA</code> must be 32-byte aligned</strong>: the v1 CDMA is 256-bit with no DRE (PG034), so an unaligned address raises <code>DMAIntErr</code>; the runtime rejects it before issuing the descriptor.</li>
+<li>Completion: command processor drives <code>instr_ready</code> high; host polls before the next doorbell. v1 = sequential, depth-1.</li>
+</ol>
+</details>
+<p><strong>Step 1: allocate a contiguous host buffer.</strong> The host runtime (PetaLinux + C/C++) opens a <code>udmabuf</code> device node. The kernel allocates a contiguous physical region (CMA-backed) and returns both a user-space virtual address (for CPU read/write) and the physical address (<code>host_phys</code>). The SMMU is bypassed: <code>host_phys</code> is a real physical address, not an IOVA; the CDMA programs it directly.</p>
+<p><strong>Step 2: write a COPY descriptor and ring the doorbell.</strong> Before ringing, the host polls <code>instr_ready == 1</code> to confirm the command processor is idle (backpressure = <code>-EBUSY</code> if not; charter §4). The host packs a COPY descriptor (charter §4, ABI 8): <code>kind=COPY</code>, <code>dir</code> (H2D or D2H), <code>host_phys</code> (64-bit physical address), <code>dev_addr</code> (device memory offset), <code>len</code> (byte count). It writes the descriptor into the write-only CMD window via UIO (memory-mapped MMIO) and writes the <strong>doorbell</strong> bit (<code>slv_reg0[4]</code>), which is self-clearing (consumed and auto-cleared by the command processor on the rising edge).</p>
+<p><strong>Step 3: command processor decode and COPY dispatch.</strong> The command processor latches the CMD window on the doorbell edge, decodes <code>kind=COPY</code>, and issues a COPY descriptor {<code>host_phys</code>, <code>dev_addr</code>, <code>len</code>, <code>dir</code>} to the copy engine over the COPY interface.</p>
+<p><strong>Step 4: AXI CDMA transfer.</strong> The copy engine programs the AXI CDMA source address (<code>SA</code>), destination address (<code>DA</code>), and byte-to-transfer (<code>BTT</code>) registers, then releases the transfer. <strong>Both the source (<code>SA</code>) and destination (<code>DA</code>) addresses must be 32-byte aligned</strong>: the v1 CDMA is configured at 256-bit and the Data Realignment Engine (DRE) is unavailable at that data width (Xilinx PG034), so an unaligned <code>host_phys</code> or <code>dev_addr</code> raises <code>DMAIntErr</code> (no data moves, and the error is sticky until a copy-engine soft reset). The runtime (<code>mininpu/runtime/memcpy.py</code>) enforces this: it rejects a misaligned COPY with a clear error before the descriptor ever reaches the CDMA. The CDMA drives two AXI4 masters simultaneously: the source master into PS-DDR via the HP port and the destination master to the interface tile via <strong>FABRIC</strong>. <strong>Linux is not in the transfer loop</strong>: there is no kernel DMA engine and no <code>dma-proxy</code>. <strong>Cache coherence</strong> is handled by construction: the udmabuf buffer is mapped <em>non-cached</em> (opened with <code>O_SYNC</code>), so CPU accesses bypass the data cache and no explicit flush or invalidate is required around the DMA. This avoids the classic non-coherent-HP-port stale-data trap; the cost is slower CPU access to the staging buffer, negligible for a write-once-then-DMA region. The buffer's physical address is stable for the lifetime of the udmabuf allocation.</p>
+<p><strong>Step 5: completion.</strong> When the CDMA completes, the command processor drives <code>instr_ready</code> high (charter §4). The host polls <code>instr_ready</code> before the next doorbell ring. v1 is <strong>sequential</strong> (depth-1 CMD window, host-mediated): there is at most one COPY or LAUNCH in flight at a time. Note: <code>dma_slot_done</code> is the compute tile's internal async-DMA completion token (charter §5); it is a separate signal and not the COPY completion path.</p>
+<h2 id="os-drivers-and-cache-model">OS, drivers, and cache model<a class="headerlink" href="#os-drivers-and-cache-model" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>OS</strong>: PetaLinux (ZynqMP) suffices; standard boot chain FSBL → PMUFW → ATF → U-Boot → Linux.</li>
+<li><strong>UIO</strong> (<code>generic-uio</code>): DT nodes for the NPU register block + the AXI CDMA, mapped at <code>/dev/uioX</code>.</li>
+<li><strong>udmabuf</strong> (out-of-tree module) + reserved <strong>CMA</strong>; buffer opened <code>O_SYNC</code> (non-cached), so no cache-management code.</li>
+<li><strong>SMMU</strong> not translating the PL master (ZynqMP default); <strong>HP</strong> port + <strong>PL-DDR4 MIG</strong> in the block design.</li>
+<li><strong>Not needed</strong>: PYNQ, <code>dma-proxy</code>, an in-kernel AXI-DMA/CDMA <code>dmaengine</code> driver, an RTOS.</li>
+</ul>
+</details>
+<p>This unit owns the host-side OS and driver contract, so the runtime and board bring-up have a single reference.</p>
+<p><strong>OS.</strong> A standard <strong>PetaLinux</strong> (ZynqMP) image is sufficient; no custom distribution is required. The boot chain is the ordinary ZynqMP one: FSBL → PMU firmware → ATF (BL31) → U-Boot → Linux, with the bitstream loaded by the FSBL (or <code>fpga_manager</code>).</p>
+<p><strong>Register access (UIO).</strong> The NPU AXI4-Lite register block (CMD window, doorbell, <code>instr_ready</code>, <code>dma_slot_done</code>) and the AXI CDMA register block are exposed as <code>generic-uio</code> device-tree nodes (<code>uio_pdrv_genirq</code>); the user-space runtime <code>mmap</code>s <code>/dev/uioX</code> and pokes the registers directly. The CDMA is deliberately <em>not</em> bound to the in-kernel <code>dmaengine</code> driver, and <code>dma-proxy</code> is not used: the device commands its own copy engine.</p>
+<p><strong>Host buffers (udmabuf + CMA).</strong> The <strong>udmabuf</strong> out-of-tree kernel module (a PetaLinux recipe) allocates physically contiguous buffers from a reserved <strong>CMA</strong> region (sized via the <code>cma=</code> bootarg or a <code>reserved-memory</code> node) and exposes <code>/dev/udmabufX</code>. The runtime opens the node with <code>O_SYNC</code> for a <strong>non-cached</strong> mapping, which is what makes the memcpy path coherent with no explicit cache operations. Cached-with-explicit-<code>sync</code> and a coherent <strong>HPC</strong> port (CCI-400, <code>dma-coherent</code>, lower bandwidth) are alternatives; v1 uses the non-cached udmabuf as the minimal, known-good option.</p>
+<p><strong>SMMU and isolation.</strong> The ZynqMP SMMU does not translate the PL DMA master (its default state), so <code>host_phys</code> is used directly. The consequence: a PL master holding a physical address can reach any PS-DDR location. This is acceptable for a single-tenant appliance; a <code>vfio-platform</code> / SMMU path is the hardening option if isolation is later required.</p>
+<p><strong>Interconnect and engine choice.</strong> The PL→PS <strong>HP</strong> port carries the CDMA's PS-DDR traffic and the <strong>PL-DDR4 MIG</strong> backs device memory; both are instantiated in the board block design. An in-fabric <strong>AXI CDMA</strong> is chosen over the PS hardened GDMA/ADMA because the device must own its copy engine (the PS DMA is a host-side resource); the streaming AXI DMA does not apply (there is no stream endpoint). Nothing beyond the above is required.</p>
+<h2 id="runtime-and-portability">Runtime and portability<a class="headerlink" href="#runtime-and-portability" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><strong>Runtime</strong>: PetaLinux + C/C++ library; no bespoke kernel driver. <strong>UIO</strong>: MMIO for CMD window, doorbell, <code>instr_ready</code>, <code>dma_slot_done</code>. <strong>udmabuf</strong>: phys-contiguous CMA-backed host buffers. No PYNQ, no <code>dma-proxy</code>.</li>
+<li><strong>SMMU bypass</strong>: udmabuf is phys-direct; no IOMMU isolation in v1.</li>
+<li><strong>The CDMA is bundled under the device</strong>: a discrete accelerator owns its copy engine; the host only posts COPY descriptors (no host-side AXI master for bulk data).</li>
+<li><strong>Host interface = target-specific shell</strong>: ZCU102 v1 = PS HP port + AXI CDMA; PCIe-class target ([v3]) = PCIe endpoint + native DMA engine. The COPY interface to the command processor is unchanged.</li>
+<li><strong>Concurrent copy | compute = [v2]</strong>; v1 is sequential (FABRIC is single-master; depth-1 CMD window).</li>
+</ul>
+</details>
+<p><strong>Runtime.</strong> The v1 runtime (charter §4) is a pure user-space C/C++ library on PetaLinux, requiring no bespoke kernel driver. <strong>UIO</strong> (userspace I/O) maps the NPU AXI4-Lite register window into the process address space: the runtime writes the CMD window and doorbell via memory-mapped stores and polls <code>instr_ready</code> and <code>dma_slot_done</code> via memory-mapped loads. v1 uses polling throughout (UIO interrupt is an easy later addition). <strong>udmabuf</strong> provides physically contiguous host buffers from user-space (CMA-backed); the kernel returns both a virtual address for CPU access and the physical address (<code>host_phys</code>) for the COPY descriptor. The SMMU is <strong>bypassed</strong>: udmabuf is phys-direct and there is no IOMMU isolation in v1. The runtime does not invoke any Linux DMA API for bulk transfers: the device itself commands its copy engine, so the host's involvement is confined to descriptor write, doorbell ring, and <code>instr_ready</code> poll. The former PYNQ-based runtime is fully replaced.</p>
+<p><strong>Portability.</strong> The CDMA is <strong>bundled under the device</strong> (charter §3). The industry model for discrete accelerators is that the device owns its DMA engine and its memory controller; the host posts high-level commands (COPY descriptors) via the command channel rather than driving AXI masters itself. Consequently the host interface and interface tile are <strong>target-specific shells</strong>, analogous to how an SRAM cell maps to BRAM (FPGA) or a standard-cell SRAM (ASIC). In ZCU102 v1, the host interface is the Zynq PS HP port plus the Xilinx AXI CDMA IP; in a PCIe-class target ([v3]) it would be a PCIe endpoint plus a PCIe-native DMA engine, with the COPY interface to the command processor unchanged. The portable IP core is the compute tile (with its DMU and SPAD); the host interface and interface tile are swapped per board and technology target.</p>
+<p><strong>v1 scope.</strong> Concurrent copy | compute is <strong>[v2]-deferred</strong> (charter §10). In v1, FABRIC is a single-master bus and there is at most one COPY or LAUNCH in flight at a time (depth-1 CMD window, host-mediated sequencing). v2 adds chip-level concurrency: the copy engine runs while the compute tile computes (an async-memcpy API, COPY does not block a concurrent LAUNCH); deeper queueing is left as implicit future work. The ABI surface for v1 is minimal: CMD window, doorbell, <code>instr_ready</code>, <code>dma_slot_done</code>; the authoritative field map is <code>mininpu/abi.py</code> (→ <code>regmap_pkg.sv</code>).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="control_plane.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Control Plane">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Control Plane
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="abi.html" class="md-footer__link md-footer__link--next" aria-label="Next: ABI Register Map">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                ABI Register Map
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>

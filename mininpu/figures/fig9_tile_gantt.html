@@ -68,12 +68,12 @@
 <div class="wrap">
 <header>
   <h1>mininpu tile-loop pipeline Gantt <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 9</span></h1>
-  <p class="sub">one (m,n) block of the 32x32 GELU worked example (ISA 0.5.0) &middot; N=8 &middot; weight double-buffer ping-pong &middot; ACC depth-2 tail overlap &middot; steady state = 1 matmul / N=8 cy, load.w fully hidden</p>
+  <p class="sub">one (m,n) block of the 32x32 worked example (ISA 0.5.0) &middot; tail activation shown as <code>vpu.lut exp2</code> (0.5.0 retires the fused gelu; the decomposition is an open item) &middot; N=8 &middot; weight double-buffer ping-pong &middot; ACC depth-2 tail overlap &middot; steady state = 1 matmul / N=8 cy, load.w fully hidden</p>
   <div class="legend">
     <span><i class="sw" style="background:var(--ctrl-f);border-color:var(--ctrl)"></i>SEQ issue / control (ctrl)</span>
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu)"></i>MXU matmul stream / ACC accumulate (mxu)</span>
     <span><i class="sw" style="background:var(--mem-f);border-color:var(--mem)"></i>load.w / LSU acc.store &middot; vreg.store (mem)</span>
-    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU gelu (vpu)</span>
+    <span><i class="sw" style="background:var(--vpu-f);border-color:var(--vpu)"></i>VPU vpu.lut exp2 (vpu)</span>
     <span><i class="sw" style="background:var(--mxu-f);border-color:var(--mxu);border-style:dashed"></i>next-block matmul (ACC depth-2 overlap)</span>
   </div>
 </header>
@@ -162,17 +162,17 @@
   <rect class="b-mxu" x="336" y="192" width="495" height="30" rx="3"/>
   <text class="bt t-mxu" x="344" y="211">+= mm0 &middot; mm1 &middot; mm2 &middot; mm3   (each lands after systolic fill = 2N-1 + PE_LATENCY = 15 + 2 = 17)</text>
 
-  <!-- ===== VPU: gelu, D_vpu = 23 drain ===== -->
+  <!-- ===== VPU: exp2, D_vpu = 23 drain ===== -->
   <rect class="b-vpu" x="981" y="240" width="345" height="30" rx="3"/>
-  <text class="bt t-vpu" x="988" y="259">vpu.lut gelu (D_vpu = 23, latency-serial: 1 row / D_vpu, not row-pipelined)</text>
+  <text class="bt t-vpu" x="988" y="259">vpu.lut exp2 (D_vpu = 23, latency-serial: 1 row / D_vpu, not row-pipelined)</text>
 
-  <!-- ===== LSU: acc.store -> (gelu) -> vreg.store ===== -->
+  <!-- ===== LSU: acc.store -> (exp2) -> vreg.store ===== -->
   <rect class="b-mem" x="831" y="288" width="150" height="30" rx="3"/>
   <text class="bt t-mem" x="906" y="307" text-anchor="middle">acc.store (10)</text>
   <rect class="b-mem" x="1326" y="288" width="150" height="30" rx="3"/>
   <text class="bt t-mem" x="1401" y="307" text-anchor="middle">vreg.store (10)</text>
 
-  <!-- dependency risers for the tail chain ACC -> acc.store -> gelu -> vreg.store -->
+  <!-- dependency risers for the tail chain ACC -> acc.store -> exp2 -> vreg.store -->
   <line class="grid" x1="831"  y1="222" x2="831"  y2="288" style="opacity:.7"/>
   <line class="grid" x1="981"  y1="270" x2="981"  y2="288" style="opacity:.7"/>
   <line class="grid" x1="1326" y1="270" x2="1326" y2="288" style="opacity:.7"/>
@@ -187,12 +187,12 @@
   other loads the next tile's weights (<code>load.w ~ N=8</code>), so <code>load.w</code> is
   fully hidden. Each matmul result reaches ACC after the systolic fill
   <code>2N-1 + PE_LATENCY = 15 + 2 = 17</code>. The <b>ACC depth-2 double-buffer</b> lets
-  block <code>j</code>'s drain / store tail (<code>acc.store</code> to gelu to
+  block <code>j</code>'s drain / store tail (<code>acc.store</code> to <code>exp2</code> to
   <code>vreg.store</code>) overlap block <code>j+1</code>'s matmul (dashed bar).
-  The gelu here is <code>vpu.lut</code>, which is <b>latency-serial</b> (each row drains
+  The <code>exp2</code> here is <code>vpu.lut</code>, which is <b>latency-serial</b> (each row drains
   the full <code>D_vpu = 23</code> before the next issues, not freely row-pipelined like
   the single-source SIMD ops). It is hidden only because the ACC depth-2 buffer overlaps
-  this <code>acc.store</code> to gelu to <code>vreg.store</code> tail (plus the
+  this <code>acc.store</code> to <code>exp2</code> to <code>vreg.store</code> tail (plus the
   <code>LSU = 10</code> latency) with block <code>j+1</code>'s matmul, so on an MXU-bound
   tile-loop it stays off the throughput critical path.
 </p>

@@ -74,7 +74,7 @@
 <div class="wrap">
 <header>
   <h1>VPU pipeline - uniform D_vpu = 23 terminal <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 13</span></h1>
-  <p class="sub">Every VPU function has the SAME issue-to-write latency D_vpu = 23 &middot; deepest (gelu) sets it, shorter functions pad to the same terminal &middot; shared fp_mul/fp_add both LATENCY=2</p>
+  <p class="sub">as-built 0.4.0 &middot; Every VPU function has the SAME issue-to-write latency D_vpu = 23 &middot; deepest (the fused gelu) sets it, shorter functions pad to the same terminal &middot; ISA 0.5.0 retires gelu, so the depth-setter (and D_vpu) may change at the cutover &middot; shared fp_mul/fp_add both LATENCY=2</p>
   <div class="legend">
     <span><i class="sw" style="background:color-mix(in srgb,var(--ext) 26%,var(--chip));border-color:var(--ext)"></i>VREG/ACC read (async, held)</span>
     <span><i class="sw" style="background:color-mix(in srgb,var(--vpu) 20%,var(--chip));border-color:var(--vpu)"></i>fp_mul L=2 (+ stage flop)</span>
@@ -200,7 +200,7 @@
 <div class="card">
   <h2>Reference - FIG. 13 (RTL-verified, vpu_ctrl.sv / vpu_gelu_unit.sv)</h2>
   <ul>
-    <li><b>D_vpu = 23</b>, uniform issue-to-write for every function (<code>stage_cnt</code> terminal). gelu (deepest) sets it; shorter functions pad. Source: <code>vpu_ctrl.sv</code> LOCKED-depth block.</li>
+    <li><b>D_vpu = 23</b> (as-built 0.4.0), uniform issue-to-write <b>latency</b> for every function (<code>stage_cnt</code> terminal). The fused gelu (deepest) sets it; shorter functions pad. Per-row FSM <b>occupancy is 24</b> = latency 23 + 1 reset cycle (<code>stage_cnt</code> 0..23 inclusive), so an 8-row latency-serial op takes 8 x 24 = 192 cy. ISA 0.5.0 retires gelu, so the depth-setter (and possibly D_vpu) changes at the cutover. Source: <code>vpu_ctrl.sv</code> LOCKED-depth block (<code>:417</code>, <code>:436-446</code>, <code>:1153-1161</code>).</li>
     <li><b>gelu ~22 stages:</b> x2 @s3, x3 @s6, c3x3 @s9, poly @s12, z @s15, tanh @s16, (1+t) @s19 &amp; half_x @s19, out @s22; + 1 BRAM-read cycle = D_vpu 23. Each fp_mul/fp_add is L=2 + a stage flop (3 stages, clean result). Source: <code>vpu_gelu_unit.sv</code>.</li>
     <li><b>exp2 = 5:</b> input @ cycle 1, result @ cycle 6 (BRAM 2^x chain; the embedded <code>u_f_sub</code> is fp_add L=2). Source: <code>fp_exp2_bram.sv</code>, vpu_ctrl stage schedule.</li>
     <li><b>reduce-tree ADD = 3*DEPTH = 9</b> (DEPTH = log2(N) = 3): 2*DEPTH fp_add internal FFs + DEPTH inter-level FFs. MAX tree is DEPTH only. Source: <code>fp_reduce_tree.sv</code>.</li>

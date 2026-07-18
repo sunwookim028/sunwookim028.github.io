@@ -240,7 +240,7 @@
     <text x="1004" y="454" class="d2">- vector unit · own FSM · touches VREG only · function via flags</text>
     <text x="1632" y="452" class="ref" text-anchor="end">140</text>
     <rect class="b-vpu rf" x="892" y="462" width="740" height="46" rx="5"/>
-    <text x="906" y="480" class="ti t-vpu" font-size="12.5">VREG - 32 &times; [8&times;8] fp32 · 8 KiB · 2r1w async whole-tile-row RF (LOCKED)</text>
+    <text x="906" y="480" class="ti t-vpu" font-size="12.5">VREG - 32 &times; [8&times;8] fp32 · 8 KiB · 2r1w async whole-tile-row RF (AS-BUILT; flat 1D is the rework-B target, #385 §5 #1)</text>
     <text x="906" y="497" class="d2">2r1w: read A = MXU X-stream (206) · read B = LSU · write = LSU (2nd write sizing-only) · conflict-free by temporal separation (MXU X-read burst vs foreground VPU/LSU access in disjoint cycles) · col0 = per-row scalars</text>
     <text x="1626" y="479" class="ref" text-anchor="end">142</text>
     <rect class="inner" x="892" y="514" width="170" height="36" rx="3"/>
@@ -248,10 +248,10 @@
     <rect class="inner" x="1070" y="514" width="272" height="36" rx="3"/>
     <text x="1080" y="530" class="d">reduce - &Sigma;/max &rarr; col0</text><text x="1080" y="545" class="d2">vpu.reduce {sum,max}</text><text x="1334" y="528" class="refs" text-anchor="end">146</text>
     <rect class="inner" x="1350" y="514" width="282" height="36" rx="3"/>
-    <text x="1360" y="530" class="d">LUT - exp(e)·rsqrt·gelu</text><text x="1360" y="545" class="d2">vectorized · vpu.lut</text><text x="1624" y="528" class="refs" text-anchor="end">148</text>
+    <text x="1360" y="530" class="d">LUT - exp2 · rsqrt · recip · tanh</text><text x="1360" y="545" class="d2">vectorized · vpu.lut</text><text x="1624" y="528" class="refs" text-anchor="end">148</text>
     <rect class="inner" x="892" y="556" width="740" height="46" rx="3"/>
     <text x="902" y="574" class="d">lane &times; N - SIMD lane-ALU (fp_mul / fp_add / fp_max)</text>
-    <text x="902" y="591" class="d2">vpu.simd funct{add sub mul max fma mov} &times; bcast{none,row,col,imm} · flags[5]=reserved-0</text>
+    <text x="902" y="591" class="d2">vpu.simd funct{add sub mul max fma mov div} (3-bit, 7 of 8 defined) &times; bcast{none,row,col,imm} · flags[5]=reserved-0</text>
     <text x="1624" y="573" class="refs" text-anchor="end">150</text>
     <rect class="agu" x="892" y="608" width="740" height="28" rx="3"/>
     <text x="902" y="626" class="d2">addr-gen · base + bo[ch] (adder, no multiplier)</text><text x="1624" y="625" class="refs" text-anchor="end">152</text>
@@ -314,10 +314,10 @@
     <li class="nw"><b>137</b> MXU addr-gen (adder, no multiplier)</li>
     <li><b>138</b> ACC (8 col-banks &times; depth 2, MXU-owned)</li>
     <li><b>140</b> VPU engine</li>
-    <li><b>142</b> VREG (32 &times; [8&times;8] fp32, 8 KiB, 2r1w async whole-tile-row)</li>
+    <li><b>142</b> VREG (as-built 32 &times; [8&times;8] fp32, 8 KiB, 2r1w async whole-tile-row; flat 1D in rework B)</li>
     <li><b>144</b> LSU (cast · vreg.load/store · acc.store)</li>
     <li><b>146</b> vpu_reduce_unit</li>
-    <li><b>148</b> LUT ROM (exp/rsqrt/gelu)</li>
+    <li><b>148</b> LUT ROM (exp2 / rsqrt / recip / tanh; gelu is decomposed, not a LUT fn)</li>
     <li><b>150</b> lane&times;N SIMD array</li>
     <li class="nw"><b>152</b> VPU addr-gen (adder, no multiplier)</li>
     <li><b>160</b> DMU (black box behind SPAD)</li>
@@ -359,7 +359,7 @@
         <li><b>Tile sequencer</b> (110): <code>pc</code> + <code>decoder</code> + <code>pc_iram</code> + <code>loop_ctrl</code> as separate modules + dispatch (iv_reg + descriptor); engine micro-FSMs live in the engines.</li>
         <li><b>Launch I/F</b>: CP (190) DMAs the binary to IRAM[0] (220), <code>start</code> (222), <code>done</code> (224).</li>
         <li><code>mxu.acc.init</code> bias-preload (204) into ACC (8 col-banks &times; depth 2, 138).</li>
-        <li>VREG (142) = 32 &times; [8&times;8] fp32 (8 KiB), 2r1w async whole-tile-row RF; VREG&rarr;MXU stream-read with <b>fp32&rarr;bf16 cast at the MXU X-input</b> (206, RS) - bf16&times;bf16 PE, fp32 accum.</li>
+        <li>VREG (142) = as-built 32 &times; [8&times;8] fp32 (8 KiB), 2r1w async whole-tile-row RF (flat 1D in rework B); VREG&rarr;MXU stream-read with <b>fp32&rarr;bf16 cast at the MXU X-input</b> (206, RS) - bf16&times;bf16 PE, fp32 accum.</li>
         <li><code>acc.store</code> (210) ACC&rarr;VREG (LSU); <code>vreg.store</code> VREG&rarr;SPAD.</li>
       </ul>
     </div>
@@ -374,7 +374,7 @@
       <div class="row nw"><span class="hx">0x02</span><code>mxu.acc.init</code><span class="fx">bias &rarr; ACC (bcast preload)</span></div>
       <div class="grp">VPU · vector (140, VREG-only)</div>
       <div class="row"><span class="hx">0x10</span><code>vpu.reduce</code><span class="fx">sum / max &rarr; col0</span></div>
-      <div class="row"><span class="hx">0x11</span><code>vpu.lut</code><span class="fx">exp(e) / rsqrt / gelu</span></div>
+      <div class="row"><span class="hx">0x11</span><code>vpu.lut</code><span class="fx">exp2 / rsqrt / recip / tanh</span></div>
       <div class="row"><span class="hx">0x12</span><code>vpu.simd</code><span class="fx">funct&times;bcast</span></div>
       <div class="grp">register move</div>
       <div class="row"><span class="hx">0x30</span><code>acc.store</code><span class="fx">ACC&rarr;VREG fp32</span></div>

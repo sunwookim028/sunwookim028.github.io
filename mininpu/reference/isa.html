@@ -10,29 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/index.html">
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/reference/isa.html">
       
       
+        <link rel="prev" href="abi.html">
       
-        <link rel="next" href="runtime.html">
+      
+        <link rel="next" href="interface_tile.html">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>mininpu documentation</title>
+        <title>ISA Reference - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +53,7 @@
       
     
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#an-asic-bound-npu-compute-tile-specified-end-to-end" class="md-skip">
+        <a href="#mininpu-isa-opcode-reference" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              ISA Reference
             
           </span>
         </div>
@@ -216,7 +218,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -231,37 +233,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="index.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
         
   
   
@@ -277,176 +252,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#01-compute-tile" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        01 Compute tile
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="01 Compute tile">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#doc-1-isa-050-specification-locked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 1 ISA 0.5.0 Specification (Locked)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-2-reference-microarchitecture-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 2 Reference Microarchitecture (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-3-implementation-files-modules-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 3 Implementation (Files &amp; Modules) (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-4-dmu-data-moving-unit-design-brief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 4 DMU: Data Moving Unit (Design brief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-5-gpt-2-kernels-placeholder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 5 GPT-2 Kernels (Placeholder)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#02-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        02 Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#03-host-runtime" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        03 Host runtime
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="03 Host runtime">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#host-runtime-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Runtime API
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#04-compiler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        04 Compiler
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#05-figures" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        05 Figures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="05 Figures">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fig-6-tile-sequencer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FIG. 6 Tile sequencer
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -458,7 +263,7 @@
   
   
     <li class="md-nav__item">
-      <a href="runtime.html" class="md-nav__link">
+      <a href="../runtime.html" class="md-nav__link">
         
   
   
@@ -537,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/isa.html" class="md-nav__link">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
         
   
   
@@ -565,7 +370,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/microarch.html" class="md-nav__link">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
         
   
   
@@ -593,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/implementation.html" class="md-nav__link">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
         
   
   
@@ -621,7 +426,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/dmu.html" class="md-nav__link">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
         
   
   
@@ -649,7 +454,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/gpt2_kernels.html" class="md-nav__link">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
         
   
   
@@ -681,8 +486,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -693,11 +500,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
@@ -718,7 +525,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -736,7 +543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/architecture.html" class="md-nav__link">
+      <a href="architecture.html" class="md-nav__link">
         
   
   
@@ -764,7 +571,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/data_movement.html" class="md-nav__link">
+      <a href="data_movement.html" class="md-nav__link">
         
   
   
@@ -792,7 +599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/control_plane.html" class="md-nav__link">
+      <a href="control_plane.html" class="md-nav__link">
         
   
   
@@ -820,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/host_interface.html" class="md-nav__link">
+      <a href="host_interface.html" class="md-nav__link">
         
   
   
@@ -848,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/abi.html" class="md-nav__link">
+      <a href="abi.html" class="md-nav__link">
         
   
   
@@ -873,10 +680,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="reference/isa.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="isa.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -892,6 +726,98 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-read-the-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to read the tables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-64-bit-instruction-word" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 64-bit instruction word
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 64-bit instruction word">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flags
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wide-immediates-the-literal-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wide immediates: the literal pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#active-instruction-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Active instruction set
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reserved-opcode-space" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved opcode space
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -904,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/interface_tile.html" class="md-nav__link">
+      <a href="interface_tile.html" class="md-nav__link">
         
   
   
@@ -932,7 +858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/compute_tile.html" class="md-nav__link">
+      <a href="compute_tile.html" class="md-nav__link">
         
   
   
@@ -960,7 +886,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/memory_tile.html" class="md-nav__link">
+      <a href="memory_tile.html" class="md-nav__link">
         
   
   
@@ -988,7 +914,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/sequencer.html" class="md-nav__link">
+      <a href="sequencer.html" class="md-nav__link">
         
   
   
@@ -1016,7 +942,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/mxu.html" class="md-nav__link">
+      <a href="mxu.html" class="md-nav__link">
         
   
   
@@ -1044,7 +970,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/vpu.html" class="md-nav__link">
+      <a href="vpu.html" class="md-nav__link">
         
   
   
@@ -1072,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/dmu.html" class="md-nav__link">
+      <a href="dmu.html" class="md-nav__link">
         
   
   
@@ -1159,7 +1085,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/index.html" class="md-nav__link">
+      <a href="../labs/index.html" class="md-nav__link">
         
   
   
@@ -1187,7 +1113,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/introduction.html" class="md-nav__link">
+      <a href="../labs/introduction.html" class="md-nav__link">
         
   
   
@@ -1215,7 +1141,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab1-vpu.html" class="md-nav__link">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
         
   
   
@@ -1243,7 +1169,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab2-systolic.html" class="md-nav__link">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
         
   
   
@@ -1271,7 +1197,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab3-dma.html" class="md-nav__link">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
         
   
   
@@ -1299,7 +1225,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab4-kernels.html" class="md-nav__link">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
         
   
   
@@ -1327,7 +1253,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab5-serving.html" class="md-nav__link">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
         
   
   
@@ -1362,7 +1288,7 @@
   
   
     <li class="md-nav__item">
-      <a href="figures/index.html" class="md-nav__link">
+      <a href="../figures/index.html" class="md-nav__link">
         
   
   
@@ -1409,22 +1335,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#01-compute-tile" class="md-nav__link">
+  <a href="#how-to-read-the-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        01 Compute tile
+        How to read the tables
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="01 Compute tile">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-64-bit-instruction-word" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 64-bit instruction word
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The 64-bit instruction word">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#doc-1-isa-050-specification-locked" class="md-nav__link">
+  <a href="#flags" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Doc 1 ISA 0.5.0 Specification (Locked)
+        Flags
       
     </span>
   </a>
@@ -1432,43 +1369,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#doc-2-reference-microarchitecture-in-progress" class="md-nav__link">
+  <a href="#wide-immediates-the-literal-pool" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Doc 2 Reference Microarchitecture (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-3-implementation-files-modules-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 3 Implementation (Files &amp; Modules) (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-4-dmu-data-moving-unit-design-brief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 4 DMU: Data Moving Unit (Design brief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-5-gpt-2-kernels-placeholder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 5 GPT-2 Kernels (Placeholder)
+        Wide immediates: the literal pool
       
     </span>
   </a>
@@ -1481,10 +1385,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#02-reference" class="md-nav__link">
+  <a href="#active-instruction-set" class="md-nav__link">
     <span class="md-ellipsis">
       
-        02 Reference
+        Active instruction set
       
     </span>
   </a>
@@ -1492,69 +1396,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#03-host-runtime" class="md-nav__link">
+  <a href="#reserved-opcode-space" class="md-nav__link">
     <span class="md-ellipsis">
       
-        03 Host runtime
+        Reserved opcode space
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="03 Host runtime">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#host-runtime-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Runtime API
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#04-compiler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        04 Compiler
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#05-figures" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        05 Figures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="05 Figures">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fig-6-tile-sequencer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FIG. 6 Tile sequencer
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1575,57 +1423,375 @@
 
 
 
-<h1 id="an-asic-bound-npu-compute-tile-specified-end-to-end">An ASIC-bound NPU compute tile, specified end to end<a class="headerlink" href="#an-asic-bound-npu-compute-tile-specified-end-to-end" title="Permanent link">&para;</a></h1>
-<p>mininpu &middot; documentation</p>
-<p>A composable NPU IP template (MXU / VPU / tile / NoC) built as an IO-attached discrete accelerator, plus the host runtime that drives it and the compiler that targets it. FPGA is a test platform only; the design stays ASIC-targeting.</p>
-<ul>
-<li><strong>ISA 0.5.0</strong> &middot; 15 opcodes</li>
-<li>geometry <strong>N=8</strong></li>
-<li>VREG <strong>32 fp32 vector registers</strong> (flat 1D; as-built RTL still 2D <code>[8x8]</code>)</li>
-<li>on-chip SPAD <strong>32 KiB</strong></li>
-<li>target <strong>GPT-2</strong></li>
-</ul>
-<h2 id="01-compute-tile">01 Compute tile<a class="headerlink" href="#01-compute-tile" title="Permanent link">&para;</a></h2>
-<p>The compute-tile design in five documents. Doc 1 is frozen; the rest are at varying stages.</p>
-<div class="admonition info">
-<p class="admonition-title">Spec vs RTL as-built</p>
-<p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. The generated, drift-guarded <a href="reference/isa.html">ISA Reference</a> and <a href="reference/abi.html">ABI Reference</a> are derived from <code>mininpu/isa</code> and <code>mininpu/abi.py</code> and report the <strong>as-built</strong> set.</p>
+<!-- GENERATED by docs/scripts/gen_isa_abi_md.py from mininpu/isa -- DO NOT EDIT. -->
+
+<h1 id="mininpu-isa-opcode-reference">mininpu ISA: Opcode Reference<a class="headerlink" href="#mininpu-isa-opcode-reference" title="Permanent link">&para;</a></h1>
+<p><strong>ISA_VERSION 0.4.0</strong> · <strong>28</strong> active <code>[v1]</code> opcodes · <strong>12</strong> reserved <em>[serving]</em> opcodes · <strong>64-bit</strong> instruction word</p>
+<div class="admonition warning">
+<p class="admonition-title">Generated page: do not hand-edit</p>
+<p>This page is generated from <code>mininpu/isa</code> (the SSOT) by
+<code>docs/scripts/gen_isa_abi_md.py</code>. Edit the SSOT and run <code>make generate-docs-md</code>;
+hand-edits are overwritten and fail the drift gate
+(<code>dv/test_abi_contract.py::test_generated_docs_up_to_date</code>).</p>
 </div>
-<h3 id="doc-1-isa-050-specification-locked"><code>Doc 1</code> <a href="compute_tile/isa.html">ISA 0.5.0 Specification</a> (Locked)<a class="headerlink" href="#doc-1-isa-050-specification-locked" title="Permanent link">&para;</a></h3>
-<p>The complete instruction-set reference: 15 opcodes, 64-bit fixed word, in-order single issue, no hardware interlock, and the full compiler scheduling contract.</p>
-<h3 id="doc-2-reference-microarchitecture-in-progress"><code>Doc 2</code> <a href="compute_tile/microarch.html">Reference Microarchitecture</a> (In progress)<a class="headerlink" href="#doc-2-reference-microarchitecture-in-progress" title="Permanent link">&para;</a></h3>
-<p>The datapath behind the ISA: concurrency model, per-unit AGU, MXU / VPU / VREG / ACC / SPAD, and the MXU-VPU software pipeline. Locked design plus open decisions.</p>
-<h3 id="doc-3-implementation-files-modules-in-progress"><code>Doc 3</code> <a href="compute_tile/implementation.html">Implementation (Files &amp; Modules)</a> (In progress)<a class="headerlink" href="#doc-3-implementation-files-modules-in-progress" title="Permanent link">&para;</a></h3>
-<p>How the design maps to RTL: the tile-sequencer fold, DMU internals, and the target file/module hierarchy. Locked decisions plus pending proposals.</p>
-<h3 id="doc-4-dmu-data-moving-unit-design-brief"><code>Doc 4</code> <a href="compute_tile/dmu.html">DMU: Data Moving Unit</a> (Design brief)<a class="headerlink" href="#doc-4-dmu-data-moving-unit-design-brief" title="Permanent link">&para;</a></h3>
-<p>The async DMA unit: 2 slots, load 0x40 / store 0x42, v1 single-outstanding, SPAD only. Split into the LOCKED contract and the OPEN implementer design space.</p>
-<h3 id="doc-5-gpt-2-kernels-placeholder"><code>Doc 5</code> <a href="compute_tile/gpt2_kernels.html">GPT-2 Kernels</a> (Placeholder)<a class="headerlink" href="#doc-5-gpt-2-kernels-placeholder" title="Permanent link">&para;</a></h3>
-<p>GPT-2 is the worked example, but it is currently documented in code and DV paths rather than as a doc page. The page points at those paths until it is authored.</p>
-<h2 id="02-reference">02 Reference<a class="headerlink" href="#02-reference" title="Permanent link">&para;</a></h2>
-<p>The 13-topic technical corpus. Each page carries both the handout prose and the
-deck bullets from the single source it was migrated from (the former LaTeX
-corpus, which built a PDF handout and a slide deck per topic; all of it is now
-deleted, and these pages are the source of truth).</p>
+<p>This is the opcode reference for mininpu's instruction set. The authoritative source is <code>mininpu/isa</code> (the ISA SSOT), which owns every opcode value, mnemonic, encoder, and the instruction-word field layout. Every table and every count on this page is derived from that module at generation time, so they cannot drift from code.</p>
+<h2 id="how-to-read-the-tables">How to read the tables<a class="headerlink" href="#how-to-read-the-tables" title="Permanent link">&para;</a></h2>
+<p>The opcode space is split into two SEPARATE tables, not one table with a tier column, so the size of the active instruction set is unambiguous.</p>
 <ul>
-<li><a href="reference/architecture.html">Architecture</a> · <a href="reference/data_movement.html">Data Movement</a></li>
-<li><a href="reference/control_plane.html">Control Plane</a> · <a href="reference/host_interface.html">Host Interface</a> · <a href="reference/abi.html">ABI Register Map</a> · <a href="reference/isa.html">ISA Reference</a></li>
-<li><a href="reference/interface_tile.html">Interface Tile</a> · <a href="reference/compute_tile.html">Compute Tile</a> · <a href="reference/memory_tile.html">Memory Tile [v3]</a></li>
-<li><a href="reference/sequencer.html">Sequencer</a> · <a href="reference/mxu.html">MXU</a> · <a href="reference/vpu.html">VPU</a> · <a href="reference/dmu.html">DMU</a></li>
+<li>The <a href="#active-instruction-set">Active instruction set</a> table holds exactly the <code>[v1]</code> opcodes: implemented in RTL / ISS and usable on <code>main</code> today. Its row count (28) IS the v1 ISA size.</li>
+<li>The <a href="#reserved-opcode-space">Reserved opcode space</a> table holds the <em>[serving]</em> opcodes: their numeric values are reserved on <code>main</code> (claimed so they cannot be reused for a different instruction) but are <strong>not</strong> active here (no encoder, no RTL, no ISS handler) and are implemented only on the serving extension branch. The 12 rows there are claimed opcode values, not additional active instructions.</li>
+<li>Within each table, rows are ordered by opcode value. The <strong>Semantics</strong> column is the normative one-line description carried next to each opcode in the SSOT (the <code>SEMANTICS</code> map), so each table is self-contained: it states what every opcode computes without cross-referencing another document.</li>
 </ul>
-<p>Figures on these pages are committed SVG assets under
-<a href="figures/index.html"><code>figures/tikz/</code></a>, embedded inline with their captions
-preserved.</p>
-<h2 id="03-host-runtime">03 Host runtime<a class="headerlink" href="#03-host-runtime" title="Permanent link">&para;</a></h2>
-<h3 id="host-runtime-api"><a href="runtime.html">Host Runtime API</a><a class="headerlink" href="#host-runtime-api" title="Permanent link">&para;</a></h3>
-<p>The in-repo host runtime (<code>mininpu/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. The page covers device selection (<code>mininpuSetDevice</code>), pinned host allocation (<code>mininpuHostAlloc</code>), synchronous and async copies (<code>mininpuMemcpy</code> / <code>mininpuMemcpyAsync</code>), kernel launch (<code>mininpuLaunchKernel</code>), the Board HAL types they hand back (<code>HostRegion</code>, <code>Mmio</code> / <code>UioMmio</code>, <code>UdmabufBuffer</code>), and a call-by-call CUDA correspondence table.</p>
-<h2 id="04-compiler">04 Compiler<a class="headerlink" href="#04-compiler" title="Permanent link">&para;</a></h2>
-<p>The compiler is developed in a separate repository and published as its own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal extensible compiler framework lowering Triton to the NPU ISA.</p>
-<h2 id="05-figures">05 Figures<a class="headerlink" href="#05-figures" title="Permanent link">&para;</a></h2>
-<p>The document text is now the authoritative source for the compute-tile model. The earlier per-unit block diagrams (compute-tile overview, VPU, MXU, SPAD) were superseded and mutually overlapping, so they have been retired to keep no two figures covering the same content and nothing contradicting the text. Per-unit pipeline diagrams will be re-authored later; until then, see the doc text for the current model. Only the tile-sequencer figure remains current.</p>
-<h3 id="fig-6-tile-sequencer"><code>FIG. 6</code> <a href="figures/fig6_sequencer.html">Tile sequencer</a><a class="headerlink" href="#fig-6-tile-sequencer" title="Permanent link">&para;</a></h3>
-<p>Issue unit: IRAM 4096 x 64b + folded PC and decoder, induction-variable broadcast, loop-frame stack.</p>
-<hr />
-<p>mininpu &middot; documentation &middot; <code>GLOSSARY.md</code> &middot; <code>docs/charter.md</code></p>
+<p>Notation: <code>ACC[r]</code> = fp32 tile row, <code>SPM[r]</code> = bf16 tile row, <code>VREG[v]</code> = fp32 vector reg.</p>
+<p>The opcode high nibble names the dispatch group (<code>0x0_</code> matmul, <code>0x1_</code>/<code>0x2_</code> vector, <code>0x3_</code> cast, <code>0x4_</code> DMA, <code>0x5_</code> control), which the sequencer routes to an engine or control sub-FSM.</p>
+<h2 id="the-64-bit-instruction-word">The 64-bit instruction word<a class="headerlink" href="#the-64-bit-instruction-word" title="Permanent link">&para;</a></h2>
+<p>Every opcode on this page is encoded in a single 64-bit instruction word. The field layout is the SSOT in <code>mininpu/isa</code> (<code>FIELDS_INSTR</code>) and is decoded layout-only before dispatch. Bit positions below are read from <code>FIELDS_INSTR</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Bits</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>op</code></td>
+<td><code>[63:56]</code></td>
+<td>8-bit operation selector; the dispatch key (the Opcode column below).</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td><code>[55:48]</code></td>
+<td>8-bit per-instruction flags; see the flag table below. <code>flags[7:6]</code> = storage dtype (BF16 in [v1]).</td>
+</tr>
+<tr>
+<td><code>op0</code></td>
+<td><code>[47:32]</code></td>
+<td>16-bit operand 0.</td>
+</tr>
+<tr>
+<td><code>op1</code></td>
+<td><code>[31:16]</code></td>
+<td>16-bit operand 1.</td>
+</tr>
+<tr>
+<td><code>op2</code></td>
+<td><code>[15:0]</code></td>
+<td>16-bit operand 2.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flags">Flags<a class="headerlink" href="#flags" title="Permanent link">&para;</a></h3>
+<p>Bit positions are read from the <code>isa.FLAG_*</code> constants. A flag bit is only meaningful for the opcodes whose Semantics column names it:</p>
+<table>
+<thead>
+<tr>
+<th>Bits</th>
+<th>SSOT constant</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flags[0]</code></td>
+<td><code>FLAG_MATMUL_ACCUMULATE_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[0]</code></td>
+<td><code>FLAG_MXU_LOAD_W_TRANS_B_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[1]</code></td>
+<td><code>FLAG_MATMUL_CAUSAL_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[3]</code></td>
+<td><code>FLAG_IMM_OP0_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[4]</code></td>
+<td><code>FLAG_IMM_OP1_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[5]</code></td>
+<td><code>FLAG_ASYNC_BIT</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>flags[7:6]</code></td>
+<td><code>FLAG_RESERVED_HI_LSB</code> / <code>FLAG_RESERVED_HI_WIDTH</code></td>
+<td>storage dtype; BF16 in [v1]</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wide-immediates-the-literal-pool">Wide immediates: the literal pool<a class="headerlink" href="#wide-immediates-the-literal-pool" title="Permanent link">&para;</a></h3>
+<p>A wide immediate does not fit a 16-bit operand slot, so the slot carries a literal-pool INDEX and the pool entry carries the value(s). The layout below is read from <code>isa.POOL_LAYOUT</code>; for the full fetch / decode / dispatch walkthrough and the pool-fetch mechanism, see the sequencer documentation.</p>
+<table>
+<thead>
+<tr>
+<th>Opcode</th>
+<th>Mnemonic</th>
+<th>Pool-index slot</th>
+<th>Adjacent slots</th>
+<th>Names</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x27</code></td>
+<td><code>vpu.fma.imm</code></td>
+<td><code>op2</code></td>
+<td>2</td>
+<td><code>scale</code>, <code>bias</code></td>
+</tr>
+<tr>
+<td><code>0x40</code></td>
+<td><code>dmu.load.spm</code></td>
+<td><code>op1</code></td>
+<td>2</td>
+<td><code>dram_addr</code>, <code>dram_stride</code></td>
+</tr>
+<tr>
+<td><code>0x42</code></td>
+<td><code>dmu.store.spm</code></td>
+<td><code>op1</code></td>
+<td>2</td>
+<td><code>dram_addr</code>, <code>dram_stride</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="active-instruction-set">Active instruction set<a class="headerlink" href="#active-instruction-set" title="Permanent link">&para;</a></h2>
+<p>The complete v1 ISA: 28 opcodes (<code>[v1]</code>, ISA_VERSION 0.4.0). Every opcode below is implemented in RTL decode/dispatch and the functional simulator.</p>
+<table>
+<thead>
+<tr>
+<th>Opcode</th>
+<th>Mnemonic</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x00</code></td>
+<td><code>mxu.load.w</code></td>
+<td><code>weight_buf_next &lt;- SPM[spm_w]  (N×N tile; transB=flags[0] reverses load order; no compute, no switch)</code></td>
+</tr>
+<tr>
+<td><code>0x01</code></td>
+<td><code>mxu.matmul</code></td>
+<td><code>acc_out = (accum? acc_out:0) + spm_x @ W_active^T; implicit switch promotes last mxu.load.w to active; causal=flags[1]</code></td>
+</tr>
+<tr>
+<td><code>0x10</code></td>
+<td><code>vpu.rowmax</code></td>
+<td><code>VREG[dst][i] = max_j ACC[src][i,j]</code></td>
+</tr>
+<tr>
+<td><code>0x11</code></td>
+<td><code>vpu.rowsum</code></td>
+<td><code>VREG[dst][i] = Σ_j ACC[src][i,j]</code></td>
+</tr>
+<tr>
+<td><code>0x12</code></td>
+<td><code>vpu.exp2</code></td>
+<td><code>ACC[dst][i,j] = exp2(ACC[src][i,j])  (LUT in HW)</code></td>
+</tr>
+<tr>
+<td><code>0x13</code></td>
+<td><code>vpu.scale.bcast</code></td>
+<td><code>ACC[dst][i,j] = VREG[c][i] * ACC[src][i,j]  (bcast cols)</code></td>
+</tr>
+<tr>
+<td><code>0x14</code></td>
+<td><code>vpu.scale.imm</code></td>
+<td><code>ACC[dst][i,j] = imm32 * ACC[src][i,j]</code></td>
+</tr>
+<tr>
+<td><code>0x15</code></td>
+<td><code>vpu.sub.bcast</code></td>
+<td><code>ACC[dst][i,j] = ACC[src][i,j] − VREG[c][i]</code></td>
+</tr>
+<tr>
+<td><code>0x16</code></td>
+<td><code>vpu.div.bcast</code></td>
+<td><code>ACC[dst][i,j] = ACC[src][i,j] / VREG[c][i]</code></td>
+</tr>
+<tr>
+<td><code>0x17</code></td>
+<td><code>vpu.zero.acc</code></td>
+<td><code>ACC[dst][0:rows,0:cols] = 0</code></td>
+</tr>
+<tr>
+<td><code>0x19</code></td>
+<td><code>vpu.mul.acc</code></td>
+<td><code>ACC[dst][i,j] = ACC[a][i,j] * ACC[b][i,j]</code></td>
+</tr>
+<tr>
+<td><code>0x1A</code></td>
+<td><code>vpu.add.acc</code></td>
+<td><code>ACC[dst][i,j] = ACC[a][i,j] + ACC[b][i,j]</code></td>
+</tr>
+<tr>
+<td><code>0x1B</code></td>
+<td><code>vpu.add.col.bcast</code></td>
+<td><code>ACC[dst][i,j] = ACC[src][i,j] + VREG[c][j]  (bcast rows; LN beta / Linear bias)</code></td>
+</tr>
+<tr>
+<td><code>0x1C</code></td>
+<td><code>vpu.scale.col.bcast</code></td>
+<td><code>ACC[dst][i,j] = VREG[c][j] * ACC[src][i,j]  (bcast rows)</code></td>
+</tr>
+<tr>
+<td><code>0x1D</code></td>
+<td><code>vpu.gelu</code></td>
+<td><code>ACC[dst][i,j] = gelu_new(x); tanh-approx GELU, tanh via BRAM LUT</code></td>
+</tr>
+<tr>
+<td><code>0x26</code></td>
+<td><code>vpu.rsqrt</code></td>
+<td><code>VREG[dst][i] = 1/sqrt(VREG[src][i]); domain src&gt;0</code></td>
+</tr>
+<tr>
+<td><code>0x27</code></td>
+<td><code>vpu.fma.imm</code></td>
+<td><code>VREG[dst][i] = VREG[src][i]*scale + bias</code></td>
+</tr>
+<tr>
+<td><code>0x30</code></td>
+<td><code>acc.store</code></td>
+<td><code>SPM[dst] = bf16(ACC[src]), row-wise, truncation (upper 16 bits)</code></td>
+</tr>
+<tr>
+<td><code>0x31</code></td>
+<td><code>acc.load</code></td>
+<td><code>ACC[dst] = fp32(bf16 SPM[src]), row-wise, exact (inverse of acc.store)</code></td>
+</tr>
+<tr>
+<td><code>0x32</code></td>
+<td><code>vreg.load</code></td>
+<td><code>VREG[dst] = fp32(SPM[src]) for a 1×N bf16 row</code></td>
+</tr>
+<tr>
+<td><code>0x33</code></td>
+<td><code>vreg.store</code></td>
+<td><code>SPM[dst] = bf16(VREG[src]), row-wise, truncation (fp32-&gt;bf16 narrow)</code></td>
+</tr>
+<tr>
+<td><code>0x34</code></td>
+<td><code>acc.init</code></td>
+<td><code>ACC[dst] = broadcast(fp32(bf16 SPM[src])); seed all N ACC rows with the 1xN bias row</code></td>
+</tr>
+<tr>
+<td><code>0x40</code></td>
+<td><code>dmu.load.spm</code></td>
+<td><code>SPM[dst] &lt;- DRAM bf16 (row-major, strided)</code></td>
+</tr>
+<tr>
+<td><code>0x42</code></td>
+<td><code>dmu.store.spm</code></td>
+<td><code>DRAM &lt;- SPM[src] bf16 (default stride = cols×2)</code></td>
+</tr>
+<tr>
+<td><code>0x50</code></td>
+<td><code>loop.begin</code></td>
+<td><code>push loop frame; IV = lo. Bounds literal-only (D4)</code></td>
+</tr>
+<tr>
+<td><code>0x51</code></td>
+<td><code>loop.end</code></td>
+<td><code>IV += step; if IV &lt; hi jump to loop body</code></td>
+</tr>
+<tr>
+<td><code>0x53</code></td>
+<td><code>flush.slot</code></td>
+<td><code>masked fence; waits only for slots set in op0 mask</code></td>
+</tr>
+<tr>
+<td><code>0x5F</code></td>
+<td><code>halt</code></td>
+<td><code>drain all outstanding DMA slots; then assert done (committed)</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="reserved-opcode-space">Reserved opcode space<a class="headerlink" href="#reserved-opcode-space" title="Permanent link">&para;</a></h2>
+<p>12 opcodes (<em>[serving]</em>). These opcode VALUES are reserved on <code>main</code> but are <strong>not</strong> active here: no encoder, no RTL, no ISS handler on <code>main</code>. Implementation lives on the serving extension branch. The Semantics column documents each reserved value's intended future behaviour, for reference only.</p>
+<table>
+<thead>
+<tr>
+<th>Opcode</th>
+<th>Mnemonic</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0x20</code></td>
+<td><code>vpu.maximum</code></td>
+<td><code>VREG[dst][i] = max(VREG[a][i], VREG[b][i])</code></td>
+</tr>
+<tr>
+<td><code>0x21</code></td>
+<td><code>vpu.fma</code></td>
+<td><code>VREG[dst][i] = VREG[a][i]*VREG[b][i] + VREG[d][i]</code></td>
+</tr>
+<tr>
+<td><code>0x22</code></td>
+<td><code>vpu.exp2.vreg</code></td>
+<td><code>VREG[dst][i] = exp2(VREG[src][i])  (same LUT contract)</code></td>
+</tr>
+<tr>
+<td><code>0x23</code></td>
+<td><code>vpu.sub.vreg</code></td>
+<td><code>VREG[dst][i] = VREG[a][i] − VREG[b][i]</code></td>
+</tr>
+<tr>
+<td><code>0x24</code></td>
+<td><code>vpu.movi</code></td>
+<td><code>VREG[dst][0:rows] = broadcast(imm32)</code></td>
+</tr>
+<tr>
+<td><code>0x25</code></td>
+<td><code>vpu.copy.vreg</code></td>
+<td><code>VREG[dst] = VREG[src]  (register rename)</code></td>
+</tr>
+<tr>
+<td><code>0x28</code></td>
+<td><code>vpu.add.vreg</code></td>
+<td><code>VREG[dst][i] = VREG[a][i] + VREG[b][i]</code></td>
+</tr>
+<tr>
+<td><code>0x29</code></td>
+<td><code>vpu.mul.vreg</code></td>
+<td><code>VREG[dst][i] = VREG[a][i] * VREG[b][i]</code></td>
+</tr>
+<tr>
+<td><code>0x2A</code></td>
+<td><code>vpu.load.imm</code></td>
+<td><code>VREG[dst][0:BANKING] = pool[idx..idx+BANKING-1]  (fp32)</code></td>
+</tr>
+<tr>
+<td><code>0x48</code></td>
+<td><code>dmu.load.spm.mi</code></td>
+<td><code>SPM[dst] &lt;- DRAM (bf16, MultiLinearAddr)</code></td>
+</tr>
+<tr>
+<td><code>0x4C</code></td>
+<td><code>dmu.store.spm.mi</code></td>
+<td><code>DRAM &lt;- SPM[src] (bf16, MultiLinearAddr)</code></td>
+</tr>
+<tr>
+<td><code>0x55</code></td>
+<td><code>loop.begin.csr</code></td>
+<td><code>IV = lo (op0 literal), hi = KERNEL_ARG[op1], step = op2 literal (default 1)</code></td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1660,15 +1826,31 @@ preserved.</p>
       
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
+          
+          <a href="abi.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: ABI Register Map">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                ABI Register Map
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="runtime.html" class="md-footer__link md-footer__link--next" aria-label="Next: Host Runtime">
+          <a href="interface_tile.html" class="md-footer__link md-footer__link--next" aria-label="Next: Interface Tile">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Host Runtime
+                Interface Tile
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1705,13 +1887,13 @@ preserved.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
   
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="javascripts/mathjax.js"></script>
+        <script src="../javascripts/mathjax.js"></script>
       
     
   <script

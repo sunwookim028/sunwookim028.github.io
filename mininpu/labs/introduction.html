@@ -1,0 +1,2551 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/labs/introduction.html">
+      
+      
+        <link rel="prev" href="index.html">
+      
+      
+        <link rel="next" href="lab1-vpu.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Lab 0: Course Introduction and Setup - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-0-course-introduction-and-setup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 0: Course Introduction and Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 2 Microarch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 3 Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 4 DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/control_plane.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/host_interface.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="introduction.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-accelerator-and-its-programming-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The accelerator and its programming model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-build-across-the-five-labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you build across the five labs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-worked-model-gpt-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The worked model: GPT-2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The toolchain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-the-ecelinux-servers-and-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup: the ecelinux servers and git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#submission-and-grading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Submission and grading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-npu-instruction-set-a-kernel-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The NPU instruction set: a kernel reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The NPU instruction set: a kernel reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-the-data-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the data lives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-instruction-subset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The instruction subset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-an-inference-kernel-by-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading an inference kernel by phase
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading an inference kernel by phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#moving-and-converting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving and converting data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-multiply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix multiply
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Softmax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layernorm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerNorm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-feed-forward-block-and-the-residual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The feed-forward block and the residual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#control-and-finishing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Control and finishing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-instruction-does-each-inference-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which instruction does each inference step
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-this-reference-leaves-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this reference leaves out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-on-the-fpga-the-zcu102-placeholder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running on the FPGA: the ZCU102 (placeholder)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Introduction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-accelerator-and-its-programming-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The accelerator and its programming model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-build-across-the-five-labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you build across the five labs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-worked-model-gpt-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The worked model: GPT-2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-toolchain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The toolchain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-the-ecelinux-servers-and-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setup: the ecelinux servers and git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#submission-and-grading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Submission and grading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-npu-instruction-set-a-kernel-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The NPU instruction set: a kernel reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The NPU instruction set: a kernel reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-the-data-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the data lives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-instruction-subset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The instruction subset
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reading-an-inference-kernel-by-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading an inference kernel by phase
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reading an inference kernel by phase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#moving-and-converting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Moving and converting data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-multiply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix multiply
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Softmax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layernorm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LayerNorm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-feed-forward-block-and-the-residual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The feed-forward block and the residual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#control-and-finishing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Control and finishing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#which-instruction-does-each-inference-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Which instruction does each inference step
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-this-reference-leaves-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What this reference leaves out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-on-the-fpga-the-zcu102-placeholder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running on the FPGA: the ZCU102 (placeholder)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- Ported from labs/common/labs_introduction.tex (content-preserving move, no rewrite).
+     Shared course-introduction and setup document for the mininpu teaching labs. It
+     holds the material every lab would otherwise repeat: the accelerator and its
+     programming model, the five-lab arc, the ecelinux + git workflow, and the
+     submission and grading model. Each lab references this document in one line
+     instead of restating it. -->
+
+<h1 id="lab-0-course-introduction-and-setup">Lab 0: Course Introduction and Setup<a class="headerlink" href="#lab-0-course-introduction-and-setup" title="Permanent link">&para;</a></h1>
+<div class="admonition info">
+<p class="admonition-title">ECE 4950/6950 AI Hardware, Fall 2026</p>
+<p>School of Electrical and Computer Engineering, Cornell University</p>
+<p><strong>Lab 0: Course Introduction and Setup</strong></p>
+<p>Due: TBD, Fall 2026</p>
+<p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Ported verbatim; technical claims under review</p>
+<p>This handout was ported from its LaTeX source content-preserving: the
+prose, listings, figures, and exercises are carried over as written, with no
+rewrite. Its <strong>technical claims have not been re-validated against the
+current RTL and ISA</strong> and are under review, tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
+names, instruction mnemonics, and datapath descriptions on this page as
+handout text, not as a reference for the hardware as it stands today. The
+authoritative sources are the <a href="../reference/isa.html">ISA Reference</a> and the
+<a href="../reference/abi.html">ABI Register Map</a>.</p>
+<p><strong>On this page specifically:</strong> the instruction reference below, and the
+kernel walkthroughs that use it, are written in a <code>vec.*</code> / <code>matmul.tile</code> /
+<code>dma.*</code> / <code>cast.*</code> mnemonic namespace that <strong>matches no generation of the
+ISA</strong>. The generated <a href="../reference/isa.html">ISA Reference</a> is the authority on
+what mnemonics exist and what they do.</p>
+</div>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
+<p>These labs build a small neural-network accelerator from the inside out. The
+datapath you build is a general tensor engine, but the workload it targets, and
+that motivates its design, is decoder language-model inference: by the end you
+will have written the hardware for a working tensor accelerator, run real
+language-model computations on it, and served a model with it. This document
+covers the parts that every lab assumes: what the accelerator is and how a host
+program drives it, what each lab adds, how to set up the toolchain on the
+<code>ecelinux</code> servers, and how you submit and are graded. Read it once before
+Lab 1. Each lab handout points back here rather than repeating it.</p>
+<h2 id="the-accelerator-and-its-programming-model">The accelerator and its programming model<a class="headerlink" href="#the-accelerator-and-its-programming-model" title="Permanent link">&para;</a></h2>
+<p>The accelerator is not a CPU. It does not fetch your program, manage a stack, or
+run an operating system. It is an <strong>IO-attached device</strong>: a separate piece
+of hardware that a host computer talks to over a bus, in the same way a host
+talks to a disk or a network card. You will see it described as the
+<strong>mininpu</strong> (Neural Processing Unit). The host runs ordinary software (in
+these labs, a Python script); the device runs only the fixed-function hardware
+you build.</p>
+<div class="admonition info">
+<p class="admonition-title">Figure 1</p>
+<p><img alt="arch-l1-system" src="../figures/tikz/arch-l1-system.svg" /></p>
+<p>The host and the accelerator. The host copies tensors into device memory, writes a control register to launch a kernel, and copies results back. The device is a fixed datapath with its own on-chip memory; it never runs the host's software. Lab 1 works entirely in simulation, so think of the host as the test program and the device as the hardware you are building.</p>
+</div>
+<p>A program drives the device in three steps.</p>
+<ul>
+<li><strong>Copy data in.</strong> The host copies input tensors (the model weights
+  and the activations) from its own memory into the device's memory with a
+  block copy, a <code>memcpy</code>. Nothing is computed yet; the data is simply
+  moved to where the hardware can reach it.</li>
+<li><strong>Launch a kernel.</strong> A <strong>kernel</strong> is a short program written in
+  the device's own assembly, the NPU instruction set. The host hands the
+  device a kernel and signals it to start (in hardware terms, it writes a
+  control register). The device executes the kernel against the data now
+  resident in its memory. The host does not step through the kernel; it
+  launches it and waits for a done signal. (Writing kernel text by hand is
+  only needed in these labs for tiny examples; later labs introduce a
+  compiler that generates it.)</li>
+<li><strong>Copy results out.</strong> When the kernel finishes, the host copies the
+  output tensors back from device memory into its own memory.</li>
+</ul>
+<p>This is the whole interface: <strong>copy in, launch a kernel, copy out</strong>.</p>
+<p>A kernel is a short sequence of <strong>NPU instructions</strong>. The hardware fetches
+each instruction in turn, decodes it to decide which units act and on which data,
+and executes it on the tensors in device memory. The instructions are simple and
+specific to the work: there is one that sums the elements of a row down to a
+single value (<code>vec.rowsum</code>), one that multiplies two vectors element by
+element (<code>vec.mul.acc</code>), one that applies a nonlinear activation such as GELU
+(<code>vec.gelu</code>), and, in the matrix unit, one that performs a tiled
+matrix multiply. The set of instructions the hardware understands, together with
+exactly what each one does, is its <strong>instruction set</strong>. The labs build the
+hardware units that fetch, decode, and execute these instructions: Lab 1 builds
+the unit that runs the vector instructions, Lab 2 the one that runs the
+matrix-multiply instruction, and Lab 3 the one that runs the instructions that
+move tensors in and out of the scratchpad.</p>
+<p>Two properties of the device shape everything you build.</p>
+<p><strong>A fixed, specialized datapath.</strong> A CPU has general-purpose units that can
+run any instruction in any order. The accelerator instead wires up a fixed set of
+arithmetic units in the exact shape that neural-network math needs: lanes of
+multipliers and adders, reduction trees, and table-lookup units for nonlinear
+functions. Data streams through this datapath. There is no general-purpose
+instruction stream rerouting work at run time; the structure is committed in the
+hardware. This is what makes the device fast and small for its one job, and
+inflexible for anything else.</p>
+<p><strong>A scratchpad, not a cache.</strong> A CPU hides memory latency with caches:
+hardware automatically decides what to keep on chip, and your program is unaware
+of it. The accelerator has no cache. Its on-chip memory is a <strong>scratchpad</strong>
+(also called the SPM or SPAD), a plain addressable RAM that the program manages
+explicitly. Data is on chip only because the program copied it there, and it
+stays exactly where the program put it. Nothing moves on its own. This trades the
+convenience of a cache for predictability: because movement is explicit, the cost
+of every access is known in advance, which is what lets the hardware run a tight,
+overlapped schedule. "Data lives where you put it" is the mental model to carry
+through every lab.</p>
+<h2 id="what-you-build-across-the-five-labs">What you build across the five labs<a class="headerlink" href="#what-you-build-across-the-five-labs" title="Permanent link">&para;</a></h2>
+<p>The labs build one accelerator step by step. Each lab leaves you with a larger,
+working subsystem; nothing built earlier is thrown away or replaced. The first
+three labs build the hardware; the last two program it.</p>
+<ul>
+<li><strong>Lab 1: the Vector Processing Unit (VPU).</strong> The VPU does the
+  element-wise and vector math: multiply, add, the reductions that sum a row
+  of numbers, and the activation functions. You build it in simulation and
+  finish by running a small neural-network layer through it. At the end of
+  Lab 1 you have a complete VPU.</li>
+<li><strong>Lab 2: the Matrix Unit (MXU).</strong> The MXU is a systolic array that
+  does matrix multiplication, the bulk of the work in a transformer (cf. the
+  systolic arrays in NVIDIA Tensor Cores and the Google TPU). You add it
+  alongside the VPU and run on the FPGA board. At the end of Lab 2 you have a
+  VPU and an MXU.</li>
+<li><strong>Lab 3: the data-movement engine (DMA).</strong> The DMA moves tensors
+  between off-chip DRAM and the on-chip scratchpad, and overlaps that
+  movement with computation. Adding it completes the accelerator. At the end
+  of Lab 3 you have a VPU, an MXU, and a DMA: a full accelerator able to run
+  decoder language-model inference on the board.</li>
+<li><strong>Lab 4: writing kernels.</strong> With the hardware finished, you write
+  compute kernels for it using Triton, a Python-based language for
+  accelerator kernels (cf. Triton and FlashAttention), and a compiler that
+  lowers them to the device's assembly. You implement attention kernels and
+  run them on the accelerator you built.</li>
+<li><strong>Lab 5: serving.</strong> Finally you build the software layer that serves a
+  model: managing the key-value cache so that generating each new token
+  reuses past work instead of recomputing it (cf. the paged attention used
+  in vLLM and SGLang).</li>
+</ul>
+<p>Lab 1 runs its hardware in simulation at a small scale and in FP32, so the work
+is getting the logic right; Labs 2 and 3 run on the board at full model scale,
+and Lab 2 is where the lower-precision storage that real inference uses comes in.
+Each subsystem is the production design; what differs between Lab 1 and the board
+labs is the scale it runs at and the number format it stores, not the design.</p>
+<h2 id="the-worked-model-gpt-2">The worked model: GPT-2<a class="headerlink" href="#the-worked-model-gpt-2" title="Permanent link">&para;</a></h2>
+<p>These labs run GPT-2 small (124M parameters): 12 decoder layers, 12 attention
+heads, a model width of 768, and a feed-forward width of 3072. As a decoder it
+generates one token at a time, each token attending only to earlier positions.</p>
+<p>One layer is two residual sublayers, each preceded by a LayerNorm (the
+pre-LayerNorm arrangement): multi-head self-attention, then a feed-forward block
+with a GELU activation. A forward pass embeds the input token and its position,
+runs the stack of layers, applies a final LayerNorm, and projects to vocabulary
+logits with a head whose weights are the (tied) input-embedding matrix. The token
+and position embedding lookups and the final argmax run on the <strong>host</strong>; all
+the arithmetic in between, including the layer matmuls and that logit projection,
+runs on the <strong>device</strong> these labs build. These handouts are not
+a transformer tutorial: this is the map, and each lab builds or programs one part
+of it. The matrix multiplications (the projections, the attention scores, the
+feed-forward) are the bulk of the work and are what the matrix unit accelerates;
+the LayerNorms, the softmax inside attention, and GELU are vector work; the
+key-value cache is what makes every token after the first cheap. Lab 1 first
+builds the vector unit on a smaller, self-contained example, a small MLP over
+sklearn's <code>load_digits</code> 8×8 handwritten digits (classes 0 through
+7), a compact stand-in for the MNIST-MLP concept.</p>
+<!-- TODO(figure): PLACEHOLDER, no GPT-2 decoder-block figure exists yet in
+     the vendored figure set (the only data-movement diagram there, dm-decodestep, is
+     Qwen/int4 and does not fit). The prose above is the map for now; drop a clean
+     decoder-block figure in here once one is drawn. Do not invent one inline. -->
+
+<h2 id="the-toolchain">The toolchain<a class="headerlink" href="#the-toolchain" title="Permanent link">&para;</a></h2>
+<p>The course uses a small set of tools, introduced as you need them. The first
+labs build hardware and test it in simulation; the later labs program the
+finished hardware. The tools, and where each is used:</p>
+<ul>
+<li><strong>Python</strong>: tests, numpy and torch reference oracles, kernel scripts.</li>
+<li><strong>Verilator</strong>: open-source RTL simulator that compiles your
+  SystemVerilog for simulation (Labs 1 to 3).</li>
+<li><strong>cocotb</strong>: Python testbench framework that drives the simulation and
+  defines the public tests (Labs 1 to 3).</li>
+<li><strong>Surfer</strong>: waveform viewer for inspecting VCD dumps while debugging
+  (Labs 1 to 3).</li>
+<li><strong>The NPU assembler and instruction set</strong>: kernels are short programs
+  in the NPU ISA; the assembler encodes them (Labs 1 to 3).</li>
+<li><strong>The cost model</strong> (Lab 4): estimates a kernel's cycle count from its
+  instruction mix, so you can reason about performance (for example, the
+  memory-traffic benefit of the attention kernel) without a board run.</li>
+<li><strong>Vivado</strong>: synthesis and bitstream generation for the FPGA
+  (Labs 2 to 3).</li>
+<li><strong>The ZCU102 board</strong>: the Xilinx Zynq UltraScale+ FPGA the
+  accelerator runs on (Labs 2 to 5).</li>
+<li><strong>mininpu-compiler</strong>: lowers Triton kernels to the NPU instruction
+  set (Lab 4).</li>
+<li><strong>Triton</strong>: the language you write accelerator kernels in (Lab 4).</li>
+<li><strong>mininpu-runtime</strong>: the host-side driver that copies data to the
+  device and launches kernels from Python (Labs 2 to 5).</li>
+</ul>
+<p>Detailed tutorials for these tools are provided separately and are linked from
+the course page (to be added).</p>
+<h2 id="setup-the-ecelinux-servers-and-git">Setup: the <code>ecelinux</code> servers and git<a class="headerlink" href="#setup-the-ecelinux-servers-and-git" title="Permanent link">&para;</a></h2>
+<p>The toolchain (the simulator, the cocotb test framework, and the synthesis tools
+used in the FPGA labs) is pre-installed on the <code>ecelinux</code> servers. You do
+your work there over <code>ssh</code>; you do not install anything locally. Each lab is
+distributed as a <strong>per-student git repository</strong> in the course GitHub
+organization, with the starter code already in it.</p>
+<p>To start a lab, log in, load the course environment, clone your repository for
+that lab, and run the tests once to confirm everything builds:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ssh<span class="w"> </span>&lt;netid&gt;@ecelinux.ece.cornell.edu
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">source</span><span class="w"> </span>/classes/ece4950/setup.sh
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:ece4950-fa26/ece4950-labN-&lt;netid&gt;.git
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">cd</span><span class="w"> </span>ece4950-labN-&lt;netid&gt;
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>make<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>The first command logs you into the servers. The second loads the course
+toolchain into your shell; run it once per login session. The third clones your
+copy of lab <code>N</code> (replace <code>N</code> with the lab number and <code>&lt;netid&gt;</code>
+with your NetID). The last command builds the design and runs the public test
+suite. On a fresh checkout the build succeeds and the tests report failures,
+because the parts you are meant to write are still empty. As you complete the lab,
+the tests turn from failing to passing.<sup id="fnref:server"><a class="footnote-ref" href="#fn:server">1</a></sup></p>
+<h2 id="submission-and-grading">Submission and grading<a class="headerlink" href="#submission-and-grading" title="Permanent link">&para;</a></h2>
+<p><strong>Submission is through git.</strong> You submit by committing your work and pushing
+it to the <code>main</code> branch of your repository. <strong>Pushing is submitting</strong>;
+there is no separate upload step and nothing to hand in on any other system. The
+latest commit on <code>main</code> at the deadline is what is graded. At the deadline,
+the course staff place an immutable git <strong>tag</strong> on your final commit; that
+tag is the official graded snapshot. Do not move or delete it, and do not rewrite
+the history it points to. The late policy stated on each lab handout is enforced
+out of band.</p>
+<p><strong>Grading has two parts.</strong> The first is correctness, measured by a public
+cocotb test suite that runs automatically when you push. These are the same tests
+you run locally with <code>make test</code>, under the same pinned tool versions, so the
+result you see on your machine is the result you are graded on. There is no hidden
+test tier. The second part is a short written report (about one page) analyzing a
+design trade-off specific to the lab; each handout says what to address. Include
+the report as <code>report.pdf</code> in your repository.</p>
+<!-- Salvaged from labs/feat-lab0-intro-lab1-refine and reviewed here: a standing
+     GPT-2 inference kernel reference (prefill+decode). The two content-level
+     TODO(owner-review) markers were resolved; the ZCU102 board section stays a
+     flagged placeholder pending board bring-up. -->
+
+<h2 id="the-npu-instruction-set-a-kernel-reference">The NPU instruction set: a kernel reference<a class="headerlink" href="#the-npu-instruction-set-a-kernel-reference" title="Permanent link">&para;</a></h2>
+<p>The rest of this document is a reference for the instructions themselves. The
+sections above explain the programming model (the host copies data in, launches a
+kernel, and copies results out); this part lists the specific operations a GPT-2
+inference kernel uses, and for each one explains what it does to the data. You
+build the hardware that runs these instructions across Labs 1 to 3: the vector
+operations in Lab 1, the matrix multiply in Lab 2, and the data-movement
+operations in Lab 3. Keep this section open while you work; it is a standing
+reference, not a problem set, so it has no exercises of its own.</p>
+<p>A forward pass has two phases. <strong>Prefill</strong> runs the whole prompt through the
+model at once: the rows of a tile are the prompt tokens, so a tile carries
+M &gt; 1 tokens. <strong>Decode</strong> then generates one token at a time, so a tile
+carries a single row. Both phases run the same instructions; prefill simply has
+more than one row per tile. Where the row count matters (the LayerNorm affine, in
+particular) the text says so.</p>
+<p>The full accelerator understands more instructions than the ones here, including
+variants for lower-precision and quantized formats and for richer addressing.
+This reference is deliberately a subset: the operations a GPT-2 inference kernel
+actually issues, and nothing else. The last subsection, <em>What this reference
+leaves out</em>, names what is omitted and why, so the boundary is explicit.</p>
+<h3 id="where-the-data-lives">Where the data lives<a class="headerlink" href="#where-the-data-lives" title="Permanent link">&para;</a></h3>
+<p>Every instruction reads and writes one of three on-chip stores. You need the
+distinction to read the operation table.</p>
+<ul>
+<li><strong>The scratchpad (SPM).</strong> The plain addressable on-chip RAM described
+  earlier, holding bfloat16 (bf16) tiles. Weights and
+  activations are copied here from off-chip memory before a kernel runs. A
+  tile is one row of eight bf16 values.</li>
+<li><strong>The accumulator (ACC).</strong> The same physical on-chip memory viewed as
+  32-bit floating-point (fp32) tiles. Matrix multiply writes its result
+  here, and the vector arithmetic operates here, so that intermediate sums
+  keep fp32 precision. A row is eight fp32 values.</li>
+<li><strong>The vector registers (VREG).</strong> A small set of fp32 registers, each
+  holding eight values. The reductions write their per-row result here (one
+  value per row), and the per-row and per-feature scalars used by the
+  broadcast operations are read from here.</li>
+</ul>
+<p>The pattern throughout a kernel is: copy bf16 tiles into the scratchpad, widen
+them to fp32 in the accumulator, compute in fp32, narrow the fp32 result back to
+bf16, and copy it out. The three <code>cast</code> operations move data between the
+bf16 and fp32 views.</p>
+<p>This reference describes the general 16-bit-store, fp32-accumulate kernel shape.
+The labs reach it in two steps. Lab 1 stays fp32 end to end (so the work is
+getting the logic right, not the numerics). Lab 2 switches the 16-bit storage
+format to BF16: the same <code>matmul.tile</code> op with only the storage format
+changed, so the kernel structure above is unaffected.</p>
+<h3 id="the-instruction-subset">The instruction subset<a class="headerlink" href="#the-instruction-subset" title="Permanent link">&para;</a></h3>
+<!-- This is the 25-op subset (D25 core + the prefill LayerNorm affine path). Each
+     row gives the mnemonic, what it does in a kernel, and the GPT-2 inference step
+     that uses it. Opcode values and bit encodings are intentionally omitted (this
+     is a kernel reference, not an encoding dump); they live in mininpu/isa. -->
+
+<table>
+<thead>
+<tr>
+<th>Instruction</th>
+<th>What it does in a kernel</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>matmul.tile</code></td>
+<td>Multiplies two tiles, accumulating in fp32. Flags select transpose of the second operand, accumulate-into-destination, and a causal mask.</td>
+<td>Every GEMM: QKV projections, attention scores, attention output, output projection, the two MLP layers, the logit projection.</td>
+</tr>
+<tr>
+<td><code>dma.load.spm</code></td>
+<td>Copies a bf16 tensor from off-chip memory into the scratchpad.</td>
+<td>Loading weights and activations for a tile.</td>
+</tr>
+<tr>
+<td><code>dma.load.acc</code></td>
+<td>Copies an fp32 tensor from off-chip memory into the accumulator.</td>
+<td>Loading a bias vector.</td>
+</tr>
+<tr>
+<td><code>dma.store.spm</code></td>
+<td>Copies a bf16 tile from the scratchpad back to off-chip memory.</td>
+<td>Writing a layer output the host will read.</td>
+</tr>
+<tr>
+<td><code>cast.load</code></td>
+<td>Widens a bf16 scratchpad row to an fp32 accumulator row.</td>
+<td>Bringing a loaded tile into the fp32 compute domain.</td>
+</tr>
+<tr>
+<td><code>cast.store</code></td>
+<td>Narrows an fp32 accumulator row to a bf16 scratchpad row.</td>
+<td>Preparing a result to store or to feed the next matmul.</td>
+</tr>
+<tr>
+<td><code>cast.load.vreg</code></td>
+<td>Widens a 1-D bf16 scratchpad row (shape 1 × N) into an fp32 vector register of length N.</td>
+<td>Loading a 1-D weight vector (the LayerNorm γ) into a register for a following <code>vec.scale.col.bcast</code>.</td>
+</tr>
+<tr>
+<td><code>vec.zero.acc</code></td>
+<td>Sets an accumulator tile to zero.</td>
+<td>Clearing a destination before an accumulating reduction or matmul.</td>
+</tr>
+<tr>
+<td><code>vec.add.acc</code></td>
+<td>Adds two accumulator tiles element by element.</td>
+<td>Residual add; adding a bias tile; the LayerNorm β shift.</td>
+</tr>
+<tr>
+<td><code>vec.mul.acc</code></td>
+<td>Multiplies two accumulator tiles element by element.</td>
+<td>Elementwise products inside LayerNorm and masking.</td>
+</tr>
+<tr>
+<td><code>vec.rowmax</code></td>
+<td>Reduces each accumulator row to its maximum, into a vector register.</td>
+<td>The stabilizing maximum in softmax.</td>
+</tr>
+<tr>
+<td><code>vec.rowsum</code></td>
+<td>Reduces each accumulator row to its sum, into a vector register.</td>
+<td>The softmax denominator; the mean and mean-of-squares in LayerNorm.</td>
+</tr>
+<tr>
+<td><code>vec.sub.bcast</code></td>
+<td>Subtracts a per-row scalar (from a vector register) from every element of that accumulator row.</td>
+<td>Softmax x − max; LayerNorm x − mean.</td>
+</tr>
+<tr>
+<td><code>vec.exp2</code></td>
+<td>Raises 2 to the power of each accumulator element, using a lookup table.</td>
+<td>The exponential in softmax (the input is pre-scaled by log₂e).</td>
+</tr>
+<tr>
+<td><code>vec.div.bcast</code></td>
+<td>Divides every element of an accumulator row by a per-row scalar from a vector register.</td>
+<td>Dividing the softmax numerator by the row sum.</td>
+</tr>
+<tr>
+<td><code>vec.scale.bcast</code></td>
+<td>Multiplies every element of an accumulator row by a per-row scalar from a vector register.</td>
+<td>Multiplying LayerNorm by the per-row 1/std.</td>
+</tr>
+<tr>
+<td><code>vec.scale.col.bcast</code></td>
+<td>Multiplies each accumulator column by a per-feature scalar from a vector register (the same scalar applied down every row).</td>
+<td>The LayerNorm per-feature γ affine, applied across the M rows of a prefill tile.</td>
+</tr>
+<tr>
+<td><code>vec.scale.imm</code></td>
+<td>Multiplies an accumulator tile by an immediate constant.</td>
+<td>Scaling attention scores by 1/√d_head and folding in log₂e for softmax.</td>
+</tr>
+<tr>
+<td><code>vec.gelu</code></td>
+<td>Applies the GELU activation to each accumulator element, using a lookup table.</td>
+<td>The activation between the two MLP layers.</td>
+</tr>
+<tr>
+<td><code>vec.rsqrt</code></td>
+<td>Computes 1/√x for each value in a vector register (domain x &gt; 0).</td>
+<td>The LayerNorm normalization factor from the variance.</td>
+</tr>
+<tr>
+<td><code>vec.fma.imm</code></td>
+<td>Multiplies a vector register by an immediate scale and adds an immediate bias.</td>
+<td>Forming var + ε before the reciprocal square root.</td>
+</tr>
+<tr>
+<td><code>vec.add.vreg</code></td>
+<td>Adds two vector registers element by element.</td>
+<td>Combining the partial row sums of a reduction that spans several tiles (a 768-wide LayerNorm covers many eight-wide tiles).</td>
+</tr>
+<tr>
+<td><code>loop.begin</code></td>
+<td>Opens a hardware loop with an induction variable and a fixed bound.</td>
+<td>Walking the tiles of a layer.</td>
+</tr>
+<tr>
+<td><code>loop.end</code></td>
+<td>Closes the loop: steps the induction variable and branches back until the bound is reached.</td>
+<td>The matching close of a tiling loop.</td>
+</tr>
+<tr>
+<td><code>flush</code></td>
+<td>Fences the pipeline so that an off-chip store completes before the host reads it; ends the program.</td>
+<td>The last instruction of a kernel.</td>
+</tr>
+</tbody>
+</table>
+<!-- Close-call membership notes (25-op subset).
+      - vec.scale.col.bcast (0x1C, per-column broadcast) and its loader
+        cast.load.vreg (0x32) are IN: together they spell out LayerNorm's
+        per-feature gamma affine for prefill (M>1 rows), with beta following via
+        vec.add.acc. These two complete the 25-op set over the 23-op core.
+      - vec.movi (broadcast an immediate into a vector register) was left OUT.
+        Constants reach the math through scale.imm / fma.imm immediates instead.
+      - dma.store.acc (fp32 store) was left OUT; the path stores bf16 via
+        cast.store + dma.store.spm. -->
+
+<h3 id="reading-an-inference-kernel-by-phase">Reading an inference kernel by phase<a class="headerlink" href="#reading-an-inference-kernel-by-phase" title="Permanent link">&para;</a></h3>
+<p>A forward pass runs the prompt (prefill) and then each generated token (decode)
+through twelve transformer layers and a final projection to vocabulary logits.
+The same handful of operations recur. Grouping them by what they accomplish is
+the easiest way to learn them.</p>
+<h4 id="moving-and-converting-data">Moving and converting data<a class="headerlink" href="#moving-and-converting-data" title="Permanent link">&para;</a></h4>
+<p>A tile is on chip only because the kernel copied it there. <code>dma.load.spm</code>
+brings a bf16 weight or activation tile from off-chip memory into the scratchpad,
+and <code>dma.load.acc</code> brings an fp32 bias into the accumulator. Compute happens
+in fp32, so <code>cast.load</code> widens a scratchpad tile into an accumulator tile
+before the vector operations touch it. When a result is ready, <code>cast.store</code>
+narrows it back to bf16 and <code>dma.store.spm</code> copies it out. A matmul whose
+result feeds another matmul is cast back to bf16 in between, because matmul reads
+its inputs from the bf16 scratchpad.</p>
+<h4 id="matrix-multiply">Matrix multiply<a class="headerlink" href="#matrix-multiply" title="Permanent link">&para;</a></h4>
+<p><code>matmul.tile</code> is the single matrix operation, and it is the bulk of the work
+in a layer. The query, key, and value projections, the attention scores, the
+attention output, the output projection, both feed-forward layers, and the final
+logit projection are all <code>matmul.tile</code>. Three flags adapt it. The transpose
+flag computes A Bᵀ, which is how the attention scores form Q Kᵀ. The accumulate
+flag adds the product into the destination rather than overwriting it, which is
+how a product whose inner dimension is larger than one tile is summed across
+tiles, and how the attention output accumulates over value tiles. The causal flag
+masks the upper triangle of the result to negative infinity, which is how a
+decoder keeps each position from attending to later ones.</p>
+<h4 id="softmax">Softmax<a class="headerlink" href="#softmax" title="Permanent link">&para;</a></h4>
+<p>Attention turns the scores into weights with a softmax over each row. The kernel
+first reduces each row to its maximum with <code>vec.rowmax</code> and subtracts that
+maximum from the row with <code>vec.sub.bcast</code>, which keeps the exponential from
+overflowing. It scales the row by log₂e with <code>vec.scale.imm</code> (this is
+usually the same scaling that already applied 1/√d_head) and
+exponentiates with <code>vec.exp2</code>, which uses a base-2 lookup table. It sums each
+row with <code>vec.rowsum</code> to get the denominator and divides the row by it with
+<code>vec.div.bcast</code>. The result is the attention weight matrix.</p>
+<h4 id="layernorm">LayerNorm<a class="headerlink" href="#layernorm" title="Permanent link">&para;</a></h4>
+<p>Each sublayer is preceded by a LayerNorm over the model width. The kernel computes
+the mean with <code>vec.rowsum</code> (the sum divided by the width), centers the data
+with <code>vec.sub.bcast</code>, and computes the variance from the mean of squares,
+again with <code>vec.rowsum</code>. Because the width (768) spans many eight-wide tiles,
+the per-tile partial sums are combined in a vector register with
+<code>vec.add.vreg</code>. It forms var + ε with
+<code>vec.fma.imm</code>, takes 1/√· with <code>vec.rsqrt</code>, and scales
+the centered data by that factor with <code>vec.scale.bcast</code>.</p>
+<p>The per-feature affine finishes the normalization, and this is where the row count
+matters. The learned weight γ is one value per feature (per column), so
+in prefill the same γ vector multiplies every one of the M token
+rows. The kernel loads γ from its 16-bit scratchpad row into a vector
+register with <code>cast.load.vreg</code>, then applies it down the columns with
+<code>vec.scale.col.bcast</code> (one scalar per column, broadcast over the rows).
+Finally <code>vec.add.acc</code> adds the per-feature shift β. In single-token
+decode the tile has one row, but the same two instructions apply unchanged.</p>
+<h4 id="the-feed-forward-block-and-the-residual">The feed-forward block and the residual<a class="headerlink" href="#the-feed-forward-block-and-the-residual" title="Permanent link">&para;</a></h4>
+<p>The feed-forward block is two matrix multiplies with a GELU activation between
+them. <code>vec.gelu</code> applies the activation to the first layer's output, using a
+lookup table, the same way <code>vec.exp2</code> uses one for the exponential. After
+each sublayer the kernel adds the sublayer output back to its input with
+<code>vec.add.acc</code>, the residual connection. A bias, where present, is also added
+with <code>vec.add.acc</code>. Before an accumulating reduction the destination is
+cleared with <code>vec.zero.acc</code>.</p>
+<h4 id="control-and-finishing">Control and finishing<a class="headerlink" href="#control-and-finishing" title="Permanent link">&para;</a></h4>
+<p>Tiling loops are expressed with <code>loop.begin</code> and <code>loop.end</code>, a hardware
+loop with a fixed bound. The last instruction of every kernel is <code>flush</code>,
+which makes sure any store to off-chip memory has completed before the host reads
+the result, and ends the program.</p>
+<h3 id="which-instruction-does-each-inference-step">Which instruction does each inference step<a class="headerlink" href="#which-instruction-does-each-inference-step" title="Permanent link">&para;</a></h3>
+<p>The table below walks the forward pass in order and names the instruction (or
+instructions) that carries out each step. Two steps have no opcode and run on the
+host: the token and position embedding lookup, where the host computes the row
+address into the embedding table because there is no gather instruction, and the
+final token selection, where the host takes the argmax (or samples) over the
+<code>lm_head</code> logits. Everything in between is on-device compute, so the table
+also shows that the NPU path has no missing step.</p>
+<table>
+<thead>
+<tr>
+<th>Inference step</th>
+<th>What happens</th>
+<th>Instruction(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Token + position embedding</td>
+<td>Look up the embedding row for each token and add the position embedding.</td>
+<td>HOST computes the address; <code>dma.load.spm</code> copies the row in</td>
+</tr>
+<tr>
+<td>LayerNorm (pre-attention, pre-MLP, and final)</td>
+<td>Mean, center, variance, normalize, then the per-feature affine.</td>
+<td><code>vec.rowsum</code>, <code>vec.sub.bcast</code>, <code>vec.mul.acc</code>, <code>vec.add.vreg</code>, <code>vec.fma.imm</code>, <code>vec.rsqrt</code>, <code>vec.scale.bcast</code>, <code>cast.load.vreg</code>, <code>vec.scale.col.bcast</code>, <code>vec.add.acc</code></td>
+</tr>
+<tr>
+<td>QKV projection</td>
+<td>Three matmuls of the normalized input.</td>
+<td><code>matmul.tile</code></td>
+</tr>
+<tr>
+<td>Attention scores + softmax + weighted sum</td>
+<td>Q Kᵀ (transpose, causal), softmax over each row, then times V.</td>
+<td><code>matmul.tile</code>, <code>vec.scale.imm</code>, <code>vec.rowmax</code>, <code>vec.sub.bcast</code>, <code>vec.exp2</code>, <code>vec.rowsum</code>, <code>vec.div.bcast</code></td>
+</tr>
+<tr>
+<td>Attention output projection</td>
+<td>One matmul.</td>
+<td><code>matmul.tile</code></td>
+</tr>
+<tr>
+<td>Residual add</td>
+<td>Add the sublayer output back to its input.</td>
+<td><code>vec.add.acc</code></td>
+</tr>
+<tr>
+<td>MLP (two layers, GELU between)</td>
+<td>matmul, activation, matmul.</td>
+<td><code>matmul.tile</code>, <code>vec.gelu</code></td>
+</tr>
+<tr>
+<td>LM head (logit projection)</td>
+<td>Project the final hidden state to vocabulary logits with the tied embedding.</td>
+<td><code>matmul.tile</code></td>
+</tr>
+<tr>
+<td>Token selection (argmax / sampling)</td>
+<td>Pick the next token from the logits.</td>
+<td>HOST</td>
+</tr>
+<tr>
+<td>Data movement and control (throughout)</td>
+<td>Move tiles, convert formats, tile the loops, fence at the end.</td>
+<td><code>dma.load.acc</code>, <code>cast.load</code>, <code>cast.store</code>, <code>dma.store.spm</code>, <code>vec.zero.acc</code>, <code>loop.begin</code>, <code>loop.end</code>, <code>flush</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-this-reference-leaves-out">What this reference leaves out<a class="headerlink" href="#what-this-reference-leaves-out" title="Permanent link">&para;</a></h3>
+<p>The accelerator's full instruction set is larger. The operations below exist in
+the hardware but are outside what a GPT-2 inference kernel needs, so they are not
+in this reference. The boundary is stated here so it is explicit rather than
+implied.</p>
+<ul>
+<li><strong>Quantized matrix multiply and its data movement.</strong> The int8 and
+  int4 (GPTQ) matrix-multiply variants, the int4 dequantization step, and
+  the int8 load and store operations. These labs store activations in a
+  16-bit float format and accumulate in fp32; quantized inference is a
+  separate topic.</li>
+<li><strong>FP8 matrix multiply.</strong> The 8-bit-float GEMM variant. Out of scope
+  for the lab numerics.</li>
+<li><strong>Multi-index DMA.</strong> The strided, multiple-induction-variable
+  addressing family used for richer access patterns such as paged
+  key-value storage. The lab kernels use the simple linear
+  base + i·stride addressing.</li>
+<li><strong>Asynchronous DMA control.</strong> The non-blocking-transfer flag, the
+  slot-tracking, the masked fence, and the multi-slot barrier. In these labs
+  a transfer blocks until it completes, so a plain <code>flush</code> is the only
+  fence needed.</li>
+<li><strong>SiLU.</strong> The SiLU activation. GPT-2 uses GELU, which is in the
+  subset; SiLU is not.</li>
+<li><strong>Vector-register helpers used only elsewhere.</strong> A set of
+  register-to-register operations (a second exponential and subtract that
+  work directly on vector registers, register copy, register maximum,
+  elementwise register multiply, and immediate loads) support the online
+  softmax of a fused attention kernel and register bookkeeping. Plain
+  softmax works on accumulator tiles with the operations in the table, so
+  these are omitted here.</li>
+<li><strong>An explicit halt.</strong> <code>flush</code> ends a kernel in these labs, so
+  the separate halt instruction is not used.</li>
+</ul>
+<!-- The 25-op subset names the irreducible inference core: the 23-op core plus
+     vec.scale.col.bcast (0x1C) and its loader cast.load.vreg (0x32) for the
+     prefill LayerNorm per-feature affine. vec.movi and dma.store.acc remain out per
+     the close-call notes in the table. -->
+
+<h2 id="running-on-the-fpga-the-zcu102-placeholder">Running on the FPGA: the ZCU102 (placeholder)<a class="headerlink" href="#running-on-the-fpga-the-zcu102-placeholder" title="Permanent link">&para;</a></h2>
+<!-- TODO(owner-review): PLACEHOLDER SECTION, overview bullets only. The full board
+     document is deferred until the board bring-up is unblocked (issues #168, #155).
+     Do not expand this into a board guide here; it is an outline so the reader knows
+     the target exists. Replace with the real section when the board run lands. -->
+
+<p><em>This section is a placeholder. It states the FPGA target at a high level so
+the reader knows what the later labs run on. The full board document is written
+once the board bring-up is complete.</em></p>
+<p>Labs 2 and 3 run the accelerator on a physical FPGA, not only in simulation. The
+target at a glance:</p>
+<ul>
+<li><strong>Board.</strong> The Xilinx Zynq UltraScale+ ZCU102, device
+  <code>xczu9eg</code>.</li>
+<li><strong>What runs on it.</strong> A single compute tile (the VPU, the MXU, and
+  the DMA you build) with its scratchpad, fed from external memory over a
+  PL-side DDR4 path.</li>
+<li><strong>Clock.</strong> The compute clock target is 100 MHz. Reaching it is
+  pending pipelining work (issue #168), so the first board bring-up runs at
+  a reduced 50 MHz. Simulation and the autograded tests are unaffected by
+  the clock rate.</li>
+</ul>
+<!-- TODO(owner-review): once the board section is written, decide whether it stays
+     here in this combined intro document or moves into the Lab 2 handout where the
+     board first appears. -->
+
+<h2 id="acknowledgement">Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permanent link">&para;</a></h2>
+<p>These labs are built on the mininpu, a composable tensor-accelerator hardware
+template developed for research and adapted here for teaching. The hardware you
+complete in the labs is drawn from the same design that runs in the full
+accelerator.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ol>
+<li>cocotb documentation, <a href="https://docs.cocotb.org/">https://docs.cocotb.org/</a>.</li>
+<li>Verilator manual, <a href="https://verilator.org/guide/">https://verilator.org/guide/</a>.</li>
+</ol>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:server">
+<p>The exact server name, setup script path, and GitHub organization are
+finalized by the course staff at the start of the term; use the values posted on
+the course page if they differ from those shown here.&#160;<a class="footnote-backref" href="#fnref:server" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="lab1-vpu.html" class="md-footer__link md-footer__link--next" aria-label="Next: Lab 1: The Vector Processing Unit">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Lab 1: The Vector Processing Unit
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>

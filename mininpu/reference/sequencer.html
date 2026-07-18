@@ -1,0 +1,1918 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/reference/sequencer.html">
+      
+      
+        <link rel="prev" href="memory_tile.html">
+      
+      
+        <link rel="next" href="mxu.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Sequencer - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mininpu-sequencer-control-path" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sequencer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute Tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 1 ISA design target [proposed]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/microarch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 2 Microarch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/implementation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 3 Implementation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 4 DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compute_tile/gpt2_kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Doc 5 GPT-2 Kernels
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="data_movement.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Movement
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="control_plane.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Control Plane
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="host_interface.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Host Interface
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI Register Map
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="interface_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Interface Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="compute_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute Tile
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="memory_tile.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory Tile [v3]
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="sequencer.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#control-in-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Control in context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetch-decode-dispatch-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetch → decode → dispatch lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifecycle-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle stages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decode-field-map-the-64-bit-instruction-word" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decode field map --- the 64-bit instruction word
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-decoding-one-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example --- decoding one instruction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exec_dispatch-fan-out-by-opcode-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EXEC_DISPATCH fan-out by opcode group
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loop-control-hardware-loops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loop control --- hardware loops
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flush-halt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flush &amp; halt
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-evolution-risc-v-control-cores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned evolution → RISC-V control core(s)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../figures/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Figures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#control-in-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Control in context
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetch-decode-dispatch-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetch → decode → dispatch lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifecycle-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lifecycle stages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decode-field-map-the-64-bit-instruction-word" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decode field map --- the 64-bit instruction word
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-decoding-one-instruction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example --- decoding one instruction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exec_dispatch-fan-out-by-opcode-group" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EXEC_DISPATCH fan-out by opcode group
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loop-control-hardware-loops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Loop control --- hardware loops
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flush-halt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flush &amp; halt
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-evolution-risc-v-control-cores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned evolution → RISC-V control core(s)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/sequencer.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose and the deck bullets were BOTH carried over in
+     source order; the deck bullets sit in the collapsed "Slide summary"
+     blocks. Figures are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-sequencer-control-path">mininpu: Sequencer (Control Path)<a class="headerlink" href="#mininpu-sequencer-control-path" title="Permanent link">&para;</a></h1>
+<p>The <strong>sequencer</strong> is the compute tile's control unit: it owns the program counter, the instruction RAM, and the decoder, and dispatches each fetched instruction to the right engine (MXU / VPU / DMA) or control sub-FSM. This document zooms in from the sequencer's place in the control plane, to the <em>fetch → decode → dispatch → engine handoff</em> lifecycle, to the 64-bit instruction word and the opcode-group fan-out of <code>EXEC_DISPATCH</code>. The exhaustive opcode-to-case table is not reproduced here --- it is the RTL itself (<code>sequencer.sv</code> + <code>mininpu/isa</code>); this document cites it.</p>
+<h2 id="control-in-context">Control in context<a class="headerlink" href="#control-in-context" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Host rings a <strong>doorbell</strong> (AXI-Lite); <code>compute_ctrl</code> launches the sequencer.</li>
+<li>Sequencer owns the <strong>PC</strong> (<code>pc.sv</code>), <strong>IRAM</strong> (4096×64-bit), <strong>decoder</strong>.</li>
+<li><code>EXEC_DISPATCH</code> fans out to MXU / VPU / DMU / control sub-FSM; each <em>done</em> advances the PC.</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>seq-context</code></p>
+<p><img alt="seq-context" src="../figures/tikz/seq-context.svg" /></p>
+<p>Zoom 1 --- the sequencer in its control plane. The host doorbell reaches <code>compute_ctrl</code>, which launches the sequencer. The sequencer owns the PC, IRAM, and decoder, and <code>EXEC_DISPATCH</code> fans out to MXU, VPU, the DMU, or a control sub-FSM. Each engine's <em>done</em> pulse advances the PC.</p>
+</div>
+<p>The host rings a <strong>doorbell</strong> over AXI-Lite. The CP decodes a LAUNCH descriptor (active v1 fields: <code>kbin_addr</code>:64, <code>kbin_size</code>:32; no runtime kernargs in v1, operand addresses are compile-baked immediates), loads the kernel binary from devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into tile IRAM, and pulses <code>start</code>; completion is <code>instr_ready</code> (combinational all-idle flag). The <strong>sequencer</strong> owns the <strong>program counter</strong> (<code>pc.sv</code>), the <strong>IRAM</strong> (4096 × 64-bit), and the combinational <strong>decoder</strong> (<code>decoder.sv</code>). On each instruction it fans out from <code>EXEC_DISPATCH</code> to one engine --- <strong>MXU</strong> or <strong>VPU</strong> (via <code>vpu_ctrl</code>) --- or the tile's <strong>DMU</strong> (driven by the <code>DMA_ROW_*</code> sub-FSM), or a <strong>control sub-FSM</strong> (loop / flush.slot / halt). Each engine's <code>done</code> pulse drives <code>pc_enable</code> and the next fetch begins.</p>
+<h2 id="fetch-decode-dispatch-lifecycle">Fetch → decode → dispatch lifecycle<a class="headerlink" href="#fetch-decode-dispatch-lifecycle" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Top FSM: 17 active states (enum widened to 7 bits, 17 of 128 used).</li>
+<li><code>start</code> loads the PC; <code>FETCH_1/2/3</code> pipelines the IRAM read; decoder slices fields.</li>
+<li><code>EXEC_DISPATCH</code> routes; engine runs; <em>done</em> drives <code>pc_enable</code> back to <code>FETCH_1</code>.</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>seq-lifecycle</code></p>
+<p><img alt="seq-lifecycle" src="../figures/tikz/seq-lifecycle.svg" /></p>
+<p>Zoom 2 --- the instruction lifecycle. <code>IDLE</code> loads the PC on <code>start</code>; <code>FETCH_1/2/3</code> pipelines the IRAM read; the decoder slices the word; <code>EXEC_DISPATCH</code> routes by opcode; the engine runs; its <em>done</em> asserts <code>pc_enable</code>, feeding back to <code>FETCH_1</code>. <code>HALT_STATE</code> (halt / undefined opcode) pulses <code>done</code> and returns to <code>IDLE</code>.</p>
+</div>
+<p>The top FSM has 17 active states (the enum is widened to 7 bits, 17 of 128 used). The common path is a short loop: <code>start</code> loads the PC, <code>FETCH_1/2/3</code> pipelines the IRAM read so the word is stable, the combinational decoder slices the field map, <code>EXEC_DISPATCH</code> routes by opcode, an engine runs, and its <code>done</code> drives <code>pc_enable</code> back to <code>FETCH_1</code>. Specialized opcodes take a detour through a sub-FSM (pool fetch, DMA row loop, loop control) and rejoin at the same fetch step.</p>
+<h2 id="lifecycle-stages">Lifecycle stages<a class="headerlink" href="#lifecycle-stages" title="Permanent link">&para;</a></h2>
+<p>Stage by stage, from doorbell launch to PC advance:</p>
+<p><strong>Table: lifecycle stages, from doorbell launch through engine handoff to PC advance.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Stage</strong></th>
+<th><strong>State(s)</strong></th>
+<th><strong>What happens</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start</td>
+<td><code>IDLE -&gt; FETCH_1</code></td>
+<td>On <code>start</code>, the PC is loaded to the kernel entry point. The CP has already loaded the kernel binary into IRAM (devmem[<code>kbin_addr</code>, <code>kbin_size</code>] → IRAM); the LAUNCH descriptor carries the devmem base address and size, not a slot index or registry handle.</td>
+</tr>
+<tr>
+<td>Fetch</td>
+<td><code>FETCH_1 / 2 / 3</code></td>
+<td>Multi-cycle pipeline that lets the IRAM read settle before the decode is stable. The PC drives the IRAM port-B address; the 64-bit word arrives a few cycles later.</td>
+</tr>
+<tr>
+<td>Decode</td>
+<td>(combinational)</td>
+<td><code>decoder.sv</code> slices the word into <code>op · flags · op0 · op1 · op2</code> per the <code>FIELDS_INSTR_*</code> layout. Layout-only; per-opcode meaning is applied at dispatch.</td>
+</tr>
+<tr>
+<td>Dispatch</td>
+<td><code>EXEC_DISPATCH</code></td>
+<td>A <code>case (op)</code> latches flags and operands, optionally schedules a literal-pool fetch for wide immediates, and selects the next state / engine.</td>
+</tr>
+<tr>
+<td>Engine handoff</td>
+<td><code>WAIT_MXU</code>, <code>VEC_WAIT_VPU</code>, <code>DMA_ROW_*</code>, …</td>
+<td>The sequencer pulses the engine's <code>start</code> and waits on its <code>done</code>. VEC / CAST are delegated wholesale to <code>vpu_ctrl</code> via a single wait state.</td>
+</tr>
+<tr>
+<td>Advance</td>
+<td><code>pc_enable</code></td>
+<td>On the engine's <code>done</code> cycle, <code>pc_enable</code> fires and the PC increments (or jumps), returning to <code>FETCH_1</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="decode-field-map-the-64-bit-instruction-word">Decode field map --- the 64-bit instruction word<a class="headerlink" href="#decode-field-map-the-64-bit-instruction-word" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>One 64-bit word: <code>opcode</code>[63:56] · <code>flags</code>[55:48] · <code>op0/op1/op2</code> (16-bit each).</li>
+<li>Decoder is layout-only; per-opcode meaning is applied at dispatch.</li>
+<li>Wide immediates carry a <strong>literal-pool index</strong>; <code>POOL_FETCH</code> reads the value from IRAM.</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>seq-iword</code></p>
+<p><img alt="seq-iword" src="../figures/tikz/seq-iword.svg" /></p>
+<p>The 64-bit instruction-word bit-field layout the decoder slices, MSB→LSB. <code>opcode</code>[63:56] (the dispatch key), <code>flags</code>[55:48], and three 16-bit operands <code>op0</code>/<code>op1</code>/<code>op2</code>. The field positions are the SSOT in <code>mininpu/isa</code> (<code>FIELDS_INSTR_*</code>) → <code>npu_isa_pkg.sv</code>.</p>
+</div>
+<p>The decoder mirrors the instruction layout in <code>mininpu/isa</code> (and <code>npu_isa_pkg.sv</code> <code>FIELDS_INSTR_*</code>). One 64-bit word splits into a 8-bit opcode, 8-bit flags, and three 16-bit operands:</p>
+<p><strong>Table: instruction word fields; bit positions are the SSOT in <code>mininpu/isa</code> (<code>FIELDS_INSTR_*</code>) → <code>npu_isa_pkg.sv</code>.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Field</strong></th>
+<th><strong>Bits</strong></th>
+<th><strong>Role</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>opcode</code></td>
+<td>[63:56]</td>
+<td>8-bit operation selector (dispatch key)</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td>[55:48]</td>
+<td>8-bit per-instruction flags; <code>flags[7:6]</code> = reserved-must-be-zero (dtype removed from v1 encoding; BF16 hardwired; parked/re-claimable); other bits: transB / accum / causal / async</td>
+</tr>
+<tr>
+<td><code>op0</code></td>
+<td>[47:32]</td>
+<td>16-bit operand 0 (dest row / VREG / mask)</td>
+</tr>
+<tr>
+<td><code>op1</code></td>
+<td>[31:16]</td>
+<td>16-bit operand 1 (src row / pool index)</td>
+</tr>
+<tr>
+<td><code>op2</code></td>
+<td>[15:0]</td>
+<td>16-bit operand 2 (row count / scalar / packed args)</td>
+</tr>
+</tbody>
+</table>
+<p>Wide immediates (DRAM addresses, fp32 scalars, loop bounds) do not fit in a 16-bit operand: an operand field instead carries a <em>literal-pool index</em>, and the sequencer's unified pool-fetch sub-FSM (<code>POOL_FETCH_REQ / WAIT</code>) reads the value from IRAM at <code>pool_base + index + step</code> before continuing.</p>
+<h2 id="worked-example-decoding-one-instruction">Worked example --- decoding one instruction<a class="headerlink" href="#worked-example-decoding-one-instruction" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><code>mxu.matmul</code> word <code>0x0102 0000 0008 0040</code>: high nibble <code>0x0_</code> → matmul group → MXU.</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>seq-worked</code></p>
+<p><img alt="seq-worked" src="../figures/tikz/seq-worked.svg" /></p>
+<p><em>Example:</em> the 64-bit word <code>0x0102 0000 0008 0040</code> decoded and dispatched. <code>opcode=0x01</code> (<code>mxu.matmul</code>) is the dispatch key; <code>flags=0x02</code> sets <code>causal</code> (<code>flags[1]</code>); <code>op0/op1</code> carry ACC-out row 0 and activation (spm_x) row 8 (weights already staged by a prior <code>mxu.load.w</code>). <code>EXEC_DISPATCH</code> routes the <code>0x0_</code> group to the MXU, which runs and pulses <code>systolic_done</code>. Concrete values are illustrative; encodings are the SSOT in <code>mininpu/isa</code>.</p>
+</div>
+<p>Take one concrete word, <code>0x0102 0000 0008 0040</code>. The decoder slices it layout-only into the five fields; <code>EXEC_DISPATCH</code> then applies meaning. The high byte <code>0x01</code> is <code>mxu.matmul</code>, whose high nibble <code>0x0_</code> names the <strong>matmul group</strong>, so dispatch routes to the MXU and enters <code>WAIT_MXU</code>. <code>flags=0x02</code> sets the <code>causal</code> bit (<code>flags[1]</code>); <code>op0=0x0000</code> is the ACC-out row and <code>op1=0x0008</code> the activation (<code>spm_x</code>) source row, with the weights already preloaded into the inactive buffer by a preceding <code>mxu.load.w</code> (which switches in on this op). The MXU consumes the operands, runs the tile, and pulses <code>systolic_done</code>, which drives <code>pc_enable</code>. These values are illustrative --- the authoritative opcode/flag/operand encodings live in <code>mininpu/isa</code>.</p>
+<h2 id="exec_dispatch-fan-out-by-opcode-group">EXEC_DISPATCH fan-out by opcode group<a class="headerlink" href="#exec_dispatch-fan-out-by-opcode-group" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>High nibble names the <strong>group</strong>; <code>0x0_</code>→MXU, <code>0x1_</code>/<code>0x2_</code>/<code>0x3_</code>→<code>vpu_ctrl</code> (<code>0x3_</code> = register load/store), <code>0x4_</code>→DMU, <code>0x5_</code>→control (<code>0x5F</code> = halt).</li>
+</ul>
+</details>
+<div class="admonition info">
+<p class="admonition-title">Figure: <code>seq-dispatch</code></p>
+<p><img alt="seq-dispatch" src="../figures/tikz/seq-dispatch.svg" /></p>
+<p>Zoom 3 --- <code>EXEC_DISPATCH</code> fan-out by opcode group. The high nibble names the group; matmul (<code>0x0_</code>) → MXU, the two vector groups and register load/store (<code>0x1_</code>/<code>0x2_</code>/<code>0x3_</code>) → <code>vpu_ctrl</code>, DMU (<code>0x4_</code>) → the inline row loop, control (<code>0x5_</code>, halt at <code>0x5F</code>) → control sub-FSMs. Group markers are for orientation --- exact opcode values and per-case operand decoding are the SSOT in <code>mininpu/isa</code> and the dispatch body in <code>sequencer.sv</code>.</p>
+</div>
+<p>The opcode's high nibble names its <strong>group</strong>; <code>EXEC_DISPATCH</code> routes by group to an engine or a control sub-FSM. The nibble map is the SSOT in <code>mininpu/isa</code>: <code>0x0_</code> matmul group (<code>mxu.load.w</code> / <code>mxu.matmul</code>), <code>0x1_</code> vector ops on ACC↔VREG, <code>0x2_</code> vector ops on VREG only, <code>0x3_</code> register load/store (<code>acc.store</code> / <code>acc.load</code> / <code>vreg.load</code>), <code>0x4_</code> DMU, <code>0x5_</code> control (halt at <code>0x5F</code>). The diagram shows the routing, not the per-opcode case table --- that is the dispatch body in <code>sequencer.sv</code>.</p>
+<p><strong>Table: <code>EXEC_DISPATCH</code> opcode-group routing; exact opcode values and per-case operand decoding are the SSOT in <code>mininpu/isa</code>.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Group</strong></th>
+<th><strong>Opcode range</strong></th>
+<th><strong>Routed to</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mxu.load.w</code> / <code>mxu.matmul</code> (<code>flags[7:6]</code> reserved)</td>
+<td>0x00, 0x01</td>
+<td>MXU → <code>WAIT_MXU</code></td>
+</tr>
+<tr>
+<td>VEC / reductions on ACC ↔ VREG [v1]</td>
+<td>0x10--0x1D</td>
+<td><code>vpu_ctrl</code> → <code>VEC_WAIT_VPU</code></td>
+</tr>
+<tr>
+<td>VEC VREG-only (0x26/0x27 [v1]; 0x20--0x25/0x28--0x2A [serving]-reserved)</td>
+<td>0x20--0x2A</td>
+<td><code>vpu_ctrl</code> → <code>VEC_WAIT_VPU</code></td>
+</tr>
+<tr>
+<td>Register load/store (SPAD bf16 ↔ ACC/VREG fp32)</td>
+<td>0x30--0x32</td>
+<td><code>vpu_ctrl</code> → <code>VEC_WAIT_VPU</code></td>
+</tr>
+<tr>
+<td>DMU load/store [v1]</td>
+<td>0x40, 0x42</td>
+<td><code>DMA_ROW_*</code></td>
+</tr>
+<tr>
+<td>DMU paged <code>.mi</code> ([serving]-reserved)</td>
+<td>0x48 / 0x4C</td>
+<td>(reserved; no impl on main)</td>
+</tr>
+<tr>
+<td>Loop control [v1]</td>
+<td>0x50, 0x51</td>
+<td><code>POOL_FETCH</code> / <code>LOOP_END_EXEC</code></td>
+</tr>
+<tr>
+<td><code>loop.begin.csr</code> ([serving]-reserved)</td>
+<td>0x55</td>
+<td>(reserved; no impl on main)</td>
+</tr>
+<tr>
+<td>Async-DMA fence [v1] (<code>flush.slot</code>)</td>
+<td>0x53</td>
+<td><code>FLUSH_SLOT_WAIT</code> (SPAD-only, masked)</td>
+</tr>
+<tr>
+<td>Halt (<code>halt</code>)</td>
+<td>0x5F</td>
+<td><code>HALT_STATE</code> → drain DMA → <code>done</code> → <code>IDLE</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="loop-control-hardware-loops">Loop control --- hardware loops<a class="headerlink" href="#loop-control-hardware-loops" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Hardware loops avoid host round-trips for tiled kernels; 4 independent induction variables (IVs).</li>
+<li><code>loop.begin</code> (0x50) pushes a frame (IV id / step / lo / body PC); <code>hi</code> from pool. (<code>loop.begin.csr</code> 0x55 is [serving]-reserved.)</li>
+<li><code>loop.end</code> (0x51): <code>IV += step</code>; if <code>IV &lt; hi</code> jump back, else fall through.</li>
+</ul>
+</details>
+<p>Hardware loops avoid host round-trips for tiled kernels. The sequencer holds four independent induction variables (IVs).</p>
+<ul>
+<li><strong><code>loop.begin</code> (0x50):</strong> pushes a loop frame --- latches IV id, step, lo (initial IV), and the loop body's start PC; the <code>hi</code> bound is read from the literal pool. (<code>loop.begin.csr</code> 0x55 would source <code>hi</code> from a kernel-arg CSR; it is [serving]-reserved and not implemented on main.)</li>
+<li><strong><code>loop.end</code> (0x51):</strong> in <code>LOOP_END_EXEC</code>, <code>IV += step</code>; if <code>IV &lt; hi</code> the PC jumps back to the body start, else it falls through. The compare/increment is combinational (<code>iv_reg_next</code>).</li>
+</ul>
+<p>Loop bounds are literal-only by ISA design --- they are not computed from runtime data; this keeps the IRAM-patch (pool) loop bounds statically known to the assembler.</p>
+<h2 id="flush-halt">Flush &amp; halt<a class="headerlink" href="#flush-halt" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li><code>flush.slot</code> (0x53): the <em>only</em> async-DMA fence --- spins until the SPAD-region slots in the op0 mask report <code>dma_slot_done</code>, then clears those bits for reuse. The full-fence pseudo <code>flush</code> lowers to <code>flush.slot</code> over all slots (the standalone 0x52 opcode is retired).</li>
+<li><code>halt</code> (0x5F): the only terminator --- drains all outstanding DMA slots, then asserts <code>done</code>. Any undefined opcode also defaults to <code>HALT_STATE</code>.</li>
+</ul>
+</details>
+<ul>
+<li><strong><code>flush.slot</code> (0x53):</strong> the sole async-DMA fence --- spins in <code>FLUSH_SLOT_WAIT</code> until every SPAD-region slot in the op0 mask reports <code>dma_slot_done</code>, then clears those done bits for reuse (make-async-real, charter § 4/§ 5). Because the DMU touches SPAD only, this fence guards SPAD regions only. The former full-fence <code>flush</code> (0x52) opcode is <strong>retired</strong>; the assembler pseudo <code>flush</code> now lowers to <code>flush.slot</code> over all slots.</li>
+<li><strong><code>halt</code> (0x5F):</strong> the only terminator. It sits at the all-ones lower-nibble slot (a clean default-to-halt decode) and <em>drains all outstanding DMA slots</em> before asserting <code>done</code> ("done" = results committed); any undefined opcode also defaults to <code>HALT_STATE</code>. (Ratified 0.4.0 value; the current RTL still homes halt at 0x3F and does not yet drain, tracked as a separate RTL fix.)</li>
+</ul>
+<h2 id="planned-evolution-risc-v-control-cores">Planned evolution → RISC-V control core(s)<a class="headerlink" href="#planned-evolution-risc-v-control-cores" title="Permanent link">&para;</a></h2>
+<details class="abstract">
+<summary>Slide summary (from the deck build)</summary>
+<ul>
+<li>Today's hand-rolled <code>EXEC_DISPATCH</code> FSM is the <em>present</em> design.</li>
+<li>Charter § 4: the command processor is a persistent device unit; the host API initiates commands in all versions. Per #109: the per-tile FSM is a candidate for a RISC-V control core once RTL stabilizes.</li>
+<li>ISA SSOT (<code>mininpu/isa</code>) + DV coverage gate retarget; sequenced after RTL stabilizes.</li>
+</ul>
+</details>
+<p>The current hand-rolled FSM is the <em>present</em> control design. Charter § 4: the command processor (<code>command_processor.sv</code>) is a persistent device unit that the host API drives in all versions via LAUNCH descriptors; a control MCU is an orthogonal complexity lever, not a version milestone. The per-tile FSM sequencer stays. Per <strong>GitHub issue #109</strong>, the per-tile <code>EXEC_DISPATCH</code> FSM is also a candidate for replacement by a small <strong>RISC-V control core</strong> once the RTL stabilizes. A programmable core fits the composable-IP template vision (#108) better than a bespoke FSM; ISA dispatch now hardwired in <code>EXEC_DISPATCH</code> would move to CPU-driven control. The ISA SSOT (<code>mininpu/isa</code>) and the DV ISA-coverage gate would retarget accordingly. Sequencing: after the current RTL stabilizes, not urgent.</p>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
+<p>This document cites; it does not restate the opcode-to-case table. Authoritative sources:</p>
+<p><strong>Table: authoritative sources by concern; this document cites rather than restates the opcode-to-case table.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Concern</strong></th>
+<th><strong>Authoritative source</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top FSM, <code>EXEC_DISPATCH</code>, sub-FSMs, pool fetch</td>
+<td><code>npu/src/compute_tile/sequencer.sv</code></td>
+</tr>
+<tr>
+<td>Instruction field slicing</td>
+<td><code>npu/src/compute_tile/decoder.sv</code> (mirrors <code>FIELDS_INSTR_*</code>)</td>
+</tr>
+<tr>
+<td>Program counter (load / advance)</td>
+<td><code>npu/src/compute_tile/pc.sv</code></td>
+</tr>
+<tr>
+<td>Chip-level launch / doorbell arbitration</td>
+<td><code>npu/src/npu/compute_ctrl.sv</code> · <code>npu.sv</code></td>
+</tr>
+<tr>
+<td>Opcodes, group nibble map, field map, flags, literal pool</td>
+<td><code>mininpu/isa</code></td>
+</tr>
+<tr>
+<td>Field positions (<code>FIELDS_INSTR_*</code>), flag bits</td>
+<td><code>npu/src/npu/npu_isa_pkg.sv</code></td>
+</tr>
+<tr>
+<td>Constants (<code>IRAM_DEPTH=4096</code>, <code>INSTR_WIDTH=64</code>, <code>IRAM_ADDR_WIDTH=12</code>)</td>
+<td><code>npu/src/npu/npu_config_pkg.sv</code></td>
+</tr>
+<tr>
+<td>Tile context</td>
+<td><code>compute_tile</code> · <code>architecture</code> · <code>README.md</code></td>
+</tr>
+</tbody>
+</table>
+<p>Dispatch specifics live in <code>npu/src/compute_tile/sequencer.sv</code> + <code>mininpu/isa</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="memory_tile.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Memory Tile [v3]">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Memory Tile [v3]
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="mxu.html" class="md-footer__link md-footer__link--next" aria-label="Next: MXU">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                MXU
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>
