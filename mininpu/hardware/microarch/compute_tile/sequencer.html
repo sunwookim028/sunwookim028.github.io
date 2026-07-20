@@ -811,6 +811,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#worked-example-mxumatmul-from-fetch-to-mxu-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example --- mxu.matmul from fetch to MXU handoff
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#loop-control-hardware-loops" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1433,7 +1444,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1529,6 +1540,17 @@
     <span class="md-ellipsis">
       
         EXEC_DISPATCH fan-out by opcode group
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-mxumatmul-from-fetch-to-mxu-handoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example --- mxu.matmul from fetch to MXU handoff
       
     </span>
   </a>
@@ -1682,7 +1704,7 @@ not the instance. The whole taxonomy is kept intact on the
 </table>
 <h2 id="decode-field-map-the-64-bit-instruction-word">Decode field map --- the 64-bit instruction word<a class="headerlink" href="#decode-field-map-the-64-bit-instruction-word" title="Permanent link">&para;</a></h2>
 <p>The 64-bit instruction word the decoder slices is
-<a href="../../spec/isa.html#fig-iword-decode">ISA Fig. 1</a>; the <a href="../../spec/isa.html">ISA Contract</a> owns
+<a href="../../spec/isa.html#fig-iword-decode">ISA Fig. 2</a>; the <a href="../../spec/isa.html">ISA Contract</a> owns
 the encoding.</p>
 <p>The decoder mirrors the instruction layout in <code>mininpu/isa</code> (and <code>npu_isa_pkg.sv</code> <code>FIELDS_INSTR_*</code>). One 64-bit word splits into a 8-bit opcode, 8-bit flags, and three 16-bit operands:</p>
 <p><strong>Table: instruction word fields; bit positions are the SSOT in <code>mininpu/isa</code> (<code>FIELDS_INSTR_*</code>) → <code>npu_isa_pkg.sv</code>.</strong></p>
@@ -1792,12 +1814,12 @@ the encoding.</p>
 </tr>
 </tbody>
 </table>
-<details class="note">
-<summary>Deeper dive: a worked dispatch --- <code>mxu.matmul</code> from fetch to MXU handoff</summary>
-<p><!-- TODO(figure-redraw): the ct-worked dispatch trace has a legacy asset on
+<h2 id="worked-example-mxumatmul-from-fetch-to-mxu-handoff">Worked example --- <code>mxu.matmul</code> from fetch to MXU handoff<a class="headerlink" href="#worked-example-mxumatmul-from-fetch-to-mxu-handoff" title="Permanent link">&para;</a></h2>
+<!-- TODO(figure-redraw): the ct-worked dispatch trace has a legacy asset on
      origin/main (figures/ct-worked) but no house-style SVG on this branch; the
      prose trace below carries its content. Redraw in the house style if wanted. -->
-Take one concrete word, <code>0x0102 0000 0008 0040</code>. The decoder slices it layout-only
+
+<p>Take one concrete word, <code>0x0102 0000 0008 0040</code>. The decoder slices it layout-only
 into the five fields; <code>EXEC_DISPATCH</code> then applies meaning. The high byte <code>0x01</code> is
 <code>mxu.matmul</code>, whose high nibble <code>0x0_</code> names the <strong>matmul group</strong>, so dispatch routes
 to the MXU (as-built: enters <code>WAIT_MXU</code>). <code>flags=0x02</code> sets the <code>causal</code> bit
@@ -1808,7 +1830,6 @@ operands, runs the tile, and pulses <code>systolic_done</code>, which drives <co
 happens inside the MXU after the handoff --- the systolic wavefront and the ACC
 drain --- is <a href="mxu.html#fig-matmul-trace">MXU Fig. 3</a>. These values are illustrative ---
 the authoritative opcode/flag/operand encodings live in <code>mininpu/isa</code>.</p>
-</details>
 <h2 id="loop-control-hardware-loops">Loop control --- hardware loops<a class="headerlink" href="#loop-control-hardware-loops" title="Permanent link">&para;</a></h2>
 <!-- TODO(figure): seq-loop-state (A2, loop frames + 8 bo channels) is NEEDED but not
      drawn; the default for v1 is to fold it into seq-lifecycle (cross-ref) rather than

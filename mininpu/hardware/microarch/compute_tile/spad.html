@@ -1400,7 +1400,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1572,12 +1572,18 @@ owns all SPAD ↔ VREG traffic) and the <strong>MXU</strong> (weight and bias re
 Port B client</strong> --- it operates on VREG and ACC, and its SPAD-adjacent traffic is
 LSU-mediated. Compute clients get a fixed access latency; the DMU absorbs arbitration
 variability by yielding (it is async and <code>flush.slot</code>-gated), so compute never stalls on SPAD.</p>
-<p>The as-built RTL additionally splits Port B into <strong>port0</strong> (MXU / DMA / serialized VPU, high
-priority) and <strong>port1</strong> (a second, lower-priority VPU path that co-issues concurrently with
-an in-flight MXU tile, <code>#149</code>); the 0.5.0 model above, routing all SPAD ↔ VREG traffic
-through the LSU, supersedes this as-built VPU-on-Port-B wiring for this page's normative
-narrative. This caveat is the single home for the port0/port1 VPU-co-issue fact that
-<a href="dmu.html#s3">dmu.md</a> cross-references.</p>
+<p>The as-built RTL splits Port B into two arbitrated compute ports, <strong>port0</strong> and <strong>port1</strong>
+(<code>spad.sv:92</code>, <code>COMP_PORTS = 2</code>, per-bank fixed priority port0 &gt; port1). Only <strong>port0</strong> is
+live: it carries MXU / DMA / VPU traffic through a static priority mux <strong>MXU &gt; LSU &gt; VPU</strong>
+(<code>tile_top.sv:418</code>, VPU arm at <code>:440-445</code>), so as-built VPU SPAD access is <strong>serialized</strong>
+behind the MXU and LSU, not concurrent. <strong>port1 is tied off</strong>: the single <code>spad</code>
+instantiation drives <code>comp1_*</code> from constants (<code>tile_top.sv:476-481</code>, <code>'0</code> / <code>1'b0</code>, with
+<code>dout</code>/<code>gnt</code> landing on <code>_unused</code> nets), so the second, lower-priority VPU path exists in
+<code>spad.sv</code> but is never driven, and the VPU-co-issue-with-an-in-flight-MXU-tile behaviour of
+<code>#149</code> is <strong>not live in the as-built tile</strong>. The 0.5.0 model above, routing all SPAD ↔ VREG
+traffic through the LSU, supersedes this as-built VPU-on-Port-B wiring for this page's
+normative narrative. This caveat is the single home for the port0/port1 VPU-co-issue fact
+that <a href="dmu.html#s3">dmu.md</a> cross-references.</p>
 <h2 id="access-latency-and-the-fixed-latency-contract">Access latency and the fixed-latency contract<a class="headerlink" href="#access-latency-and-the-fixed-latency-contract" title="Permanent link">&para;</a></h2>
 <p>Compute clients (MXU weight/bias reads, the LSU) get a <strong>fixed</strong> SPAD access latency
 (<code>MEM_LATENCY = 2</code> cycles → about 3 cycles per row, registered BRAM output); bank conflicts

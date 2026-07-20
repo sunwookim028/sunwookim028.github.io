@@ -23,7 +23,7 @@
     
     
       
-        <title>GPT-2 Kernel Gantt Figures: Generator + Output - mininpu documentation</title>
+        <title>GPT-2 Kernel Schedules: The Numbers SSOT, and the Retiring HTML Renderer - mininpu documentation</title>
       
     
     
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gpt-2-kernel-gantt-figures-generator-output" class="md-skip">
+        <a href="#gpt-2-kernel-schedules-the-numbers-ssot-and-the-retiring-html-renderer" class="md-skip">
           Skip to content
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GPT-2 Kernel Gantt Figures: Generator + Output
+              GPT-2 Kernel Schedules: The Numbers SSOT, and the Retiring HTML Renderer
             
           </span>
         </div>
@@ -1261,7 +1261,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1309,10 +1309,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-they-are-generated" class="md-nav__link">
+  <a href="#1-tikzgpt2-cyclestex-the-generated-latex-macro-include-current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        How they are generated
+        1. tikz/gpt2-cycles.tex --- the generated LaTeX macro include (current)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-gpt2_html-the-standalone-gantt-pages-retired" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. gpt2_*.html --- the standalone Gantt pages (RETIRED)
       
     </span>
   </a>
@@ -1331,10 +1342,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#section-order-map-reference-for-doc-5-no-numbers" class="md-nav__link">
+  <a href="#kernel-order-the-section-order-in-gpt2_demomd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Section-order map (reference for Doc 5, no numbers)
+        Kernel order (the section order in gpt2_demo.md)
       
     </span>
   </a>
@@ -1358,58 +1369,116 @@
 
 
 
-<h1 id="gpt-2-kernel-gantt-figures-generator-output">GPT-2 Kernel Gantt Figures: Generator + Output<a class="headerlink" href="#gpt-2-kernel-gantt-figures-generator-output" title="Permanent link">&para;</a></h1>
-<p>The <code>gpt2_*.html</code> files in this directory are cycle-level Gantt charts, one per
-GPT-2 kernel, each a self-contained inline-SVG standalone HTML styled like
-<code>fig9_tile_gantt.html</code>. They are <strong>generated</strong>, not hand-drawn.</p>
-<p><strong><code>_gen_gpt2.py</code> beside them is the source of truth.</strong> Each <code>gpt2_&lt;kernel&gt;.html</code>
-is a byte-for-byte product of running that script: it was regenerated and diffed
-against the committed HTML, and every landed figure matched exactly. This is the
-same source/output discipline the TikZ family follows (<code>tikz/*.tex</code> rendered via
-<code>make -C docs figures</code>): edit the source, re-render, never hand-edit the output
-HTML, or the next run silently reverts you.</p>
-<p>This note carries <strong>no cycle numbers on purpose</strong>. The numbers live only in
-<code>_gen_gpt2.py</code> (module constants + per-spec literals) and in the rendered HTML.
-Keeping them out of here means there is one place to change when they are
-finalized, and no stale copy to drift.</p>
-<h2 id="how-they-are-generated">How they are generated<a class="headerlink" href="#how-they-are-generated" title="Permanent link">&para;</a></h2>
-<p>Requires only Python 3 (standard library; no third-party deps). Run it from
-<strong>this directory</strong>; it writes each figure next to itself.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>docs/mkdocs/figures
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python3<span class="w"> </span>_gen_gpt2.py
+<h1 id="gpt-2-kernel-schedules-the-numbers-ssot-and-the-retiring-html-renderer">GPT-2 Kernel Schedules: The Numbers SSOT, and the Retiring HTML Renderer<a class="headerlink" href="#gpt-2-kernel-schedules-the-numbers-ssot-and-the-retiring-html-renderer" title="Permanent link">&para;</a></h1>
+<p><code>_gen_gpt2.py</code> in this directory is the <strong>single source of truth for the GPT-2
+per-kernel cycle numbers</strong> (timing-rev pin: ISA 0.5.0, source
+<code>origin/rtl/full-npu-wire</code>). It has two outputs, and they are at different points
+in their lives.</p>
+<h2 id="1-tikzgpt2-cyclestex-the-generated-latex-macro-include-current">1. <code>tikz/gpt2-cycles.tex</code> --- the generated LaTeX macro include (current)<a class="headerlink" href="#1-tikzgpt2-cyclestex-the-generated-latex-macro-include-current" title="Permanent link">&para;</a></h2>
+<p>The kernel schedules are being <strong>ported to TikZ</strong> so they share the house figure
+template (<code>tikz/fig-timing.sty</code>) with every other figure on the site, and are
+embedded inline in the sections of
+<code>hardware/microarch/compute_tile/gpt2_demo.md</code> that already discuss each kernel.</p>
+<p>Porting to hand-drawn TikZ would normally cost the single-source property the
+HTML generator had. It does not, because the numbers stay generated: this script
+emits <code>tikz/gpt2-cycles.tex</code>, a file of <code>\newcommand</code> definitions, and each
+figure <code>\input</code>s it and draws macros rather than digits. <strong>No figure hand-types a
+cycle count.</strong> A number changes here and every figure that uses it redraws.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>make<span class="w"> </span>gen-gpt2-cycles<span class="w">     </span><span class="c1"># regenerate the include (also rewrites the legacy HTML)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>make<span class="w"> </span>check-gpt2-cycles<span class="w">   </span><span class="c1"># drift gate: fails if the committed include is stale</span>
 </code></pre></div>
-<p>It prints one <code>wrote</code> line per figure and one <code>HELD</code> line for any spec that is
-withheld (see below). To change a figure, edit the relevant spec in
-<code>_gen_gpt2.py</code> and re-run; do not touch the <code>.html</code>.</p>
+<p>The drift gate is the same mechanism as the generated ISA/ABI reference
+fragments (<code>docs/scripts/gen_isa_abi_md.py --check</code>): a <code>--check</code> mode plus a
+pre-commit hook (<code>gpt2-cycles-check</code>). CI's pre-commit job runs
+<code>pre-commit run --all-files</code>, so the hook is <strong>not path-filtered</strong> and cannot be
+dodged by keeping the generator out of a diff. The generator additionally
+asserts each kernel's derived milestone sum against its declared span, so a
+constant edited without its total is an error, not a silent skew.</p>
+<p><code>gpt2-cycles.tex</code> is source, not a page: <code>mkdocs.yml</code>'s <code>exclude_docs</code> already
+carries <code>figures/tikz/*.tex</code>, so it is never published.</p>
+<p>Macro naming: <code>\gptCy&lt;Const&gt;</code> for shared timing constants, <code>\gpt&lt;Kernel&gt;&lt;Milestone&gt;</code>
+for a per-kernel cycle. LaTeX control sequences are letters only, so the kernel key
+is CamelCased with the leading <code>gpt2_</code> dropped (<code>gpt2_qkv_proj</code> -&gt; <code>QkvProj</code>).</p>
+<h2 id="2-gpt2_html-the-standalone-gantt-pages-retired">2. <code>gpt2_*.html</code> --- the standalone Gantt pages (RETIRED)<a class="headerlink" href="#2-gpt2_html-the-standalone-gantt-pages-retired" title="Permanent link">&para;</a></h2>
+<p><strong>All seven are gone.</strong> They were the original renderer's output (self-contained
+inline-SVG standalone HTML), and they were orphans: nothing linked them, and they
+published to the site as pages reachable only by direct URL. Each is now
+superseded by a TikZ figure embedded inline in <code>gpt2_demo.md</code>:</p>
+<table>
+<thead>
+<tr>
+<th>was</th>
+<th>is now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gpt2_qkv_proj.html</code></td>
+<td><code>tikz/gpt2-qkv-proj.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_qk_scores.html</code></td>
+<td><code>tikz/gpt2-qk-scores.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_softmax.html</code></td>
+<td><code>tikz/gpt2-softmax.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_layernorm.html</code></td>
+<td><code>tikz/gpt2-layernorm.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_cproj.html</code></td>
+<td><code>tikz/gpt2-cproj.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_residual.html</code></td>
+<td><code>tikz/gpt2-residual.svg</code></td>
+</tr>
+<tr>
+<td><code>gpt2_lmhead.html</code></td>
+<td><code>tikz/gpt2-lmhead.svg</code></td>
+</tr>
+</tbody>
+</table>
+<p>Their encoding was also no longer house style: six domain hues plus a dark-mode
+inversion is exactly what the figure template retired in favour of near-black ink
+on white with grey for memory. The TikZ ports do not carry it over.</p>
+<p><strong>The renderer itself is kept and still works</strong>, gated by a <code>PORTED</code> set in
+<code>_gen_gpt2.py</code>. That set is what makes the deletion stick: without it the next
+generator run would recreate all seven files. Every kernel currently ported is
+listed there, so the renderer writes nothing today --- it is retained so a future
+kernel can be prototyped as HTML before it is drawn, and so <code>gelu</code> has a renderer
+waiting when #385 unblocks it. Removing a kernel from <code>PORTED</code> re-enables its
+HTML; that is the only way to get one back.</p>
 <h2 id="what-is-held-and-why">What is HELD, and why<a class="headerlink" href="#what-is-held-and-why" title="Permanent link">&para;</a></h2>
 <p><code>_gen_gpt2.py</code> carries a spec for every GPT-2 kernel, but one is deliberately
-<strong>not written to disk</strong> and <strong>not committed</strong>:</p>
+<strong>not written to disk</strong>, <strong>not committed</strong>, and <strong>emits no cycle macros</strong>:</p>
 <ul>
 <li><strong><code>gpt2_gelu</code></strong> models gelu as a single fused latency-serial op. Owner ruling
   <strong>#385 section 5 decomposes gelu</strong> under ISA 0.5.0, so that model, and every
   roll-up that depends on it, is <strong>known-wrong</strong>. The spec is retained in the
-  generator only as the section skeleton for whoever authors Doc 5; it is listed
-  in the generator's <code>HELD</code> set and skipped on every run. Remove it from <code>HELD</code>
-  only after the spec is recomputed under the decomposition.</li>
+  generator only as the section skeleton for whoever recomputes it. Remove it
+  from the generator's <code>HELD</code> set only after the spec is recomputed under the
+  decomposition.</li>
 </ul>
 <p>No other kernel sums a gelu cost, so the rest are unaffected: <code>gpt2_cproj</code> names
-gelu as the separate next kernel but does not add its cycles.</p>
-<h2 id="section-order-map-reference-for-doc-5-no-numbers">Section-order map (reference for Doc 5, no numbers)<a class="headerlink" href="#section-order-map-reference-for-doc-5-no-numbers" title="Permanent link">&para;</a></h2>
-<p>The generator's spec order is the intended kernel-section order for the future
-Doc 5 page. Authoring that prose page (with numbers) is gated on the gelu ruling
-and is out of scope here; this is only the skeleton:</p>
+gelu as the separate next kernel but does not add its cycles. The block-level
+roll-up figure is blocked on the same ruling and is not drawn.</p>
+<h2 id="kernel-order-the-section-order-in-gpt2_demomd">Kernel order (the section order in <code>gpt2_demo.md</code>)<a class="headerlink" href="#kernel-order-the-section-order-in-gpt2_demomd" title="Permanent link">&para;</a></h2>
 <ol>
-<li><code>gpt2_qkv_proj</code> - attn QKV projection (MXU GEMM + bias)</li>
-<li><code>gpt2_qk_scores</code> - attn Q @ K^T scores (scaled, causal)</li>
-<li><code>gpt2_softmax</code> - attn row-softmax chain (VREG-only)</li>
-<li><code>gpt2_layernorm</code> - LayerNorm stats + affine</li>
-<li><code>gpt2_gelu</code> - MLP gelu activation <strong>(HELD, see above)</strong></li>
-<li><code>gpt2_cproj</code> - MLP down-projection GEMM</li>
-<li><code>gpt2_residual</code> - residual add</li>
-<li><code>gpt2_lmhead</code> - vocab projection + flush/halt tail</li>
+<li><code>gpt2_qkv_proj</code> - attn QKV projection (MXU GEMM + bias) --- <strong>drawn</strong>, <code>tikz/gpt2-qkv-proj.tex</code></li>
+<li><code>gpt2_qk_scores</code> - attn Q @ K^T scores (scaled, causal) --- <strong>drawn</strong>, <code>tikz/gpt2-qk-scores.tex</code></li>
+<li><code>gpt2_softmax</code> - attn row-softmax chain (VREG-only) --- <strong>drawn</strong>, <code>tikz/gpt2-softmax.tex</code></li>
+<li><code>gpt2_layernorm</code> - LayerNorm stats + affine --- <strong>drawn</strong>, <code>tikz/gpt2-layernorm.tex</code></li>
+<li><code>gpt2_gelu</code> - MLP gelu activation <strong>(HELD, see above --- not drawn)</strong></li>
+<li><code>gpt2_cproj</code> - MLP down-projection GEMM --- <strong>drawn</strong>, <code>tikz/gpt2-cproj.tex</code></li>
+<li><code>gpt2_residual</code> - residual add --- <strong>drawn</strong>, <code>tikz/gpt2-residual.tex</code></li>
+<li><code>gpt2_lmhead</code> - vocab projection + flush/halt tail --- <strong>drawn</strong>, <code>tikz/gpt2-lmhead.tex</code></li>
 </ol>
-<p>These figures are unreferenced assets (no topic page embeds them yet), so they
-do not affect the mkdocs nav.</p>
+<p>This is 8 specs, 7 of them sound. It is not 12: there is no spec for embedding,
+attention-V, MLP <code>fc</code>, or argmax, and none should be invented to reach a count.</p>
 
 
 

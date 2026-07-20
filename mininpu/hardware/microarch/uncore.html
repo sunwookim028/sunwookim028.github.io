@@ -985,6 +985,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-drivers-and-cache-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS, drivers, and cache model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OS, drivers, and cache model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-access-uio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register access (UIO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-buffers-udmabuf-cma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host buffers (udmabuf + CMA)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmu-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMMU and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interconnect-and-engine-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnect and engine choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#portability-and-roadmap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1398,7 +1470,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1501,6 +1573,78 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#os-drivers-and-cache-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS, drivers, and cache model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OS, drivers, and cache model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-access-uio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register access (UIO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-buffers-udmabuf-cma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host buffers (udmabuf + CMA)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmu-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMMU and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interconnect-and-engine-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnect and engine choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#portability-and-roadmap" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1548,16 +1692,17 @@ cross a separate host-DMA stream: a memcpy is serviced by the device's own <stro
 (an AXI CDMA) moving data host memory ↔ device memory over the AXI fabric. The NPU owns a
 second channel: an AXI4 master to off-chip DRAM (PL-DDR4) for bulk weight streaming. DRAM is
 the inter-kernel medium; there is no coherent cache across the link.</p>
-<!-- TODO(figure): uncore-overview (A1) is NEEDED but not drawn: the central fold figure
-     showing the units + spine + regmap routing in house style. Nothing in the drawn set
-     covers it yet.
-     The legacy source-less SVG `if-context` was retired here: it was referenced by no
-     page, and every fact it drew is stated in the prose below. When uncore-overview is
-     drawn it should carry that content forward: host interface (copy engine, AXI CDMA)
-     -> FABRIC AXI4 seam -> `dm_axi_bridge` -> DMEM `dm_*` req/ack seam -> the compute
-     tile's DMU (async prefetch, `dma_slot_done`), plus `m00_axi` AXI4 down to PL-DDR4
-     (DDR4 MIG, ZCU102), with the `compute_clk` 50 MHz domain annotated (see below). -->
-
+<figure id="fig-uncore-overview">
+<p><img alt="The uncore: units, data spine, and regmap routing" src="../../figures/tikz/uncore-overview.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>The uncore: units, data spine, and regmap routing.</strong> The host writes the encoded
+CMD window and rings the doorbell; the command processor latches the window atomically and
+routes the descriptor to exactly one seam -- a <strong>LAUNCH</strong> to the compute tile, a <strong>COPY</strong> to
+the copy engine. Red is the command plane (one encoded descriptor out, one completion back);
+ink is bulk data on AXI4. The unit row is ordered so that every bulk-data link is between
+neighbours, which leaves the two control seams as the only long edges.</p>
+</figcaption>
+</figure>
 <p>The four units and the memory hierarchy:</p>
 <p><strong>Table: the v1 on-chip memory hierarchy. Capacities/widths are owned by <code>npu_config_pkg.sv</code>; the memory tile is [v3]-deferred and absent here.</strong></p>
 <table>
@@ -1635,7 +1780,7 @@ compute clock; a CDC at the DMEM boundary can later decouple the AXI/MIG side (2
 <figure id="fig-axi-bridge-fsm">
 <p><img alt="dm_axi_bridge burst FSM" src="../../figures/tikz/d-axi-bridge-fsm.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong><code>dm_axi_bridge</code> burst FSM.</strong> One <code>dm_*</code> request → one 8-beat AXI4 INCR burst.
+<p><span class="caption-prefix">Fig. 2.</span><strong><code>dm_axi_bridge</code> burst FSM.</strong> One <code>dm_*</code> request → one 8-beat AXI4 INCR burst.
 Load: IDLE → READ_AR → READ_R → DONE. Store: IDLE → WRITE_AW → WRITE_W → WRITE_B → DONE.
 <code>dm_ack</code> is a combinational 1-cycle pulse in DONE. Single-ID, single-outstanding, in-order.</p>
 </figcaption>
@@ -1738,6 +1883,108 @@ The old opaque "B1--B4" labels are retired ("B" was unexplained and "L" collided
 architecture Level-1/2/3 notation). A compact tag <code>i1--i4</code> is available if a short label
 is ever needed. This is naming rationale, not a mechanism.</p>
 </details>
+<!-- PROVENANCE: the section below is RECOVERED documentation, not newly verified work.
+     It is the `\mode<article>` prose of the frame "OS, drivers, and cache model" from the
+     retired LaTeX source docs/src/content/host_interface.tex, recovered at
+     `git show dddb38fa^:docs/src/content/host_interface.tex`. It was dropped when the five
+     per-facet LaTeX documents were folded into this page; the owner ruled it back in. Two
+     other dropped headings, "Precision flow (numerical contract)" and "Memory hierarchy",
+     were ruled NOT to belong on this page and are deliberately not restored here.
+
+     TODO(content-pass) -- THOSE TWO HAVE A DESTINATION: the owner ruled that both merge
+     into the **Datapath spine** section of the compute-tile Overview page,
+     hardware/microarch/compute_tile/index.md ("## Datapath spine"). That section already
+     exists, so this is a MERGE INTO an existing section, not the creation of a new one --
+     which changes the shape of the work: the pass has to reconcile with prose that is
+     already there, not paste a block in.
+
+     The move is deliberately NOT done here. Both carry claims that must be re-checked
+     against the SSOT before they land on a page: the precision flow states the
+     BF16-storage / BF16-multiply / FP32-accumulate contract and its narrow-multiply /
+     wide-accumulate rationale, and the memory hierarchy is a capacity table whose numbers
+     are owned by npu_config_pkg.sv. That checking is content work and belongs to the
+     content pass; this note only records where they go and how to get them back.
+
+     So that the pass does not have to redo the excavation, here is what they are and where
+     to get them back verbatim:
+
+         git show dddb38fa^:docs/src/content/architecture.tex   # both frames, lines 134-162
+
+       - "Precision flow (numerical contract)" -- three bullets: storage
+         STORAGE_FORMAT=BF16 -> PE multiply MUL_FORMAT=BF16 -> ACCUM_FORMAT=FP32, one
+         hardwired v1 numeric story owned by npu/params.py; narrow multiply / wide
+         accumulate to avoid K-loop cancellation; quantization (int4/int8/fp8) is on the
+         extension branch, not main.
+       - "Memory hierarchy" -- the four-row SPAD / VREG / device-memory / IRAM table plus
+         two article-mode paragraphs the table alone does not carry: on-chip storage is
+         true dual-port single-clock with capacities/widths as design-time parameters in
+         npu_config_pkg.sv, and the read-latency contract is MEM_LATENCY cycles (2 today),
+         also owned by npu_config_pkg.sv, which controller FSMs such as mxu.sv time reads
+         against. The memory tile (128 KiB staging/cache tier) is [v3]-deferred (RFC #158)
+         and deliberately absent.
+
+     STALENESS FLAG, not fixed here: this page already carries partial versions of both --
+     a four-row memory table above the "Command path" heading, and, immediately under it,
+     a prose paragraph describing the precision flow (see uncore.md:45) -- on the page just
+     ruled not to be their home. ONCE THE CONTENT MOVES TO "Datapath spine", THAT PARAGRAPH
+     AND THAT TABLE ARE DUPLICATES TO RECONCILE, not content to leave standing. They are
+     deliberately not deleted now: removing them before the destination text exists would
+     drop the material from the site entirely. The table here also differs from the
+     recovered one (it drops SPAD's "256 KiB phys" and the VREG row's "1D", the latter being
+     the #411 VREG-shape question), so the reconcile is a real comparison, not a delete.
+     Flagged, not edited: changing the ink is the content pass's call, not this restore's.
+
+     Nothing in it has been re-checked against the RTL or the runtime as part of the
+     restore, and it is deliberately NOT updated in place: the one point that reads stale
+     today is flagged inline below rather than rewritten. The page's composition is to be
+     settled later, so this sits before "Portability and roadmap" (which continues into the
+     same host/board material) without restructuring anything around it. -->
+
+<h2 id="os-drivers-and-cache-model">OS, drivers, and cache model<a class="headerlink" href="#os-drivers-and-cache-model" title="Permanent link">&para;</a></h2>
+<p>This unit owns the host-side OS and driver contract, so the runtime and board bring-up have a
+single reference.</p>
+<h3 id="os">OS<a class="headerlink" href="#os" title="Permanent link">&para;</a></h3>
+<p>A standard <strong>PetaLinux</strong> (ZynqMP) image is sufficient; no custom distribution is
+required. The boot chain is the ordinary ZynqMP one: FSBL → PMU firmware → ATF (BL31) →
+U-Boot → Linux, with the bitstream loaded by the FSBL (or <code>fpga_manager</code>).</p>
+<h3 id="register-access-uio">Register access (UIO)<a class="headerlink" href="#register-access-uio" title="Permanent link">&para;</a></h3>
+<p>The NPU AXI4-Lite register block (CMD window, doorbell,
+<code>instr_ready</code>, <code>dma_slot_done</code>) and the AXI CDMA register block are exposed as <code>generic-uio</code>
+device-tree nodes (<code>uio_pdrv_genirq</code>); the user-space runtime <code>mmap</code>s <code>/dev/uioX</code> and pokes
+the registers directly. The CDMA is deliberately <em>not</em> bound to the in-kernel <code>dmaengine</code>
+driver, and <code>dma-proxy</code> is not used: the device commands its own copy engine.</p>
+<h3 id="host-buffers-udmabuf-cma">Host buffers (udmabuf + CMA)<a class="headerlink" href="#host-buffers-udmabuf-cma" title="Permanent link">&para;</a></h3>
+<p>The <strong>udmabuf</strong> out-of-tree kernel module (a PetaLinux
+recipe) allocates physically contiguous buffers from a reserved <strong>CMA</strong> region (sized via the
+<code>cma=</code> bootarg or a <code>reserved-memory</code> node) and exposes <code>/dev/udmabufX</code>. The runtime opens the
+node with <code>O_SYNC</code> for a <strong>non-cached</strong> mapping, which is what makes the memcpy path coherent
+with no explicit cache operations. Cached-with-explicit-<code>sync</code> and a coherent <strong>HPC</strong> port
+(CCI-400, <code>dma-coherent</code>, lower bandwidth) are alternatives; v1 uses the non-cached udmabuf as
+the minimal, known-good option.</p>
+<!-- STALENESS FLAG (not resolved here, per the restore's terms): the paragraph above says the
+     O_SYNC non-cached mapping is what leaves the runtime with "no explicit cache operations".
+     The in-repo runtime does not match that today: `mininpu/runtime/backend.py` gives
+     `UdmabufBuffer` explicit `sync_to_device` / `sync_from_device` hooks that write the
+     udmabuf sysfs `sync_for_device` / `sync_for_cpu` nodes around H2D/D2H (backend.py:188-220),
+     and `mininpu/runtime/tests/test_uio_backend.py` asserts the H2D cache-sync fires. The
+     runtime treats those writes as optional no-ops when the udmabuf instance is configured
+     non-cached, so the two are reconcilable, but the doc states the non-cached mapping as the
+     settled v1 choice while the runtime carries the cached path as a live option. Which one is
+     the v1 contract needs an owner ruling; do not edit either side until then. -->
+
+<h3 id="smmu-and-isolation">SMMU and isolation<a class="headerlink" href="#smmu-and-isolation" title="Permanent link">&para;</a></h3>
+<p>The ZynqMP SMMU does not translate the PL DMA master (its default
+state), so <code>host_phys</code> is used directly. The consequence: a PL master holding a physical
+address can reach any PS-DDR location. This is acceptable for a single-tenant appliance; a
+<code>vfio-platform</code> / SMMU path is the hardening option if isolation is later required.</p>
+<h3 id="interconnect-and-engine-choice">Interconnect and engine choice<a class="headerlink" href="#interconnect-and-engine-choice" title="Permanent link">&para;</a></h3>
+<p>The PL→PS <strong>HP</strong> port carries the CDMA's PS-DDR traffic
+and the <strong>PL-DDR4 MIG</strong> backs device memory; both are instantiated in the board block design.
+An in-fabric <strong>AXI CDMA</strong> is chosen over the PS hardened GDMA/ADMA because the device must own
+its copy engine (the PS DMA is a host-side resource); the streaming AXI DMA does not apply
+(there is no stream endpoint). Nothing beyond the above is required.</p>
+<p>Not needed for any of this: PYNQ, <code>dma-proxy</code>, an in-kernel AXI-DMA/CDMA <code>dmaengine</code> driver,
+or an RTOS.</p>
 <h2 id="portability-and-roadmap">Portability and roadmap<a class="headerlink" href="#portability-and-roadmap" title="Permanent link">&para;</a></h2>
 <p>The copy engine and device-memory controller are <strong>target-specific shells</strong>: the device owns
 its DMA engine and memory controller, and the host posts high-level commands rather than

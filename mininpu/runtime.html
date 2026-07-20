@@ -1480,7 +1480,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1716,7 +1716,20 @@ selection, pinned host memory, memcpy, and kernel launch, all built on the
 <code>mininpu.abi</code> SSOT (<code>mininpu/runtime/</code>). This page covers the calls a host script
 uses, plus the board HAL types they hand back. Implementation details (the
 UIO/udmabuf discovery, the two-phase doorbell handshake, the alignment contract)
-are deferred to the module docstrings and are not repeated here.</p>
+are summarised in the figure below and otherwise deferred to the module
+docstrings; the prose on this page does not repeat them.</p>
+<figure id="fig-runtime-call-sequence">
+<p><img alt="Host runtime call sequence and the doorbell handshake" src="figures/tikz/runtime-call-sequence.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>Host runtime call sequence.</strong> One COPY and one LAUNCH, from the host script down
+to the AXI-Lite CMD window · blue marks the traffic that actually crosses that window ·
+both commands funnel into the same two-phase doorbell handshake, drawn once because the
+runtime factors it once (<code>_ring_command</code>): poll <code>instr_ready</code> for room, stage <code>cmd_w1</code> ..
+<code>cmd_w7</code>, ring the doorbell in <code>cmd_w0</code> (bit 4) as the final latching write, then poll
+<code>instr_ready</code> again for retirement · after a LAUNCH the host also reads <code>launch_status</code>,
+because retirement alone does not mean the kernel ran.</p>
+</figcaption>
+</figure>
 <h2 id="public-api">Public API<a class="headerlink" href="#public-api" title="Permanent link">&para;</a></h2>
 <h3 id="mininpusetdevice">mininpuSetDevice<a class="headerlink" href="#mininpusetdevice" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuSetDevice</span><span class="p">(</span><span class="n">uio_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>

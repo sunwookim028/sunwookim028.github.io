@@ -1411,7 +1411,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1586,19 +1586,95 @@ pass adds the embedding at the front and the LM-head tail at the end):</p>
 The lanes show which unit is busy each cycle and where the overlap levers (weight
 double-buffer, async-DMA ping-pong) hide latency. The lane / overlap idiom is shared with
 the issue/overlap timeline, <a href="index.html#fig-pipeline-overlap">Compute tile Fig. 2</a>.</p>
+<p><strong>Reading the cycle scale.</strong> These schedules span 212 to 867 cycles, a 4x range, so
+they are not all drawn at one pitch: each figure names its <strong>tier</strong> in its footnote.
+Two figures in the same tier are comparable cycle-for-cycle by geometry, so equal
+widths mean equal cycles:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Pitch</th>
+<th>Kernels</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kernel</code></td>
+<td>1.10 mm / cycle</td>
+<td><code>qkv_proj</code> (234 cy), <code>cproj</code> (224), <code>residual</code> (212), <code>lmhead</code> (255)</td>
+</tr>
+<tr>
+<td><code>kernelwide</code></td>
+<td>0.32 mm / cycle</td>
+<td><code>qk_scores</code> (705 cy), <code>layernorm</code> (792), <code>softmax</code> (867)</td>
+</tr>
+</tbody>
+</table>
+<p>Figures in <strong>different</strong> tiers are not comparable, and neither tier is comparable with
+the compute-tile issue-model figures, which sit at a different altitude on a different
+scale. The two tiers are close in drawn width on purpose (286 mm and 288 mm at their
+band limits), which is what lets both sit in one page column: the width is the page
+measure, and only the pitch carries cycle meaning.</p>
+<p>Every cycle number in these figures is generated from <code>docs/mkdocs/figures/_gen_gpt2.py</code>
+into a LaTeX macro include that the figure sources consume, so no drawing hand-types a
+cycle count. <code>make check-gpt2-cycles</code> fails if that include drifts from the generator.</p>
 <h2 id="mxu-bound-kernels">MXU-bound kernels<a class="headerlink" href="#mxu-bound-kernels" title="Permanent link">&para;</a></h2>
 <p>The matmul-heavy kernels --- <code>qkv_proj</code>, <code>qk_scores</code>, <code>cproj</code> --- are MXU-bound: they stream
 weight and X tiles through the systolic array and accumulate in ACC.</p>
-<!-- TODO(figure): gpt2_qkv_proj / gpt2_qk_scores / gpt2_cproj Gantts are generated
-     (ISA 0.5.0-pinned, RTL-cross-checked); the HTML assets live under bench/dv, not in
-     docs/mkdocs/figures on this branch, so they are not embedded here yet. -->
-
+<figure id="fig-qkv-proj-schedule">
+<p><img alt="attn.qkv_proj: one (m,n) block, K=2 k-tiles" src="../../../figures/tikz/gpt2-qkv-proj.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong><code>attn.qkv_proj</code>: one <code>(m,n)</code> block, K=2 k-tiles.</strong> The MXU-bound spine: weight and X
+tiles stream through the systolic array, ACC accumulates across the two k-tiles, and the
+result is written back.</p>
+</figcaption>
+</figure>
+<p><code>qk_scores</code> contracts over <code>head_dim</code> in eight <code>N</code>-wide k-tiles, so the same weight
+ping-pong runs eight times and the 74-cycle matmul cadence dominates everything else.
+It is drawn at the wide tier because the k-loop makes it 699 cycles:</p>
+<figure id="fig-qk-scores-schedule">
+<p><img alt="attn.qk_scores: one block, K = head_dim/N = 8 k-tiles" src="../../../figures/tikz/gpt2-qk-scores.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><strong><code>attn.qk_scores</code>: one block, K = <code>head_dim</code>/N = 8 k-tiles.</strong> Drawn at the wide tier: the
+eight-deep k-loop makes the block 699 cycles, and the 74-cycle matmul cadence dominates.</p>
+</figcaption>
+</figure>
+<p>The MLP down-projection is <code>qkv_proj</code>'s spine minus the write-back --- its result stays in
+VREG for the residual add --- with the DMU prefetching both weight tiles underneath:</p>
+<figure id="fig-mlp-cproj-schedule">
+<p><img alt="mlp GEMM (c_proj): one (m,n) block, K=2 k-tiles" src="../../../figures/tikz/gpt2-cproj.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 3.</span><strong>MLP GEMM (<code>c_proj</code>): one <code>(m,n)</code> block, K=2 k-tiles.</strong> The <code>qkv_proj</code> spine minus the
+write-back: the result stays in VREG for the residual add, and the DMU prefetches both
+weight tiles underneath.</p>
+</figcaption>
+</figure>
 <h2 id="vpu-bound-kernels">VPU-bound kernels<a class="headerlink" href="#vpu-bound-kernels" title="Permanent link">&para;</a></h2>
 <p>The normalization and activation kernels --- <code>softmax</code>, <code>layernorm</code>, <code>gelu</code> --- are
 VPU-bound: reductions, transcendental LUTs, and per-lane arithmetic.</p>
-<!-- TODO(figure): gpt2_softmax / gpt2_layernorm Gantts are generated (ISA 0.5.0-pinned).
-     gpt2_gelu is HELD (#385): the single-fused-op GELU model is known-wrong until the
-     decomposition lands, so its Gantt is deliberately not written to disk. -->
+<figure id="fig-softmax-schedule">
+<p><img alt="attn.softmax: one [8,8] score tile, 7 dependent VREG-to-VREG ops" src="../../../figures/tikz/gpt2-softmax.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 4.</span><strong><code>attn.softmax</code>: one <code>[8,8]</code> score tile, 7 dependent VREG-to-VREG ops.</strong> VPU-bound: a
+chain of seven dependent ops with no MXU work to hide behind.</p>
+</figcaption>
+</figure>
+<p>LayerNorm is a 10-op chain rather than softmax's 7, but it is cheaper: <code>mean</code>, <code>var</code> and
+<code>rsqrt</code> dispatch to the <strong>parallel</strong> <code>VPU_VREG_EXEC</code> path (all 8 rows in one pass, 24 cy)
+rather than the 192-cycle latency-serial path, and the <code>gamma</code>/<code>beta</code> feed is prefetched
+entirely under the stats chain:</p>
+<figure id="fig-layernorm-schedule">
+<p><img alt="layernorm (LN1): one 8x8 col-tile, 10-op chain with hidden gamma/beta prefetch" src="../../../figures/tikz/gpt2-layernorm.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 5.</span><strong><code>layernorm</code> (LN1): one 8x8 col-tile, 10-op chain with hidden <code>gamma</code>/<code>beta</code> prefetch.</strong>
+Longer than softmax's chain but cheaper: <code>mean</code>, <code>var</code> and <code>rsqrt</code> take the parallel
+<code>VPU_VREG_EXEC</code> path, and the <code>gamma</code>/<code>beta</code> feed hides entirely under the stats chain.</p>
+</figcaption>
+</figure>
+<!-- TODO(figure): gpt2_gelu is HELD (#385): the single-fused-op GELU model is
+     known-wrong until the decomposition lands, so it emits no cycle macros and must
+     not be drawn. -->
 
 <p><code>gpt2_gelu</code> is <strong>HELD</strong> pending the GELU decomposition (<a href="https://github.com/sunwookim028/mininpu/issues/385">#385</a>):
 its single-fused-op schedule is known-wrong until the op is decomposed, so no GELU roll-up
@@ -1606,13 +1682,40 @@ is authored here.</p>
 <h2 id="residual-and-lm-head-tail">Residual and LM-head tail<a class="headerlink" href="#residual-and-lm-head-tail" title="Permanent link">&para;</a></h2>
 <p>The block tail adds the residual, and the pass ends with <code>ln_f</code>, the <code>lm_head</code> projection,
 <code>argmax</code>, and the <code>flush</code> / <code>halt</code> drain.</p>
-<!-- TODO(figure): gpt2_residual / gpt2_lmhead Gantts are generated (ISA 0.5.0-pinned);
-     assets live under bench/dv, not embedded here yet. -->
-
+<p>The residual add is the VPU-bound dual of <code>qkv_proj</code> at the same tier and pitch: two
+10-cycle ACC drains, then a 192-cycle latency-serial <code>add.acc</code>. Note the near-miss ---
+<code>add.col.bcast</code> streams at 33 cy, but plain <code>add.acc</code> does not:</p>
+<figure id="fig-residual-schedule">
+<p><img alt="residual: one 8x8 tile, two ACC drains then one latency-serial add" src="../../../figures/tikz/gpt2-residual.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 6.</span><strong><code>residual</code>: one 8x8 tile, two ACC drains then one latency-serial add.</strong> The VPU-bound
+dual of <code>qkv_proj</code> at the same tier and pitch. Note the near-miss: <code>add.col.bcast</code> streams
+at 33 cy, but plain <code>add.acc</code> runs the 192-cycle latency-serial path.</p>
+</figcaption>
+</figure>
+<p><code>lm_head</code> is the only kernel here that draws a <strong>program tail</strong>. Its GEMM spine is
+<code>qkv_proj</code>'s cycle for cycle (seeded ZERO, since the vocab projection has no bias); what
+follows is the <code>flush.slot</code> fence on the async DMU store and the <code>halt</code> drain:</p>
+<figure id="fig-lm-head-schedule">
+<p><img alt="lm_head: one n-tile vocab-projection block, then the flush/halt tail" src="../../../figures/tikz/gpt2-lmhead.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 7.</span><strong><code>lm_head</code>: one n-tile vocab-projection block, then the flush/halt tail.</strong> The only
+kernel here that draws a program tail. Its GEMM spine matches <code>qkv_proj</code> cycle for cycle
+(seeded ZERO, since the vocab projection has no bias); the <code>flush.slot</code> fence on the async
+DMU store and the <code>halt</code> drain follow.</p>
+</figcaption>
+</figure>
+<p>The GEMM half of that panel is RTL-FSM-exact; the DMU bars and the <code>halt</code> are
+<code>dm_ack</code>-paced and DRAM-dependent, so they are schedule estimates and the figure labels
+them as such.</p>
 <h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>dv/workload/gpt2_lowering.py</code> --- the operator → opcode lowering.</li>
 <li><code>mininpu/cost/programs_gpt2.py</code> --- the per-kernel cost / schedule programs the Gantts are generated from.</li>
+<li><code>docs/mkdocs/figures/_gen_gpt2.py</code> --- the SSOT for the per-kernel cycle numbers
+  (timing-rev pin: ISA 0.5.0, source <code>origin/rtl/full-npu-wire</code>). It emits
+  <code>figures/tikz/gpt2-cycles.tex</code>, the <code>\newcommand</code> include the figure sources read.
+  Regenerate with <code>make gen-gpt2-cycles</code>; <code>make check-gpt2-cycles</code> is the drift gate.</li>
 </ul>
 <hr />
 <p>mininpu · GPT-2 demo · <a href="index.html">compute-tile overview</a> · <a href="../../../index.html">back to home</a></p>

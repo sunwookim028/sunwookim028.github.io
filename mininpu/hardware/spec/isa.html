@@ -1687,7 +1687,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -2146,7 +2146,19 @@ prose for the spec, the generated tables for what today's RTL and ISS actually e
 </ul>
 <h2 id="s2">02 Architectural State and Geometry<a class="headerlink" href="#s2" title="Permanent link">&para;</a></h2>
 <p>Four explicitly-addressed data spaces (analogous to CUDA <code>.global</code> / <code>.shared</code> / <code>.reg</code> plus a tensor accumulator), plus MXU weight buffers and control state. No unified addressing: the space is implied by the opcode/operand slot.</p>
-<p>Diagram deferred to the presentation refresh; see the text below for the current model.</p>
+<figure id="fig-isa-state-spaces">
+<p><img alt="ISA architectural state: the four addressed data spaces, wbuf, control, and the literal pool" src="../../figures/tikz/a2-isa-state-spaces.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>ISA architectural state: the addressed data spaces and the datapath spine.</strong>
+The four explicitly-addressed spaces in spine order, each with how it is addressed and how
+big it is, plus the rest of the architectural state (<code>wbuf</code>, <code>control</code>, <code>LPM</code>). Red marks an
+edge on which a <strong>dtype conversion</strong> happens: the <code>SPAD</code>--<code>VREG</code> boundary (bf16 to fp32 widen,
+fp32 to bf16 truncate) and the X path into the PE array (cast fp32 to bf16 at the PE input,
+accumulate in fp32). VREG is drawn in the <strong>flat 1D</strong> form this page specifies: 32 registers of
+8 fp32 lanes (256b) each. No total LPM capacity is drawn -- that sizing is provisional (see
+<a href="#s2-1">§2.1</a>) and has no constant behind it in the SSOT.</p>
+</figcaption>
+</figure>
 <table>
 <thead>
 <tr>
@@ -2254,25 +2266,10 @@ prose for the spec, the generated tables for what today's RTL and ISS actually e
 <li>So <code>bo[ch] = sum over active loops of (iter * stride)</code>. The induction variable is the loop counter; the address math is the incremental accumulation (equivalent to <code>const + sum(iv*stride)</code> but multiplier-free).</li>
 </ul>
 <h2 id="s3">03 Instruction Encoding<a class="headerlink" href="#s3" title="Permanent link">&para;</a></h2>
-<!-- TODO(figure): `e-iword-decode` is marked ships-now, but rendering it and reading the
-     ink turned up two things the plan did not flag. Both are IN THE IMAGE, not comments:
-     1. `e-iword-decode.tex:66` draws the note "ISA 0.5.0 is the locked design target; the
-        shipped SSOT (mininpu/isa/opcodes.py) is still 0.4.0 / 38-opcode, cutover pending".
-        That is a spec-vs-as-built status statement, which CONVENTIONS rule 3 sends to
-        INTERNAL-NOTES.md. NOTE THE GENUINE TENSION: the site documents that same
-        distinction deliberately (the "Spec vs as-built" admonition on index.md, and the
-        governance paragraph in CLAUDE.md), so this may be the one status note that is
-        legitimately reader-facing. Owner call: either the note stays and rule 3 gets an
-        explicit carve-out for the spec/as-built lag, or the note comes out of the figure
-        and lives only in the page's admonition. Do not settle it by editing silently.
-     2. `e-iword-decode.tex:105` draws a footer naming its own LaTeX macros
-        ("Sub-shapes: \enfield over \enruler (a); \enuse (b); \enval + \enmeans (c)").
-        That is addressed to the figure's author, not to a reader of the design, and has
-        no defence under rule 3. It should come out at the next re-render. -->
 <figure id="fig-iword-decode">
 <p><img alt="64-bit instruction word: field layout and decode" src="../../figures/tikz/e-iword-decode.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong>64-bit instruction word: field layout and decode.</strong> Single fixed-width word,
+<p><span class="caption-prefix">Fig. 2.</span><strong>64-bit instruction word: field layout and decode.</strong> Single fixed-width word,
 no runtime type tag · operand storage fixed per opcode · layout from §3, worked value
 from §7.2.</p>
 </figcaption>
