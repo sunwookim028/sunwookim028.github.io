@@ -847,6 +847,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The tile accumulator: the MXU&#39;s second FP32 stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-clean-extraction-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A clean extraction candidate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -858,6 +875,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The tile loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#double-buffer-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Double-buffer schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operand-layout-in-spad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operand layout in SPAD
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -868,6 +913,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Source map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workload-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workload note
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1422,7 +1484,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Key-Value Cache Management
+    Lab 5: Serving: Key-Value Cache Management
   
 
     
@@ -1533,6 +1595,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The tile accumulator: the MXU&#39;s second FP32 stage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-clean-extraction-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A clean extraction candidate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1544,6 +1623,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="The tile loop">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#double-buffer-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Double-buffer schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operand-layout-in-spad" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operand layout in SPAD
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1554,6 +1661,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Source map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workload-note" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workload note
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1689,7 +1813,8 @@ window, so sim and synth must agree on the value. The class is in the taxonomy o
 <h2 id="the-tile-accumulator-the-mxus-second-fp32-stage">The tile accumulator: the MXU's second FP32 stage<a class="headerlink" href="#the-tile-accumulator-the-mxus-second-fp32-stage" title="Permanent link">&para;</a></h2>
 <p>Multiplication is BF16, but every accumulate in the MXU is FP32, and there are two of them. The <strong>first</strong> is intrinsic to the array: each PE widens its BF16×BF16 product to an FP32 product and adds the FP32 <code>psum_in</code> descending its column (the <code>fp_add</code> at <code>npu/src/compute_tile/pe.sv</code> lines 97--109), so the dot product reduces in FP32 down each column. The <strong>second</strong> is the <strong>tile accumulator</strong>: the FP32 stage that receives the whole tile's captured result and adds it onto the tile already sitting in the scratchpad when the <code>accumulate</code> flag is set. It is what lets a K-loop sum partial tiles into one output without ever leaving FP32.</p>
 <p>In the RTL today the tile accumulator lives <em>inline</em> in <code>npu/src/compute_tile/mxu.sv</code> (lines 69--90): the captured systolic result in <code>out_matrix</code>, the prior ACC tile prefetched into <code>acc_buf</code> (the <code>S_LOAD_ACC</code> phase), and the per-element <code>ACC_ADD</code> generate array of <code>fp_add</code> units at <code>ACCUM_FORMAT</code> that forms <code>acc_sum = acc_buf + out_matrix</code>. This tile accumulator is one of the system's <strong>two FP32 domains</strong>; the other is the entire VPU (see the VPU doc). Together they are why a long GPT-2 GEMM K-loop keeps its dynamic range.</p>
-<p><strong>A clean extraction candidate.</strong> The tile accumulator is self-contained (<code>out_matrix</code>, <code>acc_buf</code>, the <code>ACC_ADD</code> array, and the causal/accumulate fold), so it is a clean, behavior-preserving candidate for lifting into a named <code>mxu_accumulator</code> submodule: a future DV-gated <code>refactor(rtl,mxu)</code> that would not change a single output bit. The per-PE psum accumulator, by contrast, <em>cannot</em> be lifted out: it is intrinsic to the systolic array, physically distributed one <code>fp_add</code> per PE and wired into the north-south psum chain.</p>
+<h3 id="a-clean-extraction-candidate">A clean extraction candidate<a class="headerlink" href="#a-clean-extraction-candidate" title="Permanent link">&para;</a></h3>
+<p>The tile accumulator is self-contained (<code>out_matrix</code>, <code>acc_buf</code>, the <code>ACC_ADD</code> array, and the causal/accumulate fold), so it is a clean, behavior-preserving candidate for lifting into a named <code>mxu_accumulator</code> submodule: a future DV-gated <code>refactor(rtl,mxu)</code> that would not change a single output bit. The per-PE psum accumulator, by contrast, <em>cannot</em> be lifted out: it is intrinsic to the systolic array, physically distributed one <code>fp_add</code> per PE and wired into the north-south psum chain.</p>
 <p><strong>Table: The MXU's two FP32 accumulate points. Multiply is BF16; both accumulates are FP32 (<code>ACCUM_FORMAT = FP32</code>). Only the tile accumulator is a submodule-extraction candidate.</strong></p>
 <table>
 <thead>
@@ -1758,8 +1883,10 @@ window, so sim and synth must agree on the value. The class is in the taxonomy o
 </table>
 <p>The <code>mxu.sv</code> enum still declares SPAD-store states (<code>S_STORE_REQ/WAIT</code>) from an earlier design that wrote the tile result back to SPAD; they are among the dead ordinals (<a href="#fig-mxu-fsm">Fig. 4</a> above) and are unreachable in the current control path, so they are not documented here as a live phase.</p>
 <p>The flag bits are split across the two ops (cited <code>mininpu/isa</code>): on <code>mxu.load.w</code>, <code>flags[0] = transB</code> (reverse the weight-row fetch); on <code>mxu.matmul</code>, <code>flags[0] = accum</code> (fold onto the prior ACC tile) and <code>flags[1] = causal</code> (mask the upper triangle). The dtype field <code>flags[7:6]</code> is reserved-must-be-zero in v1 (BF16 is hardwired). The matrix-level meaning --- <code>acc_dst = (accum ? acc_dst : 0) + spm_x @ (transB ? spm_w^{}T : spm_w)</code>, with the post-multiply causal mask --- is specified normatively in <code>mininpu/isa</code>; this page does not restate it.</p>
-<p><strong>Double-buffer schedule.</strong> A K-loop issues <code>load.w W0; matmul X0; load.w W1; matmul X1 (accum); ...</code>: each <code>load.w W(k+1)</code>, issued after <code>matmul Xk</code>'s switch, runs concurrently with the <code>Xk</code> compute because the active and inactive weight buffers are disjoint. This is real v1 overlap defined by nonblocking instruction semantics (<code>mxu.load.w</code> and <code>mxu.matmul</code> are both nonblocking; see the compute-tile concurrency model), not a hardware-opportunistic reorder.</p>
-<p><strong>Operand layout in SPAD.</strong> The controller addresses three N-row regions in the scratchpad: weight rows and activation rows are bf16 (<code>STORAGE_WIDTH = 16</code>), output rows are fp32; each SPAD row is the full <code>SPAD_DATA_WIDTH = 256</code>-bit bus (8 × <code>DATA_WIDTH</code>). Base addresses arrive as <code>base_addr_w / base_addr_x / base_addr_out</code>, latched on <code>start</code>.</p>
+<h3 id="double-buffer-schedule">Double-buffer schedule<a class="headerlink" href="#double-buffer-schedule" title="Permanent link">&para;</a></h3>
+<p>A K-loop issues <code>load.w W0; matmul X0; load.w W1; matmul X1 (accum); ...</code>: each <code>load.w W(k+1)</code>, issued after <code>matmul Xk</code>'s switch, runs concurrently with the <code>Xk</code> compute because the active and inactive weight buffers are disjoint. This is real v1 overlap defined by nonblocking instruction semantics (<code>mxu.load.w</code> and <code>mxu.matmul</code> are both nonblocking; see the compute-tile concurrency model), not a hardware-opportunistic reorder.</p>
+<h3 id="operand-layout-in-spad">Operand layout in SPAD<a class="headerlink" href="#operand-layout-in-spad" title="Permanent link">&para;</a></h3>
+<p>The controller addresses three N-row regions in the scratchpad: weight rows and activation rows are bf16 (<code>STORAGE_WIDTH = 16</code>), output rows are fp32; each SPAD row is the full <code>SPAD_DATA_WIDTH = 256</code>-bit bus (8 × <code>DATA_WIDTH</code>). Base addresses arrive as <code>base_addr_w / base_addr_x / base_addr_out</code>, latched on <code>start</code>.</p>
 <h2 id="source-map">Source map<a class="headerlink" href="#source-map" title="Permanent link">&para;</a></h2>
 <p>The MXU spans three RTL files plus the two SSOT sources for its constants and semantics:</p>
 <p><strong>Table: MXU source files and their roles. Sizes, widths, and formats are owned by <code>npu_config_pkg.sv</code>; opcode semantics by <code>mininpu/isa</code>.</strong></p>
@@ -1794,7 +1921,8 @@ window, so sim and synth must agree on the value. The class is in the taxonomy o
 </tbody>
 </table>
 <p>See also: <a href="index.html">compute-tile overview</a> (the tile that hosts the MXU + VPU), <a href="vpu.html">VPU</a> (the vector engine), and <a href="../uncore.html">uncore</a> (device-level composition). RTL specifics live in <code>npu/src/compute_tile/{mxu,systolic,pe}.sv</code>.</p>
-<p><strong>Workload note.</strong> GPT-2 BF16 forward-pass GEMMs are the v1 worked example that exercises this engine, not the MXU's definition. FPGA is the test platform.</p>
+<h3 id="workload-note">Workload note<a class="headerlink" href="#workload-note" title="Permanent link">&para;</a></h3>
+<p>GPT-2 BF16 forward-pass GEMMs are the v1 worked example that exercises this engine, not the MXU's definition. FPGA is the test platform.</p>
 
 
 
