@@ -1855,11 +1855,15 @@ caveated.</em></p>
 <li><em>Numeric format and FPU blocks:</em> BF16 operands with an FP32 accumulator;
   <code>bf16_mul_fp32.sv</code>, <code>fp16_mul_fp32.sv</code>, <code>fp_add.sv</code>; and the BF16-vs-FP16
   exponent and mantissa comparison.</li>
-<li><em>Figure-borne claims:</em> <code>mxu-pe</code> and <code>mxu-array</code> are frozen legacy SVGs with
-  no TikZ source, so they cannot be re-rendered from a corrected source. The
-  weight-stationary dataflow above is asserted by the drawings as well as by
-  the caption and by Part 2, so a figure/RTL mismatch would need fixing in
-  three places and cannot be fixed by re-rendering.</li>
+<li><em>Figure-borne claims:</em> this page now embeds the main MXU figure, which
+  <strong>is</strong> re-renderable: <code>mxu-array-pe.tex</code> carries its own TikZ source and a
+  grounding block citing the <code>mxu.sv</code> / <code>systolic.sv</code> / <code>pe.sv</code> lines behind
+  every number it draws. So a figure/RTL mismatch is fixable at the source
+  and does not have to be worked around in prose. (It replaced the frozen
+  <code>mxu-pe</code> / <code>mxu-array</code> pair, which had no source and could not be
+  corrected.) The weight-stationary dataflow is still asserted by the
+  caption and by Part 2 as well as by the drawing, so those two remain
+  separate places to fix.</li>
 <li><em>Not yet real:</em> the <code>make board-test BOARD=zcu102</code> flow the Materials
   section and Part 4 describe is aspirational; the page's own source comment
   says so.</li>
@@ -1886,7 +1890,7 @@ of those cells into the array. Then the schedule that lets the matrix unit and
 the vector unit run at the same time, sharing the scratchpad. Finally you capture
 the array's results, store them back, and run the design on the FPGA board. The
 MXU you finish here is the same matrix unit used in the later work; nothing is a
-simplified stand-in. The course introduction document (<code>labs_introduction.pdf</code>)
+simplified stand-in. <a href="introduction.html">Lab 0: Course Introduction and Setup</a>
 describes the accelerator, its programming model, the setup on the
 <code>ecelinux</code> servers, and how submission and grading work. Read it first; this
 handout assumes it.</p>
@@ -1962,20 +1966,22 @@ you are graded on.</p>
 <h2 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h2>
 <p>You build one matrix engine in four parts. Each part reuses what the previous one
 built: a cell becomes a grid of cells, the grid runs alongside the vector unit,
-and the whole thing captures its results and runs on the board. <a href="#fig-mxu-array">Fig. 1</a> shows
-a single processing element and the grid you assemble from it.</p>
-<figure id="fig-mxu-array">
-<p><img alt="One PE and the systolic grid" src="../figures/tikz/mxu-pe.svg" width="40%" />
-<img alt="One PE and the systolic grid" src="../figures/tikz/mxu-array.svg" width="55%" /></p>
+and the whole thing captures its results and runs on the board. <a href="#fig-mxu-array-pe">Fig. 1</a>
+shows the grid and the single processing element you assemble it from.</p>
+<figure id="fig-mxu-array-pe">
+<p><img alt="The mininpu MXU: the systolic array and one PE" src="../figures/tikz/mxu-array-pe.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong>One PE and the grid you assemble from it.</strong>
-Left: one weight-stationary processing element. It holds a weight,
-multiplies the activation that passes through it, and adds the product into a
-partial sum that arrives from above. Right: the grid. Activations enter from
-the left and move right; partial sums move down each column. Weights are
-streamed down to load each cell, then held in place while the activations
-stream. Each operand, once inside, is reused by a whole row or column of
-cells. You build the cell in Part 1 and wire the grid in Part 2.</p>
+<p><span class="caption-prefix">Fig. 1.</span><strong>The grid, and the one cell you assemble it from.</strong>
+Left: the grid. Activations enter from the left and move right, one row each;
+partial sums start at zero on the top edge and accumulate downward, one column
+each, into the accumulator at the bottom. Weights are streamed down to load
+each cell, then held in place while the activations stream, so each operand,
+once inside, is reused by a whole row or column of cells. Right: one cell,
+opened up. It holds a weight, multiplies the activation passing through it,
+and adds the product into the partial sum arriving from above. The dashed
+wedge between the panels says the two are the same object at two zoom levels.
+The <strong>in plain words</strong> panel at the foot decodes every signal name on the
+right-hand drawing. You build the cell in Part 1 and wire the grid in Part 2.</p>
 </figcaption>
 </figure>
 <h3 id="part-1-a-processing-element">Part 1: a processing element<a class="headerlink" href="#part-1-a-processing-element" title="Permanent link">&para;</a></h3>
@@ -2249,7 +2255,7 @@ array, the mixed-precision datapath, the bank arbiter, and the FPGA flow are dra
 from the same design that runs in the full accelerator.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <ol>
-<li>mininpu course introduction and setup, <code>labs_introduction.pdf</code>.</li>
+<li><a href="introduction.html">Lab 0: Course Introduction and Setup</a>.</li>
 <li>cocotb documentation, <a href="https://docs.cocotb.org/">https://docs.cocotb.org/</a>.</li>
 <li>Verilator manual, <a href="https://verilator.org/guide/">https://verilator.org/guide/</a>.</li>
 <li>AMD/Xilinx Zynq UltraScale+ MPSoC ZCU102 evaluation board
