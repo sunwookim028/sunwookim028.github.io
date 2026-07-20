@@ -993,6 +993,67 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="OS, drivers, and cache model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-access-uio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register access (UIO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-buffers-udmabuf-cma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host buffers (udmabuf + CMA)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmu-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMMU and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interconnect-and-engine-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnect and engine choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1520,6 +1581,67 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="OS, drivers, and cache model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#register-access-uio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Register access (UIO)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-buffers-udmabuf-cma" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host buffers (udmabuf + CMA)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smmu-and-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SMMU and isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interconnect-and-engine-choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interconnect and engine choice
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1773,15 +1895,18 @@ is ever needed. This is naming rationale, not a mechanism.</p>
 <h2 id="os-drivers-and-cache-model">OS, drivers, and cache model<a class="headerlink" href="#os-drivers-and-cache-model" title="Permanent link">&para;</a></h2>
 <p>This unit owns the host-side OS and driver contract, so the runtime and board bring-up have a
 single reference.</p>
-<p><strong>OS.</strong> A standard <strong>PetaLinux</strong> (ZynqMP) image is sufficient; no custom distribution is
+<h3 id="os">OS<a class="headerlink" href="#os" title="Permanent link">&para;</a></h3>
+<p>A standard <strong>PetaLinux</strong> (ZynqMP) image is sufficient; no custom distribution is
 required. The boot chain is the ordinary ZynqMP one: FSBL → PMU firmware → ATF (BL31) →
 U-Boot → Linux, with the bitstream loaded by the FSBL (or <code>fpga_manager</code>).</p>
-<p><strong>Register access (UIO).</strong> The NPU AXI4-Lite register block (CMD window, doorbell,
+<h3 id="register-access-uio">Register access (UIO)<a class="headerlink" href="#register-access-uio" title="Permanent link">&para;</a></h3>
+<p>The NPU AXI4-Lite register block (CMD window, doorbell,
 <code>instr_ready</code>, <code>dma_slot_done</code>) and the AXI CDMA register block are exposed as <code>generic-uio</code>
 device-tree nodes (<code>uio_pdrv_genirq</code>); the user-space runtime <code>mmap</code>s <code>/dev/uioX</code> and pokes
 the registers directly. The CDMA is deliberately <em>not</em> bound to the in-kernel <code>dmaengine</code>
 driver, and <code>dma-proxy</code> is not used: the device commands its own copy engine.</p>
-<p><strong>Host buffers (udmabuf + CMA).</strong> The <strong>udmabuf</strong> out-of-tree kernel module (a PetaLinux
+<h3 id="host-buffers-udmabuf-cma">Host buffers (udmabuf + CMA)<a class="headerlink" href="#host-buffers-udmabuf-cma" title="Permanent link">&para;</a></h3>
+<p>The <strong>udmabuf</strong> out-of-tree kernel module (a PetaLinux
 recipe) allocates physically contiguous buffers from a reserved <strong>CMA</strong> region (sized via the
 <code>cma=</code> bootarg or a <code>reserved-memory</code> node) and exposes <code>/dev/udmabufX</code>. The runtime opens the
 node with <code>O_SYNC</code> for a <strong>non-cached</strong> mapping, which is what makes the memcpy path coherent
@@ -1799,11 +1924,13 @@ the minimal, known-good option.</p>
      settled v1 choice while the runtime carries the cached path as a live option. Which one is
      the v1 contract needs an owner ruling; do not edit either side until then. -->
 
-<p><strong>SMMU and isolation.</strong> The ZynqMP SMMU does not translate the PL DMA master (its default
+<h3 id="smmu-and-isolation">SMMU and isolation<a class="headerlink" href="#smmu-and-isolation" title="Permanent link">&para;</a></h3>
+<p>The ZynqMP SMMU does not translate the PL DMA master (its default
 state), so <code>host_phys</code> is used directly. The consequence: a PL master holding a physical
 address can reach any PS-DDR location. This is acceptable for a single-tenant appliance; a
 <code>vfio-platform</code> / SMMU path is the hardening option if isolation is later required.</p>
-<p><strong>Interconnect and engine choice.</strong> The PL→PS <strong>HP</strong> port carries the CDMA's PS-DDR traffic
+<h3 id="interconnect-and-engine-choice">Interconnect and engine choice<a class="headerlink" href="#interconnect-and-engine-choice" title="Permanent link">&para;</a></h3>
+<p>The PL→PS <strong>HP</strong> port carries the CDMA's PS-DDR traffic
 and the <strong>PL-DDR4 MIG</strong> backs device memory; both are instantiated in the board block design.
 An in-fabric <strong>AXI CDMA</strong> is chosen over the PS hardened GDMA/ADMA because the device must own
 its copy engine (the PS DMA is a host-side resource); the streaming AXI DMA does not apply
