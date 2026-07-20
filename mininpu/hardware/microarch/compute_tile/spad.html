@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1014,6 +1014,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1134,34 +1253,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1253,7 +1344,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1309,7 +1400,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1439,7 +1530,7 @@
 
 
 
-<h1 id="spad-the-scratchpad-operand-tier">SPAD: the scratchpad operand tier<a class="headerlink" href="#spad-the-scratchpad-operand-tier" title="Permanent link">&para;</a></h1>
+<h1 id="spad-the-scratchpad-operand-tier">SPAD: The Scratchpad Operand Tier<a class="headerlink" href="#spad-the-scratchpad-operand-tier" title="Permanent link">&para;</a></h1>
 <p>The <strong>SPAD</strong> (<code>spad.sv</code>) is the compute tile's on-chip scratchpad: <strong>bf16</strong> operand memory
 in a separate, 0-based address space (like CUDA <code>.shared</code>), sitting between off-tile device
 memory and the fp32 compute-register tiers (VREG / ACC). It is the operand store the MXU
@@ -1450,23 +1541,27 @@ This page covers its role, geometry, ports and clients, the fixed-latency contra
 <p>SPAD is the <strong>bf16 operand tier</strong>: weights and activations, plus the bf16 1D vectors
 (gamma / beta / bias) before they are lifted into VREG. It is a separate on-chip address
 space, not an fp32 view of shared SRAM. Its place in the spine (devmem → <strong>SPAD</strong> → VREG →
-ACC) is drawn on the <a href="index.html">compute-tile overview</a> (<code>a1-tile-structure</code>).</p>
+ACC) is drawn in <a href="index.html#fig-tile-structure">Compute tile Fig. 1</a>.</p>
 <h2 id="geometry-and-storage">Geometry and storage<a class="headerlink" href="#geometry-and-storage" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Geometry:</strong> 32 KiB = 1024 × 256-bit rows, <strong>8 banks</strong> (<code>bank = row mod 8</code>), <strong>bf16</strong> storage.</li>
 <li>Each row is the full 256-bit compute bus (8 × 32-bit lanes). Numbers are SSOT-owned (<code>npu_config_pkg.sv</code>, from <code>npu/params.py</code>).</li>
 </ul>
+<figure id="fig-spad-ports">
 <p><img alt="SPAD banking and port arbitration" src="../../../figures/tikz/a2-spad-ports.svg" /></p>
-<p><strong>Fig. A2. SPAD banking and port arbitration.</strong> 32 KiB over 8 banks (<code>bank = row mod 8</code>),
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>SPAD banking and port arbitration.</strong> 32 KiB over 8 banks (<code>bank = row mod 8</code>),
 bf16. Port A is the DMU; Port B is the compute-side client. Compute clients are
 fixed-latency and the DMU yields.</p>
+</figcaption>
+</figure>
 <!-- TODO(figure-content-fix): a2-spad-ports is drawn but content-stale. The current
      RTL-checked asset is as-built-grounded: it draws an MXU-to-SPAD result-writeback path
      and a live VPU SPAD port. Both are RTL-wiring facts, NOT 0.5.0-datapath facts (under
      the 0.5.0 model the MXU drains to ACC and the VPU never touches SPAD). Redraw to the
      0.5.0 model; until then the prose here does not repeat the figure's as-built framing. -->
 
-<p>Note: the <code>a2-spad-ports</code> figure is as-built-grounded and still draws an MXU-to-SPAD result
+<p>Note: <a href="#fig-spad-ports">Fig. 1</a> is as-built-grounded and still draws an MXU-to-SPAD result
 writeback and a live VPU SPAD port; both are RTL-wiring artifacts, not the 0.5.0 datapath
 (where the MXU drains to ACC and the VPU reaches SPAD only through the LSU). The prose on
 this page follows the 0.5.0 model.</p>
@@ -1505,19 +1600,24 @@ scoreboard-free sequencer. The <code>8 + 2 = 10</code> value is symbolic/paramet
 <!-- TODO(figure-redraw): fig14_lsu_pipeline is reused as-is from origin/main. The HTML
      asset predates the house-style TikZ stack; its content (the reservation table +
      datapath timing) is correct, but a house-style TikZ redraw is deferred. -->
-<iframe src="../../../figures/fig14_lsu_pipeline.html" loading="lazy" title="FIG. 14 LSU 10-cycle pipeline" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
-
-<p>FIG. 14 --- LSU pipeline, stage/latency view: FIXED LATENCY = ROWS + SPAD_RD_LATENCY =
+<figure id="fig-lsu-pipeline">
+<div>
+<iframe loading="lazy" src="../../../figures/fig14_lsu_pipeline.html" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px" title="LSU 10-cycle pipeline"></iframe>
+</div>
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><strong>LSU pipeline, stage/latency view.</strong> FIXED LATENCY = ROWS + SPAD_RD_LATENCY =
 8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath,
 read tile-row <em>r</em> on cycle <em>r</em>, write <code>RL = 2</code> later, and own the bf16 ↔ fp32 casts.
 <a href="../../../figures/fig14_lsu_pipeline.html">open standalone</a></p>
+</figcaption>
+</figure>
 <h2 id="rtl-realization">RTL realization<a class="headerlink" href="#rtl-realization" title="Permanent link">&para;</a></h2>
 <p><code>spad.sv</code> wraps a <code>common/banked_sram</code> macro: <strong>8-bank true dual-port</strong>, Port A (DMU) and
 Port B (compute). Port B is presented as <code>port0</code> (high priority) and <code>port1</code> (a second,
 lower-priority master) via the per-bank grant arbiter (<code>comp_gnt</code> / <code>comp_conflict_bank_o</code>);
 a lower-priority master advances only on a granted cycle, which is the "compute fixed &gt; DMU
-yields" primitive. The tile module tree (<code>h-module-tree</code>) is on the
-<a href="../../../index.html">site map</a>.</p>
+yields" primitive. SPAD's place in the tile's module tree, down to the <code>banked_sram</code>
+macro, is drawn in <a href="index.html#fig-module-tree">Compute tile Fig. 3</a>.</p>
 <hr />
 <p>mininpu · SPAD · <a href="index.html">compute-tile overview</a> · <a href="../../../index.html">back to home</a></p>
 

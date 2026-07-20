@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1025,6 +1025,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1145,34 +1264,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1264,7 +1355,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1320,7 +1411,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1461,7 +1552,7 @@
 
 
 
-<h1 id="gpt-2-demo-the-forward-pass-as-tile-kernels">GPT-2 demo: the forward pass as tile kernels<a class="headerlink" href="#gpt-2-demo-the-forward-pass-as-tile-kernels" title="Permanent link">&para;</a></h1>
+<h1 id="gpt-2-demo-the-forward-pass-as-tile-kernels">GPT-2 Demo: The Forward Pass as Tile Kernels<a class="headerlink" href="#gpt-2-demo-the-forward-pass-as-tile-kernels" title="Permanent link">&para;</a></h1>
 <p>The GPT-2 (124M) forward pass is the v1 <strong>worked example</strong> that exercises the compute tile:
 it lowers to the v1 opcode set and runs as a sequence of per-kernel schedules on one tile.
 GPT-2 is the demo, not the architecture's identity (the tile is a composable IP template).
@@ -1494,7 +1585,7 @@ pass adds the embedding at the front and the LM-head tail at the end):</p>
 <code>wbufB</code>, <code>ACC</code>, <code>LSU</code>, <code>VPU</code>, <code>DMU</code> --- against a cycle time axis, with a shared legend.
 The lanes show which unit is busy each cycle and where the overlap levers (weight
 double-buffer, async-DMA ping-pong) hide latency. The lane / overlap idiom is shared with
-the compute-tile <a href="index.html#exposed-issue-model"><code>ct-pipeline-overlap</code></a> figure.</p>
+the issue/overlap timeline, <a href="index.html#fig-pipeline-overlap">Compute tile Fig. 2</a>.</p>
 <h2 id="mxu-bound-kernels">MXU-bound kernels<a class="headerlink" href="#mxu-bound-kernels" title="Permanent link">&para;</a></h2>
 <p>The matmul-heavy kernels --- <code>qkv_proj</code>, <code>qk_scores</code>, <code>cproj</code> --- are MXU-bound: they stream
 weight and X tiles through the systolic array and accumulate in ACC.</p>

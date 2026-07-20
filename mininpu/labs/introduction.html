@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://sunwookim028.github.io/mininpu/labs/introduction.html">
       
       
-        <link rel="prev" href="index.html">
+        <link rel="prev" href="../compiler/index.html">
       
       
         <link rel="next" href="lab1-vpu.html">
@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -884,6 +884,122 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1001,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1429,7 +1517,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1485,7 +1573,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1819,21 +1907,73 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, the lab arc, the toolchain and <code>ecelinux</code> setup,
+submission and grading) is pedagogy and needs no such check. The
 authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> the instruction reference below, and the
-kernel walkthroughs that use it, are written in a <code>vec.*</code> / <code>matmul.tile</code> /
-<code>dma.*</code> / <code>cast.*</code> mnemonic namespace that <strong>matches no generation of the
-ISA</strong>. The generated <a href="../hardware/spec/isa.html">ISA Reference</a> is the authority on
-what mnemonics exist and what they do.</p>
+<p><strong>Known wrong, not merely unverified.</strong> The instruction reference below, and
+the kernel walkthroughs that use it, are written in a <code>vec.*</code> /
+<code>matmul.tile</code> / <code>dma.*</code> / <code>cast.*</code> mnemonic namespace that <strong>matches no
+generation of the ISA</strong>.</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>The 25-op instruction table and its semantics.</em> Every row of the table
+  under "The instruction subset" is a claim: what the op does, its operand
+  classes, and its flags. The framing claims go with it: that the table is a
+  25-op subset of a larger set the hardware understands, that the hardware
+  implements variants beyond it, and the specific hex opcodes quoted in the
+  source comments (<code>vec.scale.col.bcast</code> at <code>0x1C</code>, <code>cast.load.vreg</code> at
+  <code>0x32</code>) together with the "23-op core" framing. Note that the as-built
+  <code>ISA_VERSION</code> and the frozen spec version differ by design, so this
+  reconciliation must name which one it is checking against.</li>
+<li><em>Storage geometry.</em> That the scratchpad holds bf16 tiles of eight values
+  per row; that the accumulator is <strong>the same physical on-chip memory viewed
+  as fp32</strong>, eight values per row; that a vector register is fp32 and holds
+  eight values; and that there are exactly three <code>cast</code> operations bridging
+  the two views. The SPM/ACC aliasing claim is the strongest structural claim
+  on the page and is stated without hedge.</li>
+<li><em><code>matmul.tile</code> flags.</em> The transpose, accumulate and causal-mask flags, and
+  specifically that the causal flag masks the upper triangle to negative
+  infinity.</li>
+<li><em>The per-phase kernel walkthroughs.</em> The softmax sequence (including the
+  claim that one <code>vec.scale.imm</code> folds the 1/sqrt(d_head) attention scale
+  together with the log2(e) pre-scale), the LayerNorm sequence, the
+  per-feature affine path (<code>cast.load.vreg</code> plus <code>vec.scale.col.bcast</code>, and
+  its claimed invariance to the row count between prefill and decode), the
+  feed-forward and residual sequence, and the <code>loop.begin</code> / <code>loop.end</code> /
+  <code>flush</code> control claims.</li>
+<li><em>The "Which instruction does each inference step" table</em>, in particular
+  the host/device work split (host does the embedding lookups and the final
+  argmax) and the claim that no gather instruction exists.</li>
+<li><em>"What this reference leaves out".</em> Each omission is an existence claim
+  about hardware: the int8 and int4/GPTQ matmul variants and their
+  dequantization step, the FP8 matmul, multi-index DMA, asynchronous DMA
+  control (non-blocking flag, slot tracking, masked fence, multi-slot
+  barrier), SiLU, the vector-register-only helper ops for a fused online
+  softmax, and an explicit halt distinct from <code>flush</code>.</li>
+<li><em>Board section.</em> The ZCU102 / <code>xczu9eg</code> part, the single compute tile fed
+  over a PL-side DDR4 path, and the 100 MHz target with a 50 MHz first
+  bring-up (issue #168). The section is already marked a placeholder.</li>
+<li><em>Figure-borne claims.</em> <code>arch-l1-system</code> is a frozen legacy SVG with no
+  TikZ source, so it cannot be re-rendered from a corrected source. Its
+  caption reads the copy-in / control-register-launch / copy-out interface
+  off the drawing.</li>
+<li><em>Suspect, check first.</em> The lab-arc section says Lab 3's DMA "overlaps that
+  movement with computation" and works up to double-buffering, while "What
+  this reference leaves out" says asynchronous DMA control is out of scope
+  for these labs and "a transfer blocks until it completes". Settle which is
+  true before either is repeated elsewhere.</li>
+<li><em>Gap, not a contradiction.</em> The instruction table lists <code>vec.mul.acc</code> as
+  used by "LayerNorm and masking", and the summary table lists it in the
+  LayerNorm sequence, but the LayerNorm walkthrough never says how the mean
+  of squares is computed and no <code>vec.mul.acc</code> masking use is described
+  anywhere. Either a missing sentence or a missing op.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>These labs build a small neural-network accelerator from the inside out. The
@@ -1853,11 +1993,12 @@ talks to a disk or a network card. You will see it described as the
 <strong>mininpu</strong> (Neural Processing Unit). The host runs ordinary software (in
 these labs, a Python script); the device runs only the fixed-function hardware
 you build.</p>
-<div class="admonition info">
-<p class="admonition-title">Figure 1</p>
-<p><img alt="arch-l1-system" src="../figures/tikz/arch-l1-system.svg" /></p>
-<p>The host and the accelerator. The host copies tensors into device memory, writes a control register to launch a kernel, and copies results back. The device is a fixed datapath with its own on-chip memory; it never runs the host's software. Lab 1 works entirely in simulation, so think of the host as the test program and the device as the hardware you are building.</p>
-</div>
+<figure id="fig-system-context">
+<p><img alt="The host and the accelerator" src="../figures/tikz/arch-l1-system.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>The host and the accelerator.</strong> The host copies tensors into device memory, writes a control register to launch a kernel, and copies results back. The device is a fixed datapath with its own on-chip memory; it never runs the host's software. Lab 1 works entirely in simulation, so think of the host as the test program and the device as the hardware you are building.</p>
+</figcaption>
+</figure>
 <p>A program drives the device in three steps.</p>
 <ul>
 <li><strong>Copy data in.</strong> The host copies input tensors (the model weights
@@ -1911,32 +2052,44 @@ through every lab.</p>
 <h2 id="what-you-build-across-the-five-labs">What you build across the five labs<a class="headerlink" href="#what-you-build-across-the-five-labs" title="Permanent link">&para;</a></h2>
 <p>The labs build one accelerator step by step. Each lab leaves you with a larger,
 working subsystem; nothing built earlier is thrown away or replaced. The first
-three labs build the hardware; the last two program it.</p>
+three labs build the hardware; the last two program it. This page is Lab 0; the
+five handouts below are the labs proper, and each one links to its own page.</p>
 <ul>
-<li><strong>Lab 1: the Vector Processing Unit (VPU).</strong> The VPU does the
+<li><strong><a href="lab1-vpu.html">Lab 1: the Vector Processing Unit (VPU)</a>.</strong> The VPU does the
   element-wise and vector math: multiply, add, the reductions that sum a row
-  of numbers, and the activation functions. You build it in simulation and
+  of numbers, and the activation functions. You build it in simulation, from a
+  single dot product out to a tile loop, and
   finish by running a small neural-network layer through it. At the end of
   Lab 1 you have a complete VPU.</li>
-<li><strong>Lab 2: the Matrix Unit (MXU).</strong> The MXU is a systolic array that
+<li><strong><a href="lab2-systolic.html">Lab 2: the Matrix Unit (MXU)</a>.</strong> The MXU is a systolic
+  array that
   does matrix multiplication, the bulk of the work in a transformer (cf. the
-  systolic arrays in NVIDIA Tensor Cores and the Google TPU). You add it
-  alongside the VPU and run on the FPGA board. At the end of Lab 2 you have a
+  systolic arrays in NVIDIA Tensor Cores and the Google TPU). You build it up
+  from a single processing element, add it
+  alongside the VPU, and run on the FPGA board. At the end of Lab 2 you have a
   VPU and an MXU.</li>
-<li><strong>Lab 3: the data-movement engine (DMA).</strong> The DMA moves tensors
+<li><strong><a href="lab3-dma.html">Lab 3: putting the units together (DMA)</a>.</strong> The DMA moves
+  tensors
   between off-chip DRAM and the on-chip scratchpad, and overlaps that
-  movement with computation. Adding it completes the accelerator. At the end
+  movement with computation. You start from a single-tile transfer and work up
+  through multi-dimensional addressing to double-buffering.
+  Adding it completes the accelerator. At the end
   of Lab 3 you have a VPU, an MXU, and a DMA: a full accelerator able to run
   decoder language-model inference on the board.</li>
-<li><strong>Lab 4: writing kernels.</strong> With the hardware finished, you write
+<li><strong><a href="lab4-kernels.html">Lab 4: writing kernels</a>.</strong> With the hardware finished,
+  you write
   compute kernels for it using Triton, a Python-based language for
   accelerator kernels (cf. Triton and FlashAttention), and a compiler that
-  lowers them to the device's assembly. You implement attention kernels and
+  lowers them to the device's assembly. You implement a tiled matrix multiply
+  and tiled attention with an online softmax and a causal mask, and
   run them on the accelerator you built.</li>
-<li><strong>Lab 5: serving.</strong> Finally you build the software layer that serves a
+<li><strong><a href="lab5-serving.html">Lab 5: serving</a>.</strong> Finally you build the software layer
+  that serves a
   model: managing the key-value cache so that generating each new token
   reuses past work instead of recomputing it (cf. the paged attention used
-  in vLLM and SGLang).</li>
+  in vLLM and SGLang). You write the cache allocator and the request
+  scheduler, and offload cache blocks to host memory when device memory runs
+  short.</li>
 </ul>
 <p>Lab 1 runs its hardware in simulation at a small scale and in FP32, so the work
 is getting the logic right; Labs 2 and 3 run on the board at full model scale,
@@ -2489,7 +2642,7 @@ the course page if they differ from those shown here.&#160;<a class="footnote-ba
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview">
+          <a href="../compiler/index.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Compiler">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2499,7 +2652,7 @@ the course page if they differ from those shown here.&#160;<a class="footnote-ba
                 Previous
               </span>
               <div class="md-ellipsis">
-                Overview
+                Compiler
               </div>
             </div>
           </a>

@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mininpu-compute-tile-isa-reference" class="md-skip">
+        <a href="#isa-the-compute-tile-instruction-set" class="md-skip">
           Skip to content
         </a>
       
@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../labs/index.html" class="md-tabs__link">
+        <a href="../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -987,7 +987,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -1003,7 +1003,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1301,6 +1301,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1421,34 +1540,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1540,7 +1631,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1596,7 +1687,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -2015,7 +2106,7 @@
 
 
 
-<h1 id="mininpu-compute-tile-isa-reference">mininpu Compute-Tile ISA Reference<a class="headerlink" href="#mininpu-compute-tile-isa-reference" title="Permanent link">&para;</a></h1>
+<h1 id="isa-the-compute-tile-instruction-set">ISA: The Compute-Tile Instruction Set<a class="headerlink" href="#isa-the-compute-tile-instruction-set" title="Permanent link">&para;</a></h1>
 <p>mininpu · Doc 1 of 3 · <strong>Locked</strong></p>
 <p>Instruction Set Architecture reference for the mininpu matmul/vector accelerator compute tile, version 0.5.0.</p>
 <p><strong>ISA 0.5.0</strong> · <strong>15</strong> opcodes · <strong>64-bit</strong> word · in-order, <strong>no interlock</strong></p>
@@ -2178,10 +2269,14 @@ prose for the spec, the generated tables for what today's RTL and ISS actually e
         ("Sub-shapes: \enfield over \enruler (a); \enuse (b); \enval + \enmeans (c)").
         That is addressed to the figure's author, not to a reader of the design, and has
         no defence under rule 3. It should come out at the next re-render. -->
+<figure id="fig-iword-decode">
 <p><img alt="64-bit instruction word: field layout and decode" src="../../figures/tikz/e-iword-decode.svg" /></p>
-<p><strong>Fig. E. 64-bit instruction word: field layout and decode.</strong> Single fixed-width word,
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>64-bit instruction word: field layout and decode.</strong> Single fixed-width word,
 no runtime type tag · operand storage fixed per opcode · layout from §3, worked value
 from §7.2.</p>
+</figcaption>
+</figure>
 <p>Single 64-bit word, fixed field layout.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a> 63        56 55      48 47        32 31        16 15         0
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>+-----------+----------+------------+------------+------------+
@@ -3276,15 +3371,15 @@ would freeze a convention that has not been decided.</p>
 </tbody>
 </table>
 <h3 id="74-cycle-level-gantt-for-one-mn-block">7.4 Cycle-level Gantt for one (m,n) block<a class="headerlink" href="#74-cycle-level-gantt-for-one-mn-block" title="Permanent link">&para;</a></h3>
-<p>Structural (<code>N=8</code>); the absolute <code>L_*</code> are implementation-versioned - FIG. 9 below uses the current RTL/synth-measured example latencies.</p>
+<p>Structural (<code>N=8</code>); the absolute <code>L_*</code> are implementation-versioned - the Gantt below uses the current RTL/synth-measured example latencies.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cy -&gt;  0    2    4    6    8   10   12   14   16 ...(N=8 units)
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>SEQ  : Iai  Ilb  Ilw0 [nop/indep to cover L_ldw] Imm0 Ilw1 Imm1 Ilw2 Imm2 Ilw3 Imm3 Ile ... Ias Ilut Ivs
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>wbufA:      [ load W0 =N cy ][ stream mm0 =N cy ][ load W2 ][ stream mm2 ]
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>wbufB:                       [ load W1 =N cy  ][ stream mm1 ][ load W3 ][ stream mm3 ]
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ACC  : [init]              +=mm0  +=mm1  +=mm2  +=mm3 -&gt; drain(2N-1) -&gt; acc.store -&gt; lut -&gt; vreg.store
 </code></pre></div>
-<p>The tile-loop overlap schedule is drawn on the <a href="../microarch/compute_tile/index.html">compute-tile overview</a>
-(<code>ct-pipeline-overlap</code>): the timing contract this page specifies is what that schedule
+<p>The tile-loop overlap schedule is
+<a href="../microarch/compute_tile/index.html#fig-pipeline-overlap">Compute tile Fig. 2</a>: the timing contract this page specifies is what that schedule
 relies on, so the figure lives with the pipeline it draws, not with the contract.</p>
 <ul>
 <li>Steady state = <strong>1 matmul / N=8 cy</strong>, <code>load.w</code> fully overlapped in the other weight buffer; absolute block time TBD; ACC depth-2 lets block <code>j</code> tail overlap block <code>j+1</code> matmul.</li>

@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mininpu-vpu-vector-processing-unit-microarchitecture" class="md-skip">
+        <a href="#vpu-the-vector-processing-unit" class="md-skip">
           Skip to content
         </a>
       
@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1102,6 +1102,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1222,34 +1341,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1341,7 +1432,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1397,7 +1488,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1621,12 +1712,11 @@
      only. The article prose was carried over; the former deck-bullet
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
-<h1 id="mininpu-vpu-vector-processing-unit-microarchitecture">mininpu VPU: Vector Processing Unit Microarchitecture<a class="headerlink" href="#mininpu-vpu-vector-processing-unit-microarchitecture" title="Permanent link">&para;</a></h1>
+<h1 id="vpu-the-vector-processing-unit">VPU: The Vector Processing Unit<a class="headerlink" href="#vpu-the-vector-processing-unit" title="Permanent link">&para;</a></h1>
 <p>The <strong>VPU</strong> is the SIMD vector engine of the compute tile: an 8-lane FP32 datapath with horizontal reductions, BRAM-LUT non-linear functions, and BF16/FP32 casts. It is the workhorse for everything in the GPT-2 forward pass that is <em>not</em> a matrix multiply: RMSNorm, softmax, residual adds, LayerNorm, and GELU activation. This document is the visual deep-dive; the exhaustive specifics (every FSM state, transition, and counter terminal) live in the RTL.</p>
 <p><strong>Source of truth:</strong> <code>npu/src/compute_tile/vpu_ctrl.sv</code>, <code>npu/src/compute_tile/vec_regfile.sv</code>, <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, <code>npu/src/compute_tile/fpu/fp_*.sv</code>, <code>npu/src/npu/npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). Describes the post-refactor counter-based VPU (<code>vpu_ctrl</code> extracted from <code>sequencer.sv</code>).</p>
 <h2 id="overview-placement">Overview &amp; placement<a class="headerlink" href="#overview-placement" title="Permanent link">&para;</a></h2>
-<p>The VPU's place in the tile is drawn on the <a href="index.html">compute-tile overview</a>
-(<code>a1-tile-structure</code>).</p>
+<p>The VPU's place in the tile is drawn in <a href="index.html#fig-tile-structure">Compute tile Fig. 1</a>.</p>
 <p>The VPU performs 8-lane FP32 element-wise arithmetic, horizontal reductions, non-linear functions (exp2, reciprocal, rsqrt), and BF16↔FP32 casts. In the GPT-2 forward pass it covers RMSNorm, softmax (base-2 online), residual adds, LayerNorm, and GELU activation.</p>
 <p>The VPU lives entirely inside <code>vpu_ctrl.sv</code>, which owns the 8-lane datapath, the non-linear BRAM lookup units, the two reduction trees, and the vector register file (<code>vec_regfile</code>). It is driven by the tile <strong>sequencer</strong> (<code>sequencer.sv</code>) over a simple start/done handshake. When busy it <em>owns scratchpad BRAM Port B</em> (the same wide 256-bit port the DMA/MXU use) and streams ACC/SPM tile rows through its datapath, writing results back to ACC rows or to its own vector register file. An external async VREG read port (<code>vreg_rd_addr_ext</code>/<code>vreg_rd_data_ext</code>) is exposed by <code>vpu_ctrl</code> to sibling engines for future use while the VPU is idle.</p>
 <h2 id="handshake-contract">Handshake contract<a class="headerlink" href="#handshake-contract" title="Permanent link">&para;</a></h2>
@@ -1711,7 +1801,7 @@
 </tbody>
 </table>
 <ul>
-<li><strong>Port A / Port B</strong>: the two async operand reads (<code>rd_addr_a</code> / <code>rd_addr_b</code>) used by all VREG-to-VREG ops (e.g. <code>fma</code> reads A=src, B=multiplicand; <code>sub.vreg</code> reads A-B). The RF is a <strong>2r1w</strong> file (2 read, 1 write), matching <code>vec_regfile.sv</code> and the <code>vpu-datapath</code> figure. The external async read <code>vpu_ctrl</code> exposes to sibling engines (<code>vreg_rd_addr_ext</code>) muxes onto this read structure while the VPU is idle; it is not a third RF port.</li>
+<li><strong>Port A / Port B</strong>: the two async operand reads (<code>rd_addr_a</code> / <code>rd_addr_b</code>) used by all VREG-to-VREG ops (e.g. <code>fma</code> reads A=src, B=multiplicand; <code>sub.vreg</code> reads A-B). The RF is a <strong>2r1w</strong> file (2 read, 1 write), matching <code>vec_regfile.sv</code> and <a href="#fig-vpu-datapath">Fig. 1</a>. The external async read <code>vpu_ctrl</code> exposes to sibling engines (<code>vreg_rd_addr_ext</code>) muxes onto this read structure while the VPU is idle; it is not a third RF port.</li>
 </ul>
 <p>Note: the GLOSSARY's "tutorial" framing says 16 elements/register; the <em>implemented</em> RTL is parameterized at <code>BANKING=8</code> lanes, so a register is 8×FP32. The text above reflects the RTL as built.</p>
 <p>Register-to-SPAD movement (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) is <strong>not</strong> VPU-owned: it is dispatched to the <strong>LSU</strong>, the SPAD-VREG mover (see <a href="spad.html#the-lsu">spad.md :: The LSU</a>).</p>
@@ -1724,11 +1814,15 @@
      figure's "per-op latencies" stale, but the figure draws no latency numbers at all --
      that complaint described ink that does not exist and is dropped. Redraw in the house
      style FROM RTL. -->
+<figure id="fig-vpu-datapath">
 <p><img alt="VPU lane datapath" src="../../../figures/tikz/vpu-datapath.svg" /></p>
-<p><strong>Fig. A4. VPU lane datapath.</strong> A 256-bit row fans into 8 FP32 lanes (per-lane
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>VPU lane datapath.</strong> A 256-bit row fans into 8 FP32 lanes (per-lane
 <code>fp_add</code> / <code>fp_mul</code> / <code>fp_max</code>); <code>rowsum</code> / <code>rowmax</code> use two <code>fp_reduce_tree</code>
 (<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. Results write to <code>vec_regfile</code>
 (<code>NUM_REGS = 32</code>) or back to an ACC row.</p>
+</figcaption>
+</figure>
 <p>One zoom level in: the structure inside <code>vpu_ctrl</code>. A 256-bit ACC/SPM row unpacks into <strong>8 FP32 lanes</strong> (<code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH = 256/32 = 8</code>). Each lane owns its own ALU primitives (<code>fp_add</code>, <code>fp_mul</code>, <code>fp_max</code>). Two horizontal paths fan the 8 lanes into a scalar: an <strong>ADD reduction tree</strong> (<code>rowsum</code>) and a <strong>MAX reduction tree</strong> (<code>rowmax</code>). Three shared <strong>BRAM-LUT non-linear units</strong> (<code>exp2</code> / <code>recip</code> / <code>rsqrt</code>) serve the transcendental paths (softmax, GELU, RMSNorm). Results land in the <strong>vector register file</strong> (32 registers V0--V31, each 8×FP32) or back to an ACC row. The ACC tile in scratchpad is shared with the MXU.</p>
 <p>Every lane is built from synthesisable behavioral IEEE-754 FP32 primitives (the cvfpu/fpnew submodule was fully removed; these models map to LUTs/DSP48E2 at synthesis and to DPI-C in Verilator sim). The primitive files and modules were historically named <code>fp32_*</code>; both the files <em>and</em> the modules are now <code>fp_*</code> (e.g. <code>fp_add</code>, <code>fp_mul</code>), under <code>npu/src/compute_tile/fpu/</code>.</p>
 <h2 id="fp-primitives">FP primitives<a class="headerlink" href="#fp-primitives" title="Permanent link">&para;</a></h2>
@@ -1825,11 +1919,15 @@
      Separately, vpu_lane.sv:264 carries a stale comment saying "LOCKED VPU design,
      D_vpu=9", which contradicts vpu_ctrl.sv:68/:417 and vpu_gelu_unit.sv. That is an RTL
      comment bug (area:rtl), reported rather than fixed here. -->
+<figure id="fig-vpu-pipeline">
 <p><img alt="VPU per-function depths padded to the uniform D_vpu terminal" src="../../../figures/tikz/c-vpu-pipeline.svg" /></p>
-<p><strong>Fig. C3. VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><strong>VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
 op class has the SAME issue-to-write latency <code>D_VPU = 23</code> (<code>vpu_ctrl.sv:417</code>); the
 shallower classes are padded to it by a holding register. One uniform reservation
 window means the FSM needs a single terminal rather than a per-op one.</p>
+</figcaption>
+</figure>
 <p>A 3-bit enum (<code>vpu_state_t</code>) dispatches each opcode <em>class</em> from <code>VPU_IDLE</code> into one execution state; two counters (<code>row_cnt</code> for the 8-row ACC loop, <code>stage_cnt</code> for the pipeline stage within an op) drive all transitions:</p>
 <p><strong>Table: VPU FSM states and their roles; counters (<code>row_cnt</code>, <code>stage_cnt</code>) drive all intra-state transitions.</strong></p>
 <table>
@@ -1905,10 +2003,14 @@ window means the FSM needs a single terminal rather than a per-op one.</p>
 <p>Class E is described here as <strong>LSU-dispatched</strong> under the 0.5.0 model; the as-built RTL still routes these <code>0x3_</code> ops through the VPU's <code>VPU_ACC_ROW</code> state, which is why the table names that state.</p>
 <p>Exact per-stage cycle accounting (the <code>ST_*</code> terminals and the row-write stage for each opcode) is in the <code>vpu_ctrl.sv</code> header comment.</p>
 <h2 id="reduction-tree-fp_reduce_tree">Reduction tree: <code>fp_reduce_tree</code><a class="headerlink" href="#reduction-tree-fp_reduce_tree" title="Permanent link">&para;</a></h2>
+<figure id="fig-vpu-reduce">
 <p><img alt="One fp_reduce_tree at N=8, DEPTH=3, ADD/MAX modes" src="../../../figures/tikz/vpu-reduce.svg" /></p>
-<p><strong>Fig. H2. One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
+<figcaption>
+<p><span class="caption-prefix">Fig. 3.</span><strong>One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
 VPU instantiates twice: an ADD tree (<code>rowsum</code>) and a MAX tree (<code>rowmax</code>), both surfacing
 the same 3-cycle latency so one <code>stage_cnt</code> terminal serves both.</p>
+</figcaption>
+</figure>
 <p>The reduction tree's 8 → 4 → 2 → 1 shape over <code>DEPTH = 3</code> levels is described in the
 text above; both ADD and MAX modes surface the same 3-cycle latency, so <code>vpu_ctrl</code> sizes a
 single <code>REDUCE_TOTAL = REDUCE_LAT + 1 = 4</code> terminal (the +1 covers the BRAM read before

@@ -286,3 +286,26 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------------
+ * Numbered figure captions (pymdownx.blocks.caption; see docs/README.md).
+ * The extension emits <span class="caption-prefix">Fig. N.</span> as the
+ * first child of the caption paragraph. It only inserts a separating space
+ * when the caption text begins with plain text, so a caption that opens
+ * with **bold** (most of ours do) would render "Fig. 2.LSU pipeline".
+ * Own the gap here rather than depending on the caption's first character.
+ * ------------------------------------------------------------------- */
+.md-typeset figure > figcaption {
+  margin: 0 auto;
+  max-width: 100%;
+  text-align: left;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .caption-prefix {
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+  margin-right: 0.35em;
+}

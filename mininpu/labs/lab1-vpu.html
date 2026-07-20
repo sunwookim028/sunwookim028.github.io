@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -884,6 +884,122 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1001,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1347,7 +1435,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1403,7 +1491,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1652,20 +1740,50 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> the <code>vec.*</code> mnemonics used below
+<p><strong>Known wrong, not merely unverified.</strong> The <code>vec.*</code> mnemonics used below
 (<code>vec.rowsum</code>, <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code>) belong
-to a namespace that <strong>matches no generation of the ISA</strong>. Check the generated
-<a href="../hardware/spec/isa.html">ISA Reference</a> for the mnemonics that actually exist.</p>
+to a namespace that <strong>matches no generation of the ISA</strong>.</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>Instruction semantics and operand fields:</em> what <code>vec.rowsum</code>,
+  <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code> and <code>flush</code> do, and
+  the <code>acc_dst</code> / <code>acc_a</code> / <code>acc_b</code> / <code>vreg_dst</code> / <code>acc_src</code> operand fields
+  the three-instruction kernel in Part 2 uses.</li>
+<li><em>Datapath geometry:</em> eight lanes; one multiplier, adder and comparator per
+  lane; a scratchpad row holding eight FP32 values; an accumulator tile of
+  eight rows by eight FP32 values.</li>
+<li><em>Reduction tree:</em> <code>fp_reduce_tree</code> parameterized <code>N=8</code> with <code>OP="ADD"</code> and
+  an <code>OP="MAX"</code> mode; three pairwise levels; a three-cycle latency equal to
+  that depth.</li>
+<li><em>Lookup tables and their latency:</em> that <code>fp_exp2_bram</code>, <code>fp_recip_bram</code>,
+  <code>fp_rsqrt_bram</code> and <code>fp_tanh_bram</code> exist; that the <code>fp_tanh_bram</code> read is
+  registered and costs one cycle; that the GELU path has exactly one
+  registered stage.</li>
+<li><em>Provided FPU blocks:</em> <code>fp_mul</code> (claimed combinational), <code>fp_add</code>,
+  <code>fp_max</code>, and the claim that ReLU is one <code>fp_max</code> comparison.</li>
+<li><em>Module, signal and FSM-state names:</em> <code>vpu_lane.sv</code>, <code>vpu_ctrl.sv</code>,
+  <code>row_cnt</code>, <code>stage_cnt</code>, <code>VPU_REDUCE_ROW</code>, <code>VPU_ACC_ROW</code>, the opcode-class
+  entry-state dispatch, and the one-cycle <code>done</code> pulse.</li>
+<li><em>Numeric format:</em> that Lab 1 is FP32 end to end.</li>
+<li><em>Figure-borne claims:</em> <code>vpu-datapath</code> and <code>vpu-reduce</code> are frozen legacy
+  SVGs with no TikZ source, so they cannot be re-rendered from a corrected
+  source. The lane count, the per-lane unit set, the ADD/MAX tree shape and
+  the three-level depth are asserted by the drawings as well as by the prose:
+  checking the prose does not check the figures.</li>
+<li><em>Suspect, check first:</em> the Part 2 kernel comment says <code>vec.mul.acc</code>
+  computes "all 64 products at once", while the surrounding text describes a
+  row-sequential controller over an eight-lane datapath. At most one of these
+  can be right.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>This is the first lab in building a neural-network accelerator, and your
@@ -1779,17 +1897,21 @@ the result you see locally is the result you are graded on.</p>
 <h2 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h2>
 <p>You build one engine in four parts. Each part reuses what the previous one built:
 a dot product becomes a loop over a tile, the loop gains per-lane arithmetic and
-activations, and the whole thing composes into a layer. Figure 1 shows the
-eight-lane datapath you are building, and Figure 2 shows the reduction tree at the
-heart of Part 1.</p>
+activations, and the whole thing composes into a layer. <a href="#fig-vpu-datapath">Fig. 1</a> shows the
+eight-lane datapath you are building, and <a href="#fig-vpu-reduce">Fig. 2</a> shows the reduction tree at
+the heart of Part 1.</p>
+<figure id="fig-vpu-datapath">
 <p><img alt="vpu-datapath" src="../figures/tikz/vpu-datapath.svg" /></p>
-<p><em>Figure 1. The VPU datapath. A row of the scratchpad holds eight
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><em>The VPU datapath. A row of the scratchpad holds eight
 FP32 values, one per lane, and each lane has its own multiplier, adder, and
 comparator. Two write-back paths are shown: the reduction path (lanes into the
 ADD/MAX trees, as in the Part 1 dot product) and the element-wise bypass (per-lane
 results straight to write-back), the path the element-wise arithmetic and the
 activations use. A set of block-RAM lookup tables beside the lanes handles the
 nonlinear functions. You build this datapath up over the four parts of the lab.</em></p>
+</figcaption>
+</figure>
 <h3 id="part-1-an-eight-lane-dot-product">Part 1: an eight-lane dot product<a class="headerlink" href="#part-1-an-eight-lane-dot-product" title="Permanent link">&para;</a></h3>
 <p>The first part builds the <strong>reduction path</strong> at its smallest: a single dot
 product of two eight-element vectors, <span class="arithmatex">\(\text{result} = \sum_{i=0}^{7} a_i\,b_i\)</span>.
@@ -1805,13 +1927,17 @@ lane <span class="arithmatex">\(i\)</span> computes <code>prod[i] = a[i] * b[i]<
 <code>fp_reduce_tree</code>, parameterized with <code>N=8</code> and <code>OP="ADD"</code>, that
 sums the eight products into the single output <code>result</code>. Both sub-modules are
 provided and tested; the module header lists their ports.</p>
+<figure id="fig-vpu-reduce">
 <p><img alt="vpu-reduce" src="../figures/tikz/vpu-reduce.svg" /></p>
-<p><em>Figure 2. The reduction tree (<code>fp_reduce_tree</code> with
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><em>The reduction tree (<code>fp_reduce_tree</code> with
 <code>N=8</code>). Eight inputs are summed pairwise over three levels, each level a
 row of adders. Because the tree has <span class="arithmatex">\(\lceil\log_2 8\rceil = 3\)</span> levels, the
 architectural latency from stable inputs to a valid result is three cycles. The
 same tree in <code>MAX</code> mode computes a row maximum, used by the attention
 softmax in later labs.</em></p>
+</figcaption>
+</figure>
 <p>The idea to take away from Part 1 is the <strong>dedicated specialized datapath</strong>.
 A dot product is not run as a sequence of general-purpose instructions; it is wired
 directly in hardware as a row of per-lane multipliers feeding a reduction tree.

@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mininpu-mxu-systolic-matrix-engine" class="md-skip">
+        <a href="#mxu-the-systolic-matrix-engine" class="md-skip">
           Skip to content
         </a>
       
@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1036,6 +1036,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1156,34 +1275,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1275,7 +1366,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1331,7 +1422,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1489,44 +1580,64 @@
      only. The article prose was carried over; the former deck-bullet
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
-<h1 id="mininpu-mxu-systolic-matrix-engine">mininpu: MXU: Systolic Matrix Engine<a class="headerlink" href="#mininpu-mxu-systolic-matrix-engine" title="Permanent link">&para;</a></h1>
+<h1 id="mxu-the-systolic-matrix-engine">MXU: The Systolic Matrix Engine<a class="headerlink" href="#mxu-the-systolic-matrix-engine" title="Permanent link">&para;</a></h1>
 <p>The <strong>MXU</strong> is the matrix-multiply engine of the compute tile: an <strong>N×N weight-stationary systolic array</strong> of multiply-accumulate processing elements, wrapped by an FSM that streams operand tiles in and out of the scratchpad. It implements two ISA ops in the <code>0x0_</code> matmul group --- <code>mxu.load.w</code> (0x00), which loads an N× N weight tile into the next (inactive) weight buffer, and <code>mxu.matmul</code> (0x01), which implicitly switches the loaded weights to active, streams the activation tile through the array, and accumulates into the <strong>ACC</strong> register file. Each op runs the <code>DIM×DIM</code> tile loop internally so a kernel issues one <code>mxu.load.w</code> + <code>mxu.matmul</code> pair per weight tile. Splitting weight load from compute is what lets the compiler preload the <em>next</em> tile's weights while the current tile still computes (§ the tile loop). This document is the visual deep-dive; the exhaustive specifics (every FSM state, the synthesizable FP bit-arithmetic) live in the RTL.</p>
 <p><strong>Numbers are owned by config, not by this page.</strong> All sizes below are cited to <code>npu/src/npu/npu_config_pkg.sv</code> (the generated config package, itself derived from <code>npu/params.py</code>). For this build: <code>N = 8</code> ⇒ <strong>8×8 = 64 PEs</strong>, <code>MEM_LATENCY = 2</code>, <code>DATA_WIDTH = 32</code> (FP32 accumulate / psum bus), and storage width <code>STORAGE_WIDTH = 16</code> (BF16). Opcode semantics are cited to <code>mininpu/isa</code>.</p>
 <h2 id="where-the-mxu-sits">Where the MXU sits<a class="headerlink" href="#where-the-mxu-sits" title="Permanent link">&para;</a></h2>
+<figure id="fig-mxu-datapath">
 <p><img alt="mininpu MXU datapath" src="../../../figures/tikz/fig7-port.svg" /></p>
-<p><strong>Fig. 7. mininpu MXU datapath.</strong> Weight-stationary systolic array (RS-hybrid: W
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>mininpu MXU datapath.</strong> Weight-stationary systolic array (RS-hybrid: W
 stationary, X row-streamed) · N=8 → 8×8 = 64 PE · bf16×bf16→fp32 MAC · ACC = 8
 per-column banks × depth 2 (fp32) · X streamed from VREG (cast at boundary, LOCKED) ·
 N=8 baseline; datapath parameterized (N=16 = ISA-invariant sweep).</p>
-<p>The MXU is one of two datapath engines inside the <strong>compute tile</strong> (the other is the <strong>VPU</strong>). The tile <strong>sequencer</strong> fetches an <code>mxu.load.w</code> / <code>mxu.matmul</code> pair from IRAM, latches the operand base addresses and the flag bits, then pulses <code>start</code>. Under the 0.5.0 model the MXU sources its <strong>weights from SPAD</strong> (<code>mxu.load.w</code>) and its <strong>X tile from VREG</strong> (burst-staged into <code>x_matrix</code>), pushes them through the array, captures the FP32 results into ACC, and pulses <code>done</code>. The tile result <strong>drains from ACC</strong> (via the LSU's <code>acc.store</code>); the MXU does not store results back to SPAD. The SPAD port structure it shares with the DMU is on <a href="spad.html">spad.md</a> (<code>a2-spad-ports</code>) --- note that figure is as-built-grounded and still draws an MXU-to-SPAD writeback path; that is an RTL-wiring artifact, not the 0.5.0 datapath this page documents.</p>
+</figcaption>
+</figure>
+<p>The MXU is one of two datapath engines inside the <strong>compute tile</strong> (the other is the <strong>VPU</strong>). The tile <strong>sequencer</strong> fetches an <code>mxu.load.w</code> / <code>mxu.matmul</code> pair from IRAM, latches the operand base addresses and the flag bits, then pulses <code>start</code>. Under the 0.5.0 model the MXU sources its <strong>weights from SPAD</strong> (<code>mxu.load.w</code>) and its <strong>X tile from VREG</strong> (burst-staged into <code>x_matrix</code>), pushes them through the array, captures the FP32 results into ACC, and pulses <code>done</code>. The tile result <strong>drains from ACC</strong> (via the LSU's <code>acc.store</code>); the MXU does not store results back to SPAD. The SPAD port structure it shares with the DMU is <a href="spad.html#fig-spad-ports">SPAD Fig. 1</a> --- note that figure is as-built-grounded and still draws an MXU-to-SPAD writeback path; that is an RTL-wiring artifact, not the 0.5.0 datapath this page documents.</p>
 <h2 id="the-systolic-array-concept">The systolic-array concept<a class="headerlink" href="#the-systolic-array-concept" title="Permanent link">&para;</a></h2>
+<figure id="fig-mxu-array-pe">
 <p><img alt="mininpu MXU: the systolic array and one PE" src="../../../figures/tikz/mxu-array-pe.svg" /></p>
-<p><strong>Fig. A. mininpu MXU: the systolic array and one PE.</strong> Zoom hierarchy, one subject at
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><strong>mininpu MXU: the systolic array and one PE.</strong> Zoom hierarchy, one subject at
 two altitudes: the 8×8 = 64 PE weight-stationary array, and the inside of one of its
 PEs · X is burst-staged into <code>x_matrix</code> and streamed from there, never from VREG · the
 partial sum is injected as 0 at the north edge, not supplied from outside · the
 fp32 → bf16 cast of X sits at the array input, not inside the PE · one PE hop is
 <code>SKEW</code> = <code>PE_LATENCY</code>+1 = 3 cycles, equal W→E and N→S.</p>
+</figcaption>
+</figure>
 <p>A systolic array computes a matrix product by laying out a grid of identical multiply-accumulate cells (PEs) and letting operands <em>flow</em> through the grid in lockstep with the clock --- each PE does one multiply and one add per cycle, passing its inputs onward to its neighbours. No PE ever fetches from memory; the array is a pure dataflow pipeline fed at its edges. mininpu's array is <strong>weight-stationary</strong>: a tile of weights is loaded once and held in each PE, then a stream of activations marches across, accumulating partial sums as it goes.</p>
 <p>Concretely (from <code>npu/src/compute_tile/systolic.sv</code>): <strong>activations</strong> flow <strong>west → east</strong>, one stream per array row (<code>sys_data_in[r]</code>); <strong>weights</strong> and <strong>partial sums</strong> flow <strong>north → south</strong>, one column each (<code>sys_weight_in[c]</code>), with the bottom row driving the outputs; <strong>valid</strong> follows the activations west→east, <strong>accept_w</strong> is a per-column broadcast, and the <strong>switch</strong> propagates from <code>pe[0\]\[0]</code> rightward along row 0, then south down each column.</p>
 <h2 id="a-worked-example-one-column-accumulates">A worked example --- one column accumulates<a class="headerlink" href="#a-worked-example-one-column-accumulates" title="Permanent link">&para;</a></h2>
+<figure id="fig-matmul-trace">
 <p><img alt="Tracing one mxu.matmul" src="../../../figures/tikz/b-matmul-trace.svg" /></p>
-<p><strong>Fig. B. Tracing one <code>mxu.matmul</code>.</strong> The route of a single <code>mxu.matmul</code> across the
+<figcaption>
+<p><span class="caption-prefix">Fig. 3.</span><strong>Tracing one <code>mxu.matmul</code>.</strong> The route of a single <code>mxu.matmul</code> across the
 compute tile · everything off the route is receded · X is BURST-read (N=8 rows,
 1 row/cycle) into <code>x_matrix</code>; VREG is then not read again for the rest of the matmul.</p>
+</figcaption>
+</figure>
 <p>To make the dataflow concrete, take a single column of the array as a dot-product reducer. Each PE holds one weight w; the activation x passing through it is multiplied, and the incoming partial sum from the PE above (<code>psum_in</code>) is added: codepsum_out = w· x + codepsum_in. The top PE starts from codepsum_in = 0, so by the time the value reaches the bottom of the column it is the full dot product of that column's weights with the activation vector. In the figure, column 0 holds weights <code>0.5</code>,<code>0.25</code>,<code>-0.5</code> and the activations are <code>1.0</code>,<code>2.0</code>,<code>1.0</code>, so the partial sums step <code>0.5</code>→<code>1.0</code>→<code>0.5</code> … rolling up to the FP32 result. Every multiply widens to an FP32 product and every add is FP32, so a long reduction chain never loses dynamic range. The same thing happens in all <code>N</code> columns simultaneously, one cycle apart --- that is the systolic wavefront shown next.</p>
 <h2 id="the-systolic-wavefront-row-stagger-timing">The systolic wavefront --- row-stagger timing<a class="headerlink" href="#the-systolic-wavefront-row-stagger-timing" title="Permanent link">&para;</a></h2>
+<figure id="fig-mxu-fsm">
 <p><img alt="MXU controller FSM" src="../../../figures/tikz/d-mxu-fsm.svg" /></p>
-<p><strong>Fig. D1. MXU controller FSM.</strong> <code>mxu.sv:213-231</code> declares <strong>17</strong> enum ordinals;
+<figcaption>
+<p><span class="caption-prefix">Fig. 4.</span><strong>MXU controller FSM.</strong> <code>mxu.sv:213-231</code> declares <strong>17</strong> enum ordinals;
 <strong>14</strong> are reachable and <strong>3</strong> are dead. One op in flight on the main track, plus one
 concurrent weight-preload sub-FSM. Every state also names what it does on its own
 second line.</p>
+</figcaption>
+</figure>
 <!-- TODO(caption): `a2-acc-banks` has no CAPTIONS.md entry. Caption authored from the
      figure + mxu_accumulator.sv, not lifted verbatim from the SSOT; needs an owner read. -->
+<figure id="fig-acc-banks">
 <p><img alt="Accumulator bank structure and read-bank select" src="../../../figures/tikz/a2-acc-banks.svg" /></p>
-<p><strong>Fig. A3. Accumulator bank structure and read-bank select.</strong> ACC is 8 per-column
+<figcaption>
+<p><span class="caption-prefix">Fig. 5.</span><strong>Accumulator bank structure and read-bank select.</strong> ACC is 8 per-column
 banks of fp32, depth 2. The read-bank select is registered (#260) to close the
 200 MHz path.</p>
+</figcaption>
+</figure>
 <p>The word "systolic" refers to the staggered timing. Activations are not injected into every row on the same cycle; row r starts one cycle after row r-1. This row-stagger means a given activation reaches PE (r,c) exactly when the partial sum descending column c reaches the same cell --- multiply and accumulate line up without any PE waiting on memory. The result is a <strong>diagonal wavefront</strong>: at cycle t, the active PEs are those on the anti-diagonal r + c = t. PE (0,0) fires first; PE (codeN-1,codeN-1) fires last, 2(codeN-1) cycles later. The bottom-row outputs therefore stream out column-by-column rather than all at once, which is why the controller's <code>S_CAPTURE</code> state collects each column's result as its valid fires. The controller paces the whole run for <code>5N + PE_LAT</code> phases (see the tile-loop table).</p>
 <details class="note">
 <summary>Deeper dive: the systolic-pipeline timing pitfall</summary>
@@ -1645,7 +1756,7 @@ window, so sim and synth must agree on the value. The class is in the taxonomy o
 </tr>
 </tbody>
 </table>
-<p>The <code>mxu.sv</code> enum still declares SPAD-store states (<code>S_STORE_REQ/WAIT</code>) from an earlier design that wrote the tile result back to SPAD; they are among the dead ordinals (<code>d-mxu-fsm</code> above) and are unreachable in the current control path, so they are not documented here as a live phase.</p>
+<p>The <code>mxu.sv</code> enum still declares SPAD-store states (<code>S_STORE_REQ/WAIT</code>) from an earlier design that wrote the tile result back to SPAD; they are among the dead ordinals (<a href="#fig-mxu-fsm">Fig. 4</a> above) and are unreachable in the current control path, so they are not documented here as a live phase.</p>
 <p>The flag bits are split across the two ops (cited <code>mininpu/isa</code>): on <code>mxu.load.w</code>, <code>flags[0] = transB</code> (reverse the weight-row fetch); on <code>mxu.matmul</code>, <code>flags[0] = accum</code> (fold onto the prior ACC tile) and <code>flags[1] = causal</code> (mask the upper triangle). The dtype field <code>flags[7:6]</code> is reserved-must-be-zero in v1 (BF16 is hardwired). The matrix-level meaning --- <code>acc_dst = (accum ? acc_dst : 0) + spm_x @ (transB ? spm_w^{}T : spm_w)</code>, with the post-multiply causal mask --- is specified normatively in <code>mininpu/isa</code>; this page does not restate it.</p>
 <p><strong>Double-buffer schedule.</strong> A K-loop issues <code>load.w W0; matmul X0; load.w W1; matmul X1 (accum); ...</code>: each <code>load.w W(k+1)</code>, issued after <code>matmul Xk</code>'s switch, runs concurrently with the <code>Xk</code> compute because the active and inactive weight buffers are disjoint. This is real v1 overlap defined by nonblocking instruction semantics (<code>mxu.load.w</code> and <code>mxu.matmul</code> are both nonblocking; see the compute-tile concurrency model), not a hardware-opportunistic reorder.</p>
 <p><strong>Operand layout in SPAD.</strong> The controller addresses three N-row regions in the scratchpad: weight rows and activation rows are bf16 (<code>STORAGE_WIDTH = 16</code>), output rows are fp32; each SPAD row is the full <code>SPAD_DATA_WIDTH = 256</code>-bit bus (8 × <code>DATA_WIDTH</code>). Base addresses arrive as <code>base_addr_w / base_addr_x / base_addr_out</code>, latched on <code>start</code>.</p>

@@ -1,4 +1,4 @@
-<title>LSU 10-cycle pipeline - FIG. 14</title>
+<title>LSU 10-cycle pipeline</title>
 <style>
   :root{
     --bg:#e9edf1; --chip:#f7f9fb; --ink:#18202c; --muted:#586274; --line:#93a0b0;
@@ -77,7 +77,7 @@
 
 <div class="wrap">
 <header>
-  <h1>LSU 10-cycle pipeline <span style="font-weight:400;color:var(--muted);font-size:15px"> - FIG. 14</span></h1>
+  <h1>LSU 10-cycle pipeline</h1>
   <p class="sub">FIXED LATENCY = ROWS + SPAD_RD_LATENCY = 8 + 2 = 10 &middot; one datapath, three ops &middot; read row r on cycle r, write commits RL=2 later &middot; owns the bf16 &harr; fp32 casts</p>
   <div class="legend">
     <span><i class="sw" style="background:color-mix(in srgb,var(--ctrl) 16%,var(--chip));border-color:var(--ctrl)"></i>addr-gen / issue</span>
@@ -232,7 +232,7 @@
 </div>
 
 <div class="card">
-  <h2>Reference - FIG. 14 (RTL-verified, lsu.sv)</h2>
+  <h2>Reference (RTL-verified, lsu.sv)</h2>
   <ul>
     <li><b>FIXED LATENCY = ROWS + SPAD_RD_LATENCY = 8 + 2 = 10</b> cycles, uniform across all three ops. A read is issued for tile-row r on cycle r; the corresponding write commits <code>RL = SPAD_RD_LATENCY = 2</code> cycles later.</li>
     <li><b>One datapath.</b> The SPAD read port has 2 cycles of registered read latency; the async ACC / VREG reads are pushed through an equal-depth (RL) shift register <code>rd_data_sr</code>, so all three ops share the same timing.</li>
@@ -240,5 +240,5 @@
     <li><b>Whole-tile op:</b> an [NxN] tile = N tile-rows, processed one 256-bit tile-row per cycle; fixed, data-independent latency (safe for the scoreboard-free sequencer). <code>RL &gt;= 1</code> generalizes; deployed RL = 2 matches <code>spad.sv MEM_LATENCY = 2</code>.</li>
   </ul>
 </div>
-<p class="foot">FIG. 14 depicts RTL-measured depths on <code>rtl/full-npu-wire</code>. Grounded in <code>npu/src/compute_tile/lsu.sv</code> and <code>npu/src/npu/npu_config_pkg.sv</code> (ROWS = N = 8, MEM_LATENCY = 2). Stage/latency view of the LSU sink (FIG. 6, ref 730).</p>
+<p class="foot">Depths are RTL-measured on <code>rtl/full-npu-wire</code>. Grounded in <code>npu/src/compute_tile/lsu.sv</code> and <code>npu/src/npu/npu_config_pkg.sv</code> (ROWS = N = 8, MEM_LATENCY = 2). Stage/latency view of the LSU sink.</p>
 </div>

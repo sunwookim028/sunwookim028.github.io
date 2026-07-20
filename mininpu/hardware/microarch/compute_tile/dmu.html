@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dmu-data-moving-unit" class="md-skip">
+        <a href="#dmu-the-data-moving-unit" class="md-skip">
           Skip to content
         </a>
       
@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1109,6 +1109,125 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1229,34 +1348,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1348,7 +1439,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1404,7 +1495,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1629,7 +1720,7 @@
 
 
 
-<h1 id="dmu-data-moving-unit">DMU: Data Moving Unit<a class="headerlink" href="#dmu-data-moving-unit" title="Permanent link">&para;</a></h1>
+<h1 id="dmu-the-data-moving-unit">DMU: The Data Moving Unit<a class="headerlink" href="#dmu-the-data-moving-unit" title="Permanent link">&para;</a></h1>
 <p>The <strong>DMU</strong> is the compute tile's async data-moving unit: it streams bulk bf16 between device memory and SPAD in the background while the sequencer computes. This page documents its role and doctrine, its ISA surface, its data path to device memory, and the SPAD arbitration it participates in. Source anchors are cited as <code>file:line</code>. Primary SSOT: charter §4-§5 (<code>docs/charter.md</code>), ISA (<code>mininpu/isa/opcodes.py</code>, <code>mininpu/isa/encoders.py</code>), hardware parameters (<code>mininpu/hwparams.py</code>), and the DMA RTL under <code>npu/src/</code>.</p>
 <ul>
 <li><strong>compute-tile</strong> DMU</li>
@@ -1767,18 +1858,22 @@ to a consuming compute op.</p>
         timeout policy, the sticky dma_slot_done, dedicated Port A vs a yielding Port-B
         master, ...) and the multiple-outstanding block is tagged `[v1+]`. An `OPEN` is an
         unresolved decision addressed to whoever implements the RTL, and `[v1+]` is a
-        roadmap marker (archetype I). Both are the author side of the rule-3 test, and the
+        roadmap marker. Both are the author side of the rule-3 test, and the
         owner's ruling is explicit that status must not be re-encoded in "a dash, a hatch,
         a grey, a badge, a card, a legend row or a sentence" as a consolation prize.
      This figure ships anyway rather than leaving the DMU page figure-less, but it is NOT
      conformant: the OPEN/[v1+] tags belong in INTERNAL-NOTES.md and the figure should be
      re-rendered without them. Flagged for the owner rather than silently shipped or
      silently dropped. -->
+<figure id="fig-dmu-block">
 <p><img alt="DMU block: descriptor slots, AGU, SPAD port, completion path" src="../../../figures/tikz/a2-dmu-block.svg" /></p>
-<p><strong>Fig. A5. DMU block: descriptor slots, AGU, SPAD port, completion path.</strong> The async
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>DMU block: descriptor slots, AGU, SPAD port, completion path.</strong> The async
 data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, and the
 <code>dma_slot_done</code> completion path that <code>flush.slot</code> fences against.</p>
-<p>devmem, the DM word, the AXI bridge, the bandwidth story, and SPAD arbitration priority. The <code>dm_axi_bridge</code> burst FSM (<code>d-axi-bridge-fsm</code>) and the device-memory controller are owned by the <a href="../uncore.html#device-memory-controller">uncore</a>; this page cites them.</p>
+</figcaption>
+</figure>
+<p>devmem, the DM word, the AXI bridge, the bandwidth story, and SPAD arbitration priority. The <code>dm_axi_bridge</code> burst FSM (<a href="../uncore.html#fig-axi-bridge-fsm">Uncore Fig. 1</a>) and the device-memory controller are owned by the <a href="../uncore.html#device-memory-controller">uncore</a>; this page cites them.</p>
 <table>
 <thead>
 <tr>

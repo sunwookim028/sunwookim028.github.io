@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#an-asic-bound-npu-compute-tile-specified-end-to-end" class="md-skip">
+        <a href="#mininpu-npu-ip-and-triton-to-silicon-flows" class="md-skip">
           Skip to content
         </a>
       
@@ -292,7 +292,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="labs/index.html" class="md-tabs__link">
+        <a href="labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -670,7 +670,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -686,7 +686,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -984,6 +984,122 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hardware/flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hardware/flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1104,34 +1220,6 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="labs/introduction.html" class="md-nav__link">
         
   
@@ -1223,7 +1311,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1279,7 +1367,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1398,7 +1486,7 @@
 
 
 
-<h1 id="an-asic-bound-npu-compute-tile-specified-end-to-end">An ASIC-bound NPU compute tile, specified end to end<a class="headerlink" href="#an-asic-bound-npu-compute-tile-specified-end-to-end" title="Permanent link">&para;</a></h1>
+<h1 id="mininpu-npu-ip-and-triton-to-silicon-flows">mininpu: NPU IP and Triton to Silicon Flows<a class="headerlink" href="#mininpu-npu-ip-and-triton-to-silicon-flows" title="Permanent link">&para;</a></h1>
 <p>mininpu &middot; documentation</p>
 <p>A composable NPU IP template (MXU / VPU / tile / NoC) built as an IO-attached discrete accelerator, plus the host runtime that drives it and the compiler that targets it. FPGA is a test platform only; the design stays ASIC-targeting.</p>
 <ul>
@@ -1408,16 +1496,12 @@
 <li>on-chip SPAD <strong>32 KiB</strong></li>
 <li>target <strong>GPT-2</strong></li>
 </ul>
-<p><img alt="Compute tile: module containment tree" src="figures/tikz/h-module-tree.svg" /></p>
-<p><strong>Fig. H1. Compute tile: module containment tree.</strong> Every edge is one SystemVerilog
-instantiation. Read down for containment, right for the source file; counts are
-elaborated at <code>N=8</code> / <code>BANKING=8</code> (<code>npu_config_pkg.sv</code>). This whole-IP tree doubles as
-the site map for the pages below.</p>
 <h2 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h2>
-<p>The NPU IP: an architectural spec plus one example microarchitecture.</p>
+<p>The NPU IP: an architectural spec, one microarchitecture implementing it, and the flows that build it.</p>
 <ul>
 <li><strong>Architectural spec:</strong> <a href="hardware/spec/isa.html">ISA Contract</a> &middot; <a href="hardware/spec/abi.html">ABI Register Map</a></li>
-<li><strong>Example microarchitecture:</strong> <a href="hardware/microarch/compute_tile/index.html">Compute tile</a> (overview, <a href="hardware/microarch/compute_tile/sequencer.html">Sequencer</a>, <a href="hardware/microarch/compute_tile/vpu.html">VPU</a>, <a href="hardware/microarch/compute_tile/mxu.html">MXU</a>, <a href="hardware/microarch/compute_tile/spad.html">SPAD</a>, <a href="hardware/microarch/compute_tile/dmu.html">DMU</a>, Memory Tile ([v3]-deferred, RFC #158)) &middot; <a href="hardware/microarch/compute_tile/gpt2_demo.html">GPT-2 demo</a> &middot; <a href="hardware/microarch/uncore.html">The uncore</a> (the non-compute infra)</li>
+<li><strong>Microarchitecture:</strong> <a href="hardware/microarch/compute_tile/index.html">Compute tile</a> (overview, <a href="hardware/microarch/compute_tile/sequencer.html">Sequencer</a>, <a href="hardware/microarch/compute_tile/vpu.html">VPU</a>, <a href="hardware/microarch/compute_tile/mxu.html">MXU</a>, <a href="hardware/microarch/compute_tile/spad.html">SPAD</a>, <a href="hardware/microarch/compute_tile/dmu.html">DMU</a>, Memory Tile ([v3]-deferred, RFC #158)) &middot; <a href="hardware/microarch/compute_tile/gpt2_demo.html">GPT-2 demo</a> &middot; <a href="hardware/microarch/uncore.html">The uncore</a> (the non-compute infra)</li>
+<li><strong>Implementation flows:</strong> <a href="hardware/flows/asic.html">ASIC flow</a> (the primary path; both generator stacks target ASIC) &middot; <a href="hardware/flows/fpga.html">FPGA flow</a> (test platform only, no FPGA-specific RTL) &middot; both pages are placeholders that scope the flow rather than describe it</li>
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Spec vs RTL as-built</p>
@@ -1430,7 +1514,7 @@ the site map for the pages below.</p>
 own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal
 extensible compiler framework lowering to the NPU ISA.</p>
 <h2 id="labs">Labs<a class="headerlink" href="#labs" title="Permanent link">&para;</a></h2>
-<p>The <a href="labs/index.html">teaching path</a> (lab0..5) builds the accelerator from the inside out, one subsystem per lab. The whole-device / host-in-the-world overview lives on <a href="labs/introduction.html">Lab 0</a>, not here.</p>
+<p>The <a href="labs/introduction.html">teaching path</a> (lab0..5) builds the accelerator from the inside out, one subsystem per lab. The whole-device / host-in-the-world overview lives on <a href="labs/introduction.html">Lab 0</a>, not here.</p>
 <h2 id="where-to-start">Where to start<a class="headerlink" href="#where-to-start" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1458,7 +1542,7 @@ extensible compiler framework lowering to the NPU ISA.</p>
 </tr>
 <tr>
 <td>Learning the device end to end</td>
-<td><a href="labs/index.html">Labs</a>, starting at <a href="labs/introduction.html">Lab 0</a></td>
+<td><a href="labs/introduction.html">Labs, starting at Lab 0</a></td>
 </tr>
 </tbody>
 </table>

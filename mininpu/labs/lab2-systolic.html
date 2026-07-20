@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -884,6 +884,122 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation flows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Implementation flows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/asic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ASIC flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/fpga.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FPGA flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1001,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1380,7 +1468,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 3: The Data-Movement Engine
+    Lab 3: Putting the Units Together
   
 
     
@@ -1436,7 +1524,7 @@
   <span class="md-ellipsis">
     
   
-    Lab 5: Serving: Key-Value Cache Management
+    Lab 5: Key-Value Cache Management
   
 
     
@@ -1723,23 +1811,59 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> two claims below are known to be wrong. The
-<code>matmul.tile.bf16</code> mnemonic and its three-operand form belong to a namespace
-that <strong>matches no generation of the ISA</strong>. And the activation tile is <strong>not
-streamed from the scratchpad</strong>: the MXU sources X from the VREG 2D register
-file and stages it in its own <code>x_matrix</code> buffer
-(<code>npu/src/compute_tile/mxu.sv</code>), so the operand model described here does not
-match the current RTL.</p>
+<p><strong>Known wrong, not merely unverified.</strong> The <code>matmul.tile.bf16</code> mnemonic and
+its three-operand form belong to a namespace that <strong>matches no generation of
+the ISA</strong>. And the activation tile is <strong>not streamed from the scratchpad</strong>:
+the MXU sources X from the VREG 2D register file and stages it in its own
+<code>x_matrix</code> buffer (<code>npu/src/compute_tile/mxu.sv</code>). <em>The Section "The
+instruction the MXU runs" and Part 4 below still describe the scratchpad
+operand model, so they contradict this note and must be rewritten, not merely
+caveated.</em></p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>Array geometry:</em> that the grid is 8x8 cells in the standard build and is
+  parameterized <code>DIM</code> by <code>DIM</code>.</li>
+<li><em>PE dataflow:</em> weight-stationary cells; activations entering the left edge
+  and moving right; partial sums moving down each column; weights streamed
+  down the columns and then held.</li>
+<li><em>PE port names:</em> <code>pe_input_in</code> / <code>pe_input_out</code>, <code>pe_psum_in</code> /
+  <code>pe_psum_out</code>, <code>pe_weight_in</code> / <code>pe_weight_out</code>, <code>pe_valid_out</code>,
+  <code>pe_switch_out</code>.</li>
+<li><em>Latency arithmetic:</em> that the multiply and the add each cost <code>PE_LATENCY</code>
+  cycles plus one extra register stage; that the bottom-row partial sum is
+  valid <code>PE_LAT = 2*PE_LATENCY + 1</code> cycles behind; that <code>pe_valid_out</code> runs
+  one cycle ahead of <code>pe_psum_out</code>; and that <code>LATENCY</code> lives in the <code>pe.sv</code>
+  header while <code>PE_LATENCY</code> lives in <code>npu_config_pkg.sv</code>.</li>
+<li><em>Scratchpad geometry and arbitration:</em> that <code>banked_sram.sv</code> instantiates
+  eight 32-bit banks striped into one 256-bit row; the <code>N_PORTS</code> request
+  ports and the <code>comp_en</code> enable bus; the quoted <code>bank_req[b] = comp_en;</code> and
+  <code>comp_conflict_bank_o[b] = ($countones(comp_en) &gt; 1);</code> lines; the
+  fixed-priority <code>bank_winner</code>; the one-cycle request-to-data alignment; the
+  <code>N_PORTS=1</code> default; and the assertion that there is no spare third port.</li>
+<li><em>Capture FSM:</em> <code>sys_valid_out_d</code>, <code>sys_data_out[col]</code>, <code>row_ptr[col]</code>, the
+  <code>S_STORE_REQ</code> state, the <code>load_idx</code> walk from <code>0</code> to <code>N-1</code>, and
+  <code>base_addr_out</code>.</li>
+<li><em>Numeric format and FPU blocks:</em> BF16 operands with an FP32 accumulator;
+  <code>bf16_mul_fp32.sv</code>, <code>fp16_mul_fp32.sv</code>, <code>fp_add.sv</code>; and the BF16-vs-FP16
+  exponent and mantissa comparison.</li>
+<li><em>Figure-borne claims:</em> <code>mxu-pe</code> and <code>mxu-array</code> are frozen legacy SVGs with
+  no TikZ source, so they cannot be re-rendered from a corrected source. The
+  weight-stationary dataflow above is asserted by the drawings as well as by
+  the caption and by Part 2, so a figure/RTL mismatch would need fixing in
+  three places and cannot be fixed by re-rendering.</li>
+<li><em>Not yet real:</em> the <code>make board-test BOARD=zcu102</code> flow the Materials
+  section and Part 4 describe is aspirational; the page's own source comment
+  says so.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>In Lab 1 the vector unit computed a matrix product one row at a time. To
@@ -1838,21 +1962,22 @@ you are graded on.</p>
 <h2 id="goal">Goal<a class="headerlink" href="#goal" title="Permanent link">&para;</a></h2>
 <p>You build one matrix engine in four parts. Each part reuses what the previous one
 built: a cell becomes a grid of cells, the grid runs alongside the vector unit,
-and the whole thing captures its results and runs on the board. Figure 1 shows a
-single processing element and the grid you assemble from it.</p>
-<div class="admonition info">
-<p class="admonition-title">Figure 1</p>
-<p><img alt="mxu-pe" src="../figures/tikz/mxu-pe.svg" width="40%" />
-<img alt="mxu-array" src="../figures/tikz/mxu-array.svg" width="55%" /></p>
-<p>Left: one weight-stationary processing element. It holds a weight,
+and the whole thing captures its results and runs on the board. <a href="#fig-mxu-array">Fig. 1</a> shows
+a single processing element and the grid you assemble from it.</p>
+<figure id="fig-mxu-array">
+<p><img alt="One PE and the systolic grid" src="../figures/tikz/mxu-pe.svg" width="40%" />
+<img alt="One PE and the systolic grid" src="../figures/tikz/mxu-array.svg" width="55%" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>One PE and the grid you assemble from it.</strong>
+Left: one weight-stationary processing element. It holds a weight,
 multiplies the activation that passes through it, and adds the product into a
 partial sum that arrives from above. Right: the grid. Activations enter from
 the left and move right; partial sums move down each column. Weights are
 streamed down to load each cell, then held in place while the activations
 stream. Each operand, once inside, is reused by a whole row or column of
-cells. You build the cell
-in Part 1 and wire the grid in Part 2.</p>
-</div>
+cells. You build the cell in Part 1 and wire the grid in Part 2.</p>
+</figcaption>
+</figure>
 <h3 id="part-1-a-processing-element">Part 1: a processing element<a class="headerlink" href="#part-1-a-processing-element" title="Permanent link">&para;</a></h3>
 <p>The first part builds one cell of the array, the <strong>processing element</strong>
 (PE). The array computes its matrix product by giving each cell one weight to
@@ -2182,13 +2307,13 @@ from the same design that runs in the full accelerator.</p>
         
         
           
-          <a href="lab3-dma.html" class="md-footer__link md-footer__link--next" aria-label="Next: Lab 3: The Data-Movement Engine">
+          <a href="lab3-dma.html" class="md-footer__link md-footer__link--next" aria-label="Next: Lab 3: Putting the Units Together">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Lab 3: The Data-Movement Engine
+                Lab 3: Putting the Units Together
               </div>
             </div>
             <div class="md-footer__button md-icon">
