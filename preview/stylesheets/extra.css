@@ -1,0 +1,311 @@
+/*
+ * extra.css
+ *
+ * Academic-handout theme for the mininpu Material for MkDocs site. Pushes
+ * Material toward an ECE6775-style course-handout look: a single serif family
+ * (Palatino) for both body and headings, a restrained slate/blue palette,
+ * horizontal-rule section dividers under h2, a light header bar, a narrower
+ * 56rem reading measure, and the left site-tree sidebar collapsed on desktop
+ * (global navigation moves to the top tab bar via theme.features:
+ * navigation.tabs). Pairs with mkdocs.yml theme.font: false, so this
+ * stylesheet controls typography instead of Material's Google Fonts fetch.
+ * Both light (default) and dark (slate) schemes are tuned.
+ */
+
+/* ---------------------------------------------------------------------
+ * Font stacks. --ax-font-serif is the single family used for BOTH body
+ * and content headings (h1-h6), per the reference. --ax-font-sans is kept
+ * only for the header/logo chrome (site title bar), which is app UI, not
+ * document content, and is untouched by the heading-typography feedback.
+ * ------------------------------------------------------------------- */
+:root {
+  --ax-font-serif: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --ax-font-sans: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------------------------------------------------------------------
+ * Light scheme (default) palette: restrained slate/blue, near-black text,
+ * muted grey secondary text, academic blue links.
+ * ------------------------------------------------------------------- */
+[data-md-color-scheme="default"] {
+  /* Tone down the Material primary/accent tokens: these still drive the
+     mobile nav drawer header, active-tab underlines, and focus rings, so
+     they should read as calm slate-blue rather than saturated indigo. The
+     desktop header bar itself is overridden separately below (near-white,
+     not this slate tone) per the "light header bar" spec. */
+  --md-primary-fg-color: #3b5169;
+  --md-primary-fg-color--light: #5c7290;
+  --md-primary-fg-color--dark: #2a3b4d;
+  --md-primary-bg-color: #f7f8fa;
+  --md-primary-bg-color--light: #ffffff;
+
+  /* Bootstrap blue, per the reference's link color (~#337ab7). */
+  --md-accent-fg-color: #337ab7;
+  --md-accent-fg-color--transparent: #337ab71a;
+  --md-accent-bg-color: #ffffff;
+  --md-accent-bg-color--light: #ffffff;
+
+  /* Reference body text color is #333, not near-black. */
+  --md-default-fg-color: #333;
+  --md-default-fg-color--light: #5c6672;
+  --md-default-fg-color--lighter: #8a95a3;
+  --md-default-fg-color--lightest: #e3e7ec;
+  --md-default-bg-color: #ffffff;
+
+  --md-typeset-a-color: #337ab7;
+}
+
+/* ---------------------------------------------------------------------
+ * Dark scheme (slate): same intent, re-tuned for contrast on a dark
+ * background. Link blue is lightened so it stays legible (the reference's
+ * #337ab7 on slate-900 fails contrast); Material's own slate
+ * background/foreground tokens are left mostly alone since they are
+ * already a restrained dark blue-grey, not saturated.
+ *
+ * #82b8e6 chosen by lifting #337ab7 (HSL ~208deg, 56% sat, 46% lightness)
+ * to ~70% lightness at the same hue, same technique the previous pass used
+ * to take the old link blue #1a56db to #7fa6f0 for dark mode (large
+ * lightness jump, same hue family, so it still reads as "the same blue").
+ * ------------------------------------------------------------------- */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #2a3644;
+  --md-primary-fg-color--light: #3d4c5e;
+  --md-primary-fg-color--dark: #1c2530;
+  --md-primary-bg-color: #e8ecf1;
+  --md-primary-bg-color--light: #ffffff;
+
+  --md-accent-fg-color: #82b8e6;
+  --md-accent-fg-color--transparent: #82b8e61a;
+  --md-accent-bg-color: #14181d;
+
+  --md-default-fg-color: #e6e9ee;
+  --md-default-fg-color--light: #a9b2bd;
+  --md-default-fg-color--lighter: #7a8290;
+  --md-default-fg-color--lightest: #313b47;
+
+  --md-typeset-a-color: #82b8e6;
+}
+
+/* Material's own palette.css ships a MORE SPECIFIC rule,
+   [data-md-color-scheme=slate][data-md-color-primary=indigo], that also
+   sets --md-typeset-a-color (to indigo's #5488e8). That double-attribute
+   selector has higher specificity than the single-attribute
+   [data-md-color-scheme="slate"] block above, so it silently won and the
+   link color above was NOT actually reaching rendered links in dark mode
+   (verified: raw screenshot pixels came back #5488e8, not #82b8e6, before
+   this rule was added). mkdocs.yml does not set theme.palette.primary,
+   so Material defaults it to "indigo"; match that same double-attribute
+   shape here to tie specificity, which our later-loaded extra_css then
+   wins on cascade order. */
+[data-md-color-scheme="slate"][data-md-color-primary="indigo"] {
+  --md-typeset-a-color: #82b8e6;
+}
+
+/* ---------------------------------------------------------------------
+ * Body: serif, reference type scale (16px / 1.428 line-height, matching
+ * the reference's Bootstrap-era `p { font-size: 16px }` + tighter leading).
+ * ------------------------------------------------------------------- */
+.md-typeset {
+  font-family: var(--ax-font-serif);
+  font-size: 16px;
+  line-height: 1.428;
+}
+
+/* Left nav sidebar is hidden at desktop widths (see the nav-collapse
+   block below), which frees up the space that column occupied. Widen the
+   grid to reclaim it; this also gives the wide MXU-page figures more room
+   before they clip. 56rem, not the full Material default of 61rem, to keep
+   a deliberately narrower reading measure (academic-handout feel) than
+   stock Material. */
+.md-grid {
+  max-width: 56rem;
+}
+
+/* ---------------------------------------------------------------------
+ * Headings: SAME serif family as body (per reference: headings inherit
+ * body's Palatino, they are not a separate sans face). Hierarchy comes
+ * from a monotonic size scale + bold weight + increasing top margin, not
+ * from switching font families. h2 gets a section hairline (the reference
+ * itself uses horizontal-rule section dividers); h3 stays undecorated
+ * (sub-section, not a new section).
+ * ------------------------------------------------------------------- */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  font-family: var(--ax-font-serif);
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset h1 {
+  font-size: 32px;
+  margin-top: 0;
+}
+
+.md-typeset h2 {
+  font-size: 24px;
+  margin-top: 2.2em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-typeset h3 {
+  font-size: 20px;
+  margin-top: 1.8em;
+  border-bottom: none;
+}
+
+.md-typeset h4 {
+  font-size: 17px;
+  margin-top: 1.5em;
+}
+
+.md-typeset h5 {
+  font-size: 15px;
+  margin-top: 1.3em;
+}
+
+.md-typeset h6 {
+  font-size: 13px;
+  margin-top: 1.1em;
+}
+
+/* ---------------------------------------------------------------------
+ * Links: academic blue, underline only on hover/focus, visited muted.
+ * ------------------------------------------------------------------- */
+.md-typeset a {
+  color: var(--md-typeset-a-color);
+  text-decoration: none;
+}
+
+.md-typeset a:visited {
+  color: #5468a8;
+}
+
+[data-md-color-scheme="slate"] .md-typeset a:visited {
+  color: #9aa8d4;
+}
+
+.md-typeset a:is(:focus, :hover) {
+  text-decoration: underline;
+  color: var(--md-accent-fg-color);
+}
+
+/* ---------------------------------------------------------------------
+ * Header bar: light and calm, replacing Material's saturated top bar.
+ * Near-white background, dark text, thin bottom rule instead of a shadow.
+ * ------------------------------------------------------------------- */
+.md-header {
+  background-color: #fbfbfa;
+  color: #1a1a1a;
+  border-bottom: 1px solid #d8dce1;
+  box-shadow: none;
+}
+
+.md-header--shadow {
+  box-shadow: none;
+}
+
+.md-header__title,
+.md-header__topic {
+  font-family: var(--ax-font-sans);
+}
+
+.md-header__button.md-logo,
+.md-header__button {
+  color: #1a1a1a;
+}
+
+.md-search__input {
+  background-color: #eef0f3;
+  color: #1a1a1a;
+}
+
+.md-search__input::placeholder {
+  color: #5c6672;
+}
+
+[data-md-color-scheme="slate"] .md-header {
+  background-color: #14181d;
+  color: #e6e9ee;
+  border-bottom: 1px solid #2a323c;
+}
+
+[data-md-color-scheme="slate"] .md-header__button.md-logo,
+[data-md-color-scheme="slate"] .md-header__button {
+  color: #e6e9ee;
+}
+
+[data-md-color-scheme="slate"] .md-search__input {
+  background-color: #1e242b;
+  color: #e6e9ee;
+}
+
+/* ---------------------------------------------------------------------
+ * Flatten shadows and rounded chrome toward a flat "paper" look.
+ * ------------------------------------------------------------------- */
+.md-typeset table:not([class]),
+.md-typeset .admonition,
+.md-typeset details,
+.md-typeset code,
+.md-typeset pre > code,
+.md-typeset .highlight,
+.md-nav__link,
+.md-tooltip,
+.md-typeset img {
+  box-shadow: none;
+  border-radius: 2px;
+}
+
+.md-typeset table:not([class]) {
+  border: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-footer {
+  box-shadow: none;
+}
+
+.md-footer-meta {
+  background-color: var(--md-primary-fg-color--dark);
+}
+
+/* ---------------------------------------------------------------------
+ * Left nav collapse: hide the primary (site-tree) sidebar at desktop
+ * widths, matching the reference's absence of a left nav rail. Global
+ * navigation is provided instead by the top tab bar (theme.features:
+ * navigation.tabs). The right-hand secondary sidebar (page-local table of
+ * contents) is left alone. 76.25em matches Material's own desktop
+ * breakpoint for this sidebar so the toggle lines up exactly with where
+ * Material would otherwise start laying the sidebar out as a flex column.
+ * ------------------------------------------------------------------- */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------
+ * Numbered figure captions (pymdownx.blocks.caption; see docs/README.md).
+ * The extension emits <span class="caption-prefix">Fig. N.</span> as the
+ * first child of the caption paragraph. It only inserts a separating space
+ * when the caption text begins with plain text, so a caption that opens
+ * with **bold** (most of ours do) would render "Fig. 2.LSU pipeline".
+ * Own the gap here rather than depending on the caption's first character.
+ * ------------------------------------------------------------------- */
+.md-typeset figure > figcaption {
+  margin: 0 auto;
+  max-width: 100%;
+  text-align: left;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .caption-prefix {
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+  margin-right: 0.35em;
+}
