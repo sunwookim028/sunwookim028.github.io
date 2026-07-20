@@ -10,25 +10,31 @@
       
       
       
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/spad.html">
       
+      
+        <link rel="prev" href="vpu.html">
+      
+      
+        <link rel="next" href="dmu.html">
       
       
         
       
       
-      <link rel="icon" href="/mininpu/assets/images/favicon.png">
+      <link rel="icon" href="../../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>mininpu documentation</title>
+        <title>SPAD - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="/mininpu/assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="/mininpu/assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -41,9 +47,9 @@
       
     
     
-      <link rel="stylesheet" href="/mininpu/stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("/mininpu/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -67,6 +73,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#spad-the-scratchpad-operand-tier" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -79,7 +90,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/mininpu/index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../../../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -99,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              SPAD
             
           </span>
         </div>
@@ -192,7 +203,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/mininpu/index.html" class="md-tabs__link">
+      <a href="../../../index.html" class="md-tabs__link">
         
   
   
@@ -209,6 +220,8 @@
   
   
   
+    
+  
   
     
     
@@ -216,11 +229,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="/mininpu/hardware/spec/isa.html" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../spec/isa.html" class="md-tabs__link">
           
   
   
@@ -241,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/mininpu/runtime.html" class="md-tabs__link">
+      <a href="../../../runtime.html" class="md-tabs__link">
         
   
   
@@ -260,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/mininpu/compiler/index.html" class="md-tabs__link">
+      <a href="../../../compiler/index.html" class="md-tabs__link">
         
   
   
@@ -281,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/mininpu/labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/index.html" class="md-tabs__link">
           
   
   
@@ -321,7 +336,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/mininpu/index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../../../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -339,7 +354,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/index.html" class="md-nav__link">
+      <a href="../../../index.html" class="md-nav__link">
         
   
   
@@ -363,26 +378,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -400,7 +420,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -424,17 +444,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
         
           
-          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
             
   
   
@@ -470,7 +493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/spec/isa.html" class="md-nav__link">
+      <a href="../../spec/isa.html" class="md-nav__link">
         
   
   
@@ -498,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/spec/abi.html" class="md-nav__link">
+      <a href="../../spec/abi.html" class="md-nav__link">
         
   
   
@@ -531,26 +554,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
             
   
   
@@ -568,7 +596,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -583,8 +611,10 @@
                 
   
   
+    
   
   
+  
     
     
     
@@ -595,11 +625,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
         
           
           <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
@@ -620,7 +650,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_2_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -638,7 +668,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/index.html" class="md-nav__link">
+      <a href="index.html" class="md-nav__link">
         
   
   
@@ -666,7 +696,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/sequencer.html" class="md-nav__link">
+      <a href="sequencer.html" class="md-nav__link">
         
   
   
@@ -694,7 +724,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/mxu.html" class="md-nav__link">
+      <a href="mxu.html" class="md-nav__link">
         
   
   
@@ -722,7 +752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/vpu.html" class="md-nav__link">
+      <a href="vpu.html" class="md-nav__link">
         
   
   
@@ -747,10 +777,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/spad.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPAD
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="spad.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -766,6 +823,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#role-in-the-datapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role in the datapath
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-and-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry and storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ports-and-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ports and clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-latency-and-the-fixed-latency-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access latency and the fixed-latency contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-lsu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The LSU
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rtl-realization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RTL realization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -778,7 +921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/dmu.html" class="md-nav__link">
+      <a href="dmu.html" class="md-nav__link">
         
   
   
@@ -806,7 +949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/compute_tile/gpt2_demo.html" class="md-nav__link">
+      <a href="gpt2_demo.html" class="md-nav__link">
         
   
   
@@ -842,7 +985,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/hardware/microarch/uncore.html" class="md-nav__link">
+      <a href="../uncore.html" class="md-nav__link">
         
   
   
@@ -885,7 +1028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/runtime.html" class="md-nav__link">
+      <a href="../../../runtime.html" class="md-nav__link">
         
   
   
@@ -912,7 +1055,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/compiler/index.html" class="md-nav__link">
+      <a href="../../../compiler/index.html" class="md-nav__link">
         
   
   
@@ -991,7 +1134,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/index.html" class="md-nav__link">
+      <a href="../../../labs/index.html" class="md-nav__link">
         
   
   
@@ -1019,7 +1162,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/introduction.html" class="md-nav__link">
+      <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
   
@@ -1047,7 +1190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab1-vpu.html" class="md-nav__link">
+      <a href="../../../labs/lab1-vpu.html" class="md-nav__link">
         
   
   
@@ -1075,7 +1218,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab2-systolic.html" class="md-nav__link">
+      <a href="../../../labs/lab2-systolic.html" class="md-nav__link">
         
   
   
@@ -1103,7 +1246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab3-dma.html" class="md-nav__link">
+      <a href="../../../labs/lab3-dma.html" class="md-nav__link">
         
   
   
@@ -1131,7 +1274,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab4-kernels.html" class="md-nav__link">
+      <a href="../../../labs/lab4-kernels.html" class="md-nav__link">
         
   
   
@@ -1159,7 +1302,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/mininpu/labs/lab5-serving.html" class="md-nav__link">
+      <a href="../../../labs/lab5-serving.html" class="md-nav__link">
         
   
   
@@ -1204,6 +1347,82 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#role-in-the-datapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role in the datapath
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geometry-and-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Geometry and storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ports-and-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ports and clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-latency-and-the-fixed-latency-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access latency and the fixed-latency contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-lsu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The LSU
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rtl-realization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RTL realization
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1216,8 +1435,104 @@
               
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+
+<h1 id="spad-the-scratchpad-operand-tier">SPAD: the scratchpad operand tier<a class="headerlink" href="#spad-the-scratchpad-operand-tier" title="Permanent link">&para;</a></h1>
+<p>The <strong>SPAD</strong> (<code>spad.sv</code>) is the compute tile's on-chip scratchpad: <strong>bf16</strong> operand memory
+in a separate, 0-based address space (like CUDA <code>.shared</code>), sitting between off-tile device
+memory and the fp32 compute-register tiers (VREG / ACC). It is the operand store the MXU
+reads weights from and the LSU moves rows to and from; the DMU fills and drains it in bulk.
+This page covers its role, geometry, ports and clients, the fixed-latency contract, and the
+<strong>LSU</strong> --- the SPAD ↔ VREG mover that lives on the SPAD side of the boundary.</p>
+<h2 id="role-in-the-datapath">Role in the datapath<a class="headerlink" href="#role-in-the-datapath" title="Permanent link">&para;</a></h2>
+<p>SPAD is the <strong>bf16 operand tier</strong>: weights and activations, plus the bf16 1D vectors
+(gamma / beta / bias) before they are lifted into VREG. It is a separate on-chip address
+space, not an fp32 view of shared SRAM. Its place in the spine (devmem → <strong>SPAD</strong> → VREG →
+ACC) is drawn on the <a href="index.html">compute-tile overview</a> (<code>a1-tile-structure</code>).</p>
+<h2 id="geometry-and-storage">Geometry and storage<a class="headerlink" href="#geometry-and-storage" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Geometry:</strong> 32 KiB = 1024 × 256-bit rows, <strong>8 banks</strong> (<code>bank = row mod 8</code>), <strong>bf16</strong> storage.</li>
+<li>Each row is the full 256-bit compute bus (8 × 32-bit lanes). Numbers are SSOT-owned (<code>npu_config_pkg.sv</code>, from <code>npu/params.py</code>).</li>
+</ul>
+<p><img alt="SPAD banking and port arbitration" src="../../../figures/tikz/a2-spad-ports.svg" /></p>
+<p><strong>Fig. A2. SPAD banking and port arbitration.</strong> 32 KiB over 8 banks (<code>bank = row mod 8</code>),
+bf16. Port A is the DMU; Port B is the compute-side client. Compute clients are
+fixed-latency and the DMU yields.</p>
+<!-- TODO(figure-content-fix): a2-spad-ports is drawn but content-stale. The current
+     RTL-checked asset is as-built-grounded: it draws an MXU-to-SPAD result-writeback path
+     and a live VPU SPAD port. Both are RTL-wiring facts, NOT 0.5.0-datapath facts (under
+     the 0.5.0 model the MXU drains to ACC and the VPU never touches SPAD). Redraw to the
+     0.5.0 model; until then the prose here does not repeat the figure's as-built framing. -->
+
+<p>Note: the <code>a2-spad-ports</code> figure is as-built-grounded and still draws an MXU-to-SPAD result
+writeback and a live VPU SPAD port; both are RTL-wiring artifacts, not the 0.5.0 datapath
+(where the MXU drains to ACC and the VPU reaches SPAD only through the LSU). The prose on
+this page follows the 0.5.0 model.</p>
+<h2 id="ports-and-clients">Ports and clients<a class="headerlink" href="#ports-and-clients" title="Permanent link">&para;</a></h2>
+<p>SPAD is a <strong>true dual-port</strong>, single-clock scratchpad. <strong>Port A</strong> is the DMU; <strong>Port B</strong>
+carries the compute clients. Under the 0.5.0 model the Port B clients are the <strong>LSU</strong> (which
+owns all SPAD ↔ VREG traffic) and the <strong>MXU</strong> (weight and bias reads); the <strong>VPU is not a
+Port B client</strong> --- it operates on VREG and ACC, and its SPAD-adjacent traffic is
+LSU-mediated. Compute clients get a fixed access latency; the DMU absorbs arbitration
+variability by yielding (it is async and <code>flush.slot</code>-gated), so compute never stalls on SPAD.</p>
+<p>The as-built RTL additionally splits Port B into <strong>port0</strong> (MXU / DMA / serialized VPU, high
+priority) and <strong>port1</strong> (a second, lower-priority VPU path that co-issues concurrently with
+an in-flight MXU tile, <code>#149</code>); the 0.5.0 model above, routing all SPAD ↔ VREG traffic
+through the LSU, supersedes this as-built VPU-on-Port-B wiring for this page's normative
+narrative. This caveat is the single home for the port0/port1 VPU-co-issue fact that
+<a href="dmu.html#s3">dmu.md</a> cross-references.</p>
+<h2 id="access-latency-and-the-fixed-latency-contract">Access latency and the fixed-latency contract<a class="headerlink" href="#access-latency-and-the-fixed-latency-contract" title="Permanent link">&para;</a></h2>
+<p>Compute clients (MXU weight/bias reads, the LSU) get a <strong>fixed</strong> SPAD access latency
+(<code>MEM_LATENCY = 2</code> cycles → about 3 cycles per row, registered BRAM output); bank conflicts
+among compute clients are <strong>compiler-avoided</strong> by static scheduling, exactly like VREG. The
+end-to-end reservation offsets that enter the compiler's reservation table are owned by the
+<a href="../../spec/isa.html#s5">ISA timing contract</a>; this page states only the per-access latency.</p>
+<h2 id="the-lsu">The LSU<a class="headerlink" href="#the-lsu" title="Permanent link">&para;</a></h2>
+<p>The <strong>LSU</strong> (load/store unit) is the SPAD ↔ VREG mover: it owns the <code>0x3_</code> register
+load/store ops --- <strong><code>acc.store</code></strong> (ACC → VREG, fp32), <strong><code>vreg.load</code></strong> (SPAD bf16 → VREG
+fp32, widen), and <strong><code>vreg.store</code></strong> (VREG fp32 → SPAD bf16, narrow) --- and it owns the
+bf16 ↔ fp32 casts on the SPAD side of the boundary. It is the mover, not the VPU: this
+resolves the register-load/store ownership question the VPU page cross-refs.</p>
+<p>One datapath serves all three ops identically. The <strong>fixed latency = ROWS +
+SPAD_RD_LATENCY</strong> (<code>8 + 2 = 10</code> cycles for a full tile-row op): a read is issued for
+tile-row <em>r</em> on cycle <em>r</em>, and the corresponding write commits <code>RL = SPAD_RD_LATENCY = 2</code>
+cycles later. The async ACC / VREG reads are pushed through an equal-depth (<code>RL</code>) shift
+register so all three ops share the same, data-independent timing --- safe for the
+scoreboard-free sequencer. The <code>8 + 2 = 10</code> value is symbolic/parametric (<code>ROWS = N</code>,
+<code>RL = MEM_LATENCY</code>), not a hardcoded constant.</p>
+<!-- TODO(figure-redraw): fig14_lsu_pipeline is reused as-is from origin/main. The HTML
+     asset predates the house-style TikZ stack; its content (the reservation table +
+     datapath timing) is correct, but a house-style TikZ redraw is deferred. -->
+<iframe src="../../../figures/fig14_lsu_pipeline.html" loading="lazy" title="FIG. 14 LSU 10-cycle pipeline" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px"></iframe>
+
+<p>FIG. 14 --- LSU pipeline, stage/latency view: FIXED LATENCY = ROWS + SPAD_RD_LATENCY =
+8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath,
+read tile-row <em>r</em> on cycle <em>r</em>, write <code>RL = 2</code> later, and own the bf16 ↔ fp32 casts.
+<a href="../../../figures/fig14_lsu_pipeline.html">open standalone</a></p>
+<h2 id="rtl-realization">RTL realization<a class="headerlink" href="#rtl-realization" title="Permanent link">&para;</a></h2>
+<p><code>spad.sv</code> wraps a <code>common/banked_sram</code> macro: <strong>8-bank true dual-port</strong>, Port A (DMU) and
+Port B (compute). Port B is presented as <code>port0</code> (high priority) and <code>port1</code> (a second,
+lower-priority master) via the per-bank grant arbiter (<code>comp_gnt</code> / <code>comp_conflict_bank_o</code>);
+a lower-priority master advances only on a granted cycle, which is the "compute fixed &gt; DMU
+yields" primitive. The tile module tree (<code>h-module-tree</code>) is on the
+<a href="../../../index.html">site map</a>.</p>
+<hr />
+<p>mininpu · SPAD · <a href="index.html">compute-tile overview</a> · <a href="../../../index.html">back to home</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1235,6 +1550,44 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="vpu.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: VPU">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                VPU
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="dmu.html" class="md-footer__link md-footer__link--next" aria-label="Next: DMU">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                DMU
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -1262,13 +1615,13 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "/mininpu/", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "/mininpu/assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
   
-      <script src="/mininpu/assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="/mininpu/javascripts/mathjax.js"></script>
+        <script src="../../../javascripts/mathjax.js"></script>
       
     
   <script

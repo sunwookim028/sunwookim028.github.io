@@ -1,0 +1,1797 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU device (architecture, host runtime) and its compute tile (ISA contract, microarchitecture, sequencer, MXU, VPU, DMU).">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/mxu.html">
+      
+      
+        <link rel="prev" href="sequencer.html">
+      
+      
+        <link rel="next" href="vpu.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>MXU - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mininpu-mxu-systolic-matrix-engine" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              MXU
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../spec/isa.html" class="md-tabs__link">
+          
+  
+  
+  Hardware
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../runtime.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Runtime
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../compiler/index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../labs/index.html" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architectural spec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architectural spec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../spec/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../spec/abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example microarchitecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Example microarchitecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="mxu.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-mxu-sits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the MXU sits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-systolic-array-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The systolic-array concept
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-worked-example-one-column-accumulates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A worked example --- one column accumulates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-systolic-wavefront-row-stagger-timing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The systolic wavefront --- row-stagger timing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inside-a-pe-the-multi-precision-mac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inside a PE --- the multi-precision MAC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tile-accumulator-the-mxus-second-fp32-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tile accumulator: the MXU's second FP32 stage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tile-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tile loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="spad.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gpt2_demo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GPT-2 demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uncore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../compiler/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#where-the-mxu-sits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the MXU sits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-systolic-array-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The systolic-array concept
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-worked-example-one-column-accumulates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A worked example --- one column accumulates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-systolic-wavefront-row-stagger-timing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The systolic wavefront --- row-stagger timing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inside-a-pe-the-multi-precision-mac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inside a PE --- the multi-precision MAC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tile-accumulator-the-mxus-second-fp32-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tile accumulator: the MXU's second FP32 stage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tile-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The tile loop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Source map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/mxu.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose was carried over; the former deck-bullet
+     "Slide summary" blocks were dropped in the docs restructure. Figures
+     are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-mxu-systolic-matrix-engine">mininpu: MXU: Systolic Matrix Engine<a class="headerlink" href="#mininpu-mxu-systolic-matrix-engine" title="Permanent link">&para;</a></h1>
+<p>The <strong>MXU</strong> is the matrix-multiply engine of the compute tile: an <strong>N×N weight-stationary systolic array</strong> of multiply-accumulate processing elements, wrapped by an FSM that streams operand tiles in and out of the scratchpad. It implements two ISA ops in the <code>0x0_</code> matmul group --- <code>mxu.load.w</code> (0x00), which loads an N× N weight tile into the next (inactive) weight buffer, and <code>mxu.matmul</code> (0x01), which implicitly switches the loaded weights to active, streams the activation tile through the array, and accumulates into the <strong>ACC</strong> register file. Each op runs the <code>DIM×DIM</code> tile loop internally so a kernel issues one <code>mxu.load.w</code> + <code>mxu.matmul</code> pair per weight tile. Splitting weight load from compute is what lets the compiler preload the <em>next</em> tile's weights while the current tile still computes (§ the tile loop). This document is the visual deep-dive; the exhaustive specifics (every FSM state, the synthesizable FP bit-arithmetic) live in the RTL.</p>
+<p><strong>Numbers are owned by config, not by this page.</strong> All sizes below are cited to <code>npu/src/npu/npu_config_pkg.sv</code> (the generated config package, itself derived from <code>npu/params.py</code>). For this build: <code>N = 8</code> ⇒ <strong>8×8 = 64 PEs</strong>, <code>MEM_LATENCY = 2</code>, <code>DATA_WIDTH = 32</code> (FP32 accumulate / psum bus), and storage width <code>STORAGE_WIDTH = 16</code> (BF16). Opcode semantics are cited to <code>mininpu/isa</code>.</p>
+<h2 id="where-the-mxu-sits">Where the MXU sits<a class="headerlink" href="#where-the-mxu-sits" title="Permanent link">&para;</a></h2>
+<p><img alt="mininpu MXU datapath" src="../../../figures/tikz/fig7-port.svg" /></p>
+<p><strong>Fig. 7. mininpu MXU datapath.</strong> Weight-stationary systolic array (RS-hybrid: W
+stationary, X row-streamed) · N=8 → 8×8 = 64 PE · bf16×bf16→fp32 MAC · ACC = 8
+per-column banks × depth 2 (fp32) · X streamed from VREG (cast at boundary, LOCKED) ·
+N=8 baseline; datapath parameterized (N=16 = ISA-invariant sweep).</p>
+<p>The MXU is one of two datapath engines inside the <strong>compute tile</strong> (the other is the <strong>VPU</strong>). The tile <strong>sequencer</strong> fetches an <code>mxu.load.w</code> / <code>mxu.matmul</code> pair from IRAM, latches the operand base addresses and the flag bits, then pulses <code>start</code>. Under the 0.5.0 model the MXU sources its <strong>weights from SPAD</strong> (<code>mxu.load.w</code>) and its <strong>X tile from VREG</strong> (burst-staged into <code>x_matrix</code>), pushes them through the array, captures the FP32 results into ACC, and pulses <code>done</code>. The tile result <strong>drains from ACC</strong> (via the LSU's <code>acc.store</code>); the MXU does not store results back to SPAD. The SPAD port structure it shares with the DMU is on <a href="spad.html">spad.md</a> (<code>a2-spad-ports</code>) --- note that figure is as-built-grounded and still draws an MXU-to-SPAD writeback path; that is an RTL-wiring artifact, not the 0.5.0 datapath this page documents.</p>
+<h2 id="the-systolic-array-concept">The systolic-array concept<a class="headerlink" href="#the-systolic-array-concept" title="Permanent link">&para;</a></h2>
+<p><img alt="mininpu MXU: the systolic array and one PE" src="../../../figures/tikz/mxu-array-pe.svg" /></p>
+<p><strong>Fig. A. mininpu MXU: the systolic array and one PE.</strong> Zoom hierarchy, one subject at
+two altitudes: the 8×8 = 64 PE weight-stationary array, and the inside of one of its
+PEs · X is burst-staged into <code>x_matrix</code> and streamed from there, never from VREG · the
+partial sum is injected as 0 at the north edge, not supplied from outside · the
+fp32 → bf16 cast of X sits at the array input, not inside the PE · one PE hop is
+<code>SKEW</code> = <code>PE_LATENCY</code>+1 = 3 cycles, equal W→E and N→S.</p>
+<p>A systolic array computes a matrix product by laying out a grid of identical multiply-accumulate cells (PEs) and letting operands <em>flow</em> through the grid in lockstep with the clock --- each PE does one multiply and one add per cycle, passing its inputs onward to its neighbours. No PE ever fetches from memory; the array is a pure dataflow pipeline fed at its edges. mininpu's array is <strong>weight-stationary</strong>: a tile of weights is loaded once and held in each PE, then a stream of activations marches across, accumulating partial sums as it goes.</p>
+<p>Concretely (from <code>npu/src/compute_tile/systolic.sv</code>): <strong>activations</strong> flow <strong>west → east</strong>, one stream per array row (<code>sys_data_in[r]</code>); <strong>weights</strong> and <strong>partial sums</strong> flow <strong>north → south</strong>, one column each (<code>sys_weight_in[c]</code>), with the bottom row driving the outputs; <strong>valid</strong> follows the activations west→east, <strong>accept_w</strong> is a per-column broadcast, and the <strong>switch</strong> propagates from <code>pe[0\]\[0]</code> rightward along row 0, then south down each column.</p>
+<h2 id="a-worked-example-one-column-accumulates">A worked example --- one column accumulates<a class="headerlink" href="#a-worked-example-one-column-accumulates" title="Permanent link">&para;</a></h2>
+<p><img alt="Tracing one mxu.matmul" src="../../../figures/tikz/b-matmul-trace.svg" /></p>
+<p><strong>Fig. B. Tracing one <code>mxu.matmul</code>.</strong> The route of a single <code>mxu.matmul</code> across the
+compute tile · everything off the route is receded · X is BURST-read (N=8 rows,
+1 row/cycle) into <code>x_matrix</code>; VREG is then not read again for the rest of the matmul.</p>
+<p>To make the dataflow concrete, take a single column of the array as a dot-product reducer. Each PE holds one weight w; the activation x passing through it is multiplied, and the incoming partial sum from the PE above (<code>psum_in</code>) is added: codepsum_out = w· x + codepsum_in. The top PE starts from codepsum_in = 0, so by the time the value reaches the bottom of the column it is the full dot product of that column's weights with the activation vector. In the figure, column 0 holds weights <code>0.5</code>,<code>0.25</code>,<code>-0.5</code> and the activations are <code>1.0</code>,<code>2.0</code>,<code>1.0</code>, so the partial sums step <code>0.5</code>→<code>1.0</code>→<code>0.5</code> … rolling up to the FP32 result. Every multiply widens to an FP32 product and every add is FP32, so a long reduction chain never loses dynamic range. The same thing happens in all <code>N</code> columns simultaneously, one cycle apart --- that is the systolic wavefront shown next.</p>
+<h2 id="the-systolic-wavefront-row-stagger-timing">The systolic wavefront --- row-stagger timing<a class="headerlink" href="#the-systolic-wavefront-row-stagger-timing" title="Permanent link">&para;</a></h2>
+<p><img alt="MXU controller FSM" src="../../../figures/tikz/d-mxu-fsm.svg" /></p>
+<p><strong>Fig. D1. MXU controller FSM.</strong> <code>mxu.sv:213-231</code> declares <strong>17</strong> enum ordinals;
+<strong>14</strong> are reachable and <strong>3</strong> are dead. One op in flight on the main track, plus one
+concurrent weight-preload sub-FSM. Every state also names what it does on its own
+second line.</p>
+<!-- TODO(caption): `a2-acc-banks` has no CAPTIONS.md entry. Caption authored from the
+     figure + mxu_accumulator.sv, not lifted verbatim from the SSOT; needs an owner read. -->
+<p><img alt="Accumulator bank structure and read-bank select" src="../../../figures/tikz/a2-acc-banks.svg" /></p>
+<p><strong>Fig. A3. Accumulator bank structure and read-bank select.</strong> ACC is 8 per-column
+banks of fp32, depth 2. The read-bank select is registered (#260) to close the
+200 MHz path.</p>
+<p>The word "systolic" refers to the staggered timing. Activations are not injected into every row on the same cycle; row r starts one cycle after row r-1. This row-stagger means a given activation reaches PE (r,c) exactly when the partial sum descending column c reaches the same cell --- multiply and accumulate line up without any PE waiting on memory. The result is a <strong>diagonal wavefront</strong>: at cycle t, the active PEs are those on the anti-diagonal r + c = t. PE (0,0) fires first; PE (codeN-1,codeN-1) fires last, 2(codeN-1) cycles later. The bottom-row outputs therefore stream out column-by-column rather than all at once, which is why the controller's <code>S_CAPTURE</code> state collects each column's result as its valid fires. The controller paces the whole run for <code>5N + PE_LAT</code> phases (see the tile-loop table).</p>
+<details class="note">
+<summary>Deeper dive: the systolic-pipeline timing pitfall</summary>
+<p>From the RTL pitfall taxonomy. <strong>Systolic pipeline timing:</strong> the row-stagger and the
+per-PE <code>valid</code> delay must match across the whole PE array --- an activation and its
+descending partial sum have to arrive at each cell on the same cycle, so any mismatch
+between the injection stagger and the pipeline latency corrupts the wavefront silently
+(no assertion fires; the numbers are just wrong). Capture-valid is delayed one cycle to
+compensate for <code>pe_valid_out</code> leading <code>pe_psum_out</code>. The class lives in the taxonomy on
+the <a href="index.html">compute-tile overview</a>; the exact warning is an inline comment in
+<code>systolic.sv</code> / <code>pe.sv</code>.</p>
+</details>
+<h2 id="inside-a-pe-the-multi-precision-mac">Inside a PE --- the multi-precision MAC<a class="headerlink" href="#inside-a-pe-the-multi-precision-mac" title="Permanent link">&para;</a></h2>
+<p>Each PE (<code>npu/src/compute_tile/pe.sv</code>) is a single multiply-accumulate cell with two weight registers, an <strong>active</strong> and a <strong>next (inactive)</strong> buffer. <code>mxu.load.w</code> streams a weight tile into the inactive buffer with no compute and no switch; the subsequent <code>mxu.matmul</code> implicitly promotes it (the <code>switch</code> signal swaps active/inactive in one cycle) and streams activations. Because the two buffers are disjoint, the <em>next</em> tile's <code>mxu.load.w</code> can run concurrently with the current tile's <code>mxu.matmul</code> compute --- this is the ISA-level cross-tile weight preload (§ the tile loop). The arithmetic is two stages: a <strong>storage-format multiplier</strong> feeds an <strong>FP32 accumulator</strong>.</p>
+<p>The west activation and the active weight register multiply (<code>bf16_mul_fp32</code>, combinational) into an FP32 product, which latches in <code>mult_out_reg</code> --- the explicit pipeline register that cuts the DSP→CARRY8 path. <code>fp_add</code> then adds the FP32 <code>psum_in</code> arriving from the north; the FP32 <code>mac_out</code> becomes the <code>psum_out</code> driven south to the PE below. The activation passes through east; weights also forward south.</p>
+<p>The multiplier widens the low-precision operands directly into a <strong>FP32 product</strong>, and accumulation is always FP32 (<code>ACCUM_WIDTH = 32</code>, cited <code>npu_config_pkg.sv</code>). That is the standard "low-precision-multiply / wide-accumulate" shape: it keeps the dynamic range of long reduction chains without paying for FP32 multipliers. In v1 the storage dtype is hardwired BF16 (multiply) with FP32 accumulate; the runtime dtype field is removed from the v1 encoding, so <code>flags[7:6]</code> is now <strong>reserved (must be zero)</strong>, parked and re-claimable without a reformat (e.g. a future fp8 dtype) (cited <code>mininpu/isa</code>). One DSP48E2 maps per PE on FPGA. The multiplier is combinational and <code>fp_add</code> contributes <code>PE_LATENCY</code> stages; with <code>PE_LATENCY = 0</code> the controller budgets <code>PE_LAT = 2·PE_LATENCY + 1 = 1</code> extra cycle for the explicit <code>mult_out_reg</code> register. <code>pe_valid_out</code> is one cycle ahead of <code>pe_psum_out</code> by design; the controller delays its capture-valid by one cycle to compensate.</p>
+<p><strong>Table: PE two-stage arithmetic: BF16 storage multiply widens to FP32; accumulation is always FP32. v1 <code>STORAGE_FORMAT = BF16</code>, <code>ACCUM_FORMAT = FP32</code>.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Stage</strong></th>
+<th><strong>Result</strong></th>
+<th><strong>Module (v1, <code>STORAGE_FORMAT = BF16</code>)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multiply</td>
+<td>STORAGE × STORAGE → FP32 product</td>
+<td><code>bf16_mul_fp32</code></td>
+</tr>
+<tr>
+<td>accumulate</td>
+<td>product + incoming psum → FP32 MAC</td>
+<td><code>fp_add</code> at <code>ACCUM_FORMAT = "FP32"</code></td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Deeper dive: <code>PE_LATENCY</code> drives the FSM wait states</summary>
+<p>From the RTL pitfall taxonomy. <strong>Fixed- vs floating-point latency:</strong> the PE MAC latency
+is not a constant --- the combinational multiplier plus the registered <code>fp_add</code> give a
+<code>PE_LATENCY</code> that the controller must budget into its wait states (<code>PE_LAT =
+2*PE_LATENCY + 1</code>). The <code>LATENCY</code> / <code>PE_LATENCY</code> parameters drive the FSM's phase
+counts; changing the FP pipeline depth (e.g. to close 200 MHz) shifts the capture
+window, so sim and synth must agree on the value. The class is in the taxonomy on the
+<a href="index.html">compute-tile overview</a>.</p>
+</details>
+<h2 id="the-tile-accumulator-the-mxus-second-fp32-stage">The tile accumulator: the MXU's second FP32 stage<a class="headerlink" href="#the-tile-accumulator-the-mxus-second-fp32-stage" title="Permanent link">&para;</a></h2>
+<p>Multiplication is BF16, but every accumulate in the MXU is FP32, and there are two of them. The <strong>first</strong> is intrinsic to the array: each PE widens its BF16×BF16 product to an FP32 product and adds the FP32 <code>psum_in</code> descending its column (the <code>fp_add</code> at <code>npu/src/compute_tile/pe.sv</code> lines 97--109), so the dot product reduces in FP32 down each column. The <strong>second</strong> is the <strong>tile accumulator</strong>: the FP32 stage that receives the whole tile's captured result and adds it onto the tile already sitting in the scratchpad when the <code>accumulate</code> flag is set. It is what lets a K-loop sum partial tiles into one output without ever leaving FP32.</p>
+<p>In the RTL today the tile accumulator lives <em>inline</em> in <code>npu/src/compute_tile/mxu.sv</code> (lines 69--90): the captured systolic result in <code>out_matrix</code>, the prior ACC tile prefetched into <code>acc_buf</code> (the <code>S_LOAD_ACC</code> phase), and the per-element <code>ACC_ADD</code> generate array of <code>fp_add</code> units at <code>ACCUM_FORMAT</code> that forms <code>acc_sum = acc_buf + out_matrix</code>. This tile accumulator is one of the system's <strong>two FP32 domains</strong>; the other is the entire VPU (see the VPU doc). Together they are why a long GPT-2 GEMM K-loop keeps its dynamic range.</p>
+<p><strong>A clean extraction candidate.</strong> The tile accumulator is self-contained (<code>out_matrix</code>, <code>acc_buf</code>, the <code>ACC_ADD</code> array, and the causal/accumulate fold), so it is a clean, behavior-preserving candidate for lifting into a named <code>mxu_accumulator</code> submodule: a future DV-gated <code>refactor(rtl,mxu)</code> that would not change a single output bit. The per-PE psum accumulator, by contrast, <em>cannot</em> be lifted out: it is intrinsic to the systolic array, physically distributed one <code>fp_add</code> per PE and wired into the north-south psum chain.</p>
+<p><strong>Table: The MXU's two FP32 accumulate points. Multiply is BF16; both accumulates are FP32 (<code>ACCUM_FORMAT = FP32</code>). Only the tile accumulator is a submodule-extraction candidate.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Accumulate</strong></th>
+<th><strong>What / where</strong></th>
+<th><strong>Extractable?</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Per-PE psum</td>
+<td>FP32 dot-product reduction down each column, one <code>fp_add</code> per PE (<code>pe.sv</code> 97--109)</td>
+<td>No: intrinsic to the array</td>
+</tr>
+<tr>
+<td>Tile accumulator</td>
+<td>FP32 fold of the captured tile onto the prior ACC tile; <code>out_matrix</code> + <code>acc_buf</code> + <code>ACC_ADD</code> <code>fp_add</code> array, inline in <code>mxu.sv</code> 69--90</td>
+<td>Yes: clean <code>mxu_accumulator</code> candidate</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-tile-loop">The tile loop<a class="headerlink" href="#the-tile-loop" title="Permanent link">&para;</a></h2>
+<p>The <code>0x0_</code> matmul group hides the <code>DIM×DIM</code> tile loop: hardware "implements the DIM×DIM tile loop internally" so arbitrary M×K and K×N products are decomposed into array-sized tiles by the controller, not by the kernel (cited <code>mininpu/isa</code>). At the ISA level the tile splits across two instructions: <code>mxu.load.w</code> loads the N weight rows (from SPAD) into the inactive weight buffer (its own opcode, no compute, no switch), and <code>mxu.matmul</code> implicitly switches, streams the N activation rows (X, sourced from VREG), and accumulates into ACC --- the result stays in ACC and drains via the LSU, with no store-back to SPAD. This split is what makes <em>cross-tile</em> weight preload real at the ISA level: the next tile's <code>mxu.load.w</code> is overlap-capable with the current <code>mxu.matmul</code> (§ the double-buffer schedule below). The FSM-phase table below traces one tile end-to-end; in the current RTL the weight-load phase is still folded into the single controller pass, so this ISA-level split is the ratified design and its exact RTL realization (a distinct <code>mxu.load.w</code> dispatch) is tracked separately. Each SPAD read is paced by <code>MEM_LATENCY = 2</code> cycles:</p>
+<p><strong>Table: MXU controller FSM phases for one matmul tile (<code>mxu.load.w</code> + <code>mxu.matmul</code>). Each SPAD read is paced by <code>MEM_LATENCY</code> cycles.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Phase</strong></th>
+<th><strong>FSM states</strong></th>
+<th><strong>What happens</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Load W (<code>mxu.load.w</code>)</td>
+<td><code>S_LOAD_W_REQ,WAIT</code></td>
+<td>Read N weight rows into the inactive weight buffer. <code>trans_b</code> reverses the row-fetch order. Its own ISA op; overlap-capable with the prior tile's compute.</td>
+</tr>
+<tr>
+<td>Load ACC</td>
+<td><code>S_LOAD_ACC{,_WAIT}</code></td>
+<td>If <code>accum</code>, prefetch the N output rows (fp32) from ACC into <code>acc_buf</code> so results add onto them.</td>
+</tr>
+<tr>
+<td>Load X</td>
+<td><code>S_LOAD_X_REQ,WAIT</code></td>
+<td>Burst-read N activation rows (X, from VREG) into <code>x_matrix</code>.</td>
+</tr>
+<tr>
+<td>Run</td>
+<td><code>S_RUN</code></td>
+<td>Stream weights into the array (reverse order so the switch lands each weight in its PE), fire <code>switch</code> at phase <code>2N-1</code>, then stagger the X rows in. Runs <code>5N + PE_LAT</code> phases.</td>
+</tr>
+<tr>
+<td>Capture</td>
+<td><code>S_CAPTURE</code></td>
+<td>Collect FP32 outputs from the bottom row as each column's valid fires, into <code>out_matrix</code>.</td>
+</tr>
+<tr>
+<td>Causal / accum.</td>
+<td><code>S_CAUSAL{,_WAIT}</code></td>
+<td>If <code>causal</code>, mask the upper triangle to <code>-INF</code> (<code>0xFF800000</code>); fold in the accumulate sum. The result stays in ACC; <code>S_DONE</code> pulses <code>done</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>mxu.sv</code> enum still declares SPAD-store states (<code>S_STORE_REQ/WAIT</code>) from an earlier design that wrote the tile result back to SPAD; they are among the dead ordinals (<code>d-mxu-fsm</code> above) and are unreachable in the current control path, so they are not documented here as a live phase.</p>
+<p>The flag bits are split across the two ops (cited <code>mininpu/isa</code>): on <code>mxu.load.w</code>, <code>flags[0] = transB</code> (reverse the weight-row fetch); on <code>mxu.matmul</code>, <code>flags[0] = accum</code> (fold onto the prior ACC tile) and <code>flags[1] = causal</code> (mask the upper triangle). The dtype field <code>flags[7:6]</code> is reserved-must-be-zero in v1 (BF16 is hardwired). The matrix-level meaning --- <code>acc_dst = (accum ? acc_dst : 0) + spm_x @ (transB ? spm_w^{}T : spm_w)</code>, with the post-multiply causal mask --- is specified normatively in <code>mininpu/isa</code>; this page does not restate it.</p>
+<p><strong>Double-buffer schedule.</strong> A K-loop issues <code>load.w W0; matmul X0; load.w W1; matmul X1 (accum); ...</code>: each <code>load.w W(k+1)</code>, issued after <code>matmul Xk</code>'s switch, runs concurrently with the <code>Xk</code> compute because the active and inactive weight buffers are disjoint. This is real v1 overlap defined by nonblocking instruction semantics (<code>mxu.load.w</code> and <code>mxu.matmul</code> are both nonblocking; see the compute-tile concurrency model), not a hardware-opportunistic reorder.</p>
+<p><strong>Operand layout in SPAD.</strong> The controller addresses three N-row regions in the scratchpad: weight rows and activation rows are bf16 (<code>STORAGE_WIDTH = 16</code>), output rows are fp32; each SPAD row is the full <code>SPAD_DATA_WIDTH = 256</code>-bit bus (8 × <code>DATA_WIDTH</code>). Base addresses arrive as <code>base_addr_w / base_addr_x / base_addr_out</code>, latched on <code>start</code>.</p>
+<h2 id="source-map">Source map<a class="headerlink" href="#source-map" title="Permanent link">&para;</a></h2>
+<p>The MXU spans three RTL files plus the two SSOT sources for its constants and semantics:</p>
+<p><strong>Table: MXU source files and their roles. Sizes, widths, and formats are owned by <code>npu_config_pkg.sv</code>; opcode semantics by <code>mininpu/isa</code>.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>File</strong></th>
+<th><strong>Role</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npu/src/compute_tile/mxu.sv</code></td>
+<td>Controller: 14-state load/run/capture/store FSM, SPAD addressing, <code>trans_b</code>/<code>accumulate</code>/<code>causal</code> handling, array glue.</td>
+</tr>
+<tr>
+<td><code>npu/src/compute_tile/systolic.sv</code></td>
+<td>The <code>DIM×DIM</code> (<code>= N</code>) PE grid: edge wiring, activation/weight/psum/switch routing, bottom-row output packing.</td>
+</tr>
+<tr>
+<td><code>npu/src/compute_tile/pe.sv</code></td>
+<td>Single PE: multi-precision multiplier + FP32 accumulate, double-buffered weight registers, control delay lines.</td>
+</tr>
+<tr>
+<td><code>npu/src/npu/npu_config_pkg.sv</code></td>
+<td>Config SSOT: <code>N</code>, <code>MEM_LATENCY</code>, <code>DATA_WIDTH</code>, <code>PE_LATENCY</code>, <code>STORAGE_/ACCUM_FORMAT</code> (generated from <code>npu/params.py</code>).</td>
+</tr>
+<tr>
+<td><code>mininpu/isa</code></td>
+<td>ISA SSOT: <code>mxu.load.w</code> (0x00) + <code>mxu.matmul</code> (0x01) semantics + flag bits (<code>flags[7:6]</code> reserved-must-be-zero, BF16 hardwired in v1).</td>
+</tr>
+</tbody>
+</table>
+<p>See also: <a href="index.html">compute-tile overview</a> (the tile that hosts the MXU + VPU), <a href="vpu.html">VPU</a> (the vector engine), and <a href="../uncore.html">uncore</a> (device-level composition). RTL specifics live in <code>npu/src/compute_tile/{mxu,systolic,pe}.sv</code>.</p>
+<p><strong>Workload note.</strong> GPT-2 BF16 forward-pass GEMMs are the v1 worked example that exercises this engine, not the MXU's definition. FPGA is the test platform.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="sequencer.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Sequencer">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Sequencer
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="vpu.html" class="md-footer__link md-footer__link--next" aria-label="Next: VPU">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                VPU
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>

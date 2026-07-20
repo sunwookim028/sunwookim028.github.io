@@ -1,0 +1,2298 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU device (architecture, host runtime) and its compute tile (ISA contract, microarchitecture, sequencer, MXU, VPU, DMU).">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/vpu.html">
+      
+      
+        <link rel="prev" href="mxu.html">
+      
+      
+        <link rel="next" href="spad.html">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>VPU - mininpu documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#mininpu-vpu-vector-processing-unit-microarchitecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              VPU
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../spec/isa.html" class="md-tabs__link">
+          
+  
+  
+  Hardware
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../runtime.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Runtime
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../compiler/index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../labs/index.html" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Hardware
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Hardware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architectural spec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architectural spec
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../spec/isa.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ISA
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../spec/abi.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ABI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Example microarchitecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Example microarchitecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute tile
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="sequencer.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="mxu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MXU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="vpu.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VPU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-placement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview &amp; placement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handshake-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handshake contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vector-register-file-vec_regfilesv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector register file: vec_regfile.sv
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-8-lane-datapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 8-lane datapath
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fp-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FP primitives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-one-big-fsm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not one big FSM?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-5-states-conceptual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 5 states (conceptual)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instruction-classes-pipeline-timing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction classes &amp; pipeline timing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reduction-tree-fp_reduce_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reduction tree: fp_reduce_tree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-rowmax-then-rowsum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example: rowmax then rowsum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#isa-opcode-table-vpu-handled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ISA opcode table (VPU-handled)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametrization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parametrization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#precision-why-the-vpu-stays-fp32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precision: why the VPU stays FP32
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-add-a-new-vpu-opcode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to add a new VPU opcode
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="spad.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="dmu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DMU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gpt2_demo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GPT-2 demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../uncore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../compiler/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Labs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Labs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/introduction.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 0: Course Introduction and Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab1-vpu.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 1: The Vector Processing Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab2-systolic.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 2: The Matrix Unit
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab3-dma.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 3: The Data-Movement Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab4-kernels.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 4: Writing Kernels with Triton
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../labs/lab5-serving.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 5: Serving: Key-Value Cache Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-placement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview &amp; placement
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handshake-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handshake contract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vector-register-file-vec_regfilesv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vector register file: vec_regfile.sv
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-8-lane-datapath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 8-lane datapath
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fp-primitives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FP primitives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-one-big-fsm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not one big FSM?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-5-states-conceptual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 5 states (conceptual)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instruction-classes-pipeline-timing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instruction classes &amp; pipeline timing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reduction-tree-fp_reduce_tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reduction tree: fp_reduce_tree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-example-rowmax-then-rowsum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked example: rowmax then rowsum
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#isa-opcode-table-vpu-handled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ISA opcode table (VPU-handled)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametrization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parametrization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#precision-why-the-vpu-stays-fp32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Precision: why the VPU stays FP32
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-add-a-new-vpu-opcode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to add a new VPU opcode
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- History: this page was migrated from the former LaTeX source
+     docs/src/content/vpu.tex, which built a handout PDF and a slide
+     deck. Both outputs, and the LaTeX source, are deleted: docs/ is mkdocs
+     only. The article prose was carried over; the former deck-bullet
+     "Slide summary" blocks were dropped in the docs restructure. Figures
+     are committed SVGs under docs/mkdocs/figures/tikz/. -->
+<h1 id="mininpu-vpu-vector-processing-unit-microarchitecture">mininpu VPU: Vector Processing Unit Microarchitecture<a class="headerlink" href="#mininpu-vpu-vector-processing-unit-microarchitecture" title="Permanent link">&para;</a></h1>
+<p>The <strong>VPU</strong> is the SIMD vector engine of the compute tile: an 8-lane FP32 datapath with horizontal reductions, BRAM-LUT non-linear functions, and BF16/FP32 casts. It is the workhorse for everything in the GPT-2 forward pass that is <em>not</em> a matrix multiply: RMSNorm, softmax, residual adds, LayerNorm, and GELU activation. This document is the visual deep-dive; the exhaustive specifics (every FSM state, transition, and counter terminal) live in the RTL.</p>
+<p><strong>Source of truth:</strong> <code>npu/src/compute_tile/vpu_ctrl.sv</code>, <code>npu/src/compute_tile/vec_regfile.sv</code>, <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, <code>npu/src/compute_tile/fpu/fp_*.sv</code>, <code>npu/src/npu/npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). Describes the post-refactor counter-based VPU (<code>vpu_ctrl</code> extracted from <code>sequencer.sv</code>).</p>
+<h2 id="overview-placement">Overview &amp; placement<a class="headerlink" href="#overview-placement" title="Permanent link">&para;</a></h2>
+<p>The VPU's place in the tile is drawn on the <a href="index.html">compute-tile overview</a>
+(<code>a1-tile-structure</code>).</p>
+<p>The VPU performs 8-lane FP32 element-wise arithmetic, horizontal reductions, non-linear functions (exp2, reciprocal, rsqrt), and BF16↔FP32 casts. In the GPT-2 forward pass it covers RMSNorm, softmax (base-2 online), residual adds, LayerNorm, and GELU activation.</p>
+<p>The VPU lives entirely inside <code>vpu_ctrl.sv</code>, which owns the 8-lane datapath, the non-linear BRAM lookup units, the two reduction trees, and the vector register file (<code>vec_regfile</code>). It is driven by the tile <strong>sequencer</strong> (<code>sequencer.sv</code>) over a simple start/done handshake. When busy it <em>owns scratchpad BRAM Port B</em> (the same wide 256-bit port the DMA/MXU use) and streams ACC/SPM tile rows through its datapath, writing results back to ACC rows or to its own vector register file. An external async VREG read port (<code>vreg_rd_addr_ext</code>/<code>vreg_rd_data_ext</code>) is exposed by <code>vpu_ctrl</code> to sibling engines for future use while the VPU is idle.</p>
+<h2 id="handshake-contract">Handshake contract<a class="headerlink" href="#handshake-contract" title="Permanent link">&para;</a></h2>
+<p><strong>Table: VPU start/done handshake signals and their contract.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Signal</strong></th>
+<th><strong>Dir</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start</code></td>
+<td>in</td>
+<td>1-cycle pulse. All <code>vpu_*</code> operand inputs must be stable on this cycle (the sequencer pre-fetches any literal-pool immediates before pulsing).</td>
+</tr>
+<tr>
+<td><code>done</code></td>
+<td>out</td>
+<td>1-cycle pulse. BRAM Port B is released after this cycle; sequencer's <code>VEC_WAIT_VPU</code> state returns to fetch.</td>
+</tr>
+<tr>
+<td><code>bram_active</code></td>
+<td>out</td>
+<td>High while <code>vpu_ctrl</code> holds scratchpad BRAM Port B (i.e. <code>vpu_state != VPU_IDLE</code>). The sequencer must not assert <code>start</code> while this is high.</td>
+</tr>
+<tr>
+<td><code>vreg_rd_addr_ext</code> / <code>vreg_rd_data_ext</code></td>
+<td>in/out</td>
+<td>An external async combinational VREG read exposed by <code>vpu_ctrl</code> to sibling engines while the VPU is idle.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vector-register-file-vec_regfilesv">Vector register file: <code>vec_regfile.sv</code><a class="headerlink" href="#vector-register-file-vec_regfilesv" title="Permanent link">&para;</a></h2>
+<!-- TODO(figure): a2-vreg-ports is Decision-B-blocked (only .tex, no .svg by deliberate
+     choice, since Decision B may overturn its premise); no figure ships here. -->
+
+<p><code>vec_regfile.sv</code>: <strong>32 registers V0--V31</strong>, each <strong>8 lanes × FP32 = 256 bits</strong>.</p>
+<p><strong>Table: Vector register file (<code>vec_regfile.sv</code>) parameters as built (RTL is authoritative).</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Registers</td>
+<td>32 (<code>NUM_REGS=32</code>), addressed by a 5-bit index</td>
+</tr>
+<tr>
+<td>Lanes / register</td>
+<td>8 (<code>NUM_ELEMS = BANKING = 8</code>)</td>
+</tr>
+<tr>
+<td>Element width</td>
+<td>32 bits (<code>ELEM_WIDTH=32</code>, FP32)</td>
+</tr>
+<tr>
+<td>Register width</td>
+<td>256 bits</td>
+</tr>
+<tr>
+<td>Total size</td>
+<td>32 × 256 b = 8192 b = 1024 B</td>
+</tr>
+<tr>
+<td>Read ports</td>
+<td>2, both <strong>asynchronous</strong> (combinational): A (<code>rd_addr_a</code>), B (<code>rd_addr_b</code>)</td>
+</tr>
+<tr>
+<td>Write port</td>
+<td>1, <strong>synchronous</strong> (registered, on <code>wr_en</code>)</td>
+</tr>
+<tr>
+<td>Reset</td>
+<td>All registers cleared to zero</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Port A / Port B</strong>: the two async operand reads (<code>rd_addr_a</code> / <code>rd_addr_b</code>) used by all VREG-to-VREG ops (e.g. <code>fma</code> reads A=src, B=multiplicand; <code>sub.vreg</code> reads A-B). The RF is a <strong>2r1w</strong> file (2 read, 1 write), matching <code>vec_regfile.sv</code> and the <code>vpu-datapath</code> figure. The external async read <code>vpu_ctrl</code> exposes to sibling engines (<code>vreg_rd_addr_ext</code>) muxes onto this read structure while the VPU is idle; it is not a third RF port.</li>
+</ul>
+<p>Note: the GLOSSARY's "tutorial" framing says 16 elements/register; the <em>implemented</em> RTL is parameterized at <code>BANKING=8</code> lanes, so a register is 8×FP32. The text above reflects the RTL as built.</p>
+<p>Register-to-SPAD movement (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) is <strong>not</strong> VPU-owned: it is dispatched to the <strong>LSU</strong>, the SPAD-VREG mover (see <a href="spad.html#the-lsu">spad.md :: The LSU</a>).</p>
+<h2 id="the-8-lane-datapath">The 8-lane datapath<a class="headerlink" href="#the-8-lane-datapath" title="Permanent link">&para;</a></h2>
+<!-- TODO(figure): `vpu-datapath` ships as a frozen legacy-style SVG (its TikZ source was
+     retired with the legacy figure style; git history is the backup) and wants a house-style
+     redraw. It is no longer factually stale: the 8-register vec_regfile
+     was corrected to 32 in the image (vec_regfile.sv:11 NUM_REGS = 32, :19 index [4:0]), so
+     the caption no longer has to argue with the drawing. The old caption also called the
+     figure's "per-op latencies" stale, but the figure draws no latency numbers at all --
+     that complaint described ink that does not exist and is dropped. Redraw in the house
+     style FROM RTL. -->
+<p><img alt="VPU lane datapath" src="../../../figures/tikz/vpu-datapath.svg" /></p>
+<p><strong>Fig. A4. VPU lane datapath.</strong> A 256-bit row fans into 8 FP32 lanes (per-lane
+<code>fp_add</code> / <code>fp_mul</code> / <code>fp_max</code>); <code>rowsum</code> / <code>rowmax</code> use two <code>fp_reduce_tree</code>
+(<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. Results write to <code>vec_regfile</code>
+(<code>NUM_REGS = 32</code>) or back to an ACC row.</p>
+<p>One zoom level in: the structure inside <code>vpu_ctrl</code>. A 256-bit ACC/SPM row unpacks into <strong>8 FP32 lanes</strong> (<code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH = 256/32 = 8</code>). Each lane owns its own ALU primitives (<code>fp_add</code>, <code>fp_mul</code>, <code>fp_max</code>). Two horizontal paths fan the 8 lanes into a scalar: an <strong>ADD reduction tree</strong> (<code>rowsum</code>) and a <strong>MAX reduction tree</strong> (<code>rowmax</code>). Three shared <strong>BRAM-LUT non-linear units</strong> (<code>exp2</code> / <code>recip</code> / <code>rsqrt</code>) serve the transcendental paths (softmax, GELU, RMSNorm). Results land in the <strong>vector register file</strong> (32 registers V0--V31, each 8×FP32) or back to an ACC row. The ACC tile in scratchpad is shared with the MXU.</p>
+<p>Every lane is built from synthesisable behavioral IEEE-754 FP32 primitives (the cvfpu/fpnew submodule was fully removed; these models map to LUTs/DSP48E2 at synthesis and to DPI-C in Verilator sim). The primitive files and modules were historically named <code>fp32_*</code>; both the files <em>and</em> the modules are now <code>fp_*</code> (e.g. <code>fp_add</code>, <code>fp_mul</code>), under <code>npu/src/compute_tile/fpu/</code>.</p>
+<h2 id="fp-primitives">FP primitives<a class="headerlink" href="#fp-primitives" title="Permanent link">&para;</a></h2>
+<p><strong>Table: FP primitive modules used by the VPU, their latency, and their role in the datapath.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Primitive</strong></th>
+<th><strong>Latency</strong></th>
+<th><strong>Notes</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fp_add</code> (<code>fp_add.sv</code>)</td>
+<td>0 or 1 cycle (<code>LATENCY</code> param)</td>
+<td>IEEE-754 add. <code>LATENCY=0</code> = fully combinational. <code>LATENCY=1</code> = 2-stage pipeline (see below). The VPU instantiates every adder at <code>LATENCY=1</code>.</td>
+</tr>
+<tr>
+<td><code>fp_mul</code> (<code>fp_mul.sv</code>)</td>
+<td>combinational</td>
+<td>IEEE-754 multiply; Vivado infers a DSP48E2 for the 24×24 mantissa product. <code>LATENCY</code> is ignored (always combinational; the FSM provides settling time).</td>
+</tr>
+<tr>
+<td><code>fp_max</code> (<code>fp_max.sv</code>)</td>
+<td>combinational</td>
+<td>IEEE-754-2008 <code>maxNum</code> (NaN-quieting, +0 &gt; -0). Used by the MAX reduction tree (<code>vpu.rowmax</code>).</td>
+</tr>
+<tr>
+<td><code>fp_exp2_bram</code> (<code>fp_exp2_bram.sv</code>)</td>
+<td>registered BRAM LUT</td>
+<td>1024-entry × 23-bit ROM for 2^x. Backs <code>vpu.exp2</code> (softmax) and the <code>vpu.gelu</code> GELU approximation path. The VPU FSM allows the full multi-stage settling window (see Sec. the referenced figure).</td>
+</tr>
+<tr>
+<td><code>fp_recip_bram</code> (<code>fp_recip_bram.sv</code>)</td>
+<td>1-cycle registered BRAM LUT</td>
+<td>1/x. Backs <code>vpu.div.bcast</code> (softmax denominator).</td>
+</tr>
+<tr>
+<td><code>fp_rsqrt_bram</code> (<code>fp_rsqrt_bram.sv</code>)</td>
+<td>1-cycle registered BRAM LUT</td>
+<td>1/sqrt(x). Backs <code>vpu.rsqrt</code> (RMSNorm).</td>
+</tr>
+<tr>
+<td><code>bf16_to_fp32</code> / <code>fp32_to_bf16</code></td>
+<td>combinational</td>
+<td>Per-lane BF16↔FP32 cast converters (v1 storage type is BF16). Back <code>acc.store</code> 0x30, <code>acc.load</code> 0x31, and <code>vreg.load</code> 0x32.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why BRAM-LUT non-linear units?.</strong> The previous combinational Horner/Newton chains for exp2/recip/rsqrt cost ~31 FP units and blew the LUT budget on ZCU102. Replacing them with 1024-entry registered ROMs (one BRAM each) cut roughly 90K LUTs while staying within ≤0.1% error: acceptable for attention/normalization.</p>
+<p><strong><code>fp_add</code> LATENCY=1: the 2-stage pipeline split.</strong> A fully combinational FP32 add is a ~36-logic-level chain and was a critical path. <code>LATENCY=1</code> splits it into two ~18-level halves with one pipeline register between them:</p>
+<p><strong>Table: Two pipeline stages of <code>fp_add</code> at LATENCY=1, splitting the 36-level combinational chain.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Stage</strong></th>
+<th><strong>Work</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>S1</strong> (before the FF)</td>
+<td>Special-case detection (NaN/Inf/zero), exponent compare, mantissa <em>alignment</em> (shift the smaller operand), and the <em>mantissa add/subtract</em>. Outputs the sign, larger exponent, and 25-bit sum mantissa into the pipeline register.</td>
+</tr>
+<tr>
+<td><strong>S2</strong> (after the FF)</td>
+<td><em>Normalization</em>: leading-zero detect + shift, exponent fix-up, overflow/underflow/denormal handling, and final FP32 assembly.</td>
+</tr>
+</tbody>
+</table>
+<p>In Verilator the DPI-C model is combinational regardless of <code>LATENCY</code>; correctness comes from the caller's <code>stage_cnt</code> reserving the right number of cycles, not from physical register delay. So sim and synthesis agree bit-for-bit as long as the FSM waits the documented number of stages.</p>
+<h2 id="why-not-one-big-fsm">Why not one big FSM?<a class="headerlink" href="#why-not-one-big-fsm" title="Permanent link">&para;</a></h2>
+<p>The pre-refactor VPU was a 44-state monolithic FSM with one named state per pipeline step per opcode. That is the wrong shape: it does not scale (every new opcode adds states), it is error-prone, and it wastes the sequencer's state-enum budget. The industry pattern for a vector ALU is a small <strong>class-dispatch FSM</strong> plus <strong>counters</strong>:</p>
+<ul>
+<li><strong>Ara</strong> (PULP RVV vector unit) uses a ~6-state VALU controller and lets element counters drive iteration.</li>
+<li><strong>NVDLA</strong> deliberately keeps no compute-sequencing FSM in the math datapath: control is descriptor + counter driven.</li>
+</ul>
+<p>The refactor collapses the 44 named states into <strong>5 states + 2 counters</strong>. All datapath logic, pipeline registers, and arithmetic instances are unchanged; only the <em>sequencing</em> changed. Per-op cycle counts are derived from <code>localparam</code> terminal values (no magic numbers) and reproduce the old FSM exactly, so every opcode is bit-identical.</p>
+<h2 id="the-5-states-conceptual">The 5 states (conceptual)<a class="headerlink" href="#the-5-states-conceptual" title="Permanent link">&para;</a></h2>
+<!-- TODO(caption): `c-vpu-pipeline` has no CAPTIONS.md entry. Caption authored here from
+     the figure + vpu_ctrl.sv; needs an owner read.
+     D_vpu = 23 IS VERIFIED against RTL, on main, not taken on trust: origin/main's
+     vpu_ctrl.sv:417 declares `localparam logic [4:0] D_VPU = 5'd23`. The plan listed this
+     number as unverified and it now checks out.
+     TODO(figure): the figure's OWN DISCLAIMER is stale and must come out at the next
+     re-render. It draws: "VPU implementation is in progress: these depths are measured on
+     rtl/full-npu-wire (vpu_ctrl.sv, vpu_gelu_unit.sv, fpu/fp_exp2_bram.sv,
+     fpu/fp_reduce_tree.sv), not on main. Every number in panel A is provisional and moves
+     with the RTL." Checked against origin/main: all four files ARE on main (the two fpu
+     ones simply moved to npu/src/compute_tile/fpu/), and D_VPU = 23 is on main. So the
+     note is false as well as being exactly the implementation-status prose the owner
+     ruled off public figures -- and it names an unmerged branch on the public site.
+     Separately, vpu_lane.sv:264 carries a stale comment saying "LOCKED VPU design,
+     D_vpu=9", which contradicts vpu_ctrl.sv:68/:417 and vpu_gelu_unit.sv. That is an RTL
+     comment bug (area:rtl), reported rather than fixed here. -->
+<p><img alt="VPU per-function depths padded to the uniform D_vpu terminal" src="../../../figures/tikz/c-vpu-pipeline.svg" /></p>
+<p><strong>Fig. C3. VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
+op class has the SAME issue-to-write latency <code>D_VPU = 23</code> (<code>vpu_ctrl.sv:417</code>); the
+shallower classes are padded to it by a holding register. One uniform reservation
+window means the FSM needs a single terminal rather than a per-op one.</p>
+<p>A 3-bit enum (<code>vpu_state_t</code>) dispatches each opcode <em>class</em> from <code>VPU_IDLE</code> into one execution state; two counters (<code>row_cnt</code> for the 8-row ACC loop, <code>stage_cnt</code> for the pipeline stage within an op) drive all transitions:</p>
+<p><strong>Table: VPU FSM states and their roles; counters (<code>row_cnt</code>, <code>stage_cnt</code>) drive all intra-state transitions.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>State</strong></th>
+<th><strong>Role</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VPU_IDLE</code></td>
+<td>Wait for <code>start</code>; latch all operands; dispatch by opcode class into one of the other states.</td>
+</tr>
+<tr>
+<td><code>VPU_VREG_EXEC</code></td>
+<td>VREG-to-VREG arithmetic through the lane pipe; [v1]-active: <code>vpu.rsqrt</code> (0x26), <code>vpu.fma.imm</code> (0x27). [Serving]-RESERVED VREG ops (0x20--0x25, 0x28--0x2A) target this state but have no RTL handler on main. Also the VREG-read prefix for broadcast ACC ops.</td>
+</tr>
+<tr>
+<td><code>VPU_REDUCE_ROW</code></td>
+<td>ACC→VREG horizontal reduction (rowsum / rowmax), one row per loop, 8 rows.</td>
+</tr>
+<tr>
+<td><code>VPU_ACC_ROW</code></td>
+<td>In-place ACC element-wise ops: <code>vpu.exp2</code>, <code>vpu.gelu</code>, scale/sub/div broadcast, <code>vpu.scale.imm</code>, <code>vpu.zero.acc</code>, two-source <code>vpu.mul.acc</code>/<code>vpu.add.acc</code>, and register load/store rows.</td>
+</tr>
+<tr>
+<td><code>VPU_WRITEBACK</code></td>
+<td>Shared terminal VREG write (used by rowsum/rowmax and <code>vpu.load.imm</code>).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Single source of truth.</strong> The <strong>exact states, transitions, the per-opcode dispatch map, and every <code>stage_cnt</code>/<code>row_cnt</code> counter terminal</strong> (the <code>ST_VREG_*</code> / <code>ST_ROW_*</code> / <code>REDUCE_*</code> localparams) are documented as the header comment block of <code>npu/src/compute_tile/vpu_ctrl.sv</code> (the single source of truth). This document keeps only the concept; it does not restate the per-state transition table.</p>
+<h2 id="instruction-classes-pipeline-timing">Instruction classes &amp; pipeline timing<a class="headerlink" href="#instruction-classes-pipeline-timing" title="Permanent link">&para;</a></h2>
+<p>Each opcode class enters a specific state and loops a fixed number of pipeline stages per row. Reductions and ACC ops loop over 8 rows; VREG-only ops complete in their terminal-stage count. The per-class shape:</p>
+<p><strong>Table: Opcode classes, their entry FSM state, and per-class opcode/shape summary.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Class</strong></th>
+<th><strong>State</strong></th>
+<th><strong>Opcodes &amp; shape</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A: VREG arithmetic</td>
+<td><code>VPU_VREG_EXEC</code></td>
+<td><code>vpu.rsqrt</code> 0x26, <code>vpu.fma.imm</code> 0x27 ([v1]-active). Stage 0 latches the async VREG read; the lane result writes back after the primitive's latency (1--4 stages). [Serving]-RESERVED VREG ops (0x20--0x25, 0x28--0x2A) would also enter this state but are unimplemented on main.</td>
+</tr>
+<tr>
+<td>B: ACC→VREG reduction</td>
+<td><code>VPU_REDUCE_ROW</code></td>
+<td><code>vpu.rowsum</code>, <code>vpu.rowmax</code>. Reduce one 8-lane ACC row to a scalar into <code>vreg_data_reg[row]</code>; after 8 rows the register is written in <code>VPU_WRITEBACK</code>. Both share one terminal (Sec. the referenced figure).</td>
+</tr>
+<tr>
+<td>C: ACC e-wise, single-source</td>
+<td><code>VPU_ACC_ROW</code></td>
+<td><code>vpu.scale.bcast</code>, <code>vpu.scale.col.bcast</code>, <code>vpu.div.bcast</code>, <code>vpu.scale.imm</code>, <code>vpu.sub.bcast</code>, <code>vpu.exp2</code>, <code>vpu.gelu</code> 0x1D (active), <code>vpu.zero.acc</code>. Per-row pipeline; broadcast ops take a 1-cycle <code>VPU_VREG_EXEC</code> prefix to capture the broadcast VREG, then hand off.</td>
+</tr>
+<tr>
+<td>D: ACC e-wise, two-source</td>
+<td><code>VPU_ACC_ROW</code></td>
+<td><code>vpu.mul.acc</code>, <code>vpu.add.acc</code>. Read A row, then B row, compute, latch, write; per row.</td>
+</tr>
+<tr>
+<td>E: register load/store (0x3_) --- <strong>LSU-dispatched</strong></td>
+<td>(as-built: <code>VPU_ACC_ROW</code>)</td>
+<td>The <code>0x3_</code> register load/store ops (<code>acc.store</code> 0x30, <code>acc.load</code> 0x31, <code>vreg.load</code> 0x32): the on-chip SPAD ↔ register-file bridge with implicit dtype convert (the DMU handles off-chip DRAM). Under the 0.5.0 model these are owned by the <strong>LSU</strong> (<a href="spad.html#the-lsu">spad.md :: The LSU</a>), not the VPU. Read source row, write converted row (or VREG lanes).</td>
+</tr>
+</tbody>
+</table>
+<p>Class E is described here as <strong>LSU-dispatched</strong> under the 0.5.0 model; the as-built RTL still routes these <code>0x3_</code> ops through the VPU's <code>VPU_ACC_ROW</code> state, which is why the table names that state.</p>
+<p>Exact per-stage cycle accounting (the <code>ST_*</code> terminals and the row-write stage for each opcode) is in the <code>vpu_ctrl.sv</code> header comment.</p>
+<h2 id="reduction-tree-fp_reduce_tree">Reduction tree: <code>fp_reduce_tree</code><a class="headerlink" href="#reduction-tree-fp_reduce_tree" title="Permanent link">&para;</a></h2>
+<p><img alt="One fp_reduce_tree at N=8, DEPTH=3, ADD/MAX modes" src="../../../figures/tikz/vpu-reduce.svg" /></p>
+<p><strong>Fig. H2. One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
+VPU instantiates twice: an ADD tree (<code>rowsum</code>) and a MAX tree (<code>rowmax</code>), both surfacing
+the same 3-cycle latency so one <code>stage_cnt</code> terminal serves both.</p>
+<p>The reduction tree's 8 → 4 → 2 → 1 shape over <code>DEPTH = 3</code> levels is described in the
+text above; both ADD and MAX modes surface the same 3-cycle latency, so <code>vpu_ctrl</code> sizes a
+single <code>REDUCE_TOTAL = REDUCE_LAT + 1 = 4</code> terminal (the +1 covers the BRAM read before
+the inputs go live).</p>
+<p>File <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, module <code>fp_reduce_tree</code>. A parametric balanced binary tree over <code>N</code> FP32 inputs (N a power of two). <code>vpu_ctrl</code> instantiates two of them at <code>N = BANKING = 8</code>: an ADD tree (<code>u_rsum_tree</code>) for <code>rowsum</code> and a MAX tree (<code>u_rmax_tree</code>) for <code>rowmax</code>. <code>DEPTH = clog2(N) = 3</code>.</p>
+<p>A single <code>fp_reduce_tree</code> at <code>N=8</code> is a balanced binary tree that halves the live node count at every level, so it bottoms out in exactly <code>DEPTH = log_2 8 = 3</code> levels. In ADD mode each node is an <code>fp_add #(.LATENCY(1))</code> whose internal pipeline register carries the partial sum to the next level (no extra inter-level flops). In MAX mode each node is a combinational <code>fp_max</code> followed by an explicit pipeline register, so both modes surface the <em>same</em> 3-cycle latency, letting one <code>stage_cnt</code> terminal serve both.</p>
+<p><strong>ADD mode.</strong></p>
+<ul>
+<li>Levels are <code>fp_add #(.LATENCY(1))</code> nodes chained <strong>directly</strong>.</li>
+<li>The adder's own internal pipeline register propagates each level's partial sum (<strong>no extra inter-level registers</strong> are inserted).</li>
+<li>Result is <code>tree[DEPTH\]\[0]</code>, valid <strong>DEPTH = 3</strong> cycles after inputs are stable.</li>
+</ul>
+<p><strong>MAX mode.</strong></p>
+<ul>
+<li>Levels are <code>fp_max</code> (combinational) nodes, each followed by an <strong>explicit <code>always_ff</code> pipeline register</strong>.</li>
+<li>The final level reads combinationally from the last register stage (0 extra cycles), so total latency is <strong>DEPTH = 3</strong> register stages, matching ADD mode exactly.</li>
+</ul>
+<p><strong>How rowmax wasted cycles were eliminated.</strong> Because both modes now surface the <em>same</em> fixed latency (<code>LATENCY = clog2(N) = 3</code>), the VPU sizes a single <code>stage_cnt</code> terminal (<code>REDUCE_TOTAL = REDUCE_LAT + 1 = 4</code>) for both <code>rowsum</code> and <code>rowmax</code>. Previously the hand-unrolled MAX ladder advanced on a different (longer) schedule than ADD, so <code>rowmax</code> burned extra cycles per row. Equalizing the tree latencies lets one terminal value serve both, removing the waste.</p>
+<p>Caller contract: present stable inputs for ≥1 cycle; read <code>result</code> exactly DEPTH cycles later. In Verilator the FP adders are combinational, so correctness is enforced by <code>stage_cnt</code>, not physical register delay. The +1 in <code>REDUCE_TOTAL</code> accounts for the BRAM read latency between address-drive and valid tree inputs.</p>
+<h2 id="worked-example-rowmax-then-rowsum">Worked example: <code>rowmax</code> then <code>rowsum</code><a class="headerlink" href="#worked-example-rowmax-then-rowsum" title="Permanent link">&para;</a></h2>
+<p>Softmax over an ACC row uses two reductions back-to-back. First <code>vpu.rowmax</code> (0x10) walks the MAX tree to find the row maximum m; the row is shifted by -m for numerical stability, <code>vpu.exp2</code> (0x12) raises 2^x-m per lane through the <code>fp_exp2_bram</code> LUT, <code>vpu.rowsum</code> (0x11) walks the ADD tree for the denominator Σ, and <code>vpu.div.bcast</code> (0x16) divides each lane by Σ through the reciprocal LUT. The figure traces the <code>rowmax</code> reduction with concrete values: eight FP32 lane inputs reduce pairwise (8→4→2→1), so the row maximum is valid <code>DEPTH = 3</code> cycles after the inputs go live. Substituting <code>fp_add</code> for <code>fp_max</code> at every node turns the identical tree into the <code>rowsum</code> that the softmax denominator needs.</p>
+<h2 id="isa-opcode-table-vpu-handled">ISA opcode table (VPU-handled)<a class="headerlink" href="#isa-opcode-table-vpu-handled" title="Permanent link">&para;</a></h2>
+<p>Opcode values are the SSOT constants from <code>npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). "Cycles" is approximate (per-row terminal × 8 rows for ACC/reduction ops, plus small fixed prefixes); VREG-only ops complete in their terminal-stage count.</p>
+<p><strong>Table: VPU opcode encoding, mnemonics, and approximate cycle count. Opcode values are SSOT from <code>npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>).</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Hex</strong></th>
+<th><strong>Mnemonic</strong></th>
+<th><strong>Operation</strong></th>
+<th><strong>Class</strong></th>
+<th><strong>~Cycles</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>[v1] Reductions (ACC→VREG)</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x10</td>
+<td><code>vpu.rowmax</code></td>
+<td>VREG[d][r] = max over ACC row r</td>
+<td>Reduce</td>
+<td>~8×4</td>
+</tr>
+<tr>
+<td>0x11</td>
+<td><code>vpu.rowsum</code></td>
+<td>VREG[d][r] = Σ ACC row r</td>
+<td>Reduce</td>
+<td>~8×4</td>
+</tr>
+<tr>
+<td><em>[v1] ACC element-wise</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x12</td>
+<td><code>vpu.exp2</code></td>
+<td>ACC[d] = 2^ACC[s], per row</td>
+<td>ACC e-wise</td>
+<td>~8×6</td>
+</tr>
+<tr>
+<td>0x13</td>
+<td><code>vpu.scale.bcast</code></td>
+<td>ACC[d] = ACC[s] × VREG[a] (row-bcast scalar)</td>
+<td>ACC e-wise</td>
+<td>~8×2</td>
+</tr>
+<tr>
+<td>0x14</td>
+<td><code>vpu.scale.imm</code></td>
+<td>ACC[d] = ACC[s] × imm</td>
+<td>ACC e-wise</td>
+<td>~8×2</td>
+</tr>
+<tr>
+<td>0x15</td>
+<td><code>vpu.sub.bcast</code></td>
+<td>ACC[d] = ACC[s] - VREG[a] (broadcast)</td>
+<td>ACC e-wise</td>
+<td>~8×3</td>
+</tr>
+<tr>
+<td>0x16</td>
+<td><code>vpu.div.bcast</code></td>
+<td>ACC[d] = ACC[s] / VREG[a] (bcast, recip BRAM)</td>
+<td>ACC e-wise</td>
+<td>~8×2</td>
+</tr>
+<tr>
+<td>0x17</td>
+<td><code>vpu.zero.acc</code></td>
+<td>zero <code>vec_zero_rows</code> ACC rows</td>
+<td>ACC e-wise</td>
+<td>~rows</td>
+</tr>
+<tr>
+<td>0x19</td>
+<td><code>vpu.mul.acc</code></td>
+<td>ACC[d] = ACC[s] × ACC[b]</td>
+<td>Two-source</td>
+<td>~8×5</td>
+</tr>
+<tr>
+<td>0x1A</td>
+<td><code>vpu.add.acc</code></td>
+<td>ACC[d] = ACC[s] + ACC[b]</td>
+<td>Two-source</td>
+<td>~8×5</td>
+</tr>
+<tr>
+<td>0x1B</td>
+<td><code>vpu.add.col.bcast</code></td>
+<td>ACC[d] = ACC[s] + VREG[c][j] (per-col, LN β / Linear bias)</td>
+<td>ACC e-wise</td>
+<td>~8×2</td>
+</tr>
+<tr>
+<td>0x1C</td>
+<td><code>vpu.scale.col.bcast</code></td>
+<td>ACC[d] = ACC[s] × VREG[a] (per-col, LayerNorm γ)</td>
+<td>ACC e-wise</td>
+<td>~8×2</td>
+</tr>
+<tr>
+<td>0x1D</td>
+<td><code>vpu.gelu</code></td>
+<td>GELU activation per lane (GPT-2 activation)</td>
+<td>ACC e-wise</td>
+<td>~8×7</td>
+</tr>
+<tr>
+<td><em>[serving]-RESERVED: opcode space held, no RTL handler on main</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x20--0x25</td>
+<td>(<code>vpu.maximum</code>…<code>vpu.copy.vreg</code>)</td>
+<td>FlashAttention/serving VREG ops; reserved</td>
+<td>[serving]</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><em>[v1] VREG-only</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x26</td>
+<td><code>vpu.rsqrt</code></td>
+<td>VREG[d] = 1/sqrt(VREG[a]) (RMSNorm, LayerNorm)</td>
+<td>VREG</td>
+<td>2</td>
+</tr>
+<tr>
+<td>0x27</td>
+<td><code>vpu.fma.imm</code></td>
+<td>VREG[d] = VREG[a]×imm + bias (LayerNorm scale/shift)</td>
+<td>VREG</td>
+<td>3</td>
+</tr>
+<tr>
+<td><em>[serving]-RESERVED: opcode space held, no RTL handler on main</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x28--0x2A</td>
+<td>(<code>vpu.add.vreg</code>…<code>vpu.load.imm</code>)</td>
+<td>KV-cache/serving VREG ops; reserved</td>
+<td>[serving]</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td><em>[v1] register load/store (0x3_): SPAD bf16 ↔ register file fp32, implicit convert</em></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0x30</td>
+<td><code>acc.store</code></td>
+<td>ACC row FP32 → packed BF16 (SPM store, narrowing)</td>
+<td>Reg l/s</td>
+<td>2</td>
+</tr>
+<tr>
+<td>0x31</td>
+<td><code>acc.load</code></td>
+<td>BF16 row (SPM) → FP32 ACC (widening)</td>
+<td>Reg l/s</td>
+<td>2</td>
+</tr>
+<tr>
+<td>0x32</td>
+<td><code>vreg.load</code></td>
+<td>BF16 row (SPM) → FP32 into VREG (widening)</td>
+<td>Reg l/s</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>The non-VPU opcodes (MXU <code>mxu.load.w</code> / <code>mxu.matmul</code>, DMU <code>dmu.*</code>, <code>loop.*</code>, <code>flush.slot</code>, <code>halt</code>) are <em>not</em> VPU ops and are dispatched by the sequencer to other engines. The [serving]-RESERVED VREG range (0x20--0x25, 0x28--0x2A) holds opcode numbers for FlashAttention/KV-cache serving ops but has no RTL handler on main; see <code>mininpu/isa</code> for the full listing.</p>
+<h2 id="parametrization">Parametrization<a class="headerlink" href="#parametrization" title="Permanent link">&para;</a></h2>
+<p><code>vpu_ctrl</code> and the FP primitives are parameterized for precision retargeting:</p>
+<p><strong>Table: Structural parameters of <code>vpu_ctrl</code> and their effect on the datapath.</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Parameter</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACCUM_FORMAT</code></td>
+<td><code>"FP32"</code></td>
+<td>VPU register and arithmetic precision, forwarded to every <code>fp_add</code> / <code>fp_mul</code> and to both reduce trees. <code>"FP32"</code> selects the IEEE-754 FP32 datapath (v1 accumulation format). Narrowing to BF16 accumulation would require extending <code>FORMAT</code> handling in the primitives and regenerating the BRAM ROMs.</td>
+</tr>
+<tr>
+<td><code>BANKING</code></td>
+<td>8</td>
+<td>Lanes per row = elements per VREG = reduction tree width. Equals <code>SPAD_DATA_WIDTH / DATA_WIDTH</code>. Drives <code>row_cnt</code> width and <code>REDUCE_LAT = clog2(BANKING)</code>.</td>
+</tr>
+<tr>
+<td><code>DATA_WIDTH</code></td>
+<td>32</td>
+<td>Element width in bits. Also the VREG <code>ELEM_WIDTH</code>.</td>
+</tr>
+<tr>
+<td><code>SPAD_DATA_WIDTH</code></td>
+<td>256</td>
+<td>BRAM row width (= BANKING × DATA_WIDTH).</td>
+</tr>
+<tr>
+<td><code>SPAD_ADDR_WIDTH</code></td>
+<td>10</td>
+<td>BRAM Port B address width.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Retargeting to a narrower accumulation precision.</strong> Set <code>ACCUM_FORMAT</code> and <code>DATA_WIDTH</code> on the <code>vpu_ctrl</code> instantiation in <code>sequencer.sv</code>, keeping <code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH</code>. Extending the <code>FORMAT</code> branches in <code>fp_add.sv</code> / <code>fp_mul.sv</code> / <code>fp_max.sv</code> and regenerating the non-linear BRAM ROMs for the new mantissa width would also be required. The FSM sequencing is precision-agnostic and needs no change. Note: v1 is fixed at BF16 storage + FP32 accumulation; this describes the RTL parameter design for future retargeting.</p>
+<h2 id="precision-why-the-vpu-stays-fp32">Precision: why the VPU stays FP32<a class="headerlink" href="#precision-why-the-vpu-stays-fp32" title="Permanent link">&para;</a></h2>
+<p>The VPU is <strong>FP32 end to end</strong>: all 8 lanes, both reduction trees, the vector register file, and the transcendental BRAM-LUTs are FP32 (<code>vec_regfile.sv</code> element width 32; <code>vpu_ctrl.sv</code>). This is deliberate, not incidental: <code>ACCUM_FORMAT</code> is documented as the "accumulator + VPU register precision" (<code>mininpu/hwparams.py</code> line 27), so the one parameter that fixes the MXU accumulator at FP32 also couples the entire VPU register and arithmetic datapath to FP32. The MXU accumulator and the whole VPU are the system's two FP32 domains.</p>
+<p><strong>Why the reductions need FP32.</strong> The VPU's reduction and accumulation ops require FP32 for GPT-2 numerical stability. Softmax's denominator is a running sum of up to ~1024 exponentiated terms, and LayerNorm's mean and variance are cancellation-prone (they subtract close-magnitude quantities). Both lose accuracy quickly in BF16's 8-bit mantissa. Standard mixed-precision transformer practice keeps exactly these reductions in FP32 while narrowing the bulk elementwise math.</p>
+<p><strong>Forward-looking: a pointwise-BF16 pass.</strong> Only the <em>pointwise</em> ops (per-lane scale, add, and the GELU pointwise path) could be narrowed to BF16 in a future synth-driven pass, if area or timing ever demanded it. The reductions (<code>vpu.rowsum</code>, <code>vpu.rowmax</code>) and the reduction-fed normalization must <strong>never</strong> be narrowed: they are exactly the ops that need FP32. This is a note about a possible future, not a v1 change: <strong>v1 keeps the VPU full FP32</strong>.</p>
+<h2 id="how-to-add-a-new-vpu-opcode">How to add a new VPU opcode<a class="headerlink" href="#how-to-add-a-new-vpu-opcode" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Define the opcode</strong> in <code>mininpu/isa</code> (the ISA SSOT): add the <code>OP_*</code> constant and an encoder. Then regenerate the RTL package: <code>make -C npu generate-sv-pkgs</code> (rewrites <code>npu_isa_pkg.sv</code>).</li>
+<li><strong>Add a dispatch case</strong> in <code>sequencer.sv</code>'s <code>EXEC_DISPATCH</code> block: latch the operands into the <code>vpu_*</code> input registers, pool-fetch any literal-pool immediates, and route to <code>start_vpu</code> (the sequencer's <code>VEC_WAIT_VPU</code> path).</li>
+<li><strong>Dispatch the class</strong> in <code>vpu_ctrl.sv</code>'s <code>VPU_IDLE</code> case: pick the entry state (<code>VPU_VREG_EXEC</code>, <code>VPU_ACC_ROW</code>, <code>VPU_REDUCE_ROW</code>, or <code>VPU_WRITEBACK</code>) and pre-load any VREG read addresses.</li>
+<li><strong>Add the <code>stage_cnt</code> terminal</strong>: define a new <code>ST_*</code> localparam (or reuse an existing one), add it to the <code>acc_row_stages</code> selector if it is an ACC-row op, and add the writeback gate in the chosen state.</li>
+<li><strong>Add the datapath logic</strong>: instantiate the per-lane primitive(s) inside the <code>g_vpu_lanes</code> generate block and wire the result row into the <code>vec_computed_row</code> / <code>vec_computed_row_2src</code> mux (and the BRAM-routing write branch).</li>
+<li><strong>Add the L4 test</strong>: the golden reference is the ISS (<code>mininpu/iss/handlers.py</code>); add a non-skipped <code>test_&lt;opcode&gt;</code> in <code>dv/compute_tile/test_isa_correctness.py</code> that checks RTL output against the ISS.</li>
+<li><strong>Add the L5 system test</strong>: exercise the opcode in a real multi-instruction kernel in <code>dv/system/test_programs.py</code>.</li>
+<li><strong>Run the ISA coverage gate</strong> (required before commit): <code>python3 dv/scripts/check_isa_coverage.py</code> (must exit 0), or <code>make -C dv/compute_tile check-isa-coverage</code>. The opcode is not "done" until L4, L5, and the gating-stub rules all pass.</li>
+</ol>
+<p>Related: <a href="index.html">compute-tile overview</a> · <a href="mxu.html">MXU</a> · <a href="../uncore.html">uncore</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="mxu.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: MXU">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                MXU
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="spad.html" class="md-footer__link md-footer__link--next" aria-label="Next: SPAD">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                SPAD
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+  
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../../javascripts/mathjax.js"></script>
+      
+    
+  <script
+    src="https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js"
+    integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+    crossorigin="anonymous"></script>
+
+  </body>
+</html>

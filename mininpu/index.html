@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="mininpu documentation: the ASIC-bound NPU compute tile (ISA, microarchitecture, implementation, DMU, GPT-2 kernels), the host runtime, and the compiler.">
+        <meta name="description" content="mininpu documentation: the ASIC-bound NPU device (architecture, host runtime) and its compute tile (ISA contract, microarchitecture, sequencer, MXU, VPU, DMU).">
       
       
       
@@ -14,7 +14,7 @@
       
       
       
-        <link rel="next" href="runtime.html">
+        <link rel="next" href="hardware/spec/isa.html">
       
       
         
@@ -43,13 +43,9 @@
     
     
       
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
     
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -90,7 +86,7 @@
 
   
 
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
@@ -193,13 +189,131 @@
     
   </nav>
   
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="hardware/spec/isa.html" class="md-tabs__link">
+          
+  
+  
+  Hardware
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="runtime.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Runtime
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="compiler/index.html" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Compiler
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="labs/index.html" class="md-tabs__link">
+          
+  
+  
+  Labs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
-        
-          
         
       
       <main class="md-main" data-md-component="main">
@@ -213,8 +327,10 @@
                     
 
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
@@ -294,82 +410,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#01-compute-tile" class="md-nav__link">
+  <a href="#hardware" class="md-nav__link">
     <span class="md-ellipsis">
       
-        01 Compute tile
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="01 Compute tile">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#doc-1-isa-050-specification-locked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 1 ISA 0.5.0 Specification (Locked)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-2-reference-microarchitecture-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 2 Reference Microarchitecture (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-3-implementation-files-modules-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 3 Implementation (Files &amp; Modules) (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-4-dmu-data-moving-unit-design-brief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 4 DMU: Data Moving Unit (Design brief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-5-gpt-2-kernels-placeholder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 5 GPT-2 Kernels (Placeholder)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#02-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        02 Reference
+        Hardware
       
     </span>
   </a>
@@ -377,38 +421,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#03-host-runtime" class="md-nav__link">
+  <a href="#runtime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        03 Host runtime
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="03 Host runtime">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#host-runtime-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Runtime API
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#04-compiler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        04 Compiler
+        Runtime
       
     </span>
   </a>
@@ -416,30 +432,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#05-figures" class="md-nav__link">
+  <a href="#compiler" class="md-nav__link">
     <span class="md-ellipsis">
       
-        05 Figures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="05 Figures">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fig-6-tile-sequencer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FIG. 6 Tile sequencer
+        Compiler
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to start
+      
+    </span>
+  </a>
   
 </li>
       
@@ -457,58 +478,31 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="runtime.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Host Runtime
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
     
     
     
     
       
-        
+      
         
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Compute Tile
+    Hardware
   
 
     
@@ -519,12 +513,64 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Compute Tile
+    Hardware
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architectural spec
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architectural spec
   
 
           </label>
@@ -537,14 +583,14 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/isa.html" class="md-nav__link">
+      <a href="hardware/spec/isa.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Doc 1 ISA design target [proposed]
+    ISA
   
 
     
@@ -565,98 +611,14 @@
   
   
     <li class="md-nav__item">
-      <a href="compute_tile/microarch.html" class="md-nav__link">
+      <a href="hardware/spec/abi.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Doc 2 Microarch
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="compute_tile/implementation.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Doc 3 Implementation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="compute_tile/dmu.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Doc 4 DMU
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="compute_tile/gpt2_kernels.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Doc 5 GPT-2 Kernels
+    ABI
   
 
     
@@ -676,9 +638,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -688,26 +651,26 @@
     
     
       
-        
+      
         
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    Reference
+    Example microarchitecture
   
 
     
@@ -718,12 +681,64 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    Example microarchitecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compute tile
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Compute tile
   
 
           </label>
@@ -736,14 +751,14 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/architecture.html" class="md-nav__link">
+      <a href="hardware/microarch/compute_tile/index.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Architecture
+    Overview
   
 
     
@@ -764,231 +779,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/data_movement.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Data Movement
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/control_plane.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Control Plane
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/host_interface.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Host Interface
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/abi.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ABI Register Map
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/isa.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ISA Reference
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/interface_tile.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Interface Tile
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/compute_tile.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Compute Tile
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/memory_tile.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Memory Tile [v3]
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="reference/sequencer.html" class="md-nav__link">
+      <a href="hardware/microarch/compute_tile/sequencer.html" class="md-nav__link">
         
   
   
@@ -1016,7 +807,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/mxu.html" class="md-nav__link">
+      <a href="hardware/microarch/compute_tile/mxu.html" class="md-nav__link">
         
   
   
@@ -1044,7 +835,7 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/vpu.html" class="md-nav__link">
+      <a href="hardware/microarch/compute_tile/vpu.html" class="md-nav__link">
         
   
   
@@ -1072,7 +863,35 @@
   
   
     <li class="md-nav__item">
-      <a href="reference/dmu.html" class="md-nav__link">
+      <a href="hardware/microarch/compute_tile/spad.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SPAD
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hardware/microarch/compute_tile/dmu.html" class="md-nav__link">
         
   
   
@@ -1093,9 +912,135 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hardware/microarch/compute_tile/gpt2_demo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GPT-2 demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="hardware/microarch/uncore.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Uncore
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="runtime.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="compiler/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compiler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1111,19 +1056,19 @@
     
     
       
-        
+      
         
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1355,33 +1300,6 @@
   
 
     
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="figures/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Figures
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
   </ul>
 </nav>
                   </div>
@@ -1409,82 +1327,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#01-compute-tile" class="md-nav__link">
+  <a href="#hardware" class="md-nav__link">
     <span class="md-ellipsis">
       
-        01 Compute tile
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="01 Compute tile">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#doc-1-isa-050-specification-locked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 1 ISA 0.5.0 Specification (Locked)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-2-reference-microarchitecture-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 2 Reference Microarchitecture (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-3-implementation-files-modules-in-progress" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 3 Implementation (Files &amp; Modules) (In progress)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-4-dmu-data-moving-unit-design-brief" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 4 DMU: Data Moving Unit (Design brief)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#doc-5-gpt-2-kernels-placeholder" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Doc 5 GPT-2 Kernels (Placeholder)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#02-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        02 Reference
+        Hardware
       
     </span>
   </a>
@@ -1492,38 +1338,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#03-host-runtime" class="md-nav__link">
+  <a href="#runtime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        03 Host runtime
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="03 Host runtime">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#host-runtime-api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Host Runtime API
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#04-compiler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        04 Compiler
+        Runtime
       
     </span>
   </a>
@@ -1531,30 +1349,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#05-figures" class="md-nav__link">
+  <a href="#compiler" class="md-nav__link">
     <span class="md-ellipsis">
       
-        05 Figures
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="05 Figures">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fig-6-tile-sequencer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        FIG. 6 Tile sequencer
+        Compiler
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#labs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Labs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#where-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where to start
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1585,45 +1408,60 @@
 <li>on-chip SPAD <strong>32 KiB</strong></li>
 <li>target <strong>GPT-2</strong></li>
 </ul>
-<h2 id="01-compute-tile">01 Compute tile<a class="headerlink" href="#01-compute-tile" title="Permanent link">&para;</a></h2>
-<p>The compute-tile design in five documents. Doc 1 is frozen; the rest are at varying stages.</p>
+<p><img alt="Compute tile: module containment tree" src="figures/tikz/h-module-tree.svg" /></p>
+<p><strong>Fig. H1. Compute tile: module containment tree.</strong> Every edge is one SystemVerilog
+instantiation. Read down for containment, right for the source file; counts are
+elaborated at <code>N=8</code> / <code>BANKING=8</code> (<code>npu_config_pkg.sv</code>). This whole-IP tree doubles as
+the site map for the pages below.</p>
+<h2 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h2>
+<p>The NPU IP: an architectural spec plus one example microarchitecture.</p>
+<ul>
+<li><strong>Architectural spec:</strong> <a href="hardware/spec/isa.html">ISA Contract</a> &middot; <a href="hardware/spec/abi.html">ABI Register Map</a></li>
+<li><strong>Example microarchitecture:</strong> <a href="hardware/microarch/compute_tile/index.html">Compute tile</a> (overview, <a href="hardware/microarch/compute_tile/sequencer.html">Sequencer</a>, <a href="hardware/microarch/compute_tile/vpu.html">VPU</a>, <a href="hardware/microarch/compute_tile/mxu.html">MXU</a>, <a href="hardware/microarch/compute_tile/spad.html">SPAD</a>, <a href="hardware/microarch/compute_tile/dmu.html">DMU</a>, Memory Tile ([v3]-deferred, RFC #158)) &middot; <a href="hardware/microarch/compute_tile/gpt2_demo.html">GPT-2 demo</a> &middot; <a href="hardware/microarch/uncore.html">The uncore</a> (the non-compute infra)</li>
+</ul>
 <div class="admonition info">
 <p class="admonition-title">Spec vs RTL as-built</p>
-<p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. The generated, drift-guarded <a href="reference/isa.html">ISA Reference</a> and <a href="reference/abi.html">ABI Reference</a> are derived from <code>mininpu/isa</code> and <code>mininpu/abi.py</code> and report the <strong>as-built</strong> set.</p>
+<p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. A spec is not wrong because the RTL trails it; the pages above assert the 0.5.0 spec, and never claim the hardware implements it.</p>
 </div>
-<h3 id="doc-1-isa-050-specification-locked"><code>Doc 1</code> <a href="compute_tile/isa.html">ISA 0.5.0 Specification</a> (Locked)<a class="headerlink" href="#doc-1-isa-050-specification-locked" title="Permanent link">&para;</a></h3>
-<p>The complete instruction-set reference: 15 opcodes, 64-bit fixed word, in-order single issue, no hardware interlock, and the full compiler scheduling contract.</p>
-<h3 id="doc-2-reference-microarchitecture-in-progress"><code>Doc 2</code> <a href="compute_tile/microarch.html">Reference Microarchitecture</a> (In progress)<a class="headerlink" href="#doc-2-reference-microarchitecture-in-progress" title="Permanent link">&para;</a></h3>
-<p>The datapath behind the ISA: concurrency model, per-unit AGU, MXU / VPU / VREG / ACC / SPAD, and the MXU-VPU software pipeline. Locked design plus open decisions.</p>
-<h3 id="doc-3-implementation-files-modules-in-progress"><code>Doc 3</code> <a href="compute_tile/implementation.html">Implementation (Files &amp; Modules)</a> (In progress)<a class="headerlink" href="#doc-3-implementation-files-modules-in-progress" title="Permanent link">&para;</a></h3>
-<p>How the design maps to RTL: the tile-sequencer fold, DMU internals, and the target file/module hierarchy. Locked decisions plus pending proposals.</p>
-<h3 id="doc-4-dmu-data-moving-unit-design-brief"><code>Doc 4</code> <a href="compute_tile/dmu.html">DMU: Data Moving Unit</a> (Design brief)<a class="headerlink" href="#doc-4-dmu-data-moving-unit-design-brief" title="Permanent link">&para;</a></h3>
-<p>The async DMA unit: 2 slots, load 0x40 / store 0x42, v1 single-outstanding, SPAD only. Split into the LOCKED contract and the OPEN implementer design space.</p>
-<h3 id="doc-5-gpt-2-kernels-placeholder"><code>Doc 5</code> <a href="compute_tile/gpt2_kernels.html">GPT-2 Kernels</a> (Placeholder)<a class="headerlink" href="#doc-5-gpt-2-kernels-placeholder" title="Permanent link">&para;</a></h3>
-<p>GPT-2 is the worked example, but it is currently documented in code and DV paths rather than as a doc page. The page points at those paths until it is authored.</p>
-<h2 id="02-reference">02 Reference<a class="headerlink" href="#02-reference" title="Permanent link">&para;</a></h2>
-<p>The 13-topic technical corpus. Each page carries both the handout prose and the
-deck bullets from the single source it was migrated from (the former LaTeX
-corpus, which built a PDF handout and a slide deck per topic; all of it is now
-deleted, and these pages are the source of truth).</p>
-<ul>
-<li><a href="reference/architecture.html">Architecture</a> · <a href="reference/data_movement.html">Data Movement</a></li>
-<li><a href="reference/control_plane.html">Control Plane</a> · <a href="reference/host_interface.html">Host Interface</a> · <a href="reference/abi.html">ABI Register Map</a> · <a href="reference/isa.html">ISA Reference</a></li>
-<li><a href="reference/interface_tile.html">Interface Tile</a> · <a href="reference/compute_tile.html">Compute Tile</a> · <a href="reference/memory_tile.html">Memory Tile [v3]</a></li>
-<li><a href="reference/sequencer.html">Sequencer</a> · <a href="reference/mxu.html">MXU</a> · <a href="reference/vpu.html">VPU</a> · <a href="reference/dmu.html">DMU</a></li>
-</ul>
-<p>Figures on these pages are committed SVG assets under
-<a href="figures/index.html"><code>figures/tikz/</code></a>, embedded inline with their captions
-preserved.</p>
-<h2 id="03-host-runtime">03 Host runtime<a class="headerlink" href="#03-host-runtime" title="Permanent link">&para;</a></h2>
-<h3 id="host-runtime-api"><a href="runtime.html">Host Runtime API</a><a class="headerlink" href="#host-runtime-api" title="Permanent link">&para;</a></h3>
-<p>The in-repo host runtime (<code>mininpu/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. The page covers device selection (<code>mininpuSetDevice</code>), pinned host allocation (<code>mininpuHostAlloc</code>), synchronous and async copies (<code>mininpuMemcpy</code> / <code>mininpuMemcpyAsync</code>), kernel launch (<code>mininpuLaunchKernel</code>), the Board HAL types they hand back (<code>HostRegion</code>, <code>Mmio</code> / <code>UioMmio</code>, <code>UdmabufBuffer</code>), and a call-by-call CUDA correspondence table.</p>
-<h2 id="04-compiler">04 Compiler<a class="headerlink" href="#04-compiler" title="Permanent link">&para;</a></h2>
-<p>The compiler is developed in a separate repository and published as its own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal extensible compiler framework lowering Triton to the NPU ISA.</p>
-<h2 id="05-figures">05 Figures<a class="headerlink" href="#05-figures" title="Permanent link">&para;</a></h2>
-<p>The document text is now the authoritative source for the compute-tile model. The earlier per-unit block diagrams (compute-tile overview, VPU, MXU, SPAD) were superseded and mutually overlapping, so they have been retired to keep no two figures covering the same content and nothing contradicting the text. Per-unit pipeline diagrams will be re-authored later; until then, see the doc text for the current model. Only the tile-sequencer figure remains current.</p>
-<h3 id="fig-6-tile-sequencer"><code>FIG. 6</code> <a href="figures/fig6_sequencer.html">Tile sequencer</a><a class="headerlink" href="#fig-6-tile-sequencer" title="Permanent link">&para;</a></h3>
-<p>Issue unit: IRAM 4096 x 64b + folded PC and decoder, induction-variable broadcast, loop-frame stack.</p>
+<h2 id="runtime">Runtime<a class="headerlink" href="#runtime" title="Permanent link">&para;</a></h2>
+<p>The in-repo <a href="runtime.html">Host Runtime API</a> (<code>mininpu/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. Device selection, pinned host allocation, synchronous and async memcpy, and kernel launch.</p>
+<h2 id="compiler">Compiler<a class="headerlink" href="#compiler" title="Permanent link">&para;</a></h2>
+<p>The <a href="compiler/index.html">compiler</a> is developed in a separate repository and published as its
+own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal
+extensible compiler framework lowering to the NPU ISA.</p>
+<h2 id="labs">Labs<a class="headerlink" href="#labs" title="Permanent link">&para;</a></h2>
+<p>The <a href="labs/index.html">teaching path</a> (lab0..5) builds the accelerator from the inside out, one subsystem per lab. The whole-device / host-in-the-world overview lives on <a href="labs/introduction.html">Lab 0</a>, not here.</p>
+<h2 id="where-to-start">Where to start<a class="headerlink" href="#where-to-start" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Working on&hellip;</th>
+<th>Read first</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The ISA or ABI</td>
+<td><a href="hardware/spec/isa.html">ISA Contract</a>, <a href="hardware/spec/abi.html">ABI Register Map</a></td>
+</tr>
+<tr>
+<td>The compute tile's microarchitecture</td>
+<td><a href="hardware/microarch/compute_tile/index.html">Compute tile</a></td>
+</tr>
+<tr>
+<td>The host runtime</td>
+<td><a href="runtime.html">Host Runtime API</a></td>
+</tr>
+<tr>
+<td>The compiler</td>
+<td><a href="compiler/index.html">Compiler</a></td>
+</tr>
+<tr>
+<td>Learning the device end to end</td>
+<td><a href="labs/index.html">Labs</a>, starting at <a href="labs/introduction.html">Lab 0</a></td>
+</tr>
+</tbody>
+</table>
 <hr />
 <p>mininpu &middot; documentation &middot; <code>GLOSSARY.md</code> &middot; <code>docs/charter.md</code></p>
 
@@ -1662,13 +1500,13 @@ preserved.</p>
         
         
           
-          <a href="runtime.html" class="md-footer__link md-footer__link--next" aria-label="Next: Host Runtime">
+          <a href="hardware/spec/isa.html" class="md-footer__link md-footer__link--next" aria-label="Next: ISA">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Host Runtime
+                ISA
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1705,7 +1543,7 @@ preserved.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
   
