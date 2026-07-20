@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1341,34 +1341,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1740,7 +1712,7 @@
      only. The article prose was carried over; the former deck-bullet
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
-<h1 id="vpu-the-vector-processing-unit">VPU: the vector processing unit<a class="headerlink" href="#vpu-the-vector-processing-unit" title="Permanent link">&para;</a></h1>
+<h1 id="vpu-the-vector-processing-unit">VPU: The Vector Processing Unit<a class="headerlink" href="#vpu-the-vector-processing-unit" title="Permanent link">&para;</a></h1>
 <p>The <strong>VPU</strong> is the SIMD vector engine of the compute tile: an 8-lane FP32 datapath with horizontal reductions, BRAM-LUT non-linear functions, and BF16/FP32 casts. It is the workhorse for everything in the GPT-2 forward pass that is <em>not</em> a matrix multiply: RMSNorm, softmax, residual adds, LayerNorm, and GELU activation. This document is the visual deep-dive; the exhaustive specifics (every FSM state, transition, and counter terminal) live in the RTL.</p>
 <p><strong>Source of truth:</strong> <code>npu/src/compute_tile/vpu_ctrl.sv</code>, <code>npu/src/compute_tile/vec_regfile.sv</code>, <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, <code>npu/src/compute_tile/fpu/fp_*.sv</code>, <code>npu/src/npu/npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). Describes the post-refactor counter-based VPU (<code>vpu_ctrl</code> extracted from <code>sequencer.sv</code>).</p>
 <h2 id="overview-placement">Overview &amp; placement<a class="headerlink" href="#overview-placement" title="Permanent link">&para;</a></h2>

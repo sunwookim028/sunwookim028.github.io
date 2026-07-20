@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1264,34 +1264,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1580,7 +1552,7 @@
 
 
 
-<h1 id="compute-tile-overview">Compute tile: overview<a class="headerlink" href="#compute-tile-overview" title="Permanent link">&para;</a></h1>
+<h1 id="compute-tile-overview">Compute Tile: Overview<a class="headerlink" href="#compute-tile-overview" title="Permanent link">&para;</a></h1>
 <p>The <strong>compute tile</strong> (<code>npu/src/compute_tile/</code>) is the sequenced datapath and the portable
 IP core: a control front-end fetches and decodes a kernel from IRAM and dispatches each
 instruction, by opcode, to one of two engines --- the <strong>MXU</strong> (systolic matrix unit) or the
@@ -1589,6 +1561,10 @@ tiers. This page is the tile-level map: the datapath spine, the exposed issue mo
 within-tile concurrency levers, and the module tree. Engine internals live on their own
 unit pages (below). Every constant is owned by the SSOT (<code>npu/src/npu/npu_config_pkg.sv</code>,
 generated from <code>npu/params.py</code>); this page does not fix them by architecture.</p>
+<p>The design described here and on the pages below is <em>one</em> microarchitecture that
+implements the <a href="../../spec/isa.html">ISA</a> and <a href="../../spec/abi.html">ABI</a> spec, not the only
+one: other tile organisations could meet the same contract, and this is simply the one
+the repo builds and verifies.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Top-level compute tile: the devmem-SPAD-VREG-ACC spine plus the MXU, VPU, and tile
 sequencer. <code>compute_tile.sv</code> instantiates exactly two children: <code>sequencer</code> (all control
@@ -1698,8 +1674,18 @@ client. (The as-built RTL additionally splits Port B into a second, lower-priori
 that wiring fact, and its caveat, is homed on <a href="spad.html#ports-and-clients">spad.md :: Ports and clients</a>.)</p>
 <h2 id="module-structure">Module structure<a class="headerlink" href="#module-structure" title="Permanent link">&para;</a></h2>
 <p>The tile is a small, fixed set of RTL modules; the sequencer is the only stateful
-controller and owns both engines. The whole-IP module tree
-is <a href="../../../index.html#fig-module-tree">Home Fig. 1</a>; the tile's own module set:</p>
+controller and owns both engines. <a href="#fig-module-tree">Fig. 3</a> expands that hierarchy down to
+every instantiation; the table below is its top-level summary.</p>
+<figure id="fig-module-tree">
+<p><img alt="Compute tile: module containment tree" src="../../../figures/tikz/h-module-tree.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 3.</span><strong>Compute tile: module containment tree.</strong> Every edge is one SystemVerilog
+instantiation. Read down for containment, right for the source file; counts are
+elaborated at <code>N=8</code> / <code>BANKING=8</code> (<code>npu_config_pkg.sv</code>). Rooted at <code>compute_tile.sv</code>,
+so it covers the whole tile: sequencer, MXU, VPU, LSU, and SPAD alike.</p>
+</figcaption>
+</figure>
+<p>The tile's own top-level module set:</p>
 <p><strong>Table: top-level RTL modules of the compute tile (as-implemented).</strong></p>
 <table>
 <thead>

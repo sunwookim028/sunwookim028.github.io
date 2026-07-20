@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1275,34 +1275,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1608,7 +1580,7 @@
      only. The article prose was carried over; the former deck-bullet
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
-<h1 id="mxu-the-systolic-matrix-engine">MXU: the systolic matrix engine<a class="headerlink" href="#mxu-the-systolic-matrix-engine" title="Permanent link">&para;</a></h1>
+<h1 id="mxu-the-systolic-matrix-engine">MXU: The Systolic Matrix Engine<a class="headerlink" href="#mxu-the-systolic-matrix-engine" title="Permanent link">&para;</a></h1>
 <p>The <strong>MXU</strong> is the matrix-multiply engine of the compute tile: an <strong>N×N weight-stationary systolic array</strong> of multiply-accumulate processing elements, wrapped by an FSM that streams operand tiles in and out of the scratchpad. It implements two ISA ops in the <code>0x0_</code> matmul group --- <code>mxu.load.w</code> (0x00), which loads an N× N weight tile into the next (inactive) weight buffer, and <code>mxu.matmul</code> (0x01), which implicitly switches the loaded weights to active, streams the activation tile through the array, and accumulates into the <strong>ACC</strong> register file. Each op runs the <code>DIM×DIM</code> tile loop internally so a kernel issues one <code>mxu.load.w</code> + <code>mxu.matmul</code> pair per weight tile. Splitting weight load from compute is what lets the compiler preload the <em>next</em> tile's weights while the current tile still computes (§ the tile loop). This document is the visual deep-dive; the exhaustive specifics (every FSM state, the synthesizable FP bit-arithmetic) live in the RTL.</p>
 <p><strong>Numbers are owned by config, not by this page.</strong> All sizes below are cited to <code>npu/src/npu/npu_config_pkg.sv</code> (the generated config package, itself derived from <code>npu/params.py</code>). For this build: <code>N = 8</code> ⇒ <strong>8×8 = 64 PEs</strong>, <code>MEM_LATENCY = 2</code>, <code>DATA_WIDTH = 32</code> (FP32 accumulate / psum bus), and storage width <code>STORAGE_WIDTH = 16</code> (BF16). Opcode semantics are cited to <code>mininpu/isa</code>.</p>
 <h2 id="where-the-mxu-sits">Where the MXU sits<a class="headerlink" href="#where-the-mxu-sits" title="Permanent link">&para;</a></h2>

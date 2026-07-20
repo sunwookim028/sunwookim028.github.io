@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1253,34 +1253,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1558,7 +1530,7 @@
 
 
 
-<h1 id="spad-the-scratchpad-operand-tier">SPAD: the scratchpad operand tier<a class="headerlink" href="#spad-the-scratchpad-operand-tier" title="Permanent link">&para;</a></h1>
+<h1 id="spad-the-scratchpad-operand-tier">SPAD: The Scratchpad Operand Tier<a class="headerlink" href="#spad-the-scratchpad-operand-tier" title="Permanent link">&para;</a></h1>
 <p>The <strong>SPAD</strong> (<code>spad.sv</code>) is the compute tile's on-chip scratchpad: <strong>bf16</strong> operand memory
 in a separate, 0-based address space (like CUDA <code>.shared</code>), sitting between off-tile device
 memory and the fp32 compute-register tiers (VREG / ACC). It is the operand store the MXU
@@ -1650,7 +1622,8 @@ read tile-row <em>r</em> on cycle <em>r</em>, write <code>RL = 2</code> later, a
 Port B (compute). Port B is presented as <code>port0</code> (high priority) and <code>port1</code> (a second,
 lower-priority master) via the per-bank grant arbiter (<code>comp_gnt</code> / <code>comp_conflict_bank_o</code>);
 a lower-priority master advances only on a granted cycle, which is the "compute fixed &gt; DMU
-yields" primitive. The tile module tree is <a href="../../../index.html#fig-module-tree">Home Fig. 1</a>.</p>
+yields" primitive. SPAD's place in the tile's module tree, down to the <code>banked_sram</code>
+macro, is drawn in <a href="index.html#fig-module-tree">Compute tile Fig. 3</a>.</p>
 <hr />
 <p>mininpu · SPAD · <a href="index.html">compute-tile overview</a> · <a href="../../../index.html">back to home</a></p>
 

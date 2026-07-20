@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1117,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1768,20 +1740,50 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> the <code>vec.*</code> mnemonics used below
+<p><strong>Known wrong, not merely unverified.</strong> The <code>vec.*</code> mnemonics used below
 (<code>vec.rowsum</code>, <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code>) belong
-to a namespace that <strong>matches no generation of the ISA</strong>. Check the generated
-<a href="../hardware/spec/isa.html">ISA Reference</a> for the mnemonics that actually exist.</p>
+to a namespace that <strong>matches no generation of the ISA</strong>.</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>Instruction semantics and operand fields:</em> what <code>vec.rowsum</code>,
+  <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code> and <code>flush</code> do, and
+  the <code>acc_dst</code> / <code>acc_a</code> / <code>acc_b</code> / <code>vreg_dst</code> / <code>acc_src</code> operand fields
+  the three-instruction kernel in Part 2 uses.</li>
+<li><em>Datapath geometry:</em> eight lanes; one multiplier, adder and comparator per
+  lane; a scratchpad row holding eight FP32 values; an accumulator tile of
+  eight rows by eight FP32 values.</li>
+<li><em>Reduction tree:</em> <code>fp_reduce_tree</code> parameterized <code>N=8</code> with <code>OP="ADD"</code> and
+  an <code>OP="MAX"</code> mode; three pairwise levels; a three-cycle latency equal to
+  that depth.</li>
+<li><em>Lookup tables and their latency:</em> that <code>fp_exp2_bram</code>, <code>fp_recip_bram</code>,
+  <code>fp_rsqrt_bram</code> and <code>fp_tanh_bram</code> exist; that the <code>fp_tanh_bram</code> read is
+  registered and costs one cycle; that the GELU path has exactly one
+  registered stage.</li>
+<li><em>Provided FPU blocks:</em> <code>fp_mul</code> (claimed combinational), <code>fp_add</code>,
+  <code>fp_max</code>, and the claim that ReLU is one <code>fp_max</code> comparison.</li>
+<li><em>Module, signal and FSM-state names:</em> <code>vpu_lane.sv</code>, <code>vpu_ctrl.sv</code>,
+  <code>row_cnt</code>, <code>stage_cnt</code>, <code>VPU_REDUCE_ROW</code>, <code>VPU_ACC_ROW</code>, the opcode-class
+  entry-state dispatch, and the one-cycle <code>done</code> pulse.</li>
+<li><em>Numeric format:</em> that Lab 1 is FP32 end to end.</li>
+<li><em>Figure-borne claims:</em> <code>vpu-datapath</code> and <code>vpu-reduce</code> are frozen legacy
+  SVGs with no TikZ source, so they cannot be re-rendered from a corrected
+  source. The lane count, the per-lane unit set, the ADD/MAX tree shape and
+  the three-level depth are asserted by the drawings as well as by the prose:
+  checking the prose does not check the figures.</li>
+<li><em>Suspect, check first:</em> the Part 2 kernel comment says <code>vec.mul.acc</code>
+  computes "all 64 products at once", while the surrounding text describes a
+  row-sequential controller over an eight-lane datapath. At most one of these
+  can be right.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>This is the first lab in building a neural-network accelerator, and your

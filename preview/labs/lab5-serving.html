@@ -292,7 +292,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -568,7 +568,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -584,7 +584,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1115,34 +1115,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1805,20 +1777,38 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> this is a software lab (engine, cache,
-allocator, scheduler) and no ISA- or RTL-level conflict has been filed
-against it. The teaching packaging it assumes is in part not yet built; the
-handout marks those points in its source.</p>
+<p>This is mostly a software lab (engine, cache, allocator, scheduler), and no
+ISA- or RTL-level conflict has been filed against it. That is not the same as
+its hardware claims having been checked: the short list below has not been,
+and the teaching packaging the page assumes is in part not yet built (the
+source marks those points).</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>Hardware prerequisite:</em> that the Lab 3 hardware already reads and appends
+  a key-value cache and that the instruction set for doing so is fixed. This
+  is the load-bearing claim on the page: everything downstream assumes it.</li>
+<li><em>Backend API and semantics:</em> <code>backend.kv_append(kv_k, kv_v, k_new, v_new,
+  seq_pos)</code> writing the new key and value rows at <code>seq_pos</code>, and
+  <code>backend.decode_attn(q, kv_k, kv_v, n_ctx, ...)</code> attending over exactly the
+  first <code>n_ctx</code> rows.</li>
+<li><em>Kernel locations:</em> <code>kv_cache_append</code> in <code>kernels/kv_cache.py</code> and
+  <code>decode_attn</code> in <code>kernels/decode_attn.py</code>.</li>
+<li><em>Offload path:</em> that <code>offload(blocks)</code> and <code>fetch(blocks)</code> move blocks
+  between device memory and host memory, and that the host memory in question
+  is <strong>PS-DDR</strong>.</li>
+<li><em>Block granularity:</em> the sixteen-rows-per-block figure in Part 2 is written
+  as an example rather than a requirement; confirm no fixed hardware block
+  size contradicts it.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>In Lab 4 you wrote the kernels that run on the accelerator. In this lab you build

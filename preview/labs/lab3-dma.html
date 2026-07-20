@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1117,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1818,24 +1790,71 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> every part below tells you to write the
-address generation and row-walk in <strong><code>sequencer.sv</code>, which has been
+<p><strong>Known wrong, not merely unverified.</strong> Every part below tells you to write
+the address generation and row-walk in <strong><code>sequencer.sv</code>, which has been
 retired</strong>. It is in no live build and does not elaborate against the current
 MXU; the canonical dispatch is <code>tile_sequencer.sv</code>. Do not start this lab
 against the file as written. The <code>dma.*</code> mnemonics used below likewise match
-no generation of the ISA, and the <code>.mi</code> opcode range <code>0x48</code>–<code>0x4E</code> is
+no generation of the ISA, and the <code>.mi</code> opcode range <code>0x48</code>-<code>0x4E</code> is
 inherited from that retired file: only <code>0x48</code> and <code>0x4C</code> exist, both
-reserved. See the generated <a href="../hardware/spec/isa.html">ISA Reference</a>.</p>
+reserved. <em>Part 2 nonetheless presents the <code>.mi</code> family as live, with worked
+descriptor fields and a hardware address formula, so it contradicts this note
+and must be rewritten rather than caveated.</em></p>
+<p><strong>Self-contradictions to settle first.</strong> Part 2 claims <code>test_sequencer.py</code>
+drives a <code>.mi</code> load, and Part 3 claims <code>test_dm_axi_bridge.py</code> verifies the
+double-buffer overlap; the page's own source comments say the <code>.mi</code> subtest
+does not exist and that there is no <code>dma_buf_sel</code> or <code>BUF_ROWS</code> in the RTL
+today. The Materials section describes both regions as carved <code>TODO(lab3)</code>
+regions in the live skeleton, and its own comment says only the Part 1
+single-tile row-walk is carved. Separately, the page is titled <em>Putting the
+Units Together</em> but its first sentence still says "This lab builds the
+<strong>data-movement engine</strong> (the DMA)"; that framing tension is recorded here
+deliberately and is not resolved.</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>Bridge interface:</em> the <code>dm_axi_bridge.sv</code> port set (<code>dm_addr</code>, <code>dm_din</code>,
+  <code>dm_dout</code>, <code>dm_en</code>, <code>dm_we</code>, <code>dm_ack</code>); the claim that each 256-bit word
+  becomes an eight-beat AXI4 <code>INCR</code> burst; the single-outstanding, in-order
+  protocol with a one-cycle <code>dm_ack</code>; and the <code>byte_addr = devmem_base +
+  dm_addr * 32</code> address relation (whose factor of 32 must agree with the
+  256-bit word width).</li>
+<li><em>Part 1 registers and FSM:</em> <code>dram_addr_reg</code>, <code>dram_stride_reg</code>,
+  <code>dma_mat_rows</code>, <code>dma_row_r</code>, the <code>DMA_ROW_REQ</code> and <code>DMA_ROW_WAIT</code> states,
+  the <code>dma_byte_addr</code> formula, and the loop-exit condition.</li>
+<li><em>Part 2 <code>.mi</code> descriptor:</em> the <code>row_step</code>, <code>iv_stride_a</code>, <code>iv_stride_b</code> and
+  induction-variable id fields; the <code>dma_iv_offset</code> and <code>dma_byte_addr</code>
+  formulas; and the claim that one BF16 element is 2 bytes.</li>
+<li><em>Part 3 scratchpad and double buffering:</em> that <code>banked_sram.sv</code> is a true
+  dual-port memory with port A as the DMA master and port B as the compute
+  master, conflicting only on the same bank in the same cycle; the
+  <code>dma_buf_sel</code> register and <code>BUF_ROWS</code> parameter; the two buffer base
+  addresses; the prefetch trigger; and the swap condition.</li>
+<li><em>Host runtime and ABI surface:</em> <code>alloc_devmem(n_words)</code>,
+  <code>buf.sync_to_device()</code>, <code>set_devmem_base(buf.device_address)</code>,
+  <code>npu_launch(program)</code>, <code>read_bram</code>, and <code>sync_from_device()</code>.</li>
+<li><em>Kernel listing:</em> the <code>dma.load.spm</code>, <code>matmul.tile.bf16</code>, <code>dma.store.spm</code>
+  and <code>flush</code> mnemonics and their operand fields (<code>spm_dst</code>, <code>spm_src</code>,
+  <code>dram_addr</code>, <code>mat_rows</code>, <code>acc_dst</code>, <code>spm_a</code>, <code>spm_b</code>).</li>
+<li><em>Board and cache claims:</em> that the host stages tensors in a PS-DDR buffer,
+  and that the store path leaves the hardware able to keep a key-value cache
+  in DRAM.</li>
+<li><em>Figure-borne claims:</em> <code>ct-pingpong</code> is a frozen legacy SVG with no TikZ
+  source, so it cannot be re-rendered from a corrected source. Its caption
+  reads the fill/read split, the role-swapping fence and the no-overlap stall
+  straight off the drawing, and Part 3 restates them.</li>
+<li><em>DV file and test names:</em> <code>dv/interface_tile/test_dm_axi_bridge.py</code>, and
+  <code>test_sequencer_dma_load_spm</code> / <code>test_sequencer_dma_store_spm</code> in
+  <code>dv/compute_tile/test_sequencer.py</code>.</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>By the end of Lab 2 the accelerator could do the arithmetic of a neural network:

@@ -294,7 +294,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="index.html" class="md-tabs__link">
+        <a href="introduction.html" class="md-tabs__link">
           
   
   
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1117,34 +1117,6 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1786,21 +1758,44 @@
 <p>Late submission: 4% penalty per day; cannot be late by more than 6 days.</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Ported verbatim; technical claims under review</p>
-<p>This handout was ported from its LaTeX source content-preserving: the
-prose, listings, figures, and exercises are carried over as written, with no
-rewrite. Its <strong>technical claims have not been re-validated against the
-current RTL and ISA</strong> and are under review, tracked in
-<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. Treat module
-names, instruction mnemonics, and datapath descriptions on this page as
-handout text, not as a reference for the hardware as it stands today. The
-authoritative sources are the <a href="../hardware/spec/isa.html">ISA Reference</a> and the
+<p class="admonition-title">Unverified against the RTL and ISA</p>
+<p>This page was ported from a retired LaTeX handout without a technical
+review. The claims listed below have <strong>not</strong> been checked against the current
+RTL and ISA; they are the work list for the review tracked in
+<a href="https://github.com/sunwookim028/mininpu/issues/385">issue #385</a>. The rest of
+the page (motivation, exercises, tooling and submission steps) is pedagogy
+and needs no such check. The authoritative sources are the
+<a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>On this page specifically:</strong> the NPU instructions shown as the compiler's
-output (<code>matmul.tile.bf16</code>, <code>vec.exp2</code>, <code>dma.load.spm</code>, <code>dma.store.spm</code>)
-belong to a namespace that <strong>matches no generation of the ISA</strong>. Read them as
-illustrative of the lowering, not as the instruction set; the generated
-<a href="../hardware/spec/isa.html">ISA Reference</a> is the authority.</p>
+<p><strong>Known wrong, not merely unverified.</strong> The NPU instructions shown as the
+compiler's output (<code>matmul.tile.bf16</code>, <code>vec.exp2</code>, <code>dma.load.spm</code>,
+<code>dma.store.spm</code>) belong to a namespace that <strong>matches no generation of the
+ISA</strong>. The body below nonetheless treats those mnemonics as ground truth that
+a test checks the compiler output against, so the exercises inherit the
+error, not just the prose.</p>
+<p><strong>Unverified claims on this page.</strong></p>
+<ul>
+<li><em>MXU geometry:</em> that <code>tl.dot</code> over one tile runs on an "8-by-8 systolic
+  array". This is a hardware dimension, not a mnemonic, so the note above
+  does not cover it.</li>
+<li><em>Lowering claims:</em> that <code>tl.dot</code> becomes <code>matmul.tile.bf16</code>, <code>tl.load</code> and
+  the store become <code>dma.load.spm</code> / <code>dma.store.spm</code>, and that <code>tl.exp2</code> maps
+  directly onto the <code>vec.exp2</code> instruction the Lab 1 VPU runs.</li>
+<li><em>Numeric format:</em> that the kernel multiplies in 16 bits and accumulates in
+  32.</li>
+<li><em>Tooling fidelity:</em> that <code>mininpu.iss</code> executes the same instruction set
+  the RTL does, and that <code>mininpu.cost</code> estimates a real cycle count for this
+  accelerator.</li>
+<li><em>Top-level configuration:</em> that the accelerator is configured with a single
+  compute tile, that grid instances therefore run one after another with a
+  physical concurrency of one, and that the within-tile VPU/MXU overlap from
+  Lab 2 still applies.</li>
+<li><em>Compiler behaviour:</em> that block sizes must be <code>tl.constexpr</code> arguments or
+  the compiler cannot tile, and that the <code>matmul.tile.bf16</code> instruction count
+  follows deterministically from the block sizes.</li>
+<li><em>Model configuration:</em> <code>d_head = 64</code> for the worked model (a model-config
+  number, settled by the GPT-2 configuration rather than by the RTL).</li>
+</ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
 <p>In the first three labs you built the hardware: a vector unit, a matrix unit,

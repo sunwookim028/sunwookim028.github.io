@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../labs/index.html" class="md-tabs__link">
+        <a href="../../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -585,7 +585,7 @@
   <span class="md-ellipsis">
     
   
-    Example microarchitecture
+    Microarchitecture
   
 
     
@@ -601,7 +601,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Example microarchitecture
+    Microarchitecture
   
 
           </label>
@@ -1286,34 +1286,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../labs/index.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../labs/introduction.html" class="md-nav__link">
         
   
@@ -1630,12 +1602,12 @@
      only. The article prose was carried over; the former deck-bullet
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
-<h1 id="sequencer-the-control-path">Sequencer: the control path<a class="headerlink" href="#sequencer-the-control-path" title="Permanent link">&para;</a></h1>
+<h1 id="sequencer-the-control-path">Sequencer: The Control Path<a class="headerlink" href="#sequencer-the-control-path" title="Permanent link">&para;</a></h1>
 <p>The <strong>sequencer</strong> is the compute tile's control unit: it owns the program counter, the instruction RAM, and the decoder, and dispatches each fetched instruction to the right engine (MXU / VPU / DMA) or control sub-FSM. This document zooms in from the sequencer's place in the control plane, to the <em>fetch → decode → dispatch → engine handoff</em> lifecycle, to the 64-bit instruction word and the opcode-group fan-out of <code>EXEC_DISPATCH</code>. The exhaustive opcode-to-case table is not reproduced here --- it is the RTL itself (<code>sequencer.sv</code> + <code>mininpu/isa</code>); this document cites it.</p>
 <h2 id="the-sequencer-in-context">The sequencer in context<a class="headerlink" href="#the-sequencer-in-context" title="Permanent link">&para;</a></h2>
 <p>The sequencer's place in the device (the command processor's launch path) is described
-on <a href="../uncore.html">the uncore</a>; its place in the tile's module tree is
-<a href="../../../index.html#fig-module-tree">Home Fig. 1</a>. The whole-device context is drawn in
+on <a href="../uncore.html">the uncore</a>; its place in the tile's module tree is drawn in
+<a href="index.html#fig-module-tree">Compute tile Fig. 3</a>. The whole-device context is drawn in
 <a href="../../../labs/introduction.html#fig-system-context">Lab 0 Fig. 1</a>.</p>
 <p>The host rings a <strong>doorbell</strong> over AXI-Lite. The CP decodes a LAUNCH descriptor (active v1 fields: <code>kbin_addr</code>:64, <code>kbin_size</code>:32; no runtime kernargs in v1, operand addresses are compile-baked immediates), loads the kernel binary from devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into tile IRAM, and pulses <code>start</code>; completion is <code>instr_ready</code> (combinational all-idle flag). The <strong>sequencer</strong> owns the <strong>program counter</strong> (<code>pc.sv</code>), the <strong>IRAM</strong> (4096 × 64-bit), and the combinational <strong>decoder</strong> (<code>decoder.sv</code>). On each instruction it fans out from <code>EXEC_DISPATCH</code> to one engine --- <strong>MXU</strong> or <strong>VPU</strong> (via <code>vpu_ctrl</code>) --- or the tile's <strong>DMU</strong> (driven by the <code>DMA_ROW_*</code> sub-FSM), or a <strong>control sub-FSM</strong> (loop / flush.slot / halt). Each engine's <code>done</code> pulse drives <code>pc_enable</code> and the next fetch begins.</p>
 <h2 id="fetch-decode-dispatch-lifecycle">Fetch → decode → dispatch lifecycle<a class="headerlink" href="#fetch-decode-dispatch-lifecycle" title="Permanent link">&para;</a></h2>
