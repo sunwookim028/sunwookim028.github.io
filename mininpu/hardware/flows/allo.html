@@ -10,29 +10,31 @@
       
       
       
-        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/index.html">
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/hardware/flows/allo.html">
       
       
+        <link rel="prev" href="fpga.html">
       
-        <link rel="next" href="hardware/spec/isa.html">
+      
+        <link rel="next" href="../verification.html">
       
       
         
       
       
-      <link rel="icon" href="assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>mininpu documentation</title>
+        <title>Allo generator path - mininpu documentation</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -45,9 +47,9 @@
       
     
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -72,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mininpu-npu-ip-and-triton-to-silicon-flows" class="md-skip">
+        <a href="#allo-generator-path" class="md-skip">
           Skip to content
         </a>
       
@@ -88,7 +90,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../../index.html" title="mininpu documentation" class="md-header__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -108,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Home
+              Allo generator path
             
           </span>
         </div>
@@ -199,11 +201,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="index.html" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../../index.html" class="md-tabs__link">
         
   
   
@@ -220,6 +220,8 @@
   
   
   
+    
+  
   
     
     
@@ -227,11 +229,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="hardware/spec/isa.html" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../spec/isa.html" class="md-tabs__link">
           
   
   
@@ -252,7 +256,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="runtime.html" class="md-tabs__link">
+      <a href="../../runtime.html" class="md-tabs__link">
         
   
   
@@ -271,7 +275,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="compiler/index.html" class="md-tabs__link">
+      <a href="../../compiler/index.html" class="md-tabs__link">
         
   
   
@@ -292,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="labs/introduction.html" class="md-tabs__link">
+        <a href="../../labs/introduction.html" class="md-tabs__link">
           
   
   
@@ -332,7 +336,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
+    <a href="../../index.html" title="mininpu documentation" class="md-nav__button md-logo" aria-label="mininpu documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -347,37 +351,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="index.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../index.html" class="md-nav__link">
         
   
   
@@ -393,81 +370,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#hardware" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Hardware
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#runtime" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Runtime
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#compiler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Compiler
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#labs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Labs
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-to-start" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where to start
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -476,26 +378,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -513,7 +420,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -537,17 +444,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
         
           
-          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="">
             
   
   
@@ -583,7 +493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/spec/isa.html" class="md-nav__link">
+      <a href="../spec/isa.html" class="md-nav__link">
         
   
   
@@ -611,7 +521,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/spec/abi.html" class="md-nav__link">
+      <a href="../spec/abi.html" class="md-nav__link">
         
   
   
@@ -653,17 +563,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
             
   
   
@@ -751,7 +664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/index.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/index.html" class="md-nav__link">
         
   
   
@@ -779,7 +692,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/sequencer.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/sequencer.html" class="md-nav__link">
         
   
   
@@ -807,7 +720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/mxu.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/mxu.html" class="md-nav__link">
         
   
   
@@ -835,7 +748,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/vpu.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/vpu.html" class="md-nav__link">
         
   
   
@@ -863,7 +776,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/spad.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/spad.html" class="md-nav__link">
         
   
   
@@ -891,7 +804,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/dmu.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/dmu.html" class="md-nav__link">
         
   
   
@@ -919,7 +832,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/compute_tile/gpt2_demo.html" class="md-nav__link">
+      <a href="../microarch/compute_tile/gpt2_demo.html" class="md-nav__link">
         
   
   
@@ -955,7 +868,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/microarch/uncore.html" class="md-nav__link">
+      <a href="../microarch/uncore.html" class="md-nav__link">
         
   
   
@@ -988,26 +901,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
             
   
   
@@ -1025,7 +943,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1043,7 +961,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/flows/asic.html" class="md-nav__link">
+      <a href="asic.html" class="md-nav__link">
         
   
   
@@ -1071,7 +989,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/flows/fpga.html" class="md-nav__link">
+      <a href="fpga.html" class="md-nav__link">
         
   
   
@@ -1096,10 +1014,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="hardware/flows/allo.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="allo.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1115,6 +1060,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dual-permanent-stacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dual, permanent stacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#both-stacks-target-asic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Both stacks target ASIC
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-isa-ssot-consumed-not-duplicated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One ISA SSOT, consumed not duplicated
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repo-shape" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repo shape
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initial-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initial scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1135,7 +1155,7 @@
   
   
     <li class="md-nav__item">
-      <a href="hardware/verification.html" class="md-nav__link">
+      <a href="../verification.html" class="md-nav__link">
         
   
   
@@ -1170,7 +1190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="runtime.html" class="md-nav__link">
+      <a href="../../runtime.html" class="md-nav__link">
         
   
   
@@ -1197,7 +1217,7 @@
   
   
     <li class="md-nav__item">
-      <a href="compiler/index.html" class="md-nav__link">
+      <a href="../../compiler/index.html" class="md-nav__link">
         
   
   
@@ -1276,7 +1296,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/introduction.html" class="md-nav__link">
+      <a href="../../labs/introduction.html" class="md-nav__link">
         
   
   
@@ -1304,7 +1324,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab1-vpu.html" class="md-nav__link">
+      <a href="../../labs/lab1-vpu.html" class="md-nav__link">
         
   
   
@@ -1332,7 +1352,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab2-systolic.html" class="md-nav__link">
+      <a href="../../labs/lab2-systolic.html" class="md-nav__link">
         
   
   
@@ -1360,7 +1380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab3-dma.html" class="md-nav__link">
+      <a href="../../labs/lab3-dma.html" class="md-nav__link">
         
   
   
@@ -1388,7 +1408,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab4-kernels.html" class="md-nav__link">
+      <a href="../../labs/lab4-kernels.html" class="md-nav__link">
         
   
   
@@ -1416,7 +1436,7 @@
   
   
     <li class="md-nav__item">
-      <a href="labs/lab5-serving.html" class="md-nav__link">
+      <a href="../../labs/lab5-serving.html" class="md-nav__link">
         
   
   
@@ -1471,10 +1491,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#hardware" class="md-nav__link">
+  <a href="#dual-permanent-stacks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Hardware
+        Dual, permanent stacks
       
     </span>
   </a>
@@ -1482,10 +1502,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#runtime" class="md-nav__link">
+  <a href="#both-stacks-target-asic" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Runtime
+        Both stacks target ASIC
       
     </span>
   </a>
@@ -1493,10 +1513,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#compiler" class="md-nav__link">
+  <a href="#one-isa-ssot-consumed-not-duplicated" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Compiler
+        One ISA SSOT, consumed not duplicated
       
     </span>
   </a>
@@ -1504,10 +1524,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#labs" class="md-nav__link">
+  <a href="#repo-shape" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Labs
+        Repo shape
       
     </span>
   </a>
@@ -1515,10 +1535,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-to-start" class="md-nav__link">
+  <a href="#initial-scope" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where to start
+        Initial scope
       
     </span>
   </a>
@@ -1542,68 +1562,61 @@
 
 
 
-<h1 id="mininpu-npu-ip-and-triton-to-silicon-flows">mininpu: NPU IP and Triton to Silicon Flows<a class="headerlink" href="#mininpu-npu-ip-and-triton-to-silicon-flows" title="Permanent link">&para;</a></h1>
-<p>mininpu &middot; documentation</p>
-<p>A composable NPU IP template (MXU / VPU / tile / NoC) built as an IO-attached discrete accelerator, plus the host runtime that drives it and the compiler that targets it. FPGA is a test platform only; the design stays ASIC-targeting.</p>
+<h1 id="allo-generator-path">Allo Generator Path<a class="headerlink" href="#allo-generator-path" title="Permanent link">&para;</a></h1>
+<p>The device has <strong>two generator stacks</strong>, and this page states the doctrine of the
+second one. The hand-written <strong>manual</strong> RTL stack (the datapaths under <code>npu/src/</code>,
+its DV under <code>dv/</code>, and the <code>mininpu/isa</code> contract) is the design driver and the
+permanently maintained baseline. The <strong>Allo generator path</strong> is a heterogeneous
+integration front-end that produces the same IP from a higher-level spec. Both are
+ASIC-targeting. This page is the site-facing summary; the integration SSOT is
+<code>allo/charter.md</code>, which is subordinate to the device design goals in
+<a href="../../index.html">the docs home</a> and the maintained <code>docs/mkdocs/hardware/**</code> pages.</p>
+<h2 id="dual-permanent-stacks">Dual, permanent stacks<a class="headerlink" href="#dual-permanent-stacks" title="Permanent link">&para;</a></h2>
+<p>The manual stack and the Allo-generated stack <strong>coexist</strong>; neither replaces the
+other. The manual stack is the research baseline and the open-source value of the
+project, so it is never retired. The Allo path is reframed as a
+heterogeneous-integration front-end: one spec describes the full IP, <code>#import</code>-ing
+existing blocks that may be written in different languages, and routing parts through
+multiple backends via <code>#to LLM | HLS | BSV | ...</code>. It is not a duplicate stack.</p>
+<h2 id="both-stacks-target-asic">Both stacks target ASIC<a class="headerlink" href="#both-stacks-target-asic" title="Permanent link">&para;</a></h2>
+<p>The design is <strong>ASIC-bound</strong>. The Allo path is ASIC-targeting like the manual stack:
+it lowers via <strong>Catapult / SystemC HLS to ASIC</strong>, not via an FPGA-specific HLS path.
+FPGA remains a <strong>test platform only</strong> for both stacks:</p>
 <ul>
-<li><strong>ISA 0.5.0</strong> &middot; 15 opcodes</li>
-<li>geometry <strong>N=8</strong></li>
-<li>VREG <strong>256 fp32 vector registers</strong> (flat 1D, 8 KiB; as-built in <code>vreg_rf.sv</code>)</li>
-<li>on-chip SPAD <strong>32 KiB</strong></li>
-<li>target <strong>GPT-2</strong></li>
+<li>the manual stack validates on Zynq (ultra96-v2, zcu102) today and reaches
+  <strong>U280/Alveo</strong> (PCIe + HBM interface tile) at its [v3] milestone;</li>
+<li>the Allo path uses <strong>U280 via Vitis/XRT</strong> today as its test platform (the analogue
+  of Zynq for the manual stack), not as an end target. Vitis/HLS runs as a manual
+  offline gate, not as default CI.</li>
 </ul>
-<h2 id="hardware">Hardware<a class="headerlink" href="#hardware" title="Permanent link">&para;</a></h2>
-<p>The NPU IP: an architectural spec, one microarchitecture implementing it, and the flows that build it.</p>
+<p>Neither stack carries FPGA-specific RTL optimisations; U280/Alveo is a shared test
+platform, not a delivery target.</p>
+<h2 id="one-isa-ssot-consumed-not-duplicated">One ISA SSOT, consumed not duplicated<a class="headerlink" href="#one-isa-ssot-consumed-not-duplicated" title="Permanent link">&para;</a></h2>
+<p>The Allo subtree <strong>consumes <code>mininpu/isa</code> (<code>isa.py</code>) as the single ISA SSOT</strong>. The
+former allo-npu prototype's own isa/assembler is retired. This keeps one contract for
+both stacks: the opcodes, the instruction word, and the ABI register map are owned by
+the manual stack's <code>mininpu/isa</code> + <code>mininpu/abi.py</code>, and the Allo path targets them
+rather than defining a parallel encoding. See the <a href="../spec/isa.html">ISA spec</a> and the
+<a href="../spec/abi.html">ABI spec</a>.</p>
+<h2 id="repo-shape">Repo shape<a class="headerlink" href="#repo-shape" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Architectural spec:</strong> <a href="hardware/spec/isa.html">ISA Contract</a> &middot; <a href="hardware/spec/abi.html">ABI Register Map</a></li>
-<li><strong>Microarchitecture:</strong> <a href="hardware/microarch/compute_tile/index.html">Compute tile</a> (overview, <a href="hardware/microarch/compute_tile/sequencer.html">Sequencer</a>, <a href="hardware/microarch/compute_tile/vpu.html">VPU</a>, <a href="hardware/microarch/compute_tile/mxu.html">MXU</a>, <a href="hardware/microarch/compute_tile/spad.html">SPAD</a>, <a href="hardware/microarch/compute_tile/dmu.html">DMU</a>, Memory Tile ([v3]-deferred, RFC #158)) &middot; <a href="hardware/microarch/compute_tile/gpt2_demo.html">GPT-2 demo</a> &middot; <a href="hardware/microarch/uncore.html">The uncore</a> (the non-compute infra)</li>
-<li><strong>Implementation flows:</strong> <a href="hardware/flows/asic.html">ASIC flow</a> (the primary path; both generator stacks target ASIC) &middot; <a href="hardware/flows/fpga.html">FPGA flow</a> (test platform only, no FPGA-specific RTL) &middot; both pages are placeholders that scope the flow rather than describe it</li>
+<li><code>allo/</code> is a top-level subtree holding the generator core: the Allo spec of the IP,
+  the <code>#to</code> backend glue, HLS generate/cosim, and an <code>allo/generated/</code> output tree
+  that is gitignored.</li>
+<li>The Allo compiler itself (<code>../allo</code>, the owner's fork) stays an <strong>external,
+  lockstep-pinned</strong> dependency; it is never vendored. <code>allo/</code> pins a specific fork
+  version.</li>
+<li><code>fpga/</code> holds <strong>both</strong> a manual board-build path and an Allo board-build path; the
+  host runtime is in-repo (CUDA-style <code>mininpuMemcpy</code> / <code>mininpuLaunchKernel</code> over
+  <code>mininpu.abi</code>), shared by both stacks.</li>
 </ul>
-<div class="admonition info">
-<p class="admonition-title">Spec vs RTL as-built</p>
-<p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. A spec is not wrong because the RTL trails it; the pages above assert the 0.5.0 spec, and never claim the hardware implements it.</p>
-</div>
-<h2 id="runtime">Runtime<a class="headerlink" href="#runtime" title="Permanent link">&para;</a></h2>
-<p>The in-repo <a href="runtime.html">Host Runtime API</a> (<code>mininpu/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. Device selection, pinned host allocation, synchronous and async memcpy, and kernel launch.</p>
-<h2 id="compiler">Compiler<a class="headerlink" href="#compiler" title="Permanent link">&para;</a></h2>
-<p>The <a href="compiler/index.html">compiler</a> is developed in a separate repository and published as its
-own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal
-extensible compiler framework lowering to the NPU ISA.</p>
-<h2 id="labs">Labs<a class="headerlink" href="#labs" title="Permanent link">&para;</a></h2>
-<p>The <a href="labs/introduction.html">teaching path</a> (lab0..5) builds the accelerator from the inside out, one subsystem per lab. The whole-device / host-in-the-world overview lives on <a href="labs/introduction.html">Lab 0</a>, not here.</p>
-<h2 id="where-to-start">Where to start<a class="headerlink" href="#where-to-start" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Working on&hellip;</th>
-<th>Read first</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>The ISA or ABI</td>
-<td><a href="hardware/spec/isa.html">ISA Contract</a>, <a href="hardware/spec/abi.html">ABI Register Map</a></td>
-</tr>
-<tr>
-<td>The compute tile's microarchitecture</td>
-<td><a href="hardware/microarch/compute_tile/index.html">Compute tile</a></td>
-</tr>
-<tr>
-<td>The host runtime</td>
-<td><a href="runtime.html">Host Runtime API</a></td>
-</tr>
-<tr>
-<td>The compiler</td>
-<td><a href="compiler/index.html">Compiler</a></td>
-</tr>
-<tr>
-<td>Learning the device end to end</td>
-<td><a href="labs/introduction.html">Labs, starting at Lab 0</a></td>
-</tr>
-</tbody>
-</table>
+<h2 id="initial-scope">Initial scope<a class="headerlink" href="#initial-scope" title="Permanent link">&para;</a></h2>
+<p>The first Allo target is the <strong>compute-tile microarchitecture</strong> spec/reproduction
+only; everything else depends on manual artifacts. The generator code and the policy
+flips land at fold-in, after the ISA is finalized on <code>main</code>. Until then <code>allo/</code> holds
+the charter and coordination SSOT, not generator code.</p>
 <hr />
-<p>mininpu &middot; documentation</p>
+<p>mininpu · Allo generator path · <a href="asic.html">ASIC flow</a> · <a href="../../index.html">back to home</a></p>
 
 
 
@@ -1638,15 +1651,31 @@ extensible compiler framework lowering to the NPU ISA.</p>
       
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
+          
+          <a href="fpga.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: FPGA flow">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                FPGA flow
+              </div>
+            </div>
+          </a>
+        
         
           
-          <a href="hardware/spec/isa.html" class="md-footer__link md-footer__link--next" aria-label="Next: ISA">
+          <a href="../verification.html" class="md-footer__link md-footer__link--next" aria-label="Next: Verification">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                ISA
+                Verification
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1683,13 +1712,13 @@ extensible compiler framework lowering to the NPU ISA.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.top", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
   
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="javascripts/mathjax.js"></script>
+        <script src="../../javascripts/mathjax.js"></script>
       
     
   <script

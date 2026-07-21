@@ -992,9 +992,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1802,7 +1858,13 @@ and needs no such check. The authoritative sources are the
 <p><strong>Known wrong, not merely unverified.</strong> Every part below tells you to write
 the address generation and row-walk in <strong><code>sequencer.sv</code>, which has been
 retired</strong>. It is in no live build and does not elaborate against the current
-MXU; the canonical dispatch is <code>tile_sequencer.sv</code>. Do not start this lab
+MXU; the canonical dispatch is <code>tile_sequencer.sv</code>. Beyond that, the DMA
+address generation and row-walk do not belong in the dispatch FSM at all: the
+DMU is a <strong>separate module</strong>, and on this branch it is <strong>stubbed</strong>
+(<code>tile_sequencer</code> only exposes <code>dma_slot_done</code> / <code>dmu_idle</code>; the compute-tile
+<code>dmu.sv</code> does not yet exist, and the as-built DMA machinery still lives in the
+interface tile's <code>dma_engine.sv</code>). So every "write it in <code>sequencer.sv</code>"
+instruction below is wrong on two counts, not one. Do not start this lab
 against the file as written. The <code>dma.*</code> mnemonics used below likewise match
 no generation of the ISA, and the <code>.mi</code> opcode range <code>0x48</code>-<code>0x4E</code> is
 inherited from that retired file: only <code>0x48</code> and <code>0x4C</code> exist, both

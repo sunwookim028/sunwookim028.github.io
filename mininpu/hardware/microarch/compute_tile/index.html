@@ -1136,9 +1136,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1612,14 +1668,20 @@ value each tier holds:</p>
 <tr>
 <td>1D</td>
 <td>reduced / weight vector</td>
-<td><strong>VREG</strong> (fp32 register file)</td>
-<td>compiler reg-alloc; 5-bit id</td>
+<td><strong>VREG</strong> (shared flat-1D fp32 register file)</td>
+<td>compiler reg-alloc; 8-bit flat id (V0--V255)</td>
+</tr>
+<tr>
+<td>2D</td>
+<td>value tile</td>
+<td><strong>VREG</strong> as 8 CONSECUTIVE registers (base..base+7)</td>
+<td>compiler reg-alloc; base arbitrary, base+7 &lt;= 255, no alignment requirement</td>
 </tr>
 <tr>
 <td>2D</td>
 <td>accumulator tile</td>
-<td><strong>ACC</strong> (dedicated fp32 accumulator RF)</td>
-<td>compiler-assigned indices; no explicit alloc/free</td>
+<td><strong>ACC</strong> (dedicated fp32 accumulator RF, <strong>MXU-internal</strong>)</td>
+<td>compiler-assigned bank indices; not part of the shared VREG file</td>
 </tr>
 </tbody>
 </table>
@@ -1703,8 +1765,8 @@ so it covers the whole tile: sequencer, MXU, VPU, LSU, and SPAD alike.</p>
 </tr>
 <tr>
 <td>sequencer</td>
-<td><code>sequencer.sv</code></td>
-<td>Top FSM: fetch → <code>EXEC_DISPATCH</code> + co-issue tracks; instantiates <code>pc_iram</code>, <code>perf_counters</code>, <code>dma_addr_gen</code>×2, <code>mxu</code>, <code>vpu_ctrl</code></td>
+<td><code>tile_sequencer.sv</code></td>
+<td>Top FSM: fetch → <code>ISSUE</code> (fully exposed); the canonical dispatch SSOT. The monolithic <code>sequencer.sv</code> is RETIRED and in no live build</td>
 </tr>
 <tr>
 <td>front-end</td>
@@ -1718,8 +1780,13 @@ so it covers the whole tile: sequencer, MXU, VPU, LSU, and SPAD alike.</p>
 </tr>
 <tr>
 <td>VPU</td>
-<td><code>vpu_ctrl.sv</code> · <code>vpu_lane.sv</code> · <code>vpu_gelu,reduce,cast_unit.sv</code> · <code>vec_regfile.sv</code></td>
-<td>Vector unit: counter-based controller + 8 lanes (gelu/reduce/cast FUs) + vector RF</td>
+<td><code>vpu_ctrl.sv</code> · <code>vpu_lane.sv</code> · <code>vpu_gelu,reduce,cast_unit.sv</code></td>
+<td>Vector unit: counter-based controller + 8 lanes (gelu/reduce/cast FUs). Has no private RF: it is a client of the shared <code>vreg_rf.sv</code></td>
+</tr>
+<tr>
+<td>VREG RF</td>
+<td><code>vreg_rf.sv</code></td>
+<td>Shared flat-1D fp32 vector register file (256×256-bit, 2r1w); clients are the VPU, MXU (X reads) and LSU</td>
 </tr>
 <tr>
 <td>spad</td>

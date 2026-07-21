@@ -834,10 +834,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vector-register-file-vec_regfilesv" class="md-nav__link">
+  <a href="#vector-register-file-vreg_rfsv-shared-flat-1d" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vector register file: vec_regfile.sv
+        Vector register file: vreg_rf.sv (shared, flat 1D)
       
     </span>
   </a>
@@ -866,6 +866,17 @@
   
     <nav class="md-nav" aria-label="FP primitives">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rounding-and-error-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rounding and error bounds
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#why-bram-lut-non-linear-units" class="md-nav__link">
@@ -1024,23 +1035,6 @@
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Parametrization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#retargeting-to-a-narrower-accumulation-precision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retargeting to a narrower accumulation precision
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1342,9 +1336,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1687,10 +1737,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vector-register-file-vec_regfilesv" class="md-nav__link">
+  <a href="#vector-register-file-vreg_rfsv-shared-flat-1d" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Vector register file: vec_regfile.sv
+        Vector register file: vreg_rf.sv (shared, flat 1D)
       
     </span>
   </a>
@@ -1719,6 +1769,17 @@
   
     <nav class="md-nav" aria-label="FP primitives">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rounding-and-error-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rounding and error bounds
+      
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#why-bram-lut-non-linear-units" class="md-nav__link">
@@ -1878,23 +1939,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Parametrization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#retargeting-to-a-narrower-accumulation-precision" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Retargeting to a narrower accumulation precision
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1972,11 +2016,15 @@
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
 <h1 id="vpu-the-vector-processing-unit">VPU: The Vector Processing Unit<a class="headerlink" href="#vpu-the-vector-processing-unit" title="Permanent link">&para;</a></h1>
 <p>The <strong>VPU</strong> is the SIMD vector engine of the compute tile: an 8-lane FP32 datapath with horizontal reductions, BRAM-LUT non-linear functions, and BF16/FP32 casts. It is the workhorse for everything in the GPT-2 forward pass that is <em>not</em> a matrix multiply: RMSNorm, softmax, residual adds, LayerNorm, and GELU activation. This document is the visual deep-dive; the exhaustive specifics (every FSM state, transition, and counter terminal) live in the RTL.</p>
-<p><strong>Source of truth:</strong> <code>npu/src/compute_tile/vpu_ctrl.sv</code>, <code>npu/src/compute_tile/vec_regfile.sv</code>, <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, <code>npu/src/compute_tile/fpu/fp_*.sv</code>, <code>npu/src/npu/npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). Describes the post-refactor counter-based VPU (<code>vpu_ctrl</code> extracted from <code>sequencer.sv</code>).</p>
+<p><strong>Source of truth:</strong> <code>npu/src/compute_tile/vpu_ctrl.sv</code>, <code>npu/src/compute_tile/vreg_rf.sv</code>, <code>npu/src/compute_tile/fpu/fp_reduce_tree.sv</code>, <code>npu/src/compute_tile/fpu/fp_*.sv</code>, <code>npu/src/npu/npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). Describes the post-refactor counter-based VPU (<code>vpu_ctrl</code>, originally extracted from the now-retired <code>sequencer.sv</code>; the live dispatch is <code>tile_sequencer.sv</code>).</p>
 <h2 id="overview-placement">Overview &amp; placement<a class="headerlink" href="#overview-placement" title="Permanent link">&para;</a></h2>
 <p>The VPU's place in the tile is drawn in <a href="index.html#fig-tile-structure">Compute tile Fig. 1</a>.</p>
 <p>The VPU performs 8-lane FP32 element-wise arithmetic, horizontal reductions, non-linear functions (exp2, reciprocal, rsqrt), and BF16↔FP32 casts. In the GPT-2 forward pass it covers RMSNorm, softmax (base-2 online), residual adds, LayerNorm, and GELU activation.</p>
-<p>The VPU lives entirely inside <code>vpu_ctrl.sv</code>, which owns the 8-lane datapath, the non-linear BRAM lookup units, the two reduction trees, and the vector register file (<code>vec_regfile</code>). It is driven by the tile <strong>sequencer</strong> (<code>sequencer.sv</code>) over a simple start/done handshake. When busy it <em>owns scratchpad BRAM Port B</em> (the same wide 256-bit port the DMA/MXU use) and streams ACC/SPM tile rows through its datapath, writing results back to ACC rows or to its own vector register file. An external async VREG read port (<code>vreg_rd_addr_ext</code>/<code>vreg_rd_data_ext</code>) is exposed by <code>vpu_ctrl</code> to sibling engines for future use while the VPU is idle.</p>
+<p>The VPU lives entirely inside <code>vpu_ctrl.sv</code>, which owns the 8-lane datapath, the non-linear BRAM lookup units, and the two reduction trees. It does <strong>not</strong> own a register file: it is a client of the single shared <code>vreg_rf.sv</code> over a 2r1w port group (<code>vpu_vrf_*</code>). It is driven by the tile <strong>sequencer</strong> (<code>tile_sequencer.sv</code>) over a simple start/done handshake. When busy it <em>owns scratchpad BRAM Port B</em> (the same wide 256-bit port the DMA/MXU use) and streams tile rows through its datapath. Addresses on the shared-RF port are flat 8-bit register ids, and a tile-row address is <code>base + row</code> (an ADD).</p>
+<p>Results go back to the shared VREG file <strong>or to an ACC/SPM row</strong>: as built, the VPU still
+takes <code>acc_src</code> / <code>acc_dst</code> / <code>acc_b</code> operands and drives SPAD Port B directly (read and
+write). The <strong>specified</strong> end state is a VREG-only VPU, but that is not implemented yet and
+is downstream of the mover: see <a href="../../spec/isa.html#s4">ISA :: Flags and Locked Decisions</a>.</p>
 <h2 id="handshake-contract">Handshake contract<a class="headerlink" href="#handshake-contract" title="Permanent link">&para;</a></h2>
 <p><strong>Table: VPU start/done handshake signals and their contract.</strong></p>
 <table>
@@ -2004,18 +2052,31 @@
 <td>High while <code>vpu_ctrl</code> holds scratchpad BRAM Port B (i.e. <code>vpu_state != VPU_IDLE</code>). The sequencer must not assert <code>start</code> while this is high.</td>
 </tr>
 <tr>
-<td><code>vreg_rd_addr_ext</code> / <code>vreg_rd_data_ext</code></td>
-<td>in/out</td>
-<td>An external async combinational VREG read exposed by <code>vpu_ctrl</code> to sibling engines while the VPU is idle.</td>
+<td><code>vpu_vrf_rd_addr_a</code> / <code>vpu_vrf_rd_data_a</code></td>
+<td>out/in</td>
+<td>Shared-RF read port A: single-source / gelu source. Async (+0); the address is held for the whole per-row window.</td>
+</tr>
+<tr>
+<td><code>vpu_vrf_rd_addr_b</code> / <code>vpu_vrf_rd_data_b</code></td>
+<td>out/in</td>
+<td>Shared-RF read port B: second source for two-source ops (<code>fma.imm</code>, <code>rsqrt</code>).</td>
+</tr>
+<tr>
+<td><code>vpu_vrf_wr_en</code> / <code>vpu_vrf_wr_addr</code> / <code>vpu_vrf_wr_data</code></td>
+<td>out</td>
+<td>Shared-RF synchronous write port (whole 256-bit register row).</td>
 </tr>
 </tbody>
 </table>
-<h2 id="vector-register-file-vec_regfilesv">Vector register file: <code>vec_regfile.sv</code><a class="headerlink" href="#vector-register-file-vec_regfilesv" title="Permanent link">&para;</a></h2>
+<h2 id="vector-register-file-vreg_rfsv-shared-flat-1d">Vector register file: <code>vreg_rf.sv</code> (shared, flat 1D)<a class="headerlink" href="#vector-register-file-vreg_rfsv-shared-flat-1d" title="Permanent link">&para;</a></h2>
 <!-- TODO(figure): a2-vreg-ports is Decision-B-blocked (only .tex, no .svg by deliberate
      choice, since Decision B may overturn its premise); no figure ships here. -->
 
-<p><code>vec_regfile.sv</code>: <strong>32 registers V0--V31</strong>, each <strong>8 lanes × FP32 = 256 bits</strong>.</p>
-<p><strong>Table: Vector register file (<code>vec_regfile.sv</code>) parameters as built (RTL is authoritative).</strong></p>
+<p>The VPU has <strong>no private register file</strong>. Its former <code>vec_regfile.sv</code> (32 × 256 b) is
+<strong>RETIRED</strong>; all VPU VREG traffic now rides the single shared <code>vreg_rf.sv</code>, alongside the
+MXU (X reads) and the LSU (load/store).</p>
+<p><code>vreg_rf.sv</code>: <strong>256 registers V0--V255</strong>, each <strong>one 256-bit row = 8 lanes × FP32</strong>.</p>
+<p><strong>Table: Vector register file (<code>vreg_rf.sv</code>) parameters as built (RTL is authoritative).</strong></p>
 <table>
 <thead>
 <tr>
@@ -2026,23 +2087,23 @@
 <tbody>
 <tr>
 <td>Registers</td>
-<td>32 (<code>NUM_REGS=32</code>), addressed by a 5-bit index</td>
+<td>256 (<code>REGS = VREG_COUNT = 256</code>), addressed by an <strong>8-bit flat register id</strong></td>
 </tr>
 <tr>
 <td>Lanes / register</td>
-<td>8 (<code>NUM_ELEMS = BANKING = 8</code>)</td>
+<td>8 (<code>ELEMS_PER_ROW = BANKING = 8</code>)</td>
 </tr>
 <tr>
 <td>Element width</td>
-<td>32 bits (<code>ELEM_WIDTH=32</code>, FP32)</td>
+<td>32 bits (<code>ELEM_WIDTH = DATA_WIDTH = 32</code>, FP32)</td>
 </tr>
 <tr>
 <td>Register width</td>
-<td>256 bits</td>
+<td>256 bits (<code>ROW_BITS = SPAD_DATA_WIDTH</code>)</td>
 </tr>
 <tr>
 <td>Total size</td>
-<td>32 × 256 b = 8192 b = 1024 B</td>
+<td>256 × 256 b = 65536 b = 8192 B = <strong>8 KiB</strong></td>
 </tr>
 <tr>
 <td>Read ports</td>
@@ -2053,22 +2114,39 @@
 <td>1, <strong>synchronous</strong> (registered, on <code>wr_en</code>)</td>
 </tr>
 <tr>
+<td>Access granularity</td>
+<td>one whole register row</td>
+</tr>
+<tr>
 <td>Reset</td>
 <td>All registers cleared to zero</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Flat-1D addressing.</strong> The address <em>is</em> the register id: <code>addr = reg_id[7:0]</code>. This
+supersedes the earlier 2D <code>{reg_id[4:0], row[2:0]}</code> tile addressing. A logical <code>[N × N]</code>
+fp32 <strong>tile is N CONSECUTIVE registers</strong>, <code>base .. base+N-1</code>, so consumers form a tile-row
+address by <strong>ADDITION</strong> (<code>base + row</code>), never by concatenation. At <code>N = 8</code> a tile occupies
+8 consecutive registers; tile bases must be at least 8 apart and <code>base+7 &lt;= 255</code>. The base
+is otherwise <strong>arbitrary: there is no alignment requirement</strong> and no encoder-side scaling.</p>
+<p>The physical storage is <strong>unchanged</strong> at 8 KiB by this rework (the old geometry was
+32 tiles × 8 rows × 256 b); only the addressing is reinterpreted. <code>vreg_rf.sv</code> carries a
+static assert (<code>ASSERT_VREG_RF_8KIB</code>) pinning that invariant, so a stale rows-per-tile
+factor cannot silently balloon the RF to 64 KiB.</p>
 <ul>
-<li><strong>Port A / Port B</strong>: the two async operand reads (<code>rd_addr_a</code> / <code>rd_addr_b</code>) used by all VREG-to-VREG ops (e.g. <code>fma</code> reads A=src, B=multiplicand; <code>sub.vreg</code> reads A-B). The RF is a <strong>2r1w</strong> file (2 read, 1 write), matching <code>vec_regfile.sv</code> and <a href="#fig-vpu-datapath">Fig. 1</a>. The external async read <code>vpu_ctrl</code> exposes to sibling engines (<code>vreg_rd_addr_ext</code>) muxes onto this read structure while the VPU is idle; it is not a third RF port.</li>
+<li><strong>Port A / Port B</strong>: the two async operand reads (<code>rd_addr_a</code> / <code>rd_addr_b</code>) used by all
+  VREG-to-VREG ops (e.g. <code>fma</code> reads A=src, B=multiplicand). The RF is a <strong>2r1w</strong> file
+  (2 read, 1 write). <code>WR_PORTS</code> documents a future 2r2w hook.</li>
 </ul>
-<p>Note: the GLOSSARY's "tutorial" framing says 16 elements/register; the <em>implemented</em> RTL is parameterized at <code>BANKING=8</code> lanes, so a register is 8×FP32. The text above reflects the RTL as built.</p>
 <p>Register-to-SPAD movement (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) is <strong>not</strong> VPU-owned: it is dispatched to the <strong>LSU</strong>, the SPAD-VREG mover (see <a href="spad.html#the-lsu">spad.md :: The LSU</a>).</p>
 <h2 id="the-8-lane-datapath">The 8-lane datapath<a class="headerlink" href="#the-8-lane-datapath" title="Permanent link">&para;</a></h2>
 <!-- TODO(figure): `vpu-datapath` ships as a frozen legacy-style SVG (its TikZ source was
      retired with the legacy figure style; git history is the backup) and wants a house-style
-     redraw. It is no longer factually stale: the 8-register vec_regfile
-     was corrected to 32 in the image (vec_regfile.sv:11 NUM_REGS = 32, :19 index [4:0]), so
-     the caption no longer has to argue with the drawing. The old caption also called the
+     redraw. It IS now factually stale again: the image draws a 32-register private
+     vec_regfile with a 5-bit index, but that module is RETIRED. The live RF is the shared
+     flat-1D vreg_rf.sv (256 registers, 8-bit flat id, a tile = 8 consecutive registers).
+     The caption below states the correct model in prose until the redraw lands.
+     The old caption also called the
      figure's "per-op latencies" stale, but the figure draws no latency numbers at all --
      that complaint described ink that does not exist and is dropped. Redraw in the house
      style FROM RTL. -->
@@ -2113,12 +2191,12 @@
 <figcaption>
 <p><span class="caption-prefix">Fig. 1.</span><strong>VPU lane datapath.</strong> A 256-bit row fans into 8 FP32 lanes (per-lane
 <code>fp_add</code> / <code>fp_mul</code> / <code>fp_max</code>); <code>rowsum</code> / <code>rowmax</code> use two <code>fp_reduce_tree</code>
-(<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. Results write to <code>vec_regfile</code>
-(<code>NUM_REGS = 32</code>) or back to an ACC row.</p>
-</figcaption>
-</figure>
-<p>One zoom level in: the structure inside <code>vpu_ctrl</code>. A 256-bit ACC/SPM row unpacks into <strong>8 FP32 lanes</strong> (<code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH = 256/32 = 8</code>). Each lane owns its own ALU primitives (<code>fp_add</code>, <code>fp_mul</code>, <code>fp_max</code>). Two horizontal paths fan the 8 lanes into a scalar: an <strong>ADD reduction tree</strong> (<code>rowsum</code>) and a <strong>MAX reduction tree</strong> (<code>rowmax</code>). Three shared <strong>BRAM-LUT non-linear units</strong> (<code>exp2</code> / <code>recip</code> / <code>rsqrt</code>) serve the transcendental paths (softmax, GELU, RMSNorm). Results land in the <strong>vector register file</strong> (32 registers V0--V31, each 8×FP32) or back to an ACC row. The ACC tile in scratchpad is shared with the MXU.</p>
-<p>Every lane is built from synthesisable behavioral IEEE-754 FP32 primitives (the cvfpu/fpnew submodule was fully removed; these models map to LUTs/DSP48E2 at synthesis and to DPI-C in Verilator sim). The primitive files and modules were historically named <code>fp32_*</code>; both the files <em>and</em> the modules are now <code>fp_*</code> (e.g. <code>fp_add</code>, <code>fp_mul</code>), under <code>npu/src/compute_tile/fpu/</code>.</p>
+(<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. Results write to the shared <code>vreg_rf</code>
+(<code>REGS = 256</code>, 8-bit flat id) or back to an ACC row. <strong>The figure is stale on this
+point:</strong> it still draws a private 32-register <code>vec_regfile</code> with a 5-bit index; that
+module is retired. Read the RF as <code>vreg_rf.sv</code> until the redraw lands.</p>
+<p>One zoom level in: the structure inside <code>vpu_ctrl</code>. A 256-bit ACC/SPM row unpacks into <strong>8 FP32 lanes</strong> (<code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH = 256/32 = 8</code>). Each lane owns its own ALU primitives (<code>fp_add</code>, <code>fp_mul</code>, <code>fp_max</code>). Two horizontal paths fan the 8 lanes into a scalar: an <strong>ADD reduction tree</strong> (<code>rowsum</code>) and a <strong>MAX reduction tree</strong> (<code>rowmax</code>). Three shared <strong>BRAM-LUT non-linear units</strong> (<code>exp2</code> / <code>recip</code> / <code>rsqrt</code>) serve the transcendental paths (softmax, GELU, RMSNorm). Results land in the <strong>shared vector register file</strong> (<code>vreg_rf.sv</code>: 256 flat registers V0--V255, each 8×FP32) or back to an ACC row. ACC is <strong>MXU-internal</strong> (<code>mxu_accumulator.sv</code>, <code>ACC_DEPTH</code> banks), not a scratchpad region and not part of the shared VREG file.</p>
+<p>Every lane is built from synthesisable behavioral FP32 primitives (the cvfpu/fpnew submodule was fully removed; these models map to LUTs/DSP48E2 at synthesis). The <code>ifdef VERILATOR</code> DPI-C host-float shim for <code>fp_add</code> / <code>fp_mul</code> has been <strong>removed</strong>, along with the five caller latency shims that compensated for it: <strong>simulation now exercises the real RTL FP path</strong>, so there is no longer a host-float model that can mask an arithmetic bug (<code>fp_add.sv:19</code>, "one real FP path, no host-float emulation"). The primitive files and modules were historically named <code>fp32_*</code>; both the files <em>and</em> the modules are now <code>fp_*</code> (e.g. <code>fp_add</code>, <code>fp_mul</code>), under <code>npu/src/compute_tile/fpu/</code>.</p>
 <h2 id="fp-primitives">FP primitives<a class="headerlink" href="#fp-primitives" title="Permanent link">&para;</a></h2>
 <p><strong>Table: FP primitive modules used by the VPU, their latency, and their role in the datapath.</strong></p>
 <table>
@@ -2133,12 +2211,12 @@
 <tr>
 <td><code>fp_add</code> (<code>fp_add.sv</code>)</td>
 <td>0 or 1 cycle (<code>LATENCY</code> param)</td>
-<td>IEEE-754 add. <code>LATENCY=0</code> = fully combinational. <code>LATENCY=1</code> = 2-stage pipeline (see below). The VPU instantiates every adder at <code>LATENCY=1</code>.</td>
+<td>FP32 add, IEEE-754 <strong>format</strong> but <strong>not</strong> IEEE-754 <strong>rounding</strong>: it truncates (see <a href="#rounding-and-error-bounds">Rounding and error bounds</a>). <code>LATENCY=0</code> = fully combinational. <code>LATENCY=1</code> = 2-stage pipeline (see below). The VPU instantiates every adder at <code>LATENCY=1</code>.</td>
 </tr>
 <tr>
 <td><code>fp_mul</code> (<code>fp_mul.sv</code>)</td>
 <td>combinational</td>
-<td>IEEE-754 multiply; Vivado infers a DSP48E2 for the 24×24 mantissa product. <code>LATENCY</code> is ignored (always combinational; the FSM provides settling time).</td>
+<td>IEEE-754 multiply with <strong>round-to-nearest-even</strong> (guard / round / sticky). Vivado infers a DSP48E2 for the 24×24 mantissa product. <code>LATENCY</code> is ignored (always combinational; the FSM provides settling time).</td>
 </tr>
 <tr>
 <td><code>fp_max</code> (<code>fp_max.sv</code>)</td>
@@ -2167,6 +2245,64 @@
 </tr>
 </tbody>
 </table>
+<h3 id="rounding-and-error-bounds">Rounding and error bounds<a class="headerlink" href="#rounding-and-error-bounds" title="Permanent link">&para;</a></h3>
+<p>This subsection exists to stop a settled question from being re-opened. The
+numbers below are <strong>measured</strong> against a reference model, not estimated.</p>
+<p><strong><code>fp_mul</code> rounds to nearest-even, and did not always.</strong> Two real bugs were found and
+fixed: (i) the RNE round logic was <strong>unreachable</strong> on the product <code>&lt; 2.0</code>
+left-shift normalise path, because normalise and round were mutually exclusive arms
+of a single if/else chain; (ii) the post-round carry test compared the wrong value.
+Measured: the product <code>&lt; 2.0</code> path went from <strong>987974 / 1966167</strong> vectors differing
+from an RNE reference to <strong>0</strong>. The product <code>&gt;= 2.0</code> path was unaffected and stayed
+bit-identical at <strong>0 / 2813824</strong>.</p>
+<p><strong><code>fp_add</code> truncates, and truncation is retained.</strong> The framing this replaces -
+"should <code>fp_add</code> truncate or round-to-nearest-even?" - was <strong>the wrong question</strong>.
+The aligner discards the shifted-out bits <strong>before</strong> the subtract, so no guard,
+round or sticky information survives into the final step. Changing only the final
+rounding step would therefore <strong>not move the error tail at all</strong>. The real fix, if
+and when it is scheduled, is to <strong>retain guard + round + sticky through alignment
+and subtraction and round once</strong> at the end. That is a datapath change, not a
+rounding-mode flag.</p>
+<p><strong>The error bound is exponential in cancellation depth.</strong> Two worst cases previously
+quoted for <code>fp_add</code>, <strong>4 ULP</strong> and <strong>32 ULP</strong>, were <strong>both sampling noise</strong> drawn from
+one power-law tail, and both <strong>understate</strong> the bound. The governing law is:</p>
+<blockquote>
+<p>max error = <strong>2^k ULP</strong> at cancellation depth <strong>k</strong> bits.</p>
+</blockquote>
+<p>For full-mantissa fp32 at maximal cancellation that is <strong>2^23 ULP</strong>, i.e. <strong>100%
+relative error</strong>. Do not quote a small constant ULP figure for <code>fp_add</code>.</p>
+<p><strong>Where this is provably safe, and where it is not.</strong> For <strong>bf16-derived</strong> operands,
+<code>fp_add</code> is <strong>bit-exact</strong> against RNE at every cancellation depth when
+<code>exp_diff &lt;= 16</code>, and within <strong>2 ULP</strong> beyond that. Measured over <strong>5.2M</strong> vectors.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Operand provenance</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Elementwise bf16-in / bf16-out (softmax <code>x - max</code>, residual add)</td>
+<td>bf16-derived</td>
+<td><strong>Provably safe, no change needed</strong></td>
+</tr>
+<tr>
+<td><code>fp_reduce_tree</code> accumulation</td>
+<td>full-mantissa fp32</td>
+<td><strong>Exposed, unmeasured</strong></td>
+</tr>
+<tr>
+<td><code>fp_recip</code> / <code>fp_rsqrt</code> Newton-Raphson iterations</td>
+<td>full-mantissa fp32</td>
+<td><strong>Exposed, unmeasured</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The exposure is <strong>only</strong> where <code>fp_add</code> sees full-mantissa fp32. The two exposed
+paths above have <strong>not</strong> been measured; treat their error as unknown rather than
+assuming the bf16 result carries over.</p>
 <h3 id="why-bram-lut-non-linear-units">Why BRAM-LUT non-linear units?<a class="headerlink" href="#why-bram-lut-non-linear-units" title="Permanent link">&para;</a></h3>
 <p>The previous combinational Horner/Newton chains for exp2/recip/rsqrt cost ~31 FP units and blew the LUT budget on ZCU102. Replacing them with 1024-entry registered ROMs (one BRAM each) cut roughly 90K LUTs while staying within ≤0.1% error: acceptable for attention/normalization.</p>
 <h3 id="fp_add-latency1-the-2-stage-pipeline-split"><code>fp_add</code> LATENCY=1: the 2-stage pipeline split<a class="headerlink" href="#fp_add-latency1-the-2-stage-pipeline-split" title="Permanent link">&para;</a></h3>
@@ -2190,13 +2326,25 @@
 </tr>
 </tbody>
 </table>
-<p>In Verilator the DPI-C model is combinational regardless of <code>LATENCY</code>; correctness comes from the caller's <code>stage_cnt</code> reserving the right number of cycles, not from physical register delay. So sim and synthesis agree bit-for-bit as long as the FSM waits the documented number of stages.</p>
+<p>The arithmetic is <strong>bit-identical across all <code>LATENCY</code> values</strong> (<code>fp_add.sv:15</code>): <code>LATENCY</code> changes only the number and placement of pipeline registers, not the result. Since the DPI-C shim was removed, simulation runs this same RTL, so sim and synthesis agree bit-for-bit provided the caller's <code>stage_cnt</code> reserves at least <code>LATENCY</code> cycles.</p>
 <h2 id="why-not-one-big-fsm">Why not one big FSM?<a class="headerlink" href="#why-not-one-big-fsm" title="Permanent link">&para;</a></h2>
 <p>The pre-refactor VPU was a 44-state monolithic FSM with one named state per pipeline step per opcode. That is the wrong shape: it does not scale (every new opcode adds states), it is error-prone, and it wastes the sequencer's state-enum budget. The industry pattern for a vector ALU is a small <strong>class-dispatch FSM</strong> plus <strong>counters</strong>:</p>
 <ul>
 <li><strong>Ara</strong> (PULP RVV vector unit) uses a ~6-state VALU controller and lets element counters drive iteration.</li>
 <li><strong>NVDLA</strong> deliberately keeps no compute-sequencing FSM in the math datapath: control is descriptor + counter driven.</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">Ara provenance and license</p>
+<p>The VPU's sub-unit patterns are adapted from <strong>Ara</strong>, the ETH Zurich RISC-V
+V-extension vector processor (github.com/pulp-platform/ara): SystemVerilog, under
+the <strong>Solderpad 0.51</strong> license, taped out at <strong>TSMC 22nm</strong>. The per-file lineage of
+the adaptation is: <code>simd_alu.sv</code> to the elementwise/broadcast ALU arithmetic
+(FP32-only); <code>vmfpu.sv</code> <code>vfrsqrt7</code> to the <code>rsqrt</code> path; <code>operand_queue.sv</code>
+neutral-element reduction to the <code>rowsum</code>/<code>rowmax</code> reduction trees; and
+<code>lane_sequencer.sv</code> / <code>valu.sv</code>'s valid/ready dispatcher to the <code>vpu_ctrl</code> dispatch
+pattern. The <code>exp2</code> LUT is not from Ara: its table values come from the compiler
+(<code>exp_lut.py</code>).</p>
+</div>
 <p>The refactor collapses the 44 named states into <strong>5 states + 2 counters</strong>. All datapath logic, pipeline registers, and arithmetic instances are unchanged; only the <em>sequencing</em> changed. Per-op cycle counts are derived from <code>localparam</code> terminal values (no magic numbers) and reproduce the old FSM exactly, so every opcode is bit-identical.</p>
 <h2 id="the-5-states-conceptual">The 5 states (conceptual)<a class="headerlink" href="#the-5-states-conceptual" title="Permanent link">&para;</a></h2>
 <!-- TODO(caption): `c-vpu-pipeline` has no CAPTIONS.md entry. Caption authored here from
@@ -2218,7 +2366,7 @@
 <figure id="fig-vpu-pipeline">
 <p><img alt="VPU per-function depths padded to the uniform D_vpu terminal" src="../../../figures/tikz/c-vpu-pipeline.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 2.</span><strong>VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
+<p><span class="caption-prefix">Fig. 1.1.</span><strong>VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
 op class has the SAME issue-to-write latency <code>D_VPU = 23</code> (<code>vpu_ctrl.sv:417</code>); the
 shallower classes are padded to it by a holding register. One uniform reservation
 window means the FSM needs a single terminal rather than a per-op one.</p>
@@ -2303,7 +2451,7 @@ window means the FSM needs a single terminal rather than a per-op one.</p>
 <figure id="fig-vpu-reduce">
 <p><img alt="One fp_reduce_tree at N=8, DEPTH=3, ADD/MAX modes" src="../../../figures/tikz/vpu-reduce.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 3.</span><strong>One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
+<p><span class="caption-prefix">Fig. 1.2.</span><strong>One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
 VPU instantiates twice: an ADD tree (<code>rowsum</code>) and a MAX tree (<code>rowmax</code>), both surfacing
 the same 3-cycle latency so one <code>stage_cnt</code> terminal serves both.</p>
 </figcaption>
@@ -2568,10 +2716,9 @@ the inputs go live).</p>
 </tr>
 </tbody>
 </table>
-<h3 id="retargeting-to-a-narrower-accumulation-precision">Retargeting to a narrower accumulation precision<a class="headerlink" href="#retargeting-to-a-narrower-accumulation-precision" title="Permanent link">&para;</a></h3>
-<p>Set <code>ACCUM_FORMAT</code> and <code>DATA_WIDTH</code> on the <code>vpu_ctrl</code> instantiation in <code>sequencer.sv</code>, keeping <code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH</code>. Extending the <code>FORMAT</code> branches in <code>fp_add.sv</code> / <code>fp_mul.sv</code> / <code>fp_max.sv</code> and regenerating the non-linear BRAM ROMs for the new mantissa width would also be required. The FSM sequencing is precision-agnostic and needs no change. Note: v1 is fixed at BF16 storage + FP32 accumulation; this describes the RTL parameter design for future retargeting.</p>
+<p><strong>Retargeting to a narrower accumulation precision.</strong> Set <code>ACCUM_FORMAT</code> and <code>DATA_WIDTH</code> on the <code>vpu_ctrl</code> instantiation in <code>tile_sequencer.sv</code>, keeping <code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH</code>. Extending the <code>FORMAT</code> branches in <code>fp_add.sv</code> / <code>fp_mul.sv</code> / <code>fp_max.sv</code> and regenerating the non-linear BRAM ROMs for the new mantissa width would also be required. The FSM sequencing is precision-agnostic and needs no change. Note: v1 is fixed at BF16 storage + FP32 accumulation; this describes the RTL parameter design for future retargeting.</p>
 <h2 id="precision-why-the-vpu-stays-fp32">Precision: why the VPU stays FP32<a class="headerlink" href="#precision-why-the-vpu-stays-fp32" title="Permanent link">&para;</a></h2>
-<p>The VPU is <strong>FP32 end to end</strong>: all 8 lanes, both reduction trees, the vector register file, and the transcendental BRAM-LUTs are FP32 (<code>vec_regfile.sv</code> element width 32; <code>vpu_ctrl.sv</code>). This is deliberate, not incidental: <code>ACCUM_FORMAT</code> is documented as the "accumulator + VPU register precision" (<code>mininpu/hwparams.py</code> line 27), so the one parameter that fixes the MXU accumulator at FP32 also couples the entire VPU register and arithmetic datapath to FP32. The MXU accumulator and the whole VPU are the system's two FP32 domains.</p>
+<p>The VPU is <strong>FP32 end to end</strong>: all 8 lanes, both reduction trees, the shared vector register file, and the transcendental BRAM-LUTs are FP32 (<code>vreg_rf.sv</code> element width 32; <code>vpu_ctrl.sv</code>). This is deliberate, not incidental: <code>ACCUM_FORMAT</code> is documented as the "accumulator + VPU register precision" (<code>mininpu/hwparams.py</code> line 27), so the one parameter that fixes the MXU accumulator at FP32 also couples the entire VPU register and arithmetic datapath to FP32. The MXU accumulator and the whole VPU are the system's two FP32 domains.</p>
 <h3 id="why-the-reductions-need-fp32">Why the reductions need FP32<a class="headerlink" href="#why-the-reductions-need-fp32" title="Permanent link">&para;</a></h3>
 <p>The VPU's reduction and accumulation ops require FP32 for GPT-2 numerical stability. Softmax's denominator is a running sum of up to ~1024 exponentiated terms, and LayerNorm's mean and variance are cancellation-prone (they subtract close-magnitude quantities). Both lose accuracy quickly in BF16's 8-bit mantissa. Standard mixed-precision transformer practice keeps exactly these reductions in FP32 while narrowing the bulk elementwise math.</p>
 <h3 id="forward-looking-a-pointwise-bf16-pass">Forward-looking: a pointwise-BF16 pass<a class="headerlink" href="#forward-looking-a-pointwise-bf16-pass" title="Permanent link">&para;</a></h3>
@@ -2579,15 +2726,17 @@ the inputs go live).</p>
 <h2 id="how-to-add-a-new-vpu-opcode">How to add a new VPU opcode<a class="headerlink" href="#how-to-add-a-new-vpu-opcode" title="Permanent link">&para;</a></h2>
 <ol>
 <li><strong>Define the opcode</strong> in <code>mininpu/isa</code> (the ISA SSOT): add the <code>OP_*</code> constant and an encoder. Then regenerate the RTL package: <code>make -C npu generate-sv-pkgs</code> (rewrites <code>npu_isa_pkg.sv</code>).</li>
-<li><strong>Add a dispatch case</strong> in <code>sequencer.sv</code>'s <code>EXEC_DISPATCH</code> block: latch the operands into the <code>vpu_*</code> input registers, pool-fetch any literal-pool immediates, and route to <code>start_vpu</code> (the sequencer's <code>VEC_WAIT_VPU</code> path).</li>
+<li><strong>Add a dispatch case</strong> in <code>tile_sequencer.sv</code>'s <code>ISSUE</code> dispatch: latch the operands into the <code>vpu_*</code> input registers, pool-fetch any literal-pool immediates, and route to <code>start_vpu</code> (the sequencer's <code>VEC_WAIT_VPU</code> path).</li>
 <li><strong>Dispatch the class</strong> in <code>vpu_ctrl.sv</code>'s <code>VPU_IDLE</code> case: pick the entry state (<code>VPU_VREG_EXEC</code>, <code>VPU_ACC_ROW</code>, <code>VPU_REDUCE_ROW</code>, or <code>VPU_WRITEBACK</code>) and pre-load any VREG read addresses.</li>
 <li><strong>Add the <code>stage_cnt</code> terminal</strong>: define a new <code>ST_*</code> localparam (or reuse an existing one), add it to the <code>acc_row_stages</code> selector if it is an ACC-row op, and add the writeback gate in the chosen state.</li>
 <li><strong>Add the datapath logic</strong>: instantiate the per-lane primitive(s) inside the <code>g_vpu_lanes</code> generate block and wire the result row into the <code>vec_computed_row</code> / <code>vec_computed_row_2src</code> mux (and the BRAM-routing write branch).</li>
-<li><strong>Add the L4 test</strong>: the golden reference is the ISS (<code>mininpu/iss/handlers.py</code>); add a non-skipped <code>test_&lt;opcode&gt;</code> in <code>dv/compute_tile/test_isa_correctness.py</code> that checks RTL output against the ISS.</li>
+<li><strong>Add the L4 test</strong>: the golden reference is the ISS (<code>mininpu/iss/handlers.py</code>); add a non-skipped <code>test_&lt;opcode&gt;</code> in one of the live L4 files listed as <code>L4_FILES</code> in <code>dv/scripts/check_isa_coverage.py</code> (e.g. <code>dv/compute_tile/test_vpu_ctrl_unit.py</code> or <code>test_tile_top.py</code>) that checks RTL output against the ISS. The old single-file <code>test_isa_correctness.py</code> is deleted.</li>
 <li><strong>Add the L5 system test</strong>: exercise the opcode in a real multi-instruction kernel in <code>dv/system/test_programs.py</code>.</li>
 <li><strong>Run the ISA coverage gate</strong> (required before commit): <code>python3 dv/scripts/check_isa_coverage.py</code> (must exit 0), or <code>make -C dv/compute_tile check-isa-coverage</code>. The opcode is not "done" until L4, L5, and the gating-stub rules all pass.</li>
 </ol>
 <p>Related: <a href="index.html">compute-tile overview</a> · <a href="mxu.html">MXU</a> · <a href="../uncore.html">uncore</a>.</p>
+</figcaption>
+</figure>
 
 
 

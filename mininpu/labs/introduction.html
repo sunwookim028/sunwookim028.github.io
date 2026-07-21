@@ -992,9 +992,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware/verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2220,14 +2276,18 @@ distinction to read the operation table.</p>
   earlier, holding bfloat16 (bf16) tiles. Weights and
   activations are copied here from off-chip memory before a kernel runs. A
   tile is one row of eight bf16 values.</li>
-<li><strong>The accumulator (ACC).</strong> The same physical on-chip memory viewed as
-  32-bit floating-point (fp32) tiles. Matrix multiply writes its result
-  here, and the vector arithmetic operates here, so that intermediate sums
-  keep fp32 precision. A row is eight fp32 values.</li>
-<li><strong>The vector registers (VREG).</strong> A small set of fp32 registers, each
-  holding eight values. The reductions write their per-row result here (one
-  value per row), and the per-row and per-feature scalars used by the
-  broadcast operations are read from here.</li>
+<li><strong>The accumulator (ACC).</strong> A separate 32-bit floating-point (fp32) tile
+  store <em>inside the matrix unit</em>, not a view of the scratchpad and not part
+  of the vector register file. Matrix multiply writes its result here so
+  that intermediate sums keep fp32 precision. A row is eight fp32 values.</li>
+<li><strong>The vector registers (VREG).</strong> One shared, flat file of 256 fp32
+  registers (V0 to V255), each holding eight values. The register id is a
+  plain 8-bit number. A two-dimensional tile is simply <strong>eight consecutive
+  registers</strong>, <code>base</code> to <code>base+7</code>: you address a tile row by <em>adding</em>
+  (<code>base + row</code>), and the base can be any value as long as <code>base+7</code> is at
+  most 255. There is no alignment rule. The reductions write their per-row
+  result here (one value per row), and the per-row and per-feature scalars
+  used by the broadcast operations are read from here.</li>
 </ul>
 <p>The pattern throughout a kernel is: copy bf16 tiles into the scratchpad, widen
 them to fp32 in the accumulator, compute in fp32, narrow the fp32 result back to

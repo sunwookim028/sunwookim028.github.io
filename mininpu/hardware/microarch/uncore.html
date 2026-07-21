@@ -1195,9 +1195,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1680,11 +1736,18 @@ SPAD. It is one system, historically documented as four units --- a <strong>comm
 compute tile itself --- composed by a uniform inter-unit primitive: one request carrying an
 encoded descriptor plus one completion, with bulk data on AXI4. This page folds the former
 per-facet pages (architecture, control plane, host interface, interface tile, data movement)
-into one device-level view. The design SSOT is <code>docs/charter.md</code>; constants are owned by
-<code>mininpu/isa</code> / <code>abi.py</code> / <code>params.py</code>.</p>
+into one device-level view. This page is the maintained device-level design reference (it
+carries the former charter's system-decomposition, control-plane, memory-hierarchy and
+timing content); constants are owned by <code>mininpu/isa</code> / <code>abi.py</code> / <code>params.py</code>.</p>
 <h2 id="the-uncore-at-a-glance">The uncore at a glance<a class="headerlink" href="#the-uncore-at-a-glance" title="Permanent link">&para;</a></h2>
 <p>mininpu is an <strong>IO-attached discrete accelerator</strong>: a host (with system memory) programs the
-NPU (with its own device memory) by <strong>memcpy + kernel launch</strong>. The host writes an encoded
+NPU (with its own device memory) by <strong>memcpy + kernel launch</strong>. <strong>System memory</strong> is the host
+CPU's DRAM (PS-DDR on the Zynq PS); <strong>device memory</strong> is the off-chip DRAM physically attached
+to the accelerator (PL-DDR4 on ZCU102, HBM2 on U280 later). The two are distinct address
+spaces, and the NPU's compute datapath reaches <strong>only device memory</strong>: the kernel-plane DMA
+(the DMU) never addresses host system memory directly. The one unit that bridges the two is the
+device-owned <strong>copy engine</strong>, which DMAs host system memory ↔ device memory on a COPY command;
+everything the compute tile then touches is device memory or on-chip SPAD. The host writes an encoded
 command descriptor into a small write-only CMD window and rings a self-clearing doorbell; the
 <strong>command processor</strong> latches and decodes it on the doorbell edge and routes it --- a kernel
 launch to the compute tile, a copy to the host interface's copy engine. Bulk data does not
@@ -1723,9 +1786,9 @@ neighbours, which leaves the two control seams as the only long edges.</p>
 </tr>
 <tr>
 <td>VREG</td>
-<td>32 regs (V0--V31)</td>
-<td><strong>fp32</strong> vector register file; 8 lanes each; 5-bit id</td>
-<td><code>vec_regfile.sv</code></td>
+<td>8 KiB (256×256-bit)</td>
+<td><strong>fp32</strong> shared vector register file, flat 1D: 256 regs (V0--V255), 8 lanes each, 8-bit flat id; a tile is 8 consecutive regs</td>
+<td><code>vreg_rf.sv</code></td>
 </tr>
 <tr>
 <td>Device memory</td>
@@ -1994,7 +2057,12 @@ in a PCIe endpoint and a PCIe-native DMA engine, with the command interfaces unc
 portable IP core is the compute tile (with its DMU and SPAD); the host interface and interface
 tile are swapped per board and technology target. Across versions the host-to-CP contract is
 invariant: v1 is single-tile and chip-sequential; v2 adds copy ‖ compute concurrency; v3 adds
-multi-tile with a work distributor and the [v3]-deferred memory tile.</p>
+multi-tile with a work distributor and the [v3]-deferred <strong>memory tile</strong>. The <strong>memory tile</strong>
+(<strong>MT</strong>) is an on-chip <strong>L2 staging / cache tier</strong> between off-chip device memory and the
+compute tiles' SPADs: a shared buffer that multiple tiles fill from and drain to, so device-memory
+bandwidth is amortised across the grid rather than paid per tile. It is <strong>deferred to [v3]</strong>
+(RFC #158) and is <strong>absent from v1</strong>, which has no such tier: the v1 compute tile streams device
+memory straight into SPAD over the <code>dm_*</code> path.</p>
 <hr />
 <p>mininpu · the uncore · <a href="compute_tile/index.html">compute-tile overview</a> · <a href="../../index.html">back to home</a></p>
 

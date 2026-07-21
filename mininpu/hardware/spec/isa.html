@@ -750,6 +750,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ruled-not-implemented-x-operand-rework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ruled, not implemented (X-operand rework)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#reserved-must-be-zero" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1412,9 +1423,65 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flows/allo.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Allo generator path
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1930,6 +1997,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#ruled-not-implemented-x-operand-rework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ruled, not implemented (X-operand rework)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#reserved-must-be-zero" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2184,8 +2262,8 @@ accumulate in fp32). VREG is drawn in the <strong>flat 1D</strong> form this pag
 <tr>
 <td><code>VREG</code></td>
 <td>vector register file, fp32</td>
-<td>VREG id (5-bit, 0..31)</td>
-<td><strong>32 flat 1D fp32 vector registers</strong> (2r1w); as-built RTL still 2D <code>[8x8]</code> - see <a href="#s4">§4</a></td>
+<td>VREG id (8-bit, 0..255)</td>
+<td><strong>256 flat 1D fp32 vector registers</strong> (2r1w), 256b each = 8 KiB; a tile is 8 <strong>consecutive</strong> registers (<code>base..base+7</code>, <code>base+7 &lt;= 255</code>, no alignment requirement) - see <a href="#s4">§4</a></td>
 </tr>
 <tr>
 <td><code>ACC</code></td>
@@ -2836,32 +2914,122 @@ tables here for what today's RTL and ISS execute.</p>
 </table>
 <h2 id="s4">04 Flags and Locked Decisions<a class="headerlink" href="#s4" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
-<p class="admonition-title">Locked</p>
-<p><code>flags[5]</code> (<code>ACC_TILE</code>) is <strong>dropped</strong> from <code>vpu.simd</code>; the VPU is VREG-only. Bit 5 is reserved-must-be-zero on all opcodes.</p>
+<p class="admonition-title">Locked · spec, NOT as-built</p>
+<p><code>flags[5]</code> (<code>ACC_TILE</code>) is <strong>dropped</strong> from <code>vpu.simd</code>, and the VPU <strong>is specified
+to be VREG-only</strong>. Bit 5 is reserved-must-be-zero on all opcodes.</p>
+<p><strong>As-built: the VREG-only half is NOT implemented.</strong> Do not read it as a
+description of today's hardware. Verified against the RTL:</p>
+<ul>
+<li><strong>True today:</strong> the VPU has no path to the MXU-internal accumulator
+  (<code>mxu_accumulator.sv</code>). That external ACC read port is wired only to the
+  LSU (<code>tile_top.sv</code>), and <code>vpu_ctrl.sv</code> has no ACC port.</li>
+<li><strong>NOT true today:</strong> <code>vpu_ctrl.sv</code> still takes <code>acc_src</code> / <code>acc_dst</code> /
+  <code>acc_b</code> operands and drives them onto the <strong>SPAD compute port B</strong> for both
+  reads and writes (e.g. <code>OP_VPU_ZERO_ACC</code> writes <code>acc_dst</code>). The VPU is
+  therefore <strong>not</strong> VREG-only: it still addresses ACC/SPM rows directly.</li>
+</ul>
+<p>The <code>ACC_TILE</code> flag itself is genuinely gone (no such constant in
+<code>mininpu/isa</code>). Making the VPU actually VREG-only is downstream of the
+<strong>mover</strong> (item 6 in <a href="#ruled-not-implemented-x-operand-rework">Ruled, not implemented</a>),
+which is likewise not implemented.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Locked</p>
 <p>ACC <strong>buffers {0,1} are both used</strong> for depth-2 double-buffering (<code>acc_out</code> / <code>acc_src</code> in <code>[0, ACC_DEPTH=2)</code>). The existing ACC buffer-index operand field is now <strong>plumbed to select the buffer</strong> (the depth index; no encoding change); an index <code>&gt;= ACC_DEPTH</code> is still an <strong>illegal-op</strong>. This depth-2 buffer index is distinct from the 8 per-column banks (the physical column organization of the <code>[8x8]</code> accumulator).</p>
 </div>
 <div class="admonition note">
-<p class="admonition-title">Design target · rework B (shipped RTL still 2D)</p>
-<p>VREG is a <strong>flat 1D fp32 vector register file</strong> (RISC-V-style; 5-bit id
-unchanged). The earlier "2D <code>[8x8]</code> tile" lock is <strong>withdrawn</strong>: its
-load-bearing premise (that the MXU streams tiles directly from VRegs) is
-false for this design - the MXU bursts X into its own <code>x_matrix</code> staging
-buffer, so a standard flat vector RF is the cleaner model. Owner ruling:
+<p class="admonition-title">Locked · shipped</p>
+<p>VREG is a <strong>flat 1D fp32 vector register file</strong> (RISC-V-style). The earlier
+"2D <code>[8x8]</code> tile" lock is <strong>withdrawn</strong>: its load-bearing premise (that the
+MXU streams tiles directly from VRegs) is false for this design - the MXU
+bursts X into its own <code>x_matrix</code> staging buffer, so a standard flat vector RF
+is the cleaner model. Owner ruling:
 <a href="https://github.com/sunwookim028/mininpu/issues/385">#385</a> §5 #1, rationale
 in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a> Decision B.</p>
-<p><strong>As-built:</strong> the shipped RTL (<code>vreg_rf.sv</code>, <code>mxu.sv</code>) is still <strong>2D</strong>; the
-flat-1D rework lands in <strong>rework B</strong> (<code>vreg_rf</code>, addressing, MXU <code>S_LOAD_X</code>,
-LSU, operand encoding). <code>mininpu/hwparams.py</code> (<code>VREG_SIZE = N</code>) is already 1D.
-Span across multiple registers is expressed by <strong>register grouping</strong>
-(LMUL-style), not by a shape flag; the encoding for that is <strong>open</strong> and
-deferred to B's design.</p>
+<p><strong>As-built:</strong> rework B has <strong>landed</strong>. <code>vreg_rf.sv</code> is the live register file
+(2r1w): <code>REGS = VREG_COUNT = 256</code> flat registers V0--V255, one 256-bit row
+each, 8 KiB total, addressed by an <strong>8-bit flat register id</strong>
+(<code>VREG_ID_BITS = 8</code>). The retired <code>vec_regfile.sv</code> is deleted and the VPU owns
+no private RF. A tile is <strong>8 consecutive registers</strong> (<code>base..base+7</code>,
+<code>base+7 &lt;= 255</code>), addressed by addition, with <strong>no alignment requirement</strong> -
+that consecutive-span convention replaces the LMUL-style register-grouping
+encoding this note previously left open.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Locked</p>
 <p>DMU is <strong>async-only</strong>: the async-mode flag is retired; DMU <code>flags[5]</code> is reserved-must-be-zero.</p>
+</div>
+<h3 id="ruled-not-implemented-x-operand-rework">Ruled, not implemented (X-operand rework)<a class="headerlink" href="#ruled-not-implemented-x-operand-rework" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Decisions only - no RTL, no SSOT entry, nothing here is as-built</p>
+<p>Every item below is an <strong>owner ruling recorded so it is not re-litigated</strong>. None
+of it exists in <code>mininpu/isa</code> or in the RTL today, so none of it appears in the
+<a href="#generated-opcode-reference-as-built">generated opcode tables</a>. Do not read any
+row as a description of the hardware. The implementing step is tracked separately
+and is the <strong>only</strong> step permitted to touch the ISA SSOT for this rework.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>x.load</code> is assigned opcode <strong><code>0x02</code></strong>. This <strong>overrides</strong> the design spec's own recommendation of <code>0x03</code>.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Consequence of (1): the informally reserved <strong>int8 matmul variant</strong> (<code>mininpu/isa/opcodes.py:150</code>) and the <strong>Stage-4 multi-precision extension</strong> (<code>:527-530</code>) both lose <code>0x02</code> and must be <strong>explicitly relocated</strong> by the implementing step.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>x.load</code> semantics: <strong>VREG row to <code>x_matrix</code> row</strong>, with an explicit row index, at <strong>ROW granularity</strong> (8 instructions per matmul tile). It belongs to the VPU/mover family (Pipe V).</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>mxu.matmul</code> <strong>loses its <code>op1</code> (<code>vreg_x_id</code>) operand</strong>. This is a <strong>semantic</strong> change, not an encoding tweak: X arrives by prior <code>x.load</code>, not by an operand on the matmul.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>x_matrix</code> becomes a <strong>1-entry buffer with a full/empty valid flag</strong> - no double buffer. The previous software-visible <strong>"T &gt;= 38" timing contract is deleted</strong>, replaced by a hardware interlock: RAW via the <code>S_RUN</code> entry gate, WAR via <code>x_ready</code> backpressure.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>6</td>
+<td>A <strong>mover</strong> owns SPAD&lt;-&gt;VREG, ACC-&gt;VREG and VREG-&gt;<code>x_matrix</code>, in two pipes: <strong>Pipe S</strong> (<code>vreg.load</code> / <code>vreg.store</code>, SPAD-touching, mutually exclusive) and <strong>Pipe V</strong> (<code>acc.store</code> / <code>x.load</code>, neither touches SPAD). The MXU becomes a <strong>passive receiver</strong>.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>7</td>
+<td>The MXU <strong>keeps its own SPAD addressing</strong>: <code>mxu.load.w</code> (weights) and <code>mxu.acc.init</code> (bias) stay with the MXU and do <strong>not</strong> go through the mover.</td>
+<td>not implemented</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Over-subscription must <strong>fail loudly</strong>, never silently drop. The as-built LSU discards a <code>start</code> pulse that arrives while busy, with no error, no backpressure and no status bit; the new design must not reproduce that.</td>
+<td>not fixed</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Sequencer Tier 1: collapse the 4-cycle <code>FETCH_1/2/3/ISSUE</code> chain to <strong>2 cycles</strong>. Audited and found safe.</td>
+<td>not implemented</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Assembler debt this creates</p>
+<p>Registering the new <code>x.load</code> X-operand as a VREG operand in
+<code>mininpu/asm/_alloc/liveness.py</code> is <strong>out of scope</strong> for the implementing step and
+accepted as <strong>debt</strong>. Until it is paid, the assembler is wrong about that operand
+class, so DV for <code>x.load</code> must use <strong>hand-written assembly kernels only</strong>.</p>
 </div>
 <h3 id="reserved-must-be-zero">Reserved-must-be-zero<a class="headerlink" href="#reserved-must-be-zero" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3131,8 +3299,8 @@ deferred to B's design.</p>
 <tbody>
 <tr>
 <td><code>VREG</code></td>
-<td>fp32, as-built 32 x [8x8]</td>
-<td><code>X[m][k]</code> tile at id <code>4m+k</code> (ids 0..15); <code>Y</code> scratch at <code>V16</code> - the compute working set</td>
+<td>fp32, 256 flat 256b registers (8-bit id)</td>
+<td><code>X[m][k]</code> tile at base <code>8*(4m+k)</code> (8 consecutive registers per tile); <code>Y</code> scratch at the next free base - the compute working set</td>
 </tr>
 <tr>
 <td><code>SPAD</code></td>
