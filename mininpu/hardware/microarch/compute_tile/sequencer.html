@@ -844,6 +844,100 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scalar-unit-proposed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scalar unit (proposed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scalar unit (proposed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proposed-isa-delta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed ISA delta
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addressing-generalize-the-live-loop-frame-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addressing --- generalize the live loop-frame path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-budget-a-new-client-under-the-existing-guard-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port budget --- a new client under the existing guard contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-as-a-sub-module-of-tile_sequencersv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build as a sub-module of tile_sequencer.sv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keep-the-counted-loop-primitive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep the counted-loop primitive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open prerequisite --- confirm ACC writeback on #418 silicon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scalar-unit-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scalar-unit sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#planned-evolution-risc-v-control-cores" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1580,6 +1674,100 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scalar-unit-proposed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scalar unit (proposed)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scalar unit (proposed)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proposed-isa-delta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposed ISA delta
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addressing-generalize-the-live-loop-frame-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Addressing --- generalize the live loop-frame path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#port-budget-a-new-client-under-the-existing-guard-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Port budget --- a new client under the existing guard contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-as-a-sub-module-of-tile_sequencersv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build as a sub-module of tile_sequencer.sv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keep-the-counted-loop-primitive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Keep the counted-loop primitive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Open prerequisite --- confirm ACC writeback on #418 silicon
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scalar-unit-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scalar-unit sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#planned-evolution-risc-v-control-cores" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1625,7 +1813,7 @@
      "Slide summary" blocks were dropped in the docs restructure. Figures
      are committed SVGs under docs/mkdocs/figures/tikz/. -->
 <h1 id="sequencer-the-control-path">Sequencer: The Control Path<a class="headerlink" href="#sequencer-the-control-path" title="Permanent link">&para;</a></h1>
-<p>The <strong>sequencer</strong> is the compute tile's control unit: it owns the program counter, the instruction RAM, and the decoder, and dispatches each fetched instruction to the right engine (MXU / VPU / DMA) or control sub-FSM. This document zooms in from the sequencer's place in the control plane, to the <em>fetch → decode → dispatch → engine handoff</em> lifecycle, to the 64-bit instruction word and the opcode-group fan-out of <code>EXEC_DISPATCH</code>. The exhaustive opcode-to-case table is not reproduced here --- it is the RTL itself (<code>sequencer.sv</code> + <code>mininpu/isa</code>); this document cites it.</p>
+<p>The <strong>sequencer</strong> is the compute tile's control unit: it owns the program counter, the instruction RAM, and the decoder, and dispatches each fetched instruction to the right engine (MXU / VPU / DMA) or control sub-FSM. This document zooms in from the sequencer's place in the control plane, to the <em>fetch → decode → dispatch → engine handoff</em> lifecycle, to the 64-bit instruction word and the opcode-group fan-out of <code>EXEC_DISPATCH</code>. The exhaustive opcode-to-case table is not reproduced here --- it is the RTL itself (<code>tile_sequencer.sv</code> + <code>mininpu/isa</code>); this document cites it.</p>
 <h2 id="the-sequencer-in-context">The sequencer in context<a class="headerlink" href="#the-sequencer-in-context" title="Permanent link">&para;</a></h2>
 <p>The sequencer's place in the device (the command processor's launch path) is described
 on <a href="../uncore.html">the uncore</a>; its place in the tile's module tree is drawn in
@@ -1654,7 +1842,7 @@ timing:</strong> in a sequencer FSM, reset and non-blocking-assignment (NBA) rac
 recurring trap --- keep the explicit <code>else</code>-branch on every state transition so the
 last-NBA-wins semantics resolve deterministically, and drive derived control off the
 <em>registered</em> handshake rather than a combinational decode of it. The specific warning
-lives as an inline comment at its exact code site in <code>sequencer.sv</code>; this is the class,
+lives as an inline comment at its exact code site in <code>tile_sequencer.sv</code>; this is the class,
 not the instance. The whole taxonomy is kept intact on the
 <a href="index.html">compute-tile overview</a>.</p>
 </details>
@@ -1745,13 +1933,17 @@ the encoding.</p>
 </tbody>
 </table>
 <p>Wide immediates (DRAM addresses, fp32 scalars, loop bounds) do not fit in a 16-bit operand: an operand field instead carries a <em>literal-pool index</em>, and the sequencer's unified pool-fetch sub-FSM (<code>POOL_FETCH_REQ / WAIT</code>) reads the value from IRAM at <code>pool_base + index + step</code> before continuing.</p>
+<div class="admonition note">
+<p class="admonition-title">Under owner review: where the literal pool physically lives</p>
+<p>This page reads pool entries "from IRAM"; the <a href="../../spec/isa.html">ISA spec</a> instead calls the literal pool (<code>LPM</code>) an "on-chip constant / param RAM in the tile sequencer ... NOT devmem, NOT SPAD" (isa.md <code>LPM</code> row). This docs-vs-docs sequencer-design contradiction is under owner review; the parallel DMU/sequencer work may settle it, so this note flags it without picking a winner.</p>
+</div>
 <h2 id="exec_dispatch-fan-out-by-opcode-group">EXEC_DISPATCH fan-out by opcode group<a class="headerlink" href="#exec_dispatch-fan-out-by-opcode-group" title="Permanent link">&para;</a></h2>
 <!-- TODO(figure): the EXEC_DISPATCH fan-out has NO house-style figure. The retired
      seq-dispatch drawing was dropped rather than shipped in the old style, because the
      paragraph below already carries its entire content (the nibble map). If a fan-out
      figure is wanted, draw it in fig-fsm.sty from the dispatch body in the RTL. -->
 
-<p>The opcode's high nibble names its <strong>group</strong>; <code>EXEC_DISPATCH</code> routes by group to one of four targets --- <strong>MXU</strong>, <strong>VPU</strong>, the <strong>LSU</strong>, or the <strong>DMU</strong> --- or a control sub-FSM. The nibble map is the SSOT in <code>mininpu/isa</code>: <code>0x0_</code> matmul group (<code>mxu.load.w</code> / <code>mxu.matmul</code>) to the MXU, <code>0x1_</code> / <code>0x2_</code> vector ops (<code>vpu.*</code>) to the VPU, <code>0x3_</code> register load/store (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) to the <strong>LSU</strong> (the SPAD-VREG mover, cross-ref <a href="spad.html#the-lsu">spad.md :: The LSU</a>), <code>0x4_</code> DMU, <code>0x5_</code> control (halt at <code>0x5F</code>). Register load/store is dispatched to the LSU, not owned by the VPU, under the 0.5.0 model; the as-built RTL still routes the <code>0x3_</code> ops through <code>vpu_ctrl</code> (<code>VEC_WAIT_VPU</code>). This section shows the routing, not the per-opcode case table --- that is the dispatch body in <code>sequencer.sv</code>.</p>
+<p>The opcode's high nibble names its <strong>group</strong>; <code>EXEC_DISPATCH</code> routes by group to one of four targets --- <strong>MXU</strong>, <strong>VPU</strong>, the <strong>LSU</strong>, or the <strong>DMU</strong> --- or a control sub-FSM. The nibble map is the SSOT in <code>mininpu/isa</code>: <code>0x0_</code> matmul group (<code>mxu.load.w</code> / <code>mxu.matmul</code>) to the MXU, <code>0x1_</code> / <code>0x2_</code> vector ops (<code>vpu.*</code>) to the VPU, <code>0x3_</code> register load/store (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) to the <strong>LSU</strong> (the SPAD-VREG mover, cross-ref <a href="spad.html#the-lsu">spad.md :: The LSU</a>), <code>0x4_</code> DMU, <code>0x5_</code> control (halt at <code>0x5F</code>). Register load/store is dispatched to the LSU, not owned by the VPU, under the 0.5.0 model; the as-built RTL still routes the <code>0x3_</code> ops through <code>vpu_ctrl</code> (<code>VEC_WAIT_VPU</code>). This section shows the routing, not the per-opcode case table --- that is the dispatch body in <code>tile_sequencer.sv</code>.</p>
 <p><strong>Table: <code>EXEC_DISPATCH</code> opcode-group routing; exact opcode values and per-case operand decoding are the SSOT in <code>mininpu/isa</code>.</strong></p>
 <table>
 <thead>
@@ -1843,11 +2035,126 @@ the authoritative opcode/flag/operand encodings live in <code>mininpu/isa</code>
 <p>Loop bounds are literal-only by ISA design --- they are not computed from runtime data; this keeps the IRAM-patch (pool) loop bounds statically known to the assembler.</p>
 <h2 id="flush-halt">Flush &amp; halt<a class="headerlink" href="#flush-halt" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>flush.slot</code> (0x53):</strong> the sole async-DMA fence --- spins in <code>FLUSH_SLOT_WAIT</code> until every SPAD-region slot in the op0 mask reports <code>dma_slot_done</code>, then clears those done bits for reuse (make-async-real, charter § 4/§ 5). Because the DMU touches SPAD only, this fence guards SPAD regions only. The former full-fence <code>flush</code> (0x52) opcode is <strong>retired</strong>; the assembler pseudo <code>flush</code> now lowers to <code>flush.slot</code> over all slots.</li>
+<li><strong><code>flush.slot</code> (0x53):</strong> the sole async-DMA fence --- spins in <code>FLUSH_SLOT_WAIT</code> until every SPAD-region slot in the op0 mask reports <code>dma_slot_done</code>, then clears those done bits for reuse (make-async-real). Because the DMU touches SPAD only, this fence guards SPAD regions only. The former full-fence <code>flush</code> (0x52) opcode is <strong>retired</strong>; the assembler pseudo <code>flush</code> now lowers to <code>flush.slot</code> over all slots.</li>
 <li><strong><code>halt</code> (0x5F):</strong> the only terminator. It sits at the all-ones lower-nibble slot (a clean default-to-halt decode) and <em>drains all outstanding DMA slots</em> before asserting <code>done</code> ("done" = results committed); any undefined opcode also defaults to <code>HALT_STATE</code>. (Ratified 0.4.0 value; the current RTL still homes halt at 0x3F and does not yet drain, tracked as a separate RTL fix.)</li>
 </ul>
+<h2 id="scalar-unit-proposed">Scalar unit (proposed)<a class="headerlink" href="#scalar-unit-proposed" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Status: <strong>PROPOSED</strong> --- not implemented</p>
+<p>The scalar unit, its three opcodes, and the <code>0x55</code> wiring below are a <strong>design
+proposal</strong>, not as-built RTL. None of it exists on <code>rtl/s2-spine</code> (#418) or on silicon.
+It is documented here, in the tile front-end page, because it is a <strong>sub-module
+extension of <code>tile_sequencer.sv</code></strong> --- the module this page describes --- not a separate
+unit. Where it touches live logic (the loop-frame addressing path, the VREG/SPAD port
+guards) that is called out explicitly: those are changes to <strong>active</strong> code, not deletion
+of dead code.</p>
+</div>
+<p>The tile front-end is structurally a TensorCore-style front-end (a VPU + a flat-1D VREG file + a systolic MXU + an async DMU + a counted-loop controller) with the <strong>scalar compute unit stripped out</strong>: there is no scalar ALU and no writable scalar register file. Every run-time scalar today is a compile-time literal (the literal pool), so the program runs autonomously to <code>halt</code> with no path from a computed value to a memory address. That is fine for dense forward inference, where every address is compile-known. It breaks for <strong>Paged Attention</strong>, whose KV loop is a <em>counted</em> loop over <code>n_blocks</code> but whose per-block <strong>address</strong> is looked up at run time from a block table. That is data-dependent <strong>addressing</strong>, not data-dependent <strong>control</strong> --- a distinction that shapes the rest of this proposal.</p>
+<p>The scalar unit is the minimal fix: a small writable scalar register file plus three scalar opcodes that let a kernel compute an address at run time.</p>
+<h3 id="proposed-isa-delta">Proposed ISA delta<a class="headerlink" href="#proposed-isa-delta" title="Permanent link">&para;</a></h3>
+<p>Three opcodes in the <strong>free <code>0x6_</code> nibble</strong> plus wiring one already-declared control opcode. The <code>0x6_</code> nibble is entirely unassigned on #418 (<code>mininpu/isa/opcodes.py</code>: no <code>OP_* = 0x6x</code>), so this claims fresh space and collides with nothing.</p>
+<p><strong>Table: proposed scalar opcodes. ALL PROPOSED --- none exist in the RTL or on silicon.</strong></p>
+<table>
+<thead>
+<tr>
+<th>op</th>
+<th>opcode</th>
+<th>semantics</th>
+<th>note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scalar.movi</code></td>
+<td><strong><code>0x62</code></strong></td>
+<td><code>sreg[dst] = imm32</code></td>
+<td>immediate inline in <code>op1:op2</code></td>
+</tr>
+<tr>
+<td><code>scalar.load</code></td>
+<td><strong><code>0x60</code></strong></td>
+<td><code>sreg[dst] = spad_row[lane]</code></td>
+<td>the one genuinely new datapath: a new SPAD/VREG read-port client + a lane mux</td>
+</tr>
+<tr>
+<td><code>scalar.mac</code></td>
+<td><strong><code>0x61</code></strong></td>
+<td><code>sreg[dst] += sreg[src] * imm16</code></td>
+<td><strong><code>dst = accumulator</code></strong> so the RF stays <strong>2R1W</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>scalar.mac</code> <code>dst = accumulator</code> convention is deliberate: holding the write set to a single accumulator destination keeps the scalar RF at <strong>2-read / 1-write</strong>, matching the VREG file's <code>2r1w</code> shape (<code>vreg_rf.sv</code>) and avoiding a wider (more area/timing-costly) file.</p>
+<p><strong>Wire <code>loop.begin.csr</code> (<code>0x55</code>).</strong> <code>OP_LOOP_BEGIN_CSR = 0x55</code> is <strong>declared but not dispatched</strong> on #418: it lives in the ISA SSOT (<code>opcodes.py:543</code>) and in the <code>RESERVED</code> frozenset (<code>opcodes.py:710</code>), with <strong>no encoder</strong> (<code>encoders.py</code> has no <code>loop_begin_csr</code>), so it currently traps to the illegal-opcode / <code>halt</code> default. The proposal <strong>wires it</strong> as <code>loop.begin</code> with <code>hi</code> sourced from a scalar slot instead of a pool literal --- a runtime-bounded counted loop with no new opcode. (The SSOT declaration phrases the source as <code>hi = KERNEL_ARG[op1]</code>; that kernel-arg CSR does <strong>not</strong> exist on #418, so the writable scalar RF proposed here <strong>is</strong> the source that would make <code>0x55</code> dispatchable.)</p>
+<h3 id="addressing-generalize-the-live-loop-frame-path">Addressing --- generalize the live loop-frame path<a class="headerlink" href="#addressing-generalize-the-live-loop-frame-path" title="Permanent link">&para;</a></h3>
+<p>The affine-index / stride datapath is <strong>live</strong> on #418, not inert --- so this is a change to active logic, not a "retire the dead AGU". The loop controller reads a per-channel stride vector from the pool and accumulates it into per-channel base-offset (<code>bo</code>) registers:</p>
+<ul>
+<li><code>tile_sequencer.sv:230</code> wires the real <code>lb_desc_stride</code> signal into <code>loop_ctrl</code>'s <code>desc_stride</code> port; <code>tile_sequencer.sv:500</code> latches each per-channel stride word from the literal pool.</li>
+<li><code>loop_ctrl.sv</code> accumulates it: on each <code>loop.end</code> CONTINUE, <code>bo &lt;= bo + active_stride</code> (<code>loop_ctrl.sv:174</code>), and the unit AGUs form each operand address as <code>operand_literal + bo[ch]</code> (a single add, no multiply). This tracks <code>base + iter*stride</code> exactly.</li>
+</ul>
+<p>The scalar unit <strong>generalizes</strong> this live path: today <code>bo</code> advances by a compile-time stride vector per loop frame; the scalar unit lets <code>scalar.mac</code> / <code>scalar.load</code> compute the offset (or a full base) at run time --- e.g. a block-table gather --- and feed it into the same operand-address formation. It should <strong>eventually subsume</strong> the loop-frame stride source, but that is a migration of a <strong>working</strong> feature (tested against the existing <code>bo</code> oracle --- the 32×32 GELU stride vectors at <code>loop_ctrl.sv:44-46</code>), not a removal of dead code. The counted-stride case stays; the scalar path is its runtime-computed superset.</p>
+<h3 id="port-budget-a-new-client-under-the-existing-guard-contract">Port budget --- a new client under the existing guard contract<a class="headerlink" href="#port-budget-a-new-client-under-the-existing-guard-contract" title="Permanent link">&para;</a></h3>
+<p><code>scalar.load</code> reads a SPAD (or VREG) row, so it is a <strong>new read-port client</strong>, and #418 already has a built, enforced port-arbitration contract it must plug into --- SPAD/VREG port arbitration is <strong>not</strong> unexplored here:</p>
+<ul>
+<li>The VREG file is <code>2r1w</code> (<code>vreg_rf.sv</code>, with a documented future <code>2r2w</code> hook). <code>tile_top.sv</code> statically assigns read-port A (MXU X-burst vs VPU src-A) and read-port B (LSU vs VPU src-B) with <strong>no hardware arbiter</strong> --- temporal separation by compiler contract (<code>tile_top.sv:29-37</code>).</li>
+<li>Each client raises a <strong>per-cycle read-request qualifier</strong>: <code>mxu_vreg_rd_en</code> and <code>lsu_vreg_rd_en</code> (<code>tile_top.sv:218,342</code>, wired to the submodules' <code>vreg_rd_en</code> ports). Sim-only guards fire <code>$error</code> when a client requests a port the mux granted elsewhere (<code>tile_top.sv:454-472</code>, exercised by <code>dv/compute_tile/test_vreg_port_hazard.py</code>).</li>
+<li>The SPAD compute port (Port B) is a static priority mux MXU &gt; LSU &gt; VPU (<code>tile_top.sv:37,479</code>) and is already <strong>oversubscribed</strong>; its over-subscription guard (<code>tile_top.sv:509-523</code>) is a real, tracked contract-violation detector (<code>dv/compute_tile/test_port_guards.py</code>).</li>
+</ul>
+<p>So a <code>scalar.load</code> client must take a defined slot in this static assignment (its own per-cycle enable + a co-issue / hazard rule the compiler honors) or wait for the <code>2r2w</code> upgrade. The open question is <strong>which</strong> port and under what co-issue rule, not whether arbitration exists.</p>
+<h3 id="build-as-a-sub-module-of-tile_sequencersv">Build as a sub-module of <code>tile_sequencer.sv</code><a class="headerlink" href="#build-as-a-sub-module-of-tile_sequencersv" title="Permanent link">&para;</a></h3>
+<p>Implement the scalar unit as <strong>sub-module additions inside</strong> the existing front-end (<code>tile_sequencer.sv</code>), <strong>not</strong> as a rename or supersede of it. <code>tile_sequencer.sv</code> is the actively-reworked live front-end (the flat-1D VREG rework, #418); a supersede buys <strong>~0 RTL simplification</strong> (the real simplification is the scalar-unit content itself, which lands under either name) at <strong>maximum coordination cost</strong> on a contested in-flight file. The sub-module adds: the writable scalar RF, the three <code>0x6_</code> ops, the <code>scalar.load</code> port client, and the <code>0x55</code> wiring.</p>
+<h3 id="keep-the-counted-loop-primitive">Keep the counted-loop primitive<a class="headerlink" href="#keep-the-counted-loop-primitive" title="Permanent link">&para;</a></h3>
+<p>Paged Attention needs data-dependent <strong>addressing</strong>, not data-dependent <strong>control</strong>, so the counted loop stays:</p>
+<ul>
+<li><strong>Keep <code>loop.begin</code> / <code>loop.end</code> (<code>0x50</code> / <code>0x51</code>).</strong> The LIFO loop stack is a cheap <code>STACK_DEPTH = 4</code> structure (<code>loop_ctrl.sv:58</code>; frame storage <code>loop_ctrl.sv:99-104</code>). No new control opcode is needed for the counted KV loop.</li>
+<li><strong>A writable scalar RF as the runtime-bound source.</strong> <code>0x55</code> sourcing <code>hi</code> from a scalar slot gives a runtime-bounded counted loop, replacing a static <code>loop.begin</code> one-for-one.</li>
+<li><strong>Cross-lineage caveat:</strong> a <strong>param-CSR / arg-mode</strong> file (a launch-preloaded writable CSR) is sometimes proposed as the scalar source. That is a feature of the <strong>arg-mode lineage, NOT present on #418</strong> (no <code>param_csr</code>, no arg-mode on <code>rtl/s2-spine</code>; the two lineages are divergent, not ancestor/descendant). Treat it as a cross-lineage dependency to reconcile, not an as-built fact to build on.</li>
+<li><strong>Defer a general data-dependent branch.</strong> Neither dense forward nor Paged Attention needs one (no early-exit / <code>while</code>), so it stays deferred until a workload requires data-dependent control.</li>
+</ul>
+<h3 id="open-prerequisite-confirm-acc-writeback-on-418-silicon">Open prerequisite --- confirm ACC writeback on #418 silicon<a class="headerlink" href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" title="Permanent link">&para;</a></h3>
+<p><code>scalar.mac</code>'s <code>dst = accumulator</code> path depends on ACC writeback being correct. On the <strong>arg-mode bitstream</strong> (<code>build_id 0xB1000208</code>) the ACC-writeback path showed a <strong>row-dependent silicon bug</strong> (<code>acc.store</code> did not correctly write its SPAD destination; row 8 → garbage, row 64 → zero, MEASURED; ledger #73), with sim passing and silicon failing. #418 <strong>may already fix this</strong>: it unifies row addressing from concat to a flat <code>base + ADD</code> in both <code>lsu.sv:189</code> (<code>vreg_wr_addr = vreg_id_q + wr_row_q</code>) and <code>mxu.sv</code> (<code>vreg_rd_addr = vreg_x_id + row</code>), a plausible root cause for a <em>row-dependent</em> writeback fault. This is <strong>static analysis only</strong> --- #418 has no silicon yet --- so it is a <strong>prerequisite to confirm</strong> on an <code>rtl/s2-spine</code> bitstream re-measure, <strong>not</strong> a hard blocker and <strong>not</strong> a claimed fix.</p>
+<h3 id="scalar-unit-sources">Scalar-unit sources<a class="headerlink" href="#scalar-unit-sources" title="Permanent link">&para;</a></h3>
+<p><strong>Table: authoritative sources for the scalar-unit proposal, verified against #418 (<code>rtl/s2-spine</code>).</strong></p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Source (#418 / <code>rtl/s2-spine</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Front-end module (extension target)</td>
+<td><code>npu/src/compute_tile/tile_sequencer.sv</code></td>
+</tr>
+<tr>
+<td>Live loop-frame stride / <code>bo</code> accumulators</td>
+<td><code>tile_sequencer.sv:230,500</code> · <code>loop_ctrl.sv:44-46,174</code></td>
+</tr>
+<tr>
+<td>LIFO loop stack, <code>STACK_DEPTH=4</code></td>
+<td><code>loop_ctrl.sv:58,99-104</code></td>
+</tr>
+<tr>
+<td>Free <code>0x6_</code> nibble; <code>0x55</code> declared-not-dispatched</td>
+<td><code>mininpu/isa/opcodes.py</code> (no <code>0x6x</code>; <code>0x55</code> at <code>:543</code>, <code>RESERVED</code> at <code>:710</code>); <code>mininpu/isa/encoders.py</code> (no <code>loop_begin_csr</code>)</td>
+</tr>
+<tr>
+<td>VREG <code>2r1w</code> (+ future <code>2r2w</code> hook); flat-1D <code>base+ADD</code> addressing</td>
+<td><code>vreg_rf.sv</code> · <code>lsu.sv:189</code> · <code>mxu.sv</code></td>
+</tr>
+<tr>
+<td>Port guards / per-cycle read enables</td>
+<td><code>tile_top.sv:29-37,218,342,454-472,479,509-523</code> · <code>dv/compute_tile/test_port_guards.py</code> · <code>dv/compute_tile/test_vreg_port_hazard.py</code></td>
+</tr>
+<tr>
+<td>ACC-writeback silicon bug (arg-mode bitstream, to re-measure on #418)</td>
+<td>ledger #73 (<code>build_id 0xB1000208</code>)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="planned-evolution-risc-v-control-cores">Planned evolution → RISC-V control core(s)<a class="headerlink" href="#planned-evolution-risc-v-control-cores" title="Permanent link">&para;</a></h2>
-<p>The current hand-rolled FSM is the <em>present</em> control design. Charter § 4: the command processor (<code>command_processor.sv</code>) is a persistent device unit that the host API drives in all versions via LAUNCH descriptors; a control MCU is an orthogonal complexity lever, not a version milestone. The per-tile FSM sequencer stays. Per <strong>GitHub issue #109</strong>, the per-tile <code>EXEC_DISPATCH</code> FSM is also a candidate for replacement by a small <strong>RISC-V control core</strong> once the RTL stabilizes. A programmable core fits the composable-IP template vision (#108) better than a bespoke FSM; ISA dispatch now hardwired in <code>EXEC_DISPATCH</code> would move to CPU-driven control. The ISA SSOT (<code>mininpu/isa</code>) and the DV ISA-coverage gate would retarget accordingly. Sequencing: after the current RTL stabilizes, not urgent.</p>
+<p>The current hand-rolled FSM is the <em>present</em> control design. The command processor (<code>command_processor.sv</code>) is a persistent device unit that the host API drives in all versions via LAUNCH descriptors; a control MCU is an orthogonal complexity lever, not a version milestone. The per-tile FSM sequencer stays. Per <strong>GitHub issue #109</strong>, the per-tile <code>EXEC_DISPATCH</code> FSM is also a candidate for replacement by a small <strong>RISC-V control core</strong> once the RTL stabilizes. A programmable core fits the composable-IP template vision (#108) better than a bespoke FSM; ISA dispatch now hardwired in <code>EXEC_DISPATCH</code> would move to CPU-driven control. The ISA SSOT (<code>mininpu/isa</code>) and the DV ISA-coverage gate would retarget accordingly. Sequencing: after the current RTL stabilizes, not urgent.</p>
 <details class="note">
 <summary>Deeper dive: on-chip control-core progression in contemporary NPUs</summary>
 <p>Contemporary discrete NPUs illustrate the host-CP-to-on-chip-core progression this
@@ -1874,7 +2181,7 @@ version milestone.</p>
 <tbody>
 <tr>
 <td>Top FSM, <code>EXEC_DISPATCH</code>, sub-FSMs, pool fetch</td>
-<td><code>npu/src/compute_tile/sequencer.sv</code></td>
+<td><code>npu/src/compute_tile/tile_sequencer.sv</code></td>
 </tr>
 <tr>
 <td>Instruction field slicing</td>
@@ -1906,7 +2213,7 @@ version milestone.</p>
 </tr>
 </tbody>
 </table>
-<p>Dispatch specifics live in <code>npu/src/compute_tile/sequencer.sv</code> + <code>mininpu/isa</code>.</p>
+<p>Dispatch specifics live in <code>npu/src/compute_tile/tile_sequencer.sv</code> + <code>mininpu/isa</code>.</p>
 
 
 

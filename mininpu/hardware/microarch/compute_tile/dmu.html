@@ -1028,6 +1028,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#s7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        As-built on silicon
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1703,6 +1714,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#s7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        As-built on silicon
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1721,27 +1743,29 @@
 
 
 <h1 id="dmu-the-data-moving-unit">DMU: The Data Moving Unit<a class="headerlink" href="#dmu-the-data-moving-unit" title="Permanent link">&para;</a></h1>
-<p>The <strong>DMU</strong> is the compute tile's async data-moving unit: it streams bulk bf16 between device memory and SPAD in the background while the sequencer computes. This page documents its role and doctrine, its ISA surface, its data path to device memory, and the SPAD arbitration it participates in. Source anchors are cited as <code>file:line</code>. Primary SSOT: charter §4-§5 (<code>docs/charter.md</code>), ISA (<code>mininpu/isa/opcodes.py</code>, <code>mininpu/isa/encoders.py</code>), hardware parameters (<code>mininpu/hwparams.py</code>), and the DMA RTL under <code>npu/src/</code>.</p>
+<p>The <strong>DMU</strong> is the compute tile's async data-moving unit: it streams bulk bf16 between device memory and SPAD in the background while the sequencer computes. This page documents its role and doctrine, its ISA surface, its data path to device memory, and the SPAD arbitration it participates in. Source anchors are cited as <code>file:line</code>. Primary SSOT: ISA (<code>mininpu/isa/opcodes.py</code>, <code>mininpu/isa/encoders.py</code>), hardware parameters (<code>mininpu/hwparams.py</code>), and the DMA RTL under <code>npu/src/</code>.</p>
 <ul>
 <li><strong>compute-tile</strong> DMU</li>
 <li>async, <strong>2 slots</strong></li>
 <li><strong>0x40</strong> load · <strong>0x42</strong> store</li>
-<li>v1 <strong>single-outstanding</strong></li>
+<li>as-built datapath: <strong>multi-outstanding + coalescing + store-burst</strong></li>
 <li>SPAD only, <strong>no ACC</strong></li>
+<li>board-verified as-built on the <strong>arg-mode-lineage bitstream</strong> (<code>build_id 0xB1000208</code>, serial <code>0x0002</code>, the P1 full-tile build on <code>rtl/feat-kernarg-argmode</code>; its build_id CSR/ABI is not on main)</li>
+<li>store-burst <strong>~3.35×</strong> on contiguous stores, measured on the <strong>earlier single-feature</strong> store-burst build, <strong>not</strong> on <code>0xB1000208</code> (the merged overlap+store-burst build <code>213f1b1f</code> gave ~3.25×; see <a href="#s7">As-built on silicon</a>)</li>
 </ul>
 <h2 id="s1">Role and doctrine<a class="headerlink" href="#s1" title="Permanent link">&para;</a></h2>
 <p>Where the DMU sits and the async model it implements.</p>
 <div class="admonition note">
 <p class="admonition-title">Locked · placement</p>
-<p>The DMU <strong>lives in the compute tile</strong>, following the Gemmini <em>LoadController</em> model. The <strong>interface tile stays devmem-only</strong>: it owns the AXI path to off-chip memory, not the SPAD-fill orchestration. Charter §5: "The DMA unit lives in the compute tile (Gemmini LoadController model); the interface tile stays devmem-only." The sequencer keeps the DMU <strong>external</strong> to itself: <code>tile_sequencer</code> exposes <code>dma_slot_done</code> / <code>dmu_idle</code> stubs and <code>dmu.sv</code> is a separate module (session-decision §J).</p>
+<p>The DMU <strong>lives in the compute tile</strong>, following the Gemmini <em>LoadController</em> model. The <strong>interface tile stays devmem-only</strong>: it owns the AXI path to off-chip memory, not the SPAD-fill orchestration. The sequencer keeps the DMU <strong>external</strong> to itself: <code>tile_sequencer</code> exposes <code>dma_slot_done</code> / <code>dmu_idle</code> stubs and <code>dmu.sv</code> is a separate module (session-decision §J).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Locked · async dual-port ping-pong</p>
-<p>The DMU is <strong>async-only</strong> (session-decision §A; ISA Doc 1 §4). An async DMA request runs in the <strong>background, filling SPAD while the sequencer computes</strong> on the compute-side SPAD port (dual-port ping-pong). Charter §5: "an async DMA request (descriptor flag) runs in the background, filling SPAD port A while the sequencer computes on port B." The compute pipeline <strong>never stalls</strong> for the DMU except at an explicit <code>flush.slot</code> fence: the DMU absorbs all SPAD arbitration variability by yielding (session-decision §I).</p>
+<p>The DMU is <strong>async-only</strong> (session-decision §A; ISA Doc 1 §4). An async DMA request runs in the <strong>background, filling SPAD while the sequencer computes</strong> on the compute-side SPAD port (dual-port ping-pong). The async request is a descriptor flag: it fills SPAD port A while the sequencer computes on port B. The compute pipeline <strong>never stalls</strong> for the DMU except at an explicit <code>flush.slot</code> fence: the DMU absorbs all SPAD arbitration variability by yielding (session-decision §I).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Locked · completion token</p>
-<p>Completion is signalled by <strong><code>dma_slot_done[slot]</code></strong>, the VTA-style dependence token. <code>flush.slot</code> is the fence that waits on it. Charter §5 / §4: "Completion = <code>dma_slot_done[slot]</code> (the VTA-style dependence token); <code>flush.slot</code> fences" and "async DMA + <code>dma_slot_done</code> IS in v1 ... must be RTL-verified."</p>
+<p>Completion is signalled by <strong><code>dma_slot_done[slot]</code></strong>, the VTA-style dependence token. <code>flush.slot</code> is the fence that waits on it. Async DMA plus <code>dma_slot_done</code> is in v1 and must be RTL-verified.</p>
 </div>
 <details class="note">
 <summary>Deeper dive: DMA-unit prior art (Gemmini LoadController, VTA dependence tokens)</summary>
@@ -1757,7 +1781,7 @@ fence waits on) follows the same VTA dependence-token model. Both are prior art 
 <h3 id="sync-vs-async">Sync vs async<a class="headerlink" href="#sync-vs-async" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Async is the only DMU mode in v1.</strong> The former async-mode flag (<code>flags[5]</code> on the DMA opcodes) is retired and is now <strong>reserved-must-be-zero</strong> (ISA Doc 1 §4; session-decision §A). There is no synchronous DMU opcode variant.</li>
-<li>The host-facing <em>synchronous</em> block transfers (host&lt;-&gt;devmem memcpy) are a <strong>separate concern</strong>, handled by the command processor + copy engine over the AXI-Lite CMD window (charter §4), not by the compute-tile DMU.</li>
+<li>The host-facing <em>synchronous</em> block transfers (host&lt;-&gt;devmem memcpy) are a <strong>separate concern</strong>, handled by the command processor + copy engine over the AXI-Lite CMD window, not by the compute-tile DMU.</li>
 </ul>
 <h2 id="s2">ISA surface<a class="headerlink" href="#s2" title="Permanent link">&para;</a></h2>
 <p>The two DMU opcodes, their operand slots, the fence, and the slot count. All LOCKED (ISA SSOT).</p>
@@ -1777,28 +1801,28 @@ fence waits on) follows the same VTA dependence-token model. Both are prior art 
 <td><code>0x40</code></td>
 <td>DRAM (bf16) → SPAD</td>
 <td>SPAD only</td>
-<td><code>opcodes.py:505</code></td>
+<td><code>opcodes.py:513</code></td>
 </tr>
 <tr>
 <td><span class="mono"><code>dmu.store.spm</code></span></td>
 <td><code>0x42</code></td>
 <td>SPAD → DRAM (bf16)</td>
 <td>SPAD only</td>
-<td><code>opcodes.py:506</code></td>
+<td><code>opcodes.py:514</code></td>
 </tr>
 <tr>
 <td><span class="mono"><code>flush.slot</code></span></td>
 <td><code>0x53</code></td>
 <td>fence (masked stall)</td>
 <td>per-slot done bits</td>
-<td><code>opcodes.py:510</code></td>
+<td><code>opcodes.py:518</code></td>
 </tr>
 <tr>
 <td><span class="mono"><code>halt</code></span></td>
 <td><code>0x5F</code></td>
 <td>terminal drain</td>
 <td>all slots</td>
-<td><code>opcodes.py:512</code></td>
+<td><code>opcodes.py:520</code></td>
 </tr>
 </tbody>
 </table>
@@ -1807,7 +1831,7 @@ fence waits on) follows the same VTA dependence-token model. Both are prior art 
 <p>The DMU <strong>never touches ACC</strong>. The <code>dmu.*.acc</code> opcodes are <strong>removed</strong> (no <code>OP_DMU_*_ACC</code> in the SSOT). ACC is MXU-owned fp32 and never reaches DRAM; async DMA targets the SPAD region only and <code>flush.slot</code> guards SPAD. <code>opcodes.py:232</code>: "The DMU touches SPAD only (ACC never reaches DRAM)."</p>
 </div>
 <h3 id="64-bit-encoding-operand-slots">64-bit encoding, operand slots<a class="headerlink" href="#64-bit-encoding-operand-slots" title="Permanent link">&para;</a></h3>
-<p>The instruction word is the fixed 64-bit format <code>OP[63:56] | FLAGS[55:48] | op0[47:32] | op1[31:16] | op2[15:0]</code> (ISA Doc 1 §3). The DMU opcodes use these slots (<code>encoders.py:436-548</code>):</p>
+<p>The instruction word is the fixed 64-bit format <code>OP[63:56] | FLAGS[55:48] | op0[47:32] | op1[31:16] | op2[15:0]</code> (ISA Doc 1 §3). The DMU opcodes use these slots (<code>encoders.py:460-572</code>):</p>
 <div class="tbl-wrap" markdown="0">
 <table>
   <thead>
@@ -1825,11 +1849,11 @@ fence waits on) follows the same VTA dependence-token model. Both are prior art 
 
 <ul>
 <li><strong><code>dram_stride</code> = bytes-per-DRAM-row.</strong> Row <code>r</code> reads <code>dram_addr + r*dram_stride</code>. <code>dram_stride=0</code> is a first-class <strong>broadcast</strong> mode on load (all dst rows filled from one DRAM row - this is how bias is added). <code>encoders.py:467-490</code>.</li>
-<li>Inline form only; the W6 <code>assembler.py</code> pass lowers the inline op into a descriptor + trigger. The <strong>exact descriptor format the DMU consumes is OPEN</strong> (deferred to implementation).</li>
+<li>Inline form only; the W6 <code>assembler.py</code> pass lowers the inline op into a descriptor + trigger. The descriptor field set is fixed by the encoder: <strong>two literal-pool words</strong> - <code>pool[op1]</code> = <code>dram_addr</code>, <code>pool[op1+1]</code> = <code>dram_stride</code> (force-appended adjacent, <code>encoders.py:463-491</code>) - plus a <strong>slot = <code>flags[0]</code></strong> (<code>DMA_SLOT_COUNT=2</code>). The former "OPEN descriptor format" resolves to this fixed 2-word + slot form. On the <strong>arg-mode-lineage</strong> bitstream the DMU-fetch FSM latches those two pool words into <code>dmu_addr_q</code> / <code>dmu_stride_q</code> (<code>rtl/feat-kernarg-argmode</code> <code>tile_sequencer.sv</code>); on <code>#418</code>/main the sequencer only exposes the DMU <strong>stub</strong> interface, and its <code>LB_DESC_WORDS = 1 + AGU_NUM_CH</code> is the <strong><code>loop.begin</code></strong> descriptor (hi + one stride word per <code>bo</code> channel), <strong>not</strong> the DMU load/store descriptor. <strong>Arg-mode-branch-only (absent on #418/main):</strong> with <code>flags[7]</code> set, the descriptor instead sources <code>base &lt;- param_csr[op1[4:0]]</code> and <code>stride &lt;- param_csr[op1[9:5]]</code> from the on-chip kernel-arg CSR (<code>rtl/feat-kernarg-argmode</code> <code>tile_sequencer.sv</code>) - a <strong>proposed ISA amendment</strong> ("ISA 0.5.0"), not the repo's ISA (which is 0.4.0 on both #418 and main).</li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Locked · slots &amp; fence</p>
-<p><strong><code>DMA_SLOT_COUNT = 2</code></strong> independent async slots (<code>hwparams.py:80</code>). <code>flush.slot</code> takes a 16-bit slot bitmask in <code>op0</code>: bit <em>i</em> set = wait for slot <em>i</em> to drain; <code>flush.slot 0xFFFF</code> waits for every slot. It is the <strong>only</strong> fence primitive (the unmasked <code>flush</code> 0x52 is retired). <code>halt</code> drains all outstanding slots then asserts done. <code>encoders.py:75-88</code>.</p>
+<p><strong><code>DMA_SLOT_COUNT = 2</code></strong> independent async slots (<code>hwparams.py:87</code>). <code>flush.slot</code> takes a 16-bit slot bitmask in <code>op0</code>: bit <em>i</em> set = wait for slot <em>i</em> to drain; <code>flush.slot 0xFFFF</code> waits for every slot. It is the <strong>only</strong> fence primitive (the unmasked <code>flush</code> 0x52 is retired). <code>halt</code> drains all outstanding slots then asserts done. <code>encoders.py:75-88</code>.</p>
 </div>
 <details class="note">
 <summary>Deeper dive: a worked async load --- <code>dmu.load.spm</code> to <code>flush.slot</code></summary>
@@ -1886,7 +1910,7 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 <tr>
 <td>device memory</td>
 <td>off-chip <strong>PL-DDR4</strong>, reached via <code>dm_axi_bridge</code> → <code>m00_axi</code></td>
-<td>charter §5</td>
+<td><code>dm_axi_bridge</code></td>
 </tr>
 <tr>
 <td>DM word width</td>
@@ -1901,12 +1925,12 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 <tr>
 <td>as-built AXI</td>
 <td><strong>32-bit AXI @ 50 MHz</strong> (~200 MB/s, ~1% of DDR peak)</td>
-<td>charter §5</td>
+<td><code>dm_axi_bridge</code></td>
 </tr>
 <tr>
 <td>SPAD</td>
 <td>1024 × 256b = <strong>32 KiB</strong>, 8 banks (<code>row mod 8</code>), bf16</td>
-<td><code>hwparams.py:52,87</code></td>
+<td><code>hwparams.py:52,96,99</code></td>
 </tr>
 <tr>
 <td>SPAD read latency</td>
@@ -1917,7 +1941,7 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 </table>
 <div class="admonition note">
 <p class="admonition-title">Locked · bandwidth - bus width is the lever</p>
-<p>The as-built <code>dm_axi_bridge</code> is 32-bit AXI @ 50 MHz. The bottleneck is <strong>bus width, not outstanding depth</strong>. At 32b/50 MHz the bandwidth-delay product is ~1 burst, so multiple-outstanding buys ~nothing until the AXI path is widened (toward the 256-bit DM-word width) and/or clocked up. Charter §6 notes the DDR/AXI clock is independent of the compute-tile clock (a CDC at the DMEM boundary lets the AXI side run at the MIG user clock, 200-300 MHz), which is the lever that makes the widened path real. <strong>This bounds v1 to single-outstanding</strong> (see <a href="#s6">§06</a>).</p>
+<p>The as-built <code>dm_axi_bridge</code> is 32-bit AXI @ 50 MHz. The bottleneck is <strong>bus width, not outstanding depth</strong>. At 32b/50 MHz the bandwidth-delay product is ~1 burst, so multiple-outstanding buys ~nothing until the AXI path is widened (toward the 256-bit DM-word width) and/or clocked up. The DDR/AXI clock is independent of the compute-tile clock (a CDC at the DMEM boundary lets the AXI side run at the MIG user clock, 200-300 MHz), which is the lever that makes the widened path real. <strong>This bounds v1 to single-outstanding</strong> (see <a href="#s6">§06</a>).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Locked · SPAD arbitration priority</p>
@@ -1955,6 +1979,10 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 </table>
 </div>
 
+<div class="admonition note">
+<p class="admonition-title">Under owner review: does the AGU multiply?</p>
+<p>The <code>dma_addr_gen</code> (AGU) row above states "Pure combinational <code>base_addr + row*stride</code>" -- a literal multiply. The <a href="../../spec/isa.html">ISA spec</a> states the opposite: "There is <strong>no address multiplier</strong> in the datapath: the per-unit AGU is just an adder", with the <code>iv*stride</code> term computed multiplier-free by stride-accumulation (isa.md §2.1). This docs-vs-docs sequencer-design contradiction is under owner review (the owner's alignment direction retires the AGU); this note flags it without picking a winner.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Note · RTL-vs-target framing</p>
 <p>The as-built <code>dma_engine.sv</code> lives in the <strong>interface tile</strong> and decodes the host block-transfer modes (stream write/read, IRAM load); its 2-slot machinery and <code>dma_slot_done</code> are the completion mechanism the DMU reuses. The <strong>target</strong> DMU is a compute-tile module (<code>dmu.sv</code>) that drives <code>dma_addr_gen</code> + the <code>dm_*</code> bridge port and the SPAD DMA path. Reuse these ports and the 2-slot/grant primitives; do not rebuild them. How the slot machinery relocates or is re-instantiated inside the compute tile is an implementation choice.</p>
@@ -1999,11 +2027,11 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 <tr>
 <td><code>slot</code></td>
 <td>which of the 2 async slots this transfer occupies</td>
-<td><span class="sev gap">LOCKED concept, OPEN encoding</span></td>
+<td><span class="sev good">LOCKED · as-built <code>slot = flags[0]</code></span></td>
 </tr>
 </tbody>
 </table>
-<p>The field <em>set</em> is fixed by the ISA (<a href="#s2">§02</a>). The <strong>exact wire format of the descriptor the sequencer hands the DMU</strong> (bit packing, how <code>slot</code> is assigned/carried, how the pool-indexed <code>base</code>/<code>stride</code> are resolved to values) is OPEN.</p>
+<p>The field <em>set</em> is fixed by the ISA (<a href="#s2">§02</a>). The wire format resolves to exactly two literal-pool words (<code>pool[op1]</code>=<code>base</code>, <code>pool[op1+1]</code>=<code>stride</code>, <code>encoders.py:463-491</code>) and <code>slot = flags[0]</code>; on the arg-mode-lineage bitstream the DMU-fetch FSM latches them into <code>dmu_addr_q</code>/<code>dmu_stride_q</code>. <strong>Arg-mode-branch-only (absent on #418/main):</strong> with <code>flags[7]</code> set, <code>base</code>/<code>stride</code> re-source from <code>param_csr</code> slots (<code>op1[4:0]</code> / <code>op1[9:5]</code>) instead of the pool - a proposed ISA amendment, not the repo's ISA 0.4.0. See <a href="#s7">As-built on silicon</a>.</p>
 <h3 id="2-spad-port-arbitration-handshake">2. SPAD port + arbitration handshake<a class="headerlink" href="#2-spad-port-arbitration-handshake" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>LOCKED shape:</strong> a SPAD read/write access path (256-bit rows, <code>MEM_LATENCY=2</code>) with a <strong>yield-on-conflict</strong> handshake; compute has fixed priority.</li>
@@ -2011,7 +2039,7 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 </ul>
 <h3 id="3-completion-out-clear">3. Completion out + clear<a class="headerlink" href="#3-completion-out-clear" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>LOCKED:</strong> drive <code>dma_slot_done[1:0]</code> (sticky, one bit per slot) on transfer completion; accept a <code>clear_slot_done[1:0]</code> write-1-to-clear. This is exactly the <code>dma_engine.sv</code> contract (<code>dma_engine.sv:87-89</code>) and it must be <strong>RTL-verified</strong> in v1 (charter §4).</li>
+<li><strong>LOCKED:</strong> drive <code>dma_slot_done[1:0]</code> (sticky, one bit per slot) on transfer completion; accept a <code>clear_slot_done[1:0]</code> write-1-to-clear. This is exactly the <code>dma_engine.sv</code> contract (<code>dma_engine.sv:87-89</code>) and it must be <strong>RTL-verified</strong> in v1.</li>
 </ul>
 <h3 id="4-flushslot-handshake">4. <code>flush.slot</code> handshake<a class="headerlink" href="#4-flushslot-handshake" title="Permanent link">&para;</a></h3>
 <ul>
@@ -2026,11 +2054,41 @@ data-moving unit: 2 descriptor slots, the address-generation unit, SPAD Port A, 
 <p>What v1 must deliver, and what is explicitly out of v1.</p>
 <div class="admonition note">
 <p class="admonition-title">Locked · v1 = make-async-real, single-outstanding</p>
-<p>v1 makes the async path <strong>real and RTL-verified</strong>: <code>dma.load.spm</code> / <code>dma.store.spm</code> run in the background, complete via <code>dma_slot_done[slot]</code>, and are fenced by <code>flush.slot</code>. v1 is <strong>single-outstanding</strong>: one transfer in flight hides the latency. The two slots (<code>DMA_SLOT_COUNT=2</code>) exist in the HW contract, but v1 does not exploit multiple-outstanding, because at 32b/50 MHz the BDP is ~1 burst (<a href="#s3">§03</a>). Charter §5: "[v1] = make-async-real with single-outstanding (one slot in flight hides latency)."</p>
+<p>v1 makes the async path <strong>real and RTL-verified</strong>: <code>dma.load.spm</code> / <code>dma.store.spm</code> run in the background, complete via <code>dma_slot_done[slot]</code>, and are fenced by <code>flush.slot</code>. v1 is <strong>single-outstanding</strong>: one transfer in flight hides the latency. The two slots (<code>DMA_SLOT_COUNT=2</code>) exist in the HW contract, but v1 does not exploit multiple-outstanding, because at 32b/50 MHz the BDP is ~1 burst (<a href="#s3">§03</a>).</p>
 </div>
 <div class="admonition warning">
-<p class="admonition-title">Deferred · [v1+], out of v1</p>
-<p><strong>Multiple-outstanding + coalescing + a landing/reorder buffer</strong> are <strong>[v1+]</strong>, layered only after the AXI path is widened toward the 256-bit DM word. The landing/reorder buffer is sized to the bandwidth-delay product (= target BW × DDR latency). Charter §5 / §13. These are explicitly <strong>not in v1</strong> and the v1 DMU must not be blocked on them - but its slot/descriptor structure should not preclude them.</p>
+<p class="admonition-title">Deferred · [v1+] doctrine, now partly as-built</p>
+<p><strong>Multiple-outstanding + coalescing + a landing/reorder buffer</strong> were framed as <strong>[v1+]</strong>, to be layered only after the AXI path is widened toward the 256-bit DM word. <strong>As-built update:</strong> a max-bandwidth <strong>credit-pipe rework (multiple-outstanding + coalescing + a landing FIFO)</strong> and <strong>store-bursting</strong> (contiguous stores fuse into one <code>awlen=N-1</code> AXI burst) were in fact implemented and board-verified (see <a href="#s7">As-built on silicon</a>); the store-burst path alone gives ~3.35x on contiguous stores. What remains <strong>fabric-blocked, not RTL-blocked</strong>: multiple-outstanding beyond depth 2 is capped by the SmartConnect regulator (built for outstanding=2) and the single-ID master (<code>M_AXI_ID_WIDTH=1</code>), so the lever to go further is still AXI-widen + multi-ID (<code>gh #394/#395</code>), consistent with <a href="#s3">§03</a>.</p>
+</div>
+<h2 id="s7">As-built on silicon<a class="headerlink" href="#s7" title="Permanent link">&para;</a></h2>
+<p>Board evidence for the async DMU, so this page anchors to measured reality rather than intent. Every quantitative claim is tagged <strong>MEASURED</strong> (read off silicon), <strong>READ</strong> (from a source/JSON/note), or <strong>REASONED</strong> (modeled, not directly re-measured).</p>
+<div class="admonition success">
+<p class="admonition-title">As-built · board-verified on <code>build_id 0xB1000208</code></p>
+<p>The async DMU is <strong>live (not stubbed)</strong> and board-verified on <strong>zcu102</strong>, on the <strong>arg-mode-lineage bitstream</strong> (<code>build_id = 0xB1000208</code>; <code>BUILD_ID_MAGIC = 0xB1</code>, <code>BUILD_SERIAL = 0x0002</code>, read RO at CSR <code>0x58</code>). Those build_id constants and the <code>0x58</code> CSR live in the <strong>arg-mode branch's</strong> ABI (<code>rtl/feat-kernarg-argmode</code> <code>abi.py</code>) and are <strong>not present on main</strong> (main's <code>abi.py</code> has no build_id CSR). This is the full-tile P1 build; the DMU shares the <code>dm_axi_bridge</code> AXI path with the launch loader and arbitrates cleanly.</p>
+</div>
+<div class="tbl-wrap" markdown="0">
+<table>
+  <thead>
+    <tr><th>claim</th><th>value</th><th>tag</th><th>source</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>build_id</code> readback</td><td><code>0xB1000208</code> (match, 3 reps × multiple tests)</td><td><strong>MEASURED</strong></td><td><code>bv2opus_result.json</code>, <code>diag_result.json</code></td></tr>
+    <tr><td>pure DMU → SPAD movement</td><td>bit-exact (<code>compute_dmu_isolation</code> 256/256 B, <code>dmu_fault=0</code>)</td><td><strong>MEASURED</strong></td><td><code>bv2opus_result.json</code></td></tr>
+    <tr><td>2-slot async overlap</td><td>max-concurrent slots = <strong>2</strong> (CSR <code>0x54</code> [7:0]=0x02 across all tests)</td><td><strong>MEASURED</strong></td><td><code>0x54</code> in <code>bv2opus_result.json</code> (2-slot kernels only); the 1-slot negative control (reads 1) is a separate overlap-control run, session note</td></tr>
+    <tr><td>store-burst speedup</td><td><strong>~3.35×</strong> single-feature (contiguous store ON 417.3 vs OFF 124.7 MB/s @ 49.995 MHz); <strong>~3.25×</strong> on the merged overlap+store-burst build (404.9 vs 124.7)</td><td><strong>MEASURED</strong> (gain); feature-OFF baseline <strong>REASONED</strong></td><td>session note — the single-feature store-burst build; the merged build is md5 <code>213f1b1f</code>, whose build_id is <strong>ABSENT</strong> (<code>0x58</code>=0, the negative control) - so it is <strong>not</strong> serial <code>0x0001</code>. Serial <code>0x0001</code> (<code>0xB1000108</code>) is the distinct build <code>4f06836f</code> (merged + build_id CSR). The 124.7 OFF baseline was not re-loaded to re-measure</td></tr>
+    <tr><td>2-slot overlap BW %-gain</td><td><strong>run-variable ~4.6% → ~9%</strong> (not a fixed number)</td><td><strong>MEASURED</strong>, run-variable</td><td>session note; the durable claim is the <code>0x54</code> observable + <code>two_slot</code> 256/256 bit-exact, <strong>not</strong> a fixed percentage</td></tr>
+    <tr><td>dominant remaining bottleneck</td><td><strong>hop2 PL-DDR ↔ PL</strong> (<code>m00_axi</code> 256b @ 49.995 MHz ≈ 1600 MB/s ceiling ≈ 33% of the 4.8 GB/s DDR pin rate; best load ~899-1106 MB/s, recorded at the earlier 48.485 MHz assumption / ~3% higher at the true clock)</td><td><strong>MEASURED</strong> (load BW) / <strong>REASONED</strong> (ceiling)</td><td>session note</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="admonition note">
+<p class="admonition-title">Caveat · overlap %-gain is not a fixed number</p>
+<p>An earlier draft quoted a fixed <strong>+4.6%</strong> overlap gain. On silicon this figure is <strong>run-variable</strong> (~4.6% on the merged-control run, ~9% on the build-id run at equal beat count); do <strong>not</strong> quote a single percentage. The load-bearing, reproducible claims are: (1) the <code>0x54</code> observable reads <strong>2</strong> concurrent slots on a 2-slot kernel and <strong>1</strong> on the 1-slot negative control, and (2) the functional <code>two_slot</code> kernel is <strong>256/256 bit-exact on both slots</strong> with the POST fault bit clear.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Scope · DMU path is bit-exact; compute correctness is masked by an orthogonal bug</p>
+<p>On this same build, <strong>pure DMU ↔ SPAD movement is bit-exact</strong>, but the <strong>MXU/VPU compute</strong> minimal tests read back all-zero because they route their result through <strong>ACC writeback, which is broken on silicon</strong> (<code>acc.load</code>/<code>acc.store</code> ACC↔SPAD; row-dependent: row8 → garbage, row64 → zero; sim passes, silicon fails - ledger #73). This is <strong>outside the DMU's scope</strong> (the DMU never touches ACC), but it means MXU/VPU correctness is currently unverifiable on silicon until #73 is fixed. See the <a href="sequencer.html#scalar-unit-proposed">scalar unit (proposed)</a> section, whose <code>scalar.mac</code> accumulator path shares this ACC-writeback prerequisite.</p>
 </div>
 <hr />
 <p>mininpu · DMU · <a href="index.html">compute-tile overview</a> · <a href="../../../index.html">back to home</a></p>
