@@ -598,6 +598,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../hardware/microarch/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -612,10 +640,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -633,8 +661,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1830,11 +1858,11 @@ to a namespace that <strong>matches no generation of the ISA</strong>.</p>
   <code>row_cnt</code>, <code>stage_cnt</code>, <code>VPU_REDUCE_ROW</code>, <code>VPU_ACC_ROW</code>, the opcode-class
   entry-state dispatch, and the one-cycle <code>done</code> pulse.</li>
 <li><em>Numeric format:</em> that Lab 1 is FP32 end to end.</li>
-<li><em>Figure-borne claims:</em> <code>vpu-datapath</code> and <code>vpu-reduce</code> are frozen legacy
-  SVGs with no TikZ source, so they cannot be re-rendered from a corrected
-  source. The lane count, the per-lane unit set, the ADD/MAX tree shape and
-  the three-level depth are asserted by the drawings as well as by the prose:
-  checking the prose does not check the figures.</li>
+<li><em>Figure-borne claims:</em> <code>vpu-datapath</code> (house-style, with a TikZ source)
+  draws the eight-lane datapath together with the ADD/MAX reduction trees. The
+  lane count, the per-lane unit set, the ADD/MAX tree shape and the three-level
+  depth are asserted by the drawing as well as by the prose: checking the prose
+  does not check the figure.</li>
 <li><em>Suspect, check first:</em> the Part 2 kernel comment says <code>vec.mul.acc</code>
   computes "all 64 products at once", while the surrounding text describes a
   row-sequential controller over an eight-lane datapath. At most one of these
@@ -1954,8 +1982,7 @@ the result you see locally is the result you are graded on.</p>
 <p>You build one engine in four parts. Each part reuses what the previous one built:
 a dot product becomes a loop over a tile, the loop gains per-lane arithmetic and
 activations, and the whole thing composes into a layer. <a href="#fig-vpu-datapath">Fig. 1</a> shows the
-eight-lane datapath you are building, and <a href="#fig-vpu-reduce">Fig. 2</a> shows the reduction tree at
-the heart of Part 1.</p>
+eight-lane datapath you are building, including the reduction tree at the heart of Part 1.</p>
 <figure id="fig-vpu-datapath">
 <p><img alt="vpu-datapath" src="../figures/tikz/vpu-datapath.svg" /></p>
 <figcaption>
@@ -1982,18 +2009,11 @@ Inside a <code>generate</code> loop you instantiate one <code>fp_mul</code> per 
 lane <span class="arithmatex">\(i\)</span> computes <code>prod[i] = a[i] * b[i]</code>. You then instantiate one
 <code>fp_reduce_tree</code>, parameterized with <code>N=8</code> and <code>OP="ADD"</code>, that
 sums the eight products into the single output <code>result</code>. Both sub-modules are
-provided and tested; the module header lists their ports.</p>
-<figure id="fig-vpu-reduce">
-<p><img alt="vpu-reduce" src="../figures/tikz/vpu-reduce.svg" /></p>
-<figcaption>
-<p><span class="caption-prefix">Fig. 2.</span><em>The reduction tree (<code>fp_reduce_tree</code> with
-<code>N=8</code>). Eight inputs are summed pairwise over three levels, each level a
-row of adders. Because the tree has <span class="arithmatex">\(\lceil\log_2 8\rceil = 3\)</span> levels, the
-architectural latency from stable inputs to a valid result is three cycles. The
-same tree in <code>MAX</code> mode computes a row maximum, used by the attention
-softmax in later labs.</em></p>
-</figcaption>
-</figure>
+provided and tested; the module header lists their ports. The tree is the one drawn
+in the VPU datapath figure above (<a href="#fig-vpu-datapath">Fig. 1</a>): eight inputs summed pairwise
+over three levels, so the result is valid three cycles after the inputs are stable, and
+the same tree in <code>MAX</code> mode computes a row maximum used by the attention softmax in
+later labs.</p>
 <p>The idea to take away from Part 1 is the <strong>dedicated specialized datapath</strong>.
 A dot product is not run as a sequence of general-purpose instructions; it is wired
 directly in hardware as a row of per-lane multipliers feeding a reduction tree.

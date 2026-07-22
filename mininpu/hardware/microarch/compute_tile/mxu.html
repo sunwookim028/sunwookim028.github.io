@@ -611,6 +611,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -629,10 +657,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -650,8 +678,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1833,7 +1861,7 @@ the <a href="index.html">compute-tile overview</a>; the exact warning is an inli
 <h2 id="inside-a-pe-the-multi-precision-mac">Inside a PE --- the multi-precision MAC<a class="headerlink" href="#inside-a-pe-the-multi-precision-mac" title="Permanent link">&para;</a></h2>
 <p>Each PE (<code>npu/src/compute_tile/pe.sv</code>) is a single multiply-accumulate cell with two weight registers, an <strong>active</strong> and a <strong>next (inactive)</strong> buffer. <code>mxu.load.w</code> streams a weight tile into the inactive buffer with no compute and no switch; the subsequent <code>mxu.matmul</code> implicitly promotes it (the <code>switch</code> signal swaps active/inactive in one cycle) and streams activations. Because the two buffers are disjoint, the <em>next</em> tile's <code>mxu.load.w</code> can run concurrently with the current tile's <code>mxu.matmul</code> compute --- this is the ISA-level cross-tile weight preload (§ the tile loop). The arithmetic is two stages: a <strong>storage-format multiplier</strong> feeds an <strong>FP32 accumulator</strong>.</p>
 <p>The west activation and the active weight register multiply (<code>bf16_mul_fp32</code>, combinational) into an FP32 product, which latches in <code>mult_out_reg</code> --- the explicit pipeline register that cuts the DSP→CARRY8 path. <code>fp_add</code> then adds the FP32 <code>psum_in</code> arriving from the north; the FP32 <code>mac_out</code> becomes the <code>psum_out</code> driven south to the PE below. The activation passes through east; weights also forward south.</p>
-<p>The multiplier widens the low-precision operands directly into a <strong>FP32 product</strong>, and accumulation is always FP32 (<code>ACCUM_WIDTH = 32</code>, cited <code>npu_config_pkg.sv</code>). That is the standard "low-precision-multiply / wide-accumulate" shape: it keeps the dynamic range of long reduction chains without paying for FP32 multipliers. In v1 the storage dtype is hardwired BF16 (multiply) with FP32 accumulate; the runtime dtype field is removed from the v1 encoding, so <code>flags[7:6]</code> is now <strong>reserved (must be zero)</strong>, parked and re-claimable without a reformat (e.g. a future fp8 dtype) (cited <code>mininpu/isa</code>). One DSP48E2 maps per PE on FPGA. The multiplier is combinational and <code>fp_add</code> contributes <code>PE_LATENCY</code> stages; with <code>PE_LATENCY = 0</code> the controller budgets <code>PE_LAT = 2·PE_LATENCY + 1 = 1</code> extra cycle for the explicit <code>mult_out_reg</code> register. <code>pe_valid_out</code> is one cycle ahead of <code>pe_psum_out</code> by design; the controller delays its capture-valid by one cycle to compensate.</p>
+<p>The multiplier widens the low-precision operands directly into a <strong>FP32 product</strong>, and accumulation is always FP32 (<code>ACCUM_WIDTH = 32</code>, cited <code>npu_config_pkg.sv</code>). That is the standard "low-precision-multiply / wide-accumulate" shape: it keeps the dynamic range of long reduction chains without paying for FP32 multipliers. In v1 the storage dtype is hardwired BF16 (multiply) with FP32 accumulate; the runtime dtype field is removed from the v1 encoding, so <code>flags[7:6]</code> is now <strong>reserved (must be zero)</strong>, parked and re-claimable without a reformat (e.g. a future fp8 dtype) (cited <code>mininpu/isa</code>). One DSP48E2 maps per PE on FPGA. The multiplier is combinational and <code>fp_add</code> contributes <code>PE_LATENCY</code> stages; with <code>PE_LATENCY = 0</code> the controller budgets <code>PE_LAT = 2·PE_LATENCY + 1 = 1</code> extra cycle for the explicit <code>mult_out_reg</code> register. <code>pe_valid_out</code> is one cycle ahead of <code>pe_psum_out</code> by design; the controller delays its capture-valid by one cycle to compensate. The <code>fp_add</code> each PE accumulates with is the same primitive the VPU lanes are built from, drawn internally in <a href="vpu.html#fig-fp-primitives">VPU Fig. 2</a>; only the number and placement of pipeline flops differs between the two consumers.</p>
 <p><strong>Table: PE two-stage arithmetic: BF16 storage multiply widens to FP32; accumulation is always FP32. v1 <code>STORAGE_FORMAT = BF16</code>, <code>ACCUM_FORMAT = FP32</code>.</strong></p>
 <table>
 <thead>

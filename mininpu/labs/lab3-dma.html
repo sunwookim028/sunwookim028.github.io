@@ -598,6 +598,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../hardware/microarch/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -612,10 +640,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -633,8 +661,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1832,9 +1860,9 @@
      labs/common/labhandout.sty, which supplied the course/department/due/late
      lines rendered into every handout PDF). The port is content-preserving: all
      prose, hints, code listings, and the references list were carried over in
-     source order. The figure is the committed SVG under
-     docs/mkdocs/figures/tikz/ (same TikZ source the PDF's ct-pingpong.pdf was
-     built from). The "ASPIRATIONAL" maintainer notes below were LaTeX comments
+     source order. The double-buffering figure the handout carried (ct-pingpong.pdf)
+     has since been removed; a Gantt-chart placeholder for it is tracked in the
+     sequencer doc. The "ASPIRATIONAL" maintainer notes below were LaTeX comments
      in the .tex (invisible in the PDF); they are preserved here as HTML
      comments so they stay invisible to students but survive the port. -->
 <h1 id="lab-3-putting-the-units-together">Lab 3: Putting the Units Together<a class="headerlink" href="#lab-3-putting-the-units-together" title="Permanent link">&para;</a></h1>
@@ -1909,10 +1937,10 @@ deliberately and is not resolved.</p>
 <li><em>Board and cache claims:</em> that the host stages tensors in a PS-DDR buffer,
   and that the store path leaves the hardware able to keep a key-value cache
   in DRAM.</li>
-<li><em>Figure-borne claims:</em> <code>ct-pingpong</code> is a frozen legacy SVG with no TikZ
-  source, so it cannot be re-rendered from a corrected source. Its caption
-  reads the fill/read split, the role-swapping fence and the no-overlap stall
-  straight off the drawing, and Part 3 restates them.</li>
+<li><em>Figure-borne claims:</em> the former <code>ct-pingpong</code> double-buffering figure has
+  been removed (a Gantt-chart placeholder is tracked in the sequencer doc). The
+  fill/read split, the role-swapping fence and the no-overlap stall are now
+  asserted only in the Part 3 prose, so checking the prose is the whole check.</li>
 <li><em>DV file and test names:</em> <code>dv/interface_tile/test_dm_axi_bridge.py</code>, and
   <code>test_sequencer_dma_load_spm</code> / <code>test_sequencer_dma_store_spm</code> in
   <code>dv/compute_tile/test_sequencer.py</code>.</li>
@@ -2048,18 +2076,12 @@ the result you see locally is the result you are graded on.</p>
 <p>You build the memory path in four parts. Each part reuses what the previous one
 built: a single-tile transfer gains multi-dimensional addressing, the addressed
 transfer becomes a double-buffered one, and the double-buffered path feeds the
-complete accelerator running real kernels on the board. <a href="#fig-pingpong">Fig. 1</a> shows the
-overlap that double-buffering achieves.</p>
-<figure id="fig-pingpong">
-<p><img alt="Double-buffering overlaps transfer with compute" src="../figures/tikz/ct-pingpong.svg" /></p>
-<figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong>Double-buffering overlaps transfer with compute.</strong> The DMA
-engine fills one scratchpad buffer with the next tile while the compute path reads
-the tile already resident in the other buffer, so the two proceed at the same time
-(Part 3). A fence between iterations swaps the roles of the two buffers. Without the
-overlap, compute would stall while each tile is fetched, leaving a gap between tiles.</p>
-</figcaption>
-</figure>
+complete accelerator running real kernels on the board. Part 3 introduces
+<strong>double-buffering</strong>, which overlaps transfer with compute: the DMA engine fills one
+scratchpad buffer with the next tile while the compute path reads the tile already
+resident in the other buffer, so the two proceed at the same time. A fence between
+iterations swaps the roles of the two buffers. Without the overlap, compute would stall
+while each tile is fetched, leaving a gap between tiles.</p>
 <h3 id="part-1-a-single-tile-transfer-and-the-host-copy">Part 1: a single-tile transfer and the host copy<a class="headerlink" href="#part-1-a-single-tile-transfer-and-the-host-copy" title="Permanent link">&para;</a></h3>
 <p>The first part moves one tile of data between off-chip DRAM and the on-chip
 scratchpad, and connects that to the host copy that put the tensor in DRAM in the

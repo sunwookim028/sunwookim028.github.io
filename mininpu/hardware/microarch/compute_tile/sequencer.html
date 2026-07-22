@@ -611,6 +611,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -629,10 +657,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -650,8 +678,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1876,11 +1904,23 @@ on <a href="../uncore.html">the uncore</a>; its place in the tile's module tree 
 <a href="index.html#fig-module-tree">Compute tile Fig. 3</a>. The whole-device context is drawn in
 <a href="../../../labs/introduction.html#fig-system-context">Lab 0 Fig. 1</a>.</p>
 <p>The host rings a <strong>doorbell</strong> over AXI-Lite. The CP decodes a LAUNCH descriptor (active v1 fields: <code>kbin_addr</code>:64, <code>kbin_size</code>:32; no runtime kernargs in v1, operand addresses are compile-baked immediates), loads the kernel binary from devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into tile IRAM, and pulses <code>start</code>; completion is <code>instr_ready</code> (combinational all-idle flag). The <strong>sequencer</strong> owns the <strong>program counter</strong> (<code>pc.sv</code>), the <strong>IRAM</strong> (4096 × 64-bit), and the combinational <strong>decoder</strong> (<code>decoder.sv</code>). On each instruction it fans out from <code>EXEC_DISPATCH</code> to one engine --- <strong>MXU</strong> or <strong>VPU</strong> (via <code>vpu_ctrl</code>) --- or the tile's <strong>DMU</strong> (driven by the <code>DMA_ROW_*</code> sub-FSM), or a <strong>control sub-FSM</strong> (loop / flush.slot / halt). Each engine's <code>done</code> pulse drives <code>pc_enable</code> and the next fetch begins.</p>
+<figure id="fig-seq-datapath">
+<p><img alt="Sequencer datapath: IRAM to decoder to opcode-class issue" src="../../../figures/tikz/seq-datapath.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 1.</span><strong>Sequencer datapath, IRAM to issue.</strong> The structural spine behind the FSM. The
+dual-port <code>I_bram</code> (4096 × 64b) streams one 64-bit word per cycle into the
+combinational <code>decoder</code>, which field-slices it by the layout-only <code>FIELDS_INSTR_*</code>
+(<code>npu_isa_pkg</code>). Single-issue, in-order dispatch then routes by opcode class to the
+<code>issue_unit</code>: <code>mxu.*</code> → ISS_MXU, <code>vpu.*</code> → ISS_VPU, acc/vreg ld·st → ISS_LSU,
+<code>dmu.*</code> → ISS_DMU. Every unit qualifies <code>issue_unit == self</code>; the path is
+fully-exposed, with no scoreboard and no interlock.</p>
+</figcaption>
+</figure>
 <h2 id="fetch-decode-dispatch-lifecycle">Fetch → decode → dispatch lifecycle<a class="headerlink" href="#fetch-decode-dispatch-lifecycle" title="Permanent link">&para;</a></h2>
 <figure id="fig-seq-lifecycle">
 <p><img alt="Sequencer FSM: the instruction lifecycle" src="../../../figures/tikz/seq-lifecycle.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong>Sequencer FSM: the instruction lifecycle.</strong> Drawn from <code>tile_sequencer.sv</code>,
+<p><span class="caption-prefix">Fig. 2.</span><strong>Sequencer FSM: the instruction lifecycle.</strong> Drawn from <code>tile_sequencer.sv</code>,
 the top FSM <code>tile_top</code> instantiates. <code>IDLE</code> arms and loads the PC on <code>start</code>;
 <code>FETCH_1/2/3</code> pipelines the 3-cycle IRAM read; <code>ISSUE</code> decodes and dispatches by opcode.
 A unit op or <code>loop.end</code> issues and returns to <code>FETCH_1</code> the same cycle (fully exposed:
@@ -2094,6 +2134,17 @@ the authoritative opcode/flag/operand encodings live in <code>mininpu/isa</code>
 <li><strong><code>flush.slot</code> (0x53):</strong> the sole async-DMA fence --- spins in <code>FLUSH_SLOT_WAIT</code> until every SPAD-region slot in the op0 mask reports <code>dma_slot_done</code>, then clears those done bits for reuse (make-async-real). Because the DMU touches SPAD only, this fence guards SPAD regions only. The former full-fence <code>flush</code> (0x52) opcode is <strong>retired</strong>; the assembler pseudo <code>flush</code> now lowers to <code>flush.slot</code> over all slots.</li>
 <li><strong><code>halt</code> (0x5F):</strong> the only terminator. It sits at the all-ones lower-nibble slot (a clean default-to-halt decode) and <em>drains all outstanding DMA slots</em> before asserting <code>done</code> ("done" = results committed); any undefined opcode also defaults to <code>HALT_STATE</code>. (Ratified 0.4.0 value; the current RTL still homes halt at 0x3F and does not yet drain, tracked as a separate RTL fix.)</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">TODO(figure): pipeline / overlap Gantt chart</p>
+<p>A house-style <strong>Gantt / space-time chart</strong> belongs here, showing how the async
+DMA (<code>DMA_ROW_*</code> slots) overlaps transfer with compute across loop iterations:
+the DMU fills one SPAD region with the next tile while the compute path reads the
+tile already resident in the other region, with <code>flush.slot</code> as the fence that
+swaps the two regions between iterations. This is the double-buffering overlap the
+retired <code>ct-pingpong</code> figure sketched; it wants a redraw as a proper per-cycle
+Gantt view (family <code>fig-timing</code>) rather than the block diagram it was. Not drawn
+yet: this is a placeholder, not a figure embed.</p>
+</div>
 <h2 id="scalar-unit-proposed">Scalar unit (proposed)<a class="headerlink" href="#scalar-unit-proposed" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Status: <strong>PROPOSED</strong> --- not implemented</p>

@@ -611,6 +611,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -629,10 +657,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -650,8 +678,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1659,18 +1687,12 @@ cycles later. The async ACC / VREG reads are pushed through an equal-depth (<cod
 register so all three ops share the same, data-independent timing --- safe for the
 scoreboard-free sequencer. The <code>8 + 2 = 10</code> value is symbolic/parametric (<code>ROWS = N</code>,
 <code>RL = MEM_LATENCY</code>), not a hardcoded constant.</p>
-<!-- TODO(figure-redraw): fig14_lsu_pipeline is reused as-is from origin/main. The HTML
-     asset predates the house-style TikZ stack; its content (the reservation table +
-     datapath timing) is correct, but a house-style TikZ redraw is deferred. -->
 <figure id="fig-lsu-pipeline">
-<div>
-<iframe loading="lazy" src="../../../figures/fig14_lsu_pipeline.html" style="width:100%;height:640px;border:1px solid var(--md-default-fg-color--lightest);border-radius:12px" title="LSU 10-cycle pipeline"></iframe>
-</div>
+<p><img alt="LSU pipeline, stage and latency view" src="../../../figures/tikz/lsu-pipeline.svg" /></p>
 <figcaption>
 <p><span class="caption-prefix">Fig. 2.</span><strong>LSU pipeline, stage/latency view.</strong> FIXED LATENCY = ROWS + SPAD_RD_LATENCY =
 8 + 2 = 10; the three ops (<code>acc.store</code>, <code>vreg.load</code>, <code>vreg.store</code>) share one datapath,
-read tile-row <em>r</em> on cycle <em>r</em>, write <code>RL = 2</code> later, and own the bf16 ↔ fp32 casts.
-<a href="../../../figures/fig14_lsu_pipeline.html">open standalone</a></p>
+read tile-row <em>r</em> on cycle <em>r</em>, write <code>RL = 2</code> later, and own the bf16 ↔ fp32 casts.</p>
 </figcaption>
 </figure>
 <h2 id="rtl-realization">RTL realization<a class="headerlink" href="#rtl-realization" title="Permanent link">&para;</a></h2>

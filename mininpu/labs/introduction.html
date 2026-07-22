@@ -598,6 +598,34 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../hardware/microarch/index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -612,10 +640,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -633,8 +661,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2015,10 +2043,11 @@ generation of the ISA</strong>.</p>
 <li><em>Board section.</em> The ZCU102 / <code>xczu9eg</code> part, the single compute tile fed
   over a PL-side DDR4 path, and the 100 MHz target with a 50 MHz first
   bring-up (issue #168). The section is already marked a placeholder.</li>
-<li><em>Figure-borne claims.</em> <code>arch-l1-system</code> is a frozen legacy SVG with no
-  TikZ source, so it cannot be re-rendered from a corrected source. Its
-  caption reads the copy-in / control-register-launch / copy-out interface
-  off the drawing.</li>
+<li><em>Figure-borne claims.</em> The system-context view is now <code>a0-context</code>, a
+  house-style TikZ figure (re-rendered from <code>figures/tikz/a0-context.tex</code>)
+  that folds the host in above device memory; it supersedes the retired
+  source-less <code>arch-l1-system</code> SVG. Its caption reads the copy-in /
+  control-register-launch / copy-out interface off the drawing.</li>
 <li><em>Suspect, check first.</em> The lab-arc section says Lab 3's DMA "overlaps that
   movement with computation" and works up to double-buffering, while "What
   this reference leaves out" says asynchronous DMA control is out of scope
@@ -2050,9 +2079,9 @@ talks to a disk or a network card. You will see it described as the
 these labs, a Python script); the device runs only the fixed-function hardware
 you build.</p>
 <figure id="fig-system-context">
-<p><img alt="The host and the accelerator" src="../figures/tikz/arch-l1-system.svg" /></p>
+<p><img alt="The host and the accelerator" src="../figures/tikz/a0-context.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.</span><strong>The host and the accelerator.</strong> The host copies tensors into device memory, writes a control register to launch a kernel, and copies results back. The device is a fixed datapath with its own on-chip memory; it never runs the host's software. Lab 1 works entirely in simulation, so think of the host as the test program and the device as the hardware you are building.</p>
+<p><span class="caption-prefix">Fig. 1.</span><strong>The host and the accelerator.</strong> The host copies tensors into device memory, writes a control register to launch a kernel, and copies results back. The device is a fixed datapath with its own on-chip memory; it never runs the host's software. Inside the device, one tile sequencer broadcasts to the LSU / VPU / MXU over the SPAD → VREG → ACC spine; the off-tile command processor loads and launches the kernel, and devmem is where the host's copies land. Lab 1 works entirely in simulation, so think of the host as the test program and the device as the hardware you are building; Lab 1 builds the VPU, Lab 2 the MXU, Lab 3 the DMA path.</p>
 </figcaption>
 </figure>
 <p>A program drives the device in three steps.</p>
@@ -2110,6 +2139,14 @@ through every lab.</p>
 working subsystem; nothing built earlier is thrown away or replaced. The first
 three labs build the hardware; the last two program it. This page is Lab 0; the
 five handouts below are the labs proper, and each one links to its own page.</p>
+<!-- `a0-context` is one figure serving two readings on this page, and is embedded ONCE,
+     above, under #fig-system-context: there "the accelerator and its programming model"
+     frames the host <-> device boundary, and its caption now also carries the inside
+     reading (the tile's units and its off-tile neighbours) used here. Do not add a
+     second embed of the same figure; point back at #fig-system-context instead. -->
+<p><a href="#fig-system-context">Fig. 1</a> is that accelerator seen from the inside: one tile sequencer driving
+the LSU, VPU, and MXU over the SPAD → VREG → ACC datapath spine, with the off-tile command
+processor and device memory (devmem) as its neighbours. Each lab fills in one part of it.</p>
 <ul>
 <li><strong><a href="lab1-vpu.html">Lab 1: the Vector Processing Unit (VPU)</a>.</strong> The VPU does the
   element-wise and vector math: multiply, add, the reductions that sum a row

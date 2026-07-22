@@ -611,6 +611,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -629,10 +657,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2_2_1" id="__nav_2_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2_2" id="__nav_2_2_2_label" tabindex="0">
             
   
   
@@ -650,8 +678,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_1_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_2_1">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2140,17 +2168,19 @@ factor cannot silently balloon the RF to 64 KiB.</p>
 </ul>
 <p>Register-to-SPAD movement (<code>acc.store</code> / <code>vreg.load</code> / <code>vreg.store</code>) is <strong>not</strong> VPU-owned: it is dispatched to the <strong>LSU</strong>, the SPAD-VREG mover (see <a href="spad.html#the-lsu">spad.md :: The LSU</a>).</p>
 <h2 id="the-8-lane-datapath">The 8-lane datapath<a class="headerlink" href="#the-8-lane-datapath" title="Permanent link">&para;</a></h2>
-<!-- TODO(figure): `vpu-datapath` ships as a frozen legacy-style SVG (its TikZ source was
-     retired with the legacy figure style; git history is the backup) and wants a house-style
-     redraw. It IS now factually stale again: the image draws a 32-register private
-     vec_regfile with a 5-bit index, but that module is RETIRED. The live RF is the shared
-     flat-1D vreg_rf.sv (256 registers, 8-bit flat id, a tile = 8 consecutive registers).
-     The caption below states the correct model in prose until the redraw lands.
-     The old caption also called the
-     figure's "per-op latencies" stale, but the figure draws no latency numbers at all --
-     that complaint described ink that does not exist and is dropped. Redraw in the house
-     style FROM RTL. -->
-<!-- TODO(content-pass): the redraw was attempted and reverted. It was drawn FROM RTL
+<!-- NOTE(figure): `vpu-datapath` is now a house-style figure WITH a TikZ source
+     (`figures/tikz/vpu-datapath.tex`, redrawn on this branch): it is no longer a
+     source-less frozen SVG, and it now draws the 8 parallel FP32 lanes plus the two
+     reduce trees (so the former standalone `vpu-reduce` figure was retired as redundant).
+     The redraw follows the owner's structural ruling recorded below: per-lane arithmetic
+     units, with the reduce tree placed AFTER the lanes. The open content-pass items below
+     are the remaining doc-vs-RTL reconciliations, NOT reasons to re-render the figure.
+     The register file IS now drawn correctly: the figure draws the shared flat-1D
+     vreg_rf.sv (256 registers V0..V255, 8-bit flat id, a tile = 8 consecutive registers)
+     and shows the VPU as a client of it over its vpu_vrf_* 2r1w port group, alongside the
+     MXU and LSU clients. The retired private 32-register vec_regfile is gone from the
+     drawing. -->
+<!-- TODO(content-pass): an earlier redraw was attempted and reverted. It was drawn FROM RTL
      and it aligned this page's prose DOWN to the RTL, which inverts this repo's
      governance ("conform RTL to docs"; aligning a doc down to stale code needs the
      owner's explicit consent, which was not given). The brief that asked for it was
@@ -2191,10 +2221,12 @@ factor cannot silently balloon the RF to 64 KiB.</p>
 <figcaption>
 <p><span class="caption-prefix">Fig. 1.</span><strong>VPU lane datapath.</strong> A 256-bit row fans into 8 FP32 lanes (per-lane
 <code>fp_add</code> / <code>fp_mul</code> / <code>fp_max</code>); <code>rowsum</code> / <code>rowmax</code> use two <code>fp_reduce_tree</code>
-(<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. Results write to the shared <code>vreg_rf</code>
-(<code>REGS = 256</code>, 8-bit flat id) or back to an ACC row. <strong>The figure is stale on this
-point:</strong> it still draws a private 32-register <code>vec_regfile</code> with a 5-bit index; that
-module is retired. Read the RF as <code>vreg_rf.sv</code> until the redraw lands.</p>
+(<code>DEPTH = 3</code>); transcendentals use BRAM-LUTs. The register file is the shared flat-1D
+<code>vreg_rf</code> (<code>REGS = 256</code>, V0--V255, 8-bit flat id); the VPU is one client of it over its
+<code>vpu_vrf_*</code> 2r1w port group, alongside the MXU and LSU. Results write back to <code>vreg_rf</code>
+or to an ACC row.</p>
+</figcaption>
+</figure>
 <p>One zoom level in: the structure inside <code>vpu_ctrl</code>. A 256-bit ACC/SPM row unpacks into <strong>8 FP32 lanes</strong> (<code>BANKING = SPAD_DATA_WIDTH / DATA_WIDTH = 256/32 = 8</code>). Each lane owns its own ALU primitives (<code>fp_add</code>, <code>fp_mul</code>, <code>fp_max</code>). Two horizontal paths fan the 8 lanes into a scalar: an <strong>ADD reduction tree</strong> (<code>rowsum</code>) and a <strong>MAX reduction tree</strong> (<code>rowmax</code>). Three shared <strong>BRAM-LUT non-linear units</strong> (<code>exp2</code> / <code>recip</code> / <code>rsqrt</code>) serve the transcendental paths (softmax, GELU, RMSNorm). Results land in the <strong>shared vector register file</strong> (<code>vreg_rf.sv</code>: 256 flat registers V0--V255, each 8×FP32) or back to an ACC row. ACC is <strong>MXU-internal</strong> (<code>mxu_accumulator.sv</code>, <code>ACC_DEPTH</code> banks), not a scratchpad region and not part of the shared VREG file.</p>
 <p>Every lane is built from synthesisable behavioral FP32 primitives (the cvfpu/fpnew submodule was fully removed; these models map to LUTs/DSP48E2 at synthesis). The <code>ifdef VERILATOR</code> DPI-C host-float shim for <code>fp_add</code> / <code>fp_mul</code> has been <strong>removed</strong>, along with the five caller latency shims that compensated for it: <strong>simulation now exercises the real RTL FP path</strong>, so there is no longer a host-float model that can mask an arithmetic bug (<code>fp_add.sv:19</code>, "one real FP path, no host-float emulation"). The primitive files and modules were historically named <code>fp32_*</code>; both the files <em>and</em> the modules are now <code>fp_*</code> (e.g. <code>fp_add</code>, <code>fp_mul</code>), under <code>npu/src/compute_tile/fpu/</code>.</p>
 <h2 id="fp-primitives">FP primitives<a class="headerlink" href="#fp-primitives" title="Permanent link">&para;</a></h2>
@@ -2245,6 +2277,19 @@ module is retired. Read the RF as <code>vreg_rf.sv</code> until the redraw lands
 </tr>
 </tbody>
 </table>
+<p>Each of the eight lanes is built from these primitives; the two arithmetic
+atoms are drawn one zoom level down below.</p>
+<figure id="fig-fp-primitives">
+<p><img alt="Internal datapath of the fp_add and fp_mul primitives" src="../../../figures/tikz/fp-primitives.svg" /></p>
+<figcaption>
+<p><span class="caption-prefix">Fig. 2.</span><strong>Inside <code>fp_add</code> and <code>fp_mul</code>.</strong> The two arithmetic atoms every VPU lane is built
+from. <code>fp_add</code> splits into unpack + align + add, normalize, then pack (a 2-stage
+pipeline at <code>LATENCY=1</code>); <code>fp_mul</code> splits into unpack + exponent add, the 24×24
+mantissa multiply (a DSP48E2), then round + normalize + pack (combinational). The
+same two primitives back every MXU MAC, so the number and placement of flops is the
+only thing that changes between the two consumers.</p>
+</figcaption>
+</figure>
 <h3 id="rounding-and-error-bounds">Rounding and error bounds<a class="headerlink" href="#rounding-and-error-bounds" title="Permanent link">&para;</a></h3>
 <p>This subsection exists to stop a settled question from being re-opened. The
 numbers below are <strong>measured</strong> against a reference model, not estimated.</p>
@@ -2366,7 +2411,7 @@ pattern. The <code>exp2</code> LUT is not from Ara: its table values come from t
 <figure id="fig-vpu-pipeline">
 <p><img alt="VPU per-function depths padded to the uniform D_vpu terminal" src="../../../figures/tikz/c-vpu-pipeline.svg" /></p>
 <figcaption>
-<p><span class="caption-prefix">Fig. 1.1.</span><strong>VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
+<p><span class="caption-prefix">Fig. 3.</span><strong>VPU per-function depths padded to the uniform <code>D_vpu</code> terminal.</strong> Every VPU
 op class has the SAME issue-to-write latency <code>D_VPU = 23</code> (<code>vpu_ctrl.sv:417</code>); the
 shallower classes are padded to it by a holding register. One uniform reservation
 window means the FSM needs a single terminal rather than a per-op one.</p>
@@ -2448,14 +2493,10 @@ window means the FSM needs a single terminal rather than a per-op one.</p>
 <p>Class E is described here as <strong>LSU-dispatched</strong> under the 0.5.0 model; the as-built RTL still routes these <code>0x3_</code> ops through the VPU's <code>VPU_ACC_ROW</code> state, which is why the table names that state.</p>
 <p>Exact per-stage cycle accounting (the <code>ST_*</code> terminals and the row-write stage for each opcode) is in the <code>vpu_ctrl.sv</code> header comment.</p>
 <h2 id="reduction-tree-fp_reduce_tree">Reduction tree: <code>fp_reduce_tree</code><a class="headerlink" href="#reduction-tree-fp_reduce_tree" title="Permanent link">&para;</a></h2>
-<figure id="fig-vpu-reduce">
-<p><img alt="One fp_reduce_tree at N=8, DEPTH=3, ADD/MAX modes" src="../../../figures/tikz/vpu-reduce.svg" /></p>
-<figcaption>
-<p><span class="caption-prefix">Fig. 1.2.</span><strong>One <code>fp_reduce_tree</code> (N=8, DEPTH=3).</strong> The balanced binary reduction tree the
-VPU instantiates twice: an ADD tree (<code>rowsum</code>) and a MAX tree (<code>rowmax</code>), both surfacing
-the same 3-cycle latency so one <code>stage_cnt</code> terminal serves both.</p>
-</figcaption>
-</figure>
+<p>The two reduction trees are drawn in the VPU datapath figure (<a href="#fig-vpu-datapath">Fig. 1</a>):
+an ADD tree (<code>rowsum</code>) and a MAX tree (<code>rowmax</code>), both surfacing the same 3-cycle
+latency so one <code>stage_cnt</code> terminal serves both. This section is the detail behind that
+drawing.</p>
 <p>The reduction tree's 8 → 4 → 2 → 1 shape over <code>DEPTH = 3</code> levels is described in the
 text above; both ADD and MAX modes surface the same 3-cycle latency, so <code>vpu_ctrl</code> sizes a
 single <code>REDUCE_TOTAL = REDUCE_LAT + 1 = 4</code> terminal (the +1 covers the BRAM read before
@@ -2477,7 +2518,7 @@ the inputs go live).</p>
 <p>Because both modes now surface the <em>same</em> fixed latency (<code>LATENCY = clog2(N) = 3</code>), the VPU sizes a single <code>stage_cnt</code> terminal (<code>REDUCE_TOTAL = REDUCE_LAT + 1 = 4</code>) for both <code>rowsum</code> and <code>rowmax</code>. Previously the hand-unrolled MAX ladder advanced on a different (longer) schedule than ADD, so <code>rowmax</code> burned extra cycles per row. Equalizing the tree latencies lets one terminal value serve both, removing the waste.</p>
 <p>Caller contract: present stable inputs for ≥1 cycle; read <code>result</code> exactly DEPTH cycles later. In Verilator the FP adders are combinational, so correctness is enforced by <code>stage_cnt</code>, not physical register delay. The +1 in <code>REDUCE_TOTAL</code> accounts for the BRAM read latency between address-drive and valid tree inputs.</p>
 <h2 id="worked-example-rowmax-then-rowsum">Worked example: <code>rowmax</code> then <code>rowsum</code><a class="headerlink" href="#worked-example-rowmax-then-rowsum" title="Permanent link">&para;</a></h2>
-<p>Softmax over an ACC row uses two reductions back-to-back. First <code>vpu.rowmax</code> (0x10) walks the MAX tree to find the row maximum m; the row is shifted by -m for numerical stability, <code>vpu.exp2</code> (0x12) raises 2^x-m per lane through the <code>fp_exp2_bram</code> LUT, <code>vpu.rowsum</code> (0x11) walks the ADD tree for the denominator Σ, and <code>vpu.div.bcast</code> (0x16) divides each lane by Σ through the reciprocal LUT. The figure traces the <code>rowmax</code> reduction with concrete values: eight FP32 lane inputs reduce pairwise (8→4→2→1), so the row maximum is valid <code>DEPTH = 3</code> cycles after the inputs go live. Substituting <code>fp_add</code> for <code>fp_max</code> at every node turns the identical tree into the <code>rowsum</code> that the softmax denominator needs.</p>
+<p>Softmax over an ACC row uses two reductions back-to-back. First <code>vpu.rowmax</code> (0x10) walks the MAX tree to find the row maximum m; the row is shifted by -m for numerical stability, <code>vpu.exp2</code> (0x12) raises 2^x-m per lane through the <code>fp_exp2_bram</code> LUT, <code>vpu.rowsum</code> (0x11) walks the ADD tree for the denominator Σ, and <code>vpu.div.bcast</code> (0x16) divides each lane by Σ through the reciprocal LUT. Traced with concrete values, the <code>rowmax</code> reduction takes eight FP32 lane inputs that reduce pairwise (8→4→2→1), so the row maximum is valid <code>DEPTH = 3</code> cycles after the inputs go live. Substituting <code>fp_add</code> for <code>fp_max</code> at every node turns the identical tree into the <code>rowsum</code> that the softmax denominator needs.</p>
 <h2 id="isa-opcode-table-vpu-handled">ISA opcode table (VPU-handled)<a class="headerlink" href="#isa-opcode-table-vpu-handled" title="Permanent link">&para;</a></h2>
 <p>Opcode values are the SSOT constants from <code>npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>). "Cycles" is approximate (per-row terminal × 8 rows for ACC/reduction ops, plus small fixed prefixes); VREG-only ops complete in their terminal-stage count.</p>
 <p><strong>Table: VPU opcode encoding, mnemonics, and approximate cycle count. Opcode values are SSOT from <code>npu_isa_pkg.sv</code> (generated from <code>mininpu/isa</code>).</strong></p>
@@ -2735,8 +2776,6 @@ the inputs go live).</p>
 <li><strong>Run the ISA coverage gate</strong> (required before commit): <code>python3 dv/scripts/check_isa_coverage.py</code> (must exit 0), or <code>make -C dv/compute_tile check-isa-coverage</code>. The opcode is not "done" until L4, L5, and the gating-stub rules all pass.</li>
 </ol>
 <p>Related: <a href="index.html">compute-tile overview</a> · <a href="mxu.html">MXU</a> · <a href="../uncore.html">uncore</a>.</p>
-</figcaption>
-</figure>
 
 
 

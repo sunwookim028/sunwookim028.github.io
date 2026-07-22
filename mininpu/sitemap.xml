@@ -2,98 +2,102 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://sunwookim028.github.io/mininpu/index.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/runtime.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/compiler/index.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/figures/README-gpt2.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/verification.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/flows/allo.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/flows/asic.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/flows/fpga.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
+    </url>
+    <url>
+         <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/index.html</loc>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/uncore.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/index.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/dmu.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/gpt2_demo.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/mxu.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/sequencer.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/spad.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/microarch/compute_tile/vpu.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/spec/abi.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/hardware/spec/isa.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/introduction.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/lab1-vpu.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/lab2-systolic.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/lab3-dma.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/lab4-kernels.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
     <url>
          <loc>https://sunwookim028.github.io/mininpu/labs/lab5-serving.html</loc>
-         <lastmod>2026-07-21</lastmod>
+         <lastmod>2026-07-22</lastmod>
     </url>
 </urlset>
