@@ -1639,6 +1639,9 @@
 <h1 id="gpt-2-demo-the-forward-pass-as-tile-kernels">GPT-2 Demo: The Forward Pass as Tile Kernels<a class="headerlink" href="#gpt-2-demo-the-forward-pass-as-tile-kernels" title="Permanent link">&para;</a></h1>
 <p>The GPT-2 (124M) forward pass is the v1 <strong>worked example</strong> that exercises the compute tile:
 it lowers to the v1 opcode set and runs as a sequence of per-kernel schedules on one tile.
+The 124M configuration is GPT-2 small: 12 transformer layers, 12 attention heads
+(<code>head_dim = 64</code>), model width <code>n_embd = 768</code>, feed-forward width 3072 (4x), and tied
+input/output (<code>lm_head</code>) embeddings (SSOT: <code>dv/workload/gpt2_lowering.py::GPT2Config</code>).
 GPT-2 is the demo, not the architecture's identity (the tile is a composable IP template).
 This page is a skeleton: the kernel decomposition and the per-kernel Gantt schedules are
 generated from the lowering and cost model (see Sources); roll-up cycle numbers are not
@@ -1724,6 +1727,11 @@ It is drawn at the wide tier because the k-loop makes it 699 cycles:</p>
 eight-deep k-loop makes the block 699 cycles, and the 74-cycle matmul cadence dominates.</p>
 </figcaption>
 </figure>
+<p>For a context spanning multiple key tiles, only the query/key tile on the diagonal needs
+its upper triangle masked (the <code>causal</code> flag, <a href="mxu.html">mxu tile loop</a>); a tile strictly
+below the diagonal is kept whole and one strictly above is skipped entirely. This kernel's
+single score tile is that diagonal case (<code>dv/workload/gpt2_lowering.py::attention</code> marks it
+the causal-masked diagonal tile).</p>
 <p>The MLP down-projection is <code>qkv_proj</code>'s spine minus the write-back --- its result stays in
 VREG for the residual add --- with the DMU prefetching both weight tiles underneath:</p>
 <figure id="fig-mlp-cproj-schedule">
@@ -1744,6 +1752,12 @@ VPU-bound: reductions, transcendental LUTs, and per-lane arithmetic.</p>
 chain of seven dependent ops with no MXU work to hide behind.</p>
 </figcaption>
 </figure>
+<p>Subtracting the row max (<code>vpu.rowmax</code> -&gt; <code>vpu.sub.bcast</code>) before <code>vpu.exp2</code> is a
+numerical-stability step: it keeps the exponential from overflowing. A context spanning
+multiple key tiles generalizes this into <strong>online softmax</strong> --- carrying a running max and
+sum across tiles and rescaling the accumulator each time a later tile raises the max, so
+the full score matrix is never materialized. This demo's chain is the single-tile base
+case, since its causal-masked diagonal tile already holds the whole row's context.</p>
 <p>LayerNorm is a 10-op chain rather than softmax's 7, but it is cheaper: <code>mean</code>, <code>var</code> and
 <code>rsqrt</code> dispatch to the <strong>parallel</strong> <code>VPU_VREG_EXEC</code> path (all 8 rows in one pass, 24 cy)
 rather than the 192-cycle latency-serial path, and the <code>gamma</code>/<code>beta</code> feed is prefetched

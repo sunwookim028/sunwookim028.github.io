@@ -1413,23 +1413,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deliverables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deliverables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Deliverables">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#report" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1443,6 +1426,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deliverables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deliverables
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1739,23 +1733,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deliverables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deliverables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Deliverables">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#report" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1769,6 +1746,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deliverables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deliverables
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1833,40 +1821,21 @@ the page (motivation, exercises, tooling and submission steps) is pedagogy
 and needs no such check. The authoritative sources are the
 <a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>Known wrong, not merely unverified.</strong> The <code>vec.*</code> mnemonics used below
-(<code>vec.rowsum</code>, <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code>) belong
-to a namespace that <strong>matches no generation of the ISA</strong>.</p>
 <p><strong>Unverified claims on this page.</strong></p>
 <ul>
-<li><em>Instruction semantics and operand fields:</em> what <code>vec.rowsum</code>,
-  <code>vec.mul.acc</code>, <code>vec.add.acc</code>, <code>vec.gelu</code>, <code>vec.exp2</code> and <code>flush</code> do, and
-  the <code>acc_dst</code> / <code>acc_a</code> / <code>acc_b</code> / <code>vreg_dst</code> / <code>acc_src</code> operand fields
-  the three-instruction kernel in Part 2 uses.</li>
-<li><em>Datapath geometry:</em> eight lanes; one multiplier, adder and comparator per
-  lane; a scratchpad row holding eight FP32 values; an accumulator tile of
-  eight rows by eight FP32 values.</li>
-<li><em>Reduction tree:</em> <code>fp_reduce_tree</code> parameterized <code>N=8</code> with <code>OP="ADD"</code> and
-  an <code>OP="MAX"</code> mode; three pairwise levels; a three-cycle latency equal to
-  that depth.</li>
+<li><em>Operand fields:</em> the <code>acc_dst</code> / <code>acc_a</code> / <code>acc_b</code> / <code>vreg_dst</code> /
+  <code>acc_src</code> operand fields the three-instruction kernel in Part 2 uses.</li>
+<li><em>Datapath geometry:</em> a scratchpad row holding eight FP32 values.</li>
 <li><em>Lookup tables and their latency:</em> that <code>fp_exp2_bram</code>, <code>fp_recip_bram</code>,
   <code>fp_rsqrt_bram</code> and <code>fp_tanh_bram</code> exist; that the <code>fp_tanh_bram</code> read is
   registered and costs one cycle; that the GELU path has exactly one
   registered stage.</li>
-<li><em>Provided FPU blocks:</em> <code>fp_mul</code> (claimed combinational), <code>fp_add</code>,
-  <code>fp_max</code>, and the claim that ReLU is one <code>fp_max</code> comparison.</li>
-<li><em>Module, signal and FSM-state names:</em> <code>vpu_lane.sv</code>, <code>vpu_ctrl.sv</code>,
-  <code>row_cnt</code>, <code>stage_cnt</code>, <code>VPU_REDUCE_ROW</code>, <code>VPU_ACC_ROW</code>, the opcode-class
-  entry-state dispatch, and the one-cycle <code>done</code> pulse.</li>
 <li><em>Numeric format:</em> that Lab 1 is FP32 end to end.</li>
 <li><em>Figure-borne claims:</em> <code>vpu-datapath</code> (house-style, with a TikZ source)
   draws the eight-lane datapath together with the ADD/MAX reduction trees. The
   lane count, the per-lane unit set, the ADD/MAX tree shape and the three-level
   depth are asserted by the drawing as well as by the prose: checking the prose
   does not check the figure.</li>
-<li><em>Suspect, check first:</em> the Part 2 kernel comment says <code>vec.mul.acc</code>
-  computes "all 64 products at once", while the surrounding text describes a
-  row-sequential controller over an eight-lane datapath. At most one of these
-  can be right.</li>
 </ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
@@ -1893,11 +1862,11 @@ lab, and you build it up piece by piece.</p>
 document explains the programming model: a kernel is a short sequence of NPU
 instructions that the hardware fetches, decodes, and executes. The VPU is the
 unit that runs the vector instructions in that set. Among them are a row-sum
-reduction (<code>vec.rowsum</code>, which sums the elements of a row to one value), the
-element-wise arithmetic (<code>vec.mul.acc</code> and <code>vec.add.acc</code>, an
+reduction (<code>vpu.rowsum</code>, which sums the elements of a row to one value), the
+element-wise arithmetic (<code>vpu.mul.acc</code> and <code>vpu.add.acc</code>, an
 element-wise multiply and add over a tile), and the activations ReLU
-(a maximum against zero) and GELU (<code>vec.gelu</code>). The same datapath also runs
-the base-2 exponential <code>vec.exp2</code> that the attention softmax uses in later
+(a maximum against zero) and GELU (<code>vpu.gelu</code>). The same datapath also runs
+the base-2 exponential <code>vpu.exp2</code> that the attention softmax uses in later
 labs. The parts below build the hardware that decodes and executes these
 operations.</p>
 <p>You build the VPU in four parts, from the bottom up. First a single vector dot
@@ -1961,10 +1930,11 @@ structure alone. The pieces are:</p>
 <li><strong>The handwritten-digit fixture</strong> that the final part runs on:
   the sklearn <code>load_digits</code> <span class="arithmatex">\(8\times8\)</span> images (classes 0 through 7)
   and the trained weights of a tiny 64-32-8 classifier, committed as
-  <code>tests/digits_0_7_weights.npz</code> and used to drive the assembled
-  layer end to end. It stands in for the MNIST-MLP concept at a scale that
-  runs quickly in simulation; sklearn is only needed offline to regenerate
-  it (<code>tests/gen_digits_fixture.py</code>), not at test time.</li>
+  <code>dv/golden/digits_0_7/digits_0_7_weights.npz</code> and used to drive the
+  assembled layer end to end. It stands in for the MNIST-MLP concept at a
+  scale that runs quickly in simulation; sklearn is only needed offline to
+  regenerate it (<code>dv/golden/digits_0_7/gen_digits_fixture.py</code>), not at test
+  time.</li>
 <li><strong>The <code>Makefile</code></strong>. <code>make test</code> builds the design with
   Verilator and runs the public tests. <code>make clean</code> removes build
   artifacts. <code>make help</code> lists the targets.</li>
@@ -2011,8 +1981,7 @@ lane <span class="arithmatex">\(i\)</span> computes <code>prod[i] = a[i] * b[i]<
 sums the eight products into the single output <code>result</code>. Both sub-modules are
 provided and tested; the module header lists their ports. The tree is the one drawn
 in the VPU datapath figure above (<a href="#fig-vpu-datapath">Fig. 1</a>): eight inputs summed pairwise
-over three levels, so the result is valid three cycles after the inputs are stable, and
-the same tree in <code>MAX</code> mode computes a row maximum used by the attention softmax in
+over three levels, and the same tree in <code>MAX</code> mode computes a row maximum used by the attention softmax in
 later labs.</p>
 <p>The idea to take away from Part 1 is the <strong>dedicated specialized datapath</strong>.
 A dot product is not run as a sequence of general-purpose instructions; it is wired
@@ -2021,10 +1990,11 @@ The lanes do all the multiplies at once, and the tree collapses their results in
 fixed structure. This lane-and-tree shape is what the rest of the lab extends: a
 lookup table is added to it in Part 3 for nonlinear functions, and the whole thing
 is driven over a tile in Part 2. As a practical detail, the reduction tree is
-registered, so its result is valid a fixed number of cycles after its inputs are
-stable (three cycles for eight inputs). The test for this part holds the inputs
-steady, waits, and then samples <code>result</code>; later parts have a controller that
-must account for this delay itself.</p>
+registered, so its result is valid only a fixed number of cycles after its
+inputs go stable; that latency differs by mode (<code>ADD</code>, the mode this part
+uses, versus <code>MAX</code>) and is documented in the module header. The test for
+this part holds the inputs steady, waits, and then samples <code>result</code>; later
+parts have a controller that must account for this delay itself.</p>
 <p>The public test for this part compares your output against numpy's dot
 product. The comparison uses a tolerance (a relative tolerance of
 <span class="arithmatex">\(1\times10^{-5}\)</span> and an absolute tolerance of <span class="arithmatex">\(1\times10^{-4}\)</span>), not exact
@@ -2035,28 +2005,27 @@ is correct wiring, not bit-for-bit agreement with numpy.</p>
 <h3 id="part-2-a-tile-loop-over-the-scratchpad">Part 2: a tile loop over the scratchpad<a class="headerlink" href="#part-2-a-tile-loop-over-the-scratchpad" title="Permanent link">&para;</a></h3>
 <p>Part 2 stays on the <strong>reduction path</strong> and turns the single dot product into
 a loop that runs it over every row of a <strong>tile</strong> resident in the
-<strong>scratchpad</strong>. A real intermediate tensor in a network is far larger
+<strong>accumulator</strong>. A real intermediate tensor in a network is far larger
 than the on-chip memory, so it is worked on in pieces. A tile is one such piece:
-a chunk of the larger tensor, sized to fit the scratchpad and shaped to the fixed
-datapath that processes it. Here the tile the VPU works on is an accumulator tile of
-eight rows, each eight FP32 values wide, matching the eight lanes. Instead of one
-vector presented on the inputs, the data lives in the scratchpad, and a small
+a chunk of the larger tensor, sized to fit the accumulator and shaped to the fixed
+datapath that processes it (the accumulator's geometry is on the
+<a href="../hardware/microarch/compute_tile/mxu.html">MXU page</a>). Instead of one
+vector presented on the inputs, the data lives in the accumulator, and a small
 controller reads it one row at a time, runs the row through the datapath, and
 advances to the next row until the tile is done.</p>
-<p>You complete the loop control in <code>vpu_ctrl.sv</code>. This controller is built
-around two counters: <code>row_cnt</code>, which selects the current scratchpad row,
-and <code>stage_cnt</code>, which counts the pipeline stages within the operation on
-that row. You write the counter advance (driving the read address from the
-current row, stepping <code>stage_cnt</code> through the pipeline, and detecting that
-the tile is finished when the last row has been processed). The dot product from
+<p>You complete the loop control in <code>vpu_ctrl.sv</code>. Its two counters, <code>row_cnt</code>
+over the rows of the tile and <code>stage_cnt</code> over the pipeline stages within the
+operation on one row, are described on the
+<a href="../hardware/microarch/compute_tile/vpu.html">VPU page</a>; you write the counter
+advance and the detection that the tile is finished. The dot product from
 Part 1 is reused unchanged as the per-row computation. The file header documents
 the controller's states and how the two counters drive them.</p>
 <p>The idea here is how a counter-driven loop streams a tile through a fixed
-datapath: the data is on chip under the scratchpad model from the introduction
-document, so the controller walks over it at known addresses, on a known cycle
-schedule.</p>
+datapath: the data is on chip under the explicit, no-cache model from the
+introduction document, so the controller walks over it at known addresses, on
+a known cycle schedule.</p>
 <p>The testbench plays the host copy step from the introduction document: it loads
-the operand tiles into the scratchpad before the kernel runs and reads the
+the operand tiles into the accumulator before the kernel runs and reads the
 results back afterward, so the kernel itself never copies data to or from DRAM.
 Suppose you want, for two eight-by-eight tiles <span class="arithmatex">\(A\)</span> and <span class="arithmatex">\(B\)</span>, the eight numbers
 <span class="arithmatex">\(d_r = \sum_{j} A[r,j]\,B[r,j]\)</span>: one dot product per row, eight in all. With the
@@ -2064,26 +2033,26 @@ two operand tiles already in the accumulator, that computation reads, in the
 device's assembly, as three instructions:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">; (testbench loads the two operand tiles into ACC[0] and ACC[1])</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">; ACC[2][r,j] = ACC[0][r,j] * ACC[1][r,j]  (all 64 products at once)</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nf">vec.mul.acc</span><span class="w">  </span><span class="no">acc_dst</span><span class="err">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="no">acc_a</span><span class="err">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="no">acc_b</span><span class="err">=</span><span class="mi">1</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">; ACC[2][r,j] = ACC[0][r,j] * ACC[1][r,j]  (8 products per cycle, one row at a time)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nf">vpu.mul.acc</span><span class="w">  </span><span class="no">acc_dst</span><span class="err">=</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="no">acc_a</span><span class="err">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="no">acc_b</span><span class="err">=</span><span class="mi">1</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">; VREG[0][r] = sum over j of ACC[2][r,j]  (one dot product per row)</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nf">vec.rowsum</span><span class="w">   </span><span class="no">vreg_dst</span><span class="err">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="no">acc_src</span><span class="err">=</span><span class="mi">2</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="nf">vpu.rowsum</span><span class="w">   </span><span class="no">vreg_dst</span><span class="err">=</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="no">acc_src</span><span class="err">=</span><span class="mi">2</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">; wait for the pipeline to drain, then stop</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nf">flush</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">; end the kernel (asserts done)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nf">halt</span>
 </code></pre></div>
 <p>Read it line by line. The two operand tiles sit in accumulator tiles 0 and 1,
-placed there by the testbench. <code>vec.mul.acc</code> multiplies them entry by entry
+placed there by the testbench. <code>vpu.mul.acc</code> multiplies them entry by entry
 and writes the <span class="arithmatex">\(8\times8\)</span> products into accumulator tile 2; this runs on the
 <strong>element-wise path</strong>, where each lane produces one independent result and
-no value crosses between lanes. <code>vec.rowsum</code> then runs the <strong>reduction
+no value crosses between lanes. <code>vpu.rowsum</code> then runs the <strong>reduction
 path</strong>: for each of the eight rows it feeds that row's eight products through the
 <strong>reduction tree</strong>, collapsing them to a single sum, and writes the eight
 per-row results into vector register 0. The output <code>VREG[0]</code> therefore holds
-the eight per-row dot products, one per row of the tile. <code>flush</code> ends the
+the eight per-row dot products, one per row of the tile. <code>halt</code> ends the
 program. The whole computation is three instructions operating on
-scratchpad-resident data; that is what "launching a kernel" means. The part is
+accumulator-resident data; that is what "launching a kernel" means. The part is
 graded by its cocotb test against a numpy reference in the same FP32 tolerance
 class as Part 1.</p>
 <h3 id="part-3-per-lane-arithmetic-and-activations">Part 3: per-lane arithmetic and activations<a class="headerlink" href="#part-3-per-lane-arithmetic-and-activations" title="Permanent link">&para;</a></h3>
@@ -2097,12 +2066,12 @@ tree entirely. You work inside <code>vpu_lane.sv</code>, the per-lane datapath. 
 pieces:</p>
 <ul>
 <li><strong>The element-wise arithmetic</strong>, an element-wise multiply and add on
-  the accumulator tile (<code>vec.mul.acc</code> and <code>vec.add.acc</code>). You wire
+  the accumulator tile (<code>vpu.mul.acc</code> and <code>vpu.add.acc</code>). You wire
   the lane's multiplier and adder, using the provided <code>fp_mul</code> and
   <code>fp_add</code>, so each lane computes its own product or sum and writes it
   straight back, not through the tree. This is the work behind most of a
   layer: multiplying two tensors element by element, and adding the bias in
-  <span class="arithmatex">\(W x + b\)</span>, which is an element-wise add (<code>vec.add.acc</code>), not a
+  <span class="arithmatex">\(W x + b\)</span>, which is an element-wise add (<code>vpu.add.acc</code>), not a
   dedicated bias operation. Part 4 uses these to compose the layer.</li>
 <li><strong>ReLU</strong>, the activation <span class="arithmatex">\(\text{ReLU}(x)=\max(x,0)\)</span>. This needs no
   table: it is one comparison, computed with the provided <code>fp_max</code>
@@ -2139,15 +2108,14 @@ dot product of Part 1 looped over the rows of <span class="arithmatex">\(W\)</sp
 the activation run on the <strong>element-wise path</strong> from Part 3. You build the
 top-level control in <code>vpu_ctrl.sv</code> that sequences these pieces. Reusing the
 <code>row_cnt</code> and <code>stage_cnt</code> counters from Part 2, it walks the rows of
-<span class="arithmatex">\(W\)</span> to compute <span class="arithmatex">\(W x\)</span> on the reduction path (one <code>vec.rowsum</code> per row,
-entering through the <code>VPU_REDUCE_ROW</code> state), then adds the bias with an
-element-wise <code>vec.add.acc</code> on the element-wise path (the <code>VPU_ACC_ROW</code>
-state), then applies the activation. The path-select is the entry-state dispatch
-keyed on the opcode class, and within a row the per-op <code>stage_cnt</code> terminal
-holds the stage long enough to cover each block's latency. The layer output is
-valid when the last row's activation has been written back: <code>row_cnt</code>
-reaches the tile's last row, the writeback completes, and <code>done</code> pulses for one
-cycle.</p>
+<span class="arithmatex">\(W\)</span> to compute <span class="arithmatex">\(W x\)</span> on the reduction path (one <code>vpu.rowsum</code> per row),
+then adds the bias with an
+element-wise <code>vpu.add.acc</code> on the element-wise path, then applies the
+activation. Which path an instruction takes is fixed by its opcode class; the
+states that dispatch reaches, and the per-stage terminals that cover each
+block's latency, are on the
+<a href="../hardware/microarch/compute_tile/vpu.html">VPU page</a>. The layer output is
+valid when the last row's activation has been written back.</p>
 <p>This is a real layer of the worked example for Lab 1, a small multi-layer
 perceptron (MLP) that classifies handwritten digits: the sklearn
 <code>load_digits</code> <span class="arithmatex">\(8\times8\)</span> images (classes 0 through 7), a compact stand-in
@@ -2177,22 +2145,17 @@ layer used in simulation.</p>
 </ul>
 <h3 id="latency-and-the-lookup-tables">Latency and the lookup tables<a class="headerlink" href="#latency-and-the-lookup-tables" title="Permanent link">&para;</a></h3>
 <ul>
-<li>The reduction tree in Part 1 has a latency equal to its depth, three cycles
-  for eight inputs, because each of its three levels is registered. The block-RAM table reads in Part 3 add a cycle each.
-  Whenever you instantiate a registered block, find its latency in the module
-  header and make the surrounding control wait that many cycles.</li>
+<li>The reduction tree in Part 1 is registered in every level, in both <code>ADD</code>
+  mode (used in this part) and <code>MAX</code> mode, but the two modes are pipelined
+  to different depths, and that latency is stated in the module header, not
+  here. The block-RAM table reads in Part 3 add a cycle each. Whenever you
+  instantiate a registered block, find its latency in the module header and
+  make the surrounding control wait that many cycles.</li>
 <li>The GELU path in Part 3 has exactly one registered stage, the
   <code>fp_tanh_bram</code> read. The rest of the GELU arithmetic is
   combinational. Align the path so the table's one-cycle output lines up with
   the combinational parts; this is the single most common Part 3 error.</li>
 </ul>
-<h2 id="deliverables">Deliverables<a class="headerlink" href="#deliverables" title="Permanent link">&para;</a></h2>
-<p>Submit through your course git repository as described in the introduction
-document. Include in your repository the
-design files you edited (<code>vpu_lane.sv</code> and <code>vpu_ctrl.sv</code>; only the
-files you changed) and your report as
-<code>report.pdf</code>. Do not commit build artifacts or the <code>sim_build/</code>
-directory.</p>
 <h3 id="report">Report<a class="headerlink" href="#report" title="Permanent link">&para;</a></h3>
 <p>Write about one page, single column, with figures or tables where they help
 (captions required). Describe the VPU you built as a whole and discuss its design
@@ -2206,6 +2169,13 @@ larger table would cost in on-chip memory and latency), and the layer (how the
 pieces compose into <span class="arithmatex">\(y = \text{act}(W x + b)\)</span> over the digit data). Pick the
 trade-offs you found most significant rather than covering every point
 exhaustively.</p>
+<h2 id="deliverables">Deliverables<a class="headerlink" href="#deliverables" title="Permanent link">&para;</a></h2>
+<p>Submit through your course git repository as described in the introduction
+document. Include in your repository the
+design files you edited (<code>vpu_lane.sv</code> and <code>vpu_ctrl.sv</code>; only the
+files you changed) and your report as
+<code>report.pdf</code>. Do not commit build artifacts or the <code>sim_build/</code>
+directory.</p>
 <h2 id="acknowledgement">Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permanent link">&para;</a></h2>
 <p>This lab is built on the mininpu, a composable tensor-accelerator hardware
 template developed for research and adapted here for teaching. The skeleton, the

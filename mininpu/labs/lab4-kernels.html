@@ -1508,23 +1508,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deliverables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deliverables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Deliverables">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#report" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1538,6 +1521,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deliverables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deliverables
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1761,23 +1755,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#deliverables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Deliverables
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Deliverables">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#report" class="md-nav__link">
     <span class="md-ellipsis">
@@ -1791,6 +1768,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deliverables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deliverables
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1851,34 +1839,22 @@ the page (motivation, exercises, tooling and submission steps) is pedagogy
 and needs no such check. The authoritative sources are the
 <a href="../hardware/spec/isa.html">ISA Reference</a> and the
 <a href="../hardware/spec/abi.html">ABI Register Map</a>.</p>
-<p><strong>Known wrong, not merely unverified.</strong> The NPU instructions shown as the
-compiler's output (<code>matmul.tile.bf16</code>, <code>vec.exp2</code>, <code>dma.load.spm</code>,
-<code>dma.store.spm</code>) belong to a namespace that <strong>matches no generation of the
-ISA</strong>. The body below nonetheless treats those mnemonics as ground truth that
-a test checks the compiler output against, so the exercises inherit the
-error, not just the prose.</p>
 <p><strong>Unverified claims on this page.</strong></p>
 <ul>
-<li><em>MXU geometry:</em> that <code>tl.dot</code> over one tile runs on an "8-by-8 systolic
-  array". This is a hardware dimension, not a mnemonic, so the note above
-  does not cover it.</li>
-<li><em>Lowering claims:</em> that <code>tl.dot</code> becomes <code>matmul.tile.bf16</code>, <code>tl.load</code> and
-  the store become <code>dma.load.spm</code> / <code>dma.store.spm</code>, and that <code>tl.exp2</code> maps
-  directly onto the <code>vec.exp2</code> instruction the Lab 1 VPU runs.</li>
-<li><em>Numeric format:</em> that the kernel multiplies in 16 bits and accumulates in
-  32.</li>
-<li><em>Tooling fidelity:</em> that <code>mininpu.iss</code> executes the same instruction set
-  the RTL does, and that <code>mininpu.cost</code> estimates a real cycle count for this
-  accelerator.</li>
+<li><em>Lowering claims:</em> that <code>tl.dot</code> becomes <code>mxu.matmul</code>, <code>tl.load</code> and
+  the store become <code>dmu.load.spm</code> / <code>dmu.store.spm</code>, and that <code>tl.exp2</code> maps
+  directly onto the <code>vpu.exp2</code> instruction the Lab 1 VPU runs.</li>
+<li><em>Tooling:</em> that the lab repository provides <code>make test</code>, <code>make test-sim</code>
+  and <code>make test-board</code>, and that the simulation run reports a per-kernel
+  cycle count. No such Makefile exists in this repo yet; the lab-4 material
+  is not populated in <code>labs/manifest.txt</code>.</li>
 <li><em>Top-level configuration:</em> that the accelerator is configured with a single
   compute tile, that grid instances therefore run one after another with a
   physical concurrency of one, and that the within-tile VPU/MXU overlap from
   Lab 2 still applies.</li>
 <li><em>Compiler behaviour:</em> that block sizes must be <code>tl.constexpr</code> arguments or
-  the compiler cannot tile, and that the <code>matmul.tile.bf16</code> instruction count
+  the compiler cannot tile, and that the <code>mxu.matmul</code> instruction count
   follows deterministically from the block sizes.</li>
-<li><em>Model configuration:</em> <code>d_head = 64</code> for the worked model (a model-config
-  number, settled by the GPT-2 configuration rather than by the RTL).</li>
 </ul>
 </div>
 <h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h2>
@@ -1898,15 +1874,19 @@ handles, and what runs on one tile. Dropping to Triton is how you control the
 tiling that maps onto the accelerator you built.</p>
 <p>A Triton kernel is therefore not a separate kind of program. It compiles down to
 the same instructions the earlier labs implemented in hardware. A <code>tl.dot</code>
-in your kernel becomes a <code>matmul.tile.bf16</code> on the matrix unit you built in
-Lab 2. An exponential becomes a <code>vec.exp2</code> on the lookup-table datapath
-of the VPU you built in Lab 1. A load and a store of a tile become <code>dma.load.spm</code> and
-<code>dma.store.spm</code> on the data-movement path you built in Lab 3. When the
+in your kernel becomes a <code>mxu.matmul</code> on the
+<a href="../hardware/microarch/compute_tile/mxu.html">matrix unit</a> you built in
+Lab 2. An exponential becomes a <code>vpu.exp2</code> on the lookup-table datapath
+of the <a href="../hardware/microarch/compute_tile/vpu.html">VPU</a> you built in Lab 1. A
+load and a store of a tile become <code>dmu.load.spm</code> and
+<code>dmu.store.spm</code> on the
+<a href="../hardware/microarch/compute_tile/dmu.html">data-movement path</a> you built in
+Lab 3. When the
 kernel runs, it runs as those instructions.</p>
 <p>You write kernels in two stages of difficulty. First a tiled matrix multiply:
 you fill in the block decomposition of a provided matrix-multiply kernel, which
 is where you learn to express tiling in Triton and to see it lower to
-<code>matmul.tile.bf16</code>. Then attention, ending with <strong>FlashAttention</strong>, the
+<code>mxu.matmul</code>. Then attention, ending with <strong>FlashAttention</strong>, the
 tiled attention that dominates as the context grows and that a transformer can
 spend much of its time in. The hardware
 target of these kernels is the accelerator you built, and the main payoff of the
@@ -1965,18 +1945,17 @@ specific holes. The pieces are:</p>
 <li><strong>The compiler</strong> (<code>mininpu_compiler</code>), which lowers a Triton
   kernel to an NPU instruction sequence (a <code>.s</code> assembly file). You
   invoke it on your finished kernels in Part 4; you do not modify it.</li>
-<li><strong>The instruction-set simulator (ISS)</strong> (<code>mininpu.iss</code>), the
-  software model of the NPU. It executes the same instruction set the RTL
-  does. You use it for fast functional checks and when a board is not
+<li><strong>The RTL simulation</strong>, the same Verilator and cocotb flow you used in
+  Labs 1 through 3, running the accelerator you built. It executes a compiled
+  program instruction by instruction and reports the cycle count that program
+  took. You use it in Part 2 and the report to reason about the cost of
+  attention, and in Part 4 for a functional check when a board is not
   available.</li>
-<li><strong>The cost model</strong> (<code>mininpu.cost</code>), which estimates the cycle
-  count of a compiled program on the accelerator. You use it in Part 2 and
-  the report to reason about the cost of attention.</li>
 <li><strong>The <code>Makefile</code></strong>. <code>make test</code> runs the kernels against
   their numpy oracles for functional correctness, with no compile step
-  needed. <code>make test-iss</code> compiles your kernels and runs them on the
-  simulator. <code>make test-board</code> runs them on the FPGA. <code>make help</code>
-  lists the targets.</li>
+  needed. <code>make test-sim</code> compiles your kernels and runs them in RTL
+  simulation, reporting each program's cycle count. <code>make test-board</code> runs
+  them on the FPGA. <code>make help</code> lists the targets.</li>
 </ul>
 <p>Everything else in the repository is provided and complete; you edit only the
 <code># TODO(lab4)</code> regions named above.</p>
@@ -2026,9 +2005,9 @@ computes the one tile of <code>C</code> it is responsible for:</p>
 block multiply that the rest of the kernel is built around. The
 <code>tl.dot(a, b, acc=acc)</code> that does the tile multiply is exactly what lowers
 to the accelerator. The point to take from Part 1 is that lowering. The
-<code>tl.dot</code> over one tile compiles to a <code>matmul.tile.bf16</code> instruction on the
-8-by-8 systolic array you built in Lab 2, the <code>tl.load</code> of each tile
-compiles to a <code>dma.load.spm</code> that brings it into the scratchpad, and the
+<code>tl.dot</code> over one tile compiles to a <code>mxu.matmul</code> instruction on the
+systolic array you built in Lab 2, the <code>tl.load</code> of each tile
+compiles to a <code>dmu.load.spm</code> that brings it into the scratchpad, and the
 <code>tl.store</code> of the result compiles to a store of the accumulator tile. The
 tiling you write in Python is the tiling the hardware executes.</p>
 <p>Part 1 is graded by the matrix-multiply oracle, which compares your output
@@ -2036,7 +2015,7 @@ against numpy's product. The comparison uses a tolerance, not exact equality,
 because the kernel multiplies in 16-bit precision and accumulates in 32-bit,
 while numpy works in higher precision; the bar is a correct kernel, not
 bit-for-bit agreement. In addition, the test compiles your kernel and checks that
-the resulting instruction sequence contains the <code>matmul.tile.bf16</code> for the
+the resulting instruction sequence contains the <code>mxu.matmul</code> for the
 product and a store for the output, so a kernel that passes numerically but
 compiles to nothing useful is caught.</p>
 <h3 id="part-2-tiled-attention-with-online-softmax">Part 2: tiled attention with online softmax<a class="headerlink" href="#part-2-tiled-attention-with-online-softmax" title="Permanent link">&para;</a></h3>
@@ -2075,17 +2054,18 @@ benefit of computing attention this way, because the oracle and the kernel
 produce the same answer. The benefit of FlashAttention is that it never builds
 the square score matrix, so it touches far less memory and moves far less data,
 and that benefit shows up as cycles, not as a different result. You see it two
-ways. The first is the on-board run in Part 4. The second is the <strong>cost
-model</strong>, <code>mininpu.cost</code>, which estimates the cycle count of a compiled program
-on this accelerator. Compile the tiled attention kernel and a kernel that forms
-the full score matrix, run both through the cost model, and compare the
-estimates: the tiled kernel does the same arithmetic but with far less data
-movement, and the cost model makes that difference concrete. Use this comparison
-in your report.</p>
+ways, and both are measurements of a real run rather than estimates. The first
+is <strong>RTL simulation</strong>: compile the tiled attention kernel and a kernel that
+forms the full score matrix, run each on the accelerator you built with
+<code>make test-sim</code>, and compare the cycle counts the two runs report. The tiled
+kernel does the same arithmetic but with far less data movement, and the cycle
+difference is what that costs. The second is the on-board run in Part 4, where
+the same difference appears as elapsed time. Use this comparison in your
+report.</p>
 <p>Part 2 is graded by the non-causal attention oracle, with a tolerance sized to
 the reduced-precision arithmetic, and the same instruction check as Part 1 (the
-compiled program must contain a <code>matmul.tile.bf16</code> for the scores, a
-<code>vec.exp2</code> for the exponential, and a store for the output).</p>
+compiled program must contain a <code>mxu.matmul</code> for the scores, a
+<code>vpu.exp2</code> for the exponential, and a store for the output).</p>
 <h3 id="part-3-the-causal-mask">Part 3: the causal mask<a class="headerlink" href="#part-3-the-causal-mask" title="Permanent link">&para;</a></h3>
 <p>Part 3 makes one small, guided change in <code>kernels/fa_fwd_causal.py</code>: it
 adds the <strong>causal mask</strong> to the attention kernel of Part 2.</p>
@@ -2109,11 +2089,10 @@ instruction check as Part 2.</p>
 <p>Part 4 compiles your finished kernels and runs them on the accelerator you built.
 The FPGA board is the main run path: you compile the kernels from Parts 1
 through 3 and run them on the board with <code>make test-board</code>, on the hardware
-you completed in Lab 3, and compare the output against the oracle. The
-instruction-set simulator is the supporting path: <code>make test-iss</code> compiles
-the kernels and runs them on the software model of the NPU, which executes the
-same instruction set the RTL does, for a fast functional check or when a board is
-not available.</p>
+you completed in Lab 3, and compare the output against the oracle. RTL
+simulation is the supporting path: <code>make test-sim</code> compiles the kernels and
+runs them on your own RTL under Verilator, for a functional check and a cycle
+count when a board is not available.</p>
 <p>Some of this part is resolving what the compiler reports: an operation the
 back-end does not support, or a tile-size argument that must be marked
 <code>tl.constexpr</code> so the compiler can tile the loop around it. Stay within the
@@ -2124,8 +2103,8 @@ simulator run it and compare against the oracle as before.</p>
 <p>This part closes the loop the lab opened. The Python kernels you wrote, with the
 tiling you chose, become sequences of NPU instructions, and those instructions
 run on the hardware you built. Running attention on the board is also where the
-FlashAttention benefit becomes visible as real time, alongside the cost-model
-estimate from Part 2.</p>
+FlashAttention benefit becomes visible as real time, alongside the simulated
+cycle counts from Part 2.</p>
 <p>A note on scale. You write each kernel with a logical launch grid, one program
 instance per output tile, addressed by <code>tl.program_id</code>. The accelerator you
 built is configured with a <em>single</em> compute tile, so the grid instances run
@@ -2143,8 +2122,8 @@ tile here is what a multi-tile device runs in parallel.</p>
   be <code>tl.constexpr</code> arguments. The compiler tiles the loop using these
   values at compile time; if they are ordinary runtime arguments it cannot.</li>
 <li>To see the lowering, compile a kernel and read the <code>.s</code> it produces.
-  Find the <code>matmul.tile.bf16</code> that your <code>tl.dot</code> became, and the
-  <code>dma.load.spm</code> and store around it. This is the most direct way to
+  Find the <code>mxu.matmul</code> that your <code>tl.dot</code> became, and the
+  <code>dmu.load.spm</code> and store around it. This is the most direct way to
   confirm your tiling maps to the hardware the way you intend.</li>
 <li>One program instance computes one output tile. Get the single-tile
   arithmetic right first, with a one-instance grid, before you launch the
@@ -2159,7 +2138,7 @@ tile here is what a multi-tile device runs in parallel.</p>
   maximum before each <code>tl.exp2</code> is also what keeps the exponentials in
   range; without it a large score would overflow.</li>
 <li>Use <code>tl.exp2</code>, the base-2 exponential, rather than the natural
-  exponential. It maps directly to the <code>vec.exp2</code> instruction your
+  exponential. It maps directly to the <code>vpu.exp2</code> instruction your
   Lab 1 VPU runs. Convert by folding <code>ln 2</code> into the scale: <code>e^x = 2^(x / ln 2)</code>, so
   multiply the scores by <code>1 / ln 2</code> before exponentiating. The provided
   kernel passes this factor in as a constexpr; reuse it.</li>
@@ -2169,9 +2148,9 @@ tile here is what a multi-tile device runs in parallel.</p>
 </ul>
 <h3 id="cost-and-the-compiler">Cost and the compiler<a class="headerlink" href="#cost-and-the-compiler" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Use the cost model to compare the tiled attention kernel against the
+<li>Use <code>make test-sim</code> to compare the tiled attention kernel against the
   full-score-matrix version. The two compute the same result, so the only
-  difference the model reports is in cycles, and that difference is the
+  difference the simulation reports is in cycles, and that difference is the
   FlashAttention benefit. Keep the numbers for your report.</li>
 <li>Keep your edits inside the marked regions of the provided kernels, which
   are otherwise known to compile. When the compiler rejects an operation,
@@ -2180,6 +2159,17 @@ tile here is what a multi-tile device runs in parallel.</p>
   disagrees, revisit which operations the kernel uses against the supported
   subset and bring any unsupported form to its supported equivalent.</li>
 </ul>
+<h3 id="report">Report<a class="headerlink" href="#report" title="Permanent link">&para;</a></h3>
+<p>Write about one page, single column, with tables where they help (captions
+required). Take the compiled program for the matrix multiply and relate it back
+to the tiling you wrote: which instructions correspond to the tile loads, the
+<code>mxu.matmul</code> products, and the output store, and how the number of
+<code>mxu.matmul</code> instructions follows from your block sizes. Then discuss the
+FlashAttention benefit using the evidence you gathered, not the oracle: the
+simulated cycle count for the tiled kernel against a full-score-matrix
+version, and, if you ran on the board, the measured time. Explain why the tiled
+kernel costs less even though it does the same arithmetic, in terms of the data
+it does not move and the score matrix it does not build.</p>
 <h2 id="deliverables">Deliverables<a class="headerlink" href="#deliverables" title="Permanent link">&para;</a></h2>
 <p>Submit through your course git repository as described in the introduction
 document. Include the kernel files you edited (<code>kernels/matmul.py</code>,
@@ -2190,23 +2180,12 @@ the compiled program from Part 4 (<code>attn.s</code>), and your report as
 stated tolerance, together with the check that each compiled program contains the
 expected instructions. Performance is not graded; the cost reasoning is part of
 the report.</p>
-<h3 id="report">Report<a class="headerlink" href="#report" title="Permanent link">&para;</a></h3>
-<p>Write about one page, single column, with tables where they help (captions
-required). Take the compiled program for the matrix multiply and relate it back
-to the tiling you wrote: which instructions correspond to the tile loads, the
-<code>matmul.tile.bf16</code> products, and the output store, and how the number of
-<code>matmul.tile.bf16</code> instructions follows from your block sizes. Then discuss the
-FlashAttention benefit using the evidence you gathered, not the oracle: the
-cost-model cycle estimate for the tiled kernel against a full-score-matrix
-version, and, if you ran on the board, the measured time. Explain why the tiled
-kernel costs less even though it does the same arithmetic, in terms of the data
-it does not move and the score matrix it does not build.</p>
 <h2 id="acknowledgement">Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permanent link">&para;</a></h2>
 <p>This lab is built on the mininpu, a composable tensor-accelerator hardware
 template developed for research and adapted here for teaching. The compiler,
-the simulator, the cost model, the reference kernels, and the test infrastructure
-are part of the NPU software toolchain included in your lab folder. The
-FlashAttention algorithm is due to Dao et al.</p>
+the reference kernels, and the test infrastructure are part of the NPU software
+toolchain included in your lab folder. The FlashAttention algorithm is due to
+Dao et al.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <ol>
 <li><a href="introduction.html">Lab 0: Course Introduction and Setup</a>.</li>
