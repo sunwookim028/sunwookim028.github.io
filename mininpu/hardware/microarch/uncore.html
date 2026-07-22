@@ -2054,10 +2054,10 @@ with no explicit cache operations. Cached-with-explicit-<code>sync</code> and a 
 the minimal, known-good option.</p>
 <!-- STALENESS FLAG (not resolved here, per the restore's terms): the paragraph above says the
      O_SYNC non-cached mapping is what leaves the runtime with "no explicit cache operations".
-     The in-repo runtime does not match that today: `mininpu/runtime/backend.py` gives
+     The in-repo runtime does not match that today: `host/runtime/backend.py` gives
      `UdmabufBuffer` explicit `sync_to_device` / `sync_from_device` hooks that write the
      udmabuf sysfs `sync_for_device` / `sync_for_cpu` nodes around H2D/D2H (backend.py:188-220),
-     and `mininpu/runtime/tests/test_uio_backend.py` asserts the H2D cache-sync fires. The
+     and `host/runtime/tests/test_uio_backend.py` asserts the H2D cache-sync fires. The
      runtime treats those writes as optional no-ops when the udmabuf instance is configured
      non-cached, so the two are reconcilable, but the doc states the non-cached mapping as the
      settled v1 choice while the runtime carries the cached path as a live option. Which one is

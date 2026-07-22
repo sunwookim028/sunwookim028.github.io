@@ -1569,7 +1569,7 @@
 <p><strong>Spec:</strong> ISA 0.5.0 (frozen; amendments tracked in <a href="https://github.com/sunwookim028/mininpu/issues/381">#381</a>) &middot; <strong>RTL as-built:</strong> 0.4.0 &middot; cutover pending. A spec is not wrong because the RTL trails it; the pages above assert the 0.5.0 spec, and never claim the hardware implements it.</p>
 </div>
 <h2 id="runtime">Runtime<a class="headerlink" href="#runtime" title="Permanent link">&para;</a></h2>
-<p>The in-repo <a href="runtime.html">Host Runtime API</a> (<code>mininpu/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. Device selection, pinned host allocation, synchronous and async memcpy, and kernel launch.</p>
+<p>The in-repo <a href="runtime.html">Host Runtime API</a> (<code>host/runtime/</code>): a CUDA-style host/device API for driving the NPU from a Python script, built on the <code>mininpu.abi</code> register-map SSOT. Device selection, pinned host allocation, device (PL-DDR) allocation, synchronous memcpy (async is a [v2] stub), and kernel launch with kernarg late-binding. (<code>mininpu/</code> itself is now lean: <code>isa</code> + <code>abi</code> + <code>hwparams</code> + <code>core</code>; the runtime moved to <code>host/runtime/</code>.)</p>
 <h2 id="compiler">Compiler<a class="headerlink" href="#compiler" title="Permanent link">&para;</a></h2>
 <p>The <a href="compiler/index.html">compiler</a> is developed in a separate repository and published as its
 own doc site: <a href="https://sunwookim028.github.io/mininpu/compiler/">mininpu-compiler</a>, a minimal

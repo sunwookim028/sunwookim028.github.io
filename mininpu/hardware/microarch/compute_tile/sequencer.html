@@ -939,10 +939,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" class="md-nav__link">
+  <a href="#open-prerequisite-acc-writeback-is-board-confirmed-still-open-on-flat-1d-73" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Open prerequisite --- confirm ACC writeback on #418 silicon
+        Open prerequisite --- ACC writeback is board-confirmed STILL OPEN on flat-1D (#73)
       
     </span>
   </a>
@@ -1825,10 +1825,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" class="md-nav__link">
+  <a href="#open-prerequisite-acc-writeback-is-board-confirmed-still-open-on-flat-1d-73" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Open prerequisite --- confirm ACC writeback on #418 silicon
+        Open prerequisite --- ACC writeback is board-confirmed STILL OPEN on flat-1D (#73)
       
     </span>
   </a>
@@ -1903,7 +1903,7 @@
 on <a href="../uncore.html">the uncore</a>; its place in the tile's module tree is drawn in
 <a href="index.html#fig-module-tree">Compute tile Fig. 3</a>. The whole-device context is drawn in
 <a href="../../../labs/introduction.html#fig-system-context">Lab 0 Fig. 1</a>.</p>
-<p>The host rings a <strong>doorbell</strong> over AXI-Lite. The CP decodes a LAUNCH descriptor (active v1 fields: <code>kbin_addr</code>:64, <code>kbin_size</code>:32; no runtime kernargs in v1, operand addresses are compile-baked immediates), loads the kernel binary from devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into tile IRAM, and pulses <code>start</code>; completion is <code>instr_ready</code> (combinational all-idle flag). The <strong>sequencer</strong> owns the <strong>program counter</strong> (<code>pc.sv</code>), the <strong>IRAM</strong> (4096 × 64-bit), and the combinational <strong>decoder</strong> (<code>decoder.sv</code>). On each instruction it fans out from <code>EXEC_DISPATCH</code> to one engine --- <strong>MXU</strong> or <strong>VPU</strong> (via <code>vpu_ctrl</code>) --- or the tile's <strong>DMU</strong> (driven by the <code>DMA_ROW_*</code> sub-FSM), or a <strong>control sub-FSM</strong> (loop / flush.slot / halt). Each engine's <code>done</code> pulse drives <code>pc_enable</code> and the next fetch begins.</p>
+<p>The host rings a <strong>doorbell</strong> over AXI-Lite. The CP decodes a LAUNCH descriptor (active v1 fields: <code>kbin_addr</code>:64, <code>kbin_size</code>:32; the descriptor itself carries no operand addresses, but runtime operand base/stride are late-bound via the AXI-Lite <code>kernel_arg</code> CSRs on the P1 arg-mode path documented <a href="#exec_dispatch-fan-out-by-opcode-group">below</a>, landed on this branch not yet on main), loads the kernel binary from devmem[<code>kbin_addr</code>, <code>kbin_size</code>] into tile IRAM, and pulses <code>start</code>; completion is <code>instr_ready</code> (combinational all-idle flag). The <strong>sequencer</strong> owns the <strong>program counter</strong> (<code>pc.sv</code>), the <strong>IRAM</strong> (4096 × 64-bit), and the combinational <strong>decoder</strong> (<code>decoder.sv</code>). On each instruction it fans out from <code>EXEC_DISPATCH</code> to one engine --- <strong>MXU</strong> or <strong>VPU</strong> (via <code>vpu_ctrl</code>) --- or the tile's <strong>DMU</strong> (driven by the landed <code>DMU_FETCH_REQ</code> → <code>DMU_ISSUE</code> descriptor sub-FSM), or a <strong>control sub-FSM</strong> (loop / flush.slot / halt). Each engine's <code>done</code> pulse drives <code>pc_enable</code> and the next fetch begins.</p>
 <figure id="fig-seq-datapath">
 <p><img alt="Sequencer datapath: IRAM to decoder to opcode-class issue" src="../../../figures/tikz/seq-datapath.svg" /></p>
 <figcaption>
@@ -2073,7 +2073,7 @@ the encoding.</p>
 <tr>
 <td>DMU load/store [v1]</td>
 <td>0x40, 0x42</td>
-<td><code>DMA_ROW_*</code></td>
+<td><code>DMU_FETCH_REQ</code> → <code>DMU_ISSUE</code> (landed)</td>
 </tr>
 <tr>
 <td>DMU paged <code>.mi</code> ([serving]-reserved)</td>
@@ -2102,6 +2102,10 @@ the encoding.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition success">
+<p class="admonition-title">As-built · the DMU descriptor FSM is LANDED on flat-1D (no longer stubbed)</p>
+<p>On this landing branch (<code>build_id 0xB1000308</code>, board-verified — see <a href="dmu.html#s7">dmu.md :: As-built on silicon</a>) the DMU dispatch is a <strong>live descriptor sub-FSM</strong>, not a stub. A <code>dmu.load.spm</code> / <code>dmu.store.spm</code> enters <code>DMU_FETCH_REQ</code> (present the <code>pool[op1]</code>/<code>pool[op1+1]</code> descriptor words), latches <code>dmu_addr_q</code> / <code>dmu_stride_q</code>, then holds in <code>DMU_ISSUE</code> until the target async slot accepts the descriptor (<code>dmu_desc_accept</code>); <code>dma_slot_done</code> / <code>dmu_idle</code> are live inputs consumed by <code>FLUSH_WAIT</code> / <code>HALT_DRAIN</code> (<code>tile_sequencer.sv:211-213,686-697</code>). The <strong>RFC P1 arg-mode</strong> late-binding path is grafted in the same FSM: with <code>flags[FLAG_DMU_ARG_BASE]</code> (<code>flags[7]</code>) set, <code>base</code>/<code>stride</code> source from <code>param_csr[op1[4:0]]</code> / <code>param_csr[op1[9:5]]</code> (the AXI-Lite <code>kernel_arg</code> CSRs) instead of the pool (<code>tile_sequencer.sv:264-277,424-428</code>; <code>opcodes.py:765</code>). Both are on this branch, not yet on main.</p>
+</div>
 <h2 id="worked-example-mxumatmul-from-fetch-to-mxu-handoff">Worked example --- <code>mxu.matmul</code> from fetch to MXU handoff<a class="headerlink" href="#worked-example-mxumatmul-from-fetch-to-mxu-handoff" title="Permanent link">&para;</a></h2>
 <!-- TODO(figure-redraw): the ct-worked dispatch trace has a legacy asset on
      origin/main (figures/ct-worked) but no house-style SVG on this branch; the
@@ -2129,6 +2133,10 @@ the authoritative opcode/flag/operand encodings live in <code>mininpu/isa</code>
 <li><strong><code>loop.end</code> (0x51):</strong> in <code>LOOP_END_EXEC</code>, <code>IV += step</code>; if <code>IV &lt; hi</code> the PC jumps back to the body start, else it falls through. The compare/increment is combinational (<code>iv_reg_next</code>).</li>
 </ul>
 <p>Loop bounds are literal-only by ISA design --- they are not computed from runtime data; this keeps the IRAM-patch (pool) loop bounds statically known to the assembler.</p>
+<div class="admonition note">
+<p class="admonition-title">As-built · A-prime single-word loop descriptor (<code>LB_DESC_WORDS = 1</code>, <code>bo = 0</code>)</p>
+<p>As landed on flat-1D, <code>loop.begin</code> reads <strong>one</strong> descriptor word from the pool (<code>LB_DESC_WORDS = 1</code>, <code>tile_sequencer.sv:172</code>): the <code>hi</code> bound only. The former <strong><code>bo</code>-strided multi-word</strong> loop descriptor (<code>hi</code> + one stride word per <code>bo</code> channel, <code>LB_DESC_WORDS = 1 + AGU_NUM_CH</code>) is <strong>retired</strong> - no stride vector is read from the pool and the per-channel base-offset stays <code>bo = 0</code> (<code>tile_sequencer.sv:325</code>). This is the A-prime fix for the <code>loop.begin</code> pool over-read (the sequencer now reads exactly the one word the ISA allocates). The <strong>4 <code>dv/compute_tile/test_tile_loop_gemm</code> tests are skipped</strong> as a consequence: they hand-roll the 9-word <code>loop.begin</code> pool layout the ISA never allocated, so they assert the retired contract (<code>test_tile_loop_gemm.py</code> <code>_APRIME_SKIP</code>). Restoring the <code>bo</code>-strided loop requires an <strong>ISA re-widen</strong> (a real <code>loop.begin</code> <code>bo</code> descriptor lowered through the AGU), <strong>not</strong> merely re-widening <code>LB_DESC_WORDS</code> (which would just re-introduce the over-read bug). The affine <code>bo</code> engine itself stays covered by <code>test_loop_ctrl</code>.</p>
+</div>
 <h2 id="flush-halt">Flush &amp; halt<a class="headerlink" href="#flush-halt" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong><code>flush.slot</code> (0x53):</strong> the sole async-DMA fence --- spins in <code>FLUSH_SLOT_WAIT</code> until every SPAD-region slot in the op0 mask reports <code>dma_slot_done</code>, then clears those done bits for reuse (make-async-real). Because the DMU touches SPAD only, this fence guards SPAD regions only. The former full-fence <code>flush</code> (0x52) opcode is <strong>retired</strong>; the assembler pseudo <code>flush</code> now lowers to <code>flush.slot</code> over all slots.</li>
@@ -2218,8 +2226,8 @@ of dead code.</p>
 <li><strong>Cross-lineage caveat:</strong> a <strong>param-CSR / arg-mode</strong> file (a launch-preloaded writable CSR) is sometimes proposed as the scalar source. That is a feature of the <strong>arg-mode lineage, NOT present on #418</strong> (no <code>param_csr</code>, no arg-mode on <code>rtl/s2-spine</code>; the two lineages are divergent, not ancestor/descendant). Treat it as a cross-lineage dependency to reconcile, not an as-built fact to build on.</li>
 <li><strong>Defer a general data-dependent branch.</strong> Neither dense forward nor Paged Attention needs one (no early-exit / <code>while</code>), so it stays deferred until a workload requires data-dependent control.</li>
 </ul>
-<h3 id="open-prerequisite-confirm-acc-writeback-on-418-silicon">Open prerequisite --- confirm ACC writeback on #418 silicon<a class="headerlink" href="#open-prerequisite-confirm-acc-writeback-on-418-silicon" title="Permanent link">&para;</a></h3>
-<p><code>scalar.mac</code>'s <code>dst = accumulator</code> path depends on ACC writeback being correct. On the <strong>arg-mode bitstream</strong> (<code>build_id 0xB1000208</code>) the ACC-writeback path showed a <strong>row-dependent silicon bug</strong> (<code>acc.store</code> did not correctly write its SPAD destination; row 8 → garbage, row 64 → zero, MEASURED; ledger #73), with sim passing and silicon failing. #418 <strong>may already fix this</strong>: it unifies row addressing from concat to a flat <code>base + ADD</code> in both <code>lsu.sv:189</code> (<code>vreg_wr_addr = vreg_id_q + wr_row_q</code>) and <code>mxu.sv</code> (<code>vreg_rd_addr = vreg_x_id + row</code>), a plausible root cause for a <em>row-dependent</em> writeback fault. This is <strong>static analysis only</strong> --- #418 has no silicon yet --- so it is a <strong>prerequisite to confirm</strong> on an <code>rtl/s2-spine</code> bitstream re-measure, <strong>not</strong> a hard blocker and <strong>not</strong> a claimed fix.</p>
+<h3 id="open-prerequisite-acc-writeback-is-board-confirmed-still-open-on-flat-1d-73">Open prerequisite --- ACC writeback is board-confirmed STILL OPEN on flat-1D (#73)<a class="headerlink" href="#open-prerequisite-acc-writeback-is-board-confirmed-still-open-on-flat-1d-73" title="Permanent link">&para;</a></h3>
+<p><code>scalar.mac</code>'s <code>dst = accumulator</code> path depends on ACC writeback being correct. On the earlier arg-mode bitstream (<code>build_id 0xB1000208</code>) the ACC-writeback path showed a <strong>row-dependent silicon bug</strong> (<code>acc.store</code> did not correctly write its SPAD destination; row 8 → garbage, row 64 → zero, MEASURED; ledger #73), with sim passing and silicon failing. The hypothesis that <strong>#418</strong>'s row-addressing rework (concat → flat <code>base + ADD</code> in <code>lsu.sv:189</code> <code>vreg_wr_addr = vreg_id_q + wr_row_q</code> and <code>mxu.sv</code> <code>vreg_rd_addr = vreg_x_id + row</code>) had fixed this is <strong>REFUTED by the flat-1D board run</strong>: on <code>build_id 0xB1000308</code> (the landed DMU-on-flat-1D bitstream) <code>acc_roundtrip_row8</code> <strong>and</strong> <code>acc_roundtrip_row64</code> <strong>both read back all-zero</strong> — ACC data still not landing — with <code>instr=7</code>, <code>beats=16</code>, and <code>dmu_err</code> bit0=0 unchanged. So <strong>#73 is board-confirmed still open on flat-1D; #418 did not fix it</strong> (MEASURED, <code>board_regression_0xB1000308_sectionB.json</code>). This is a <strong>hard prerequisite for <code>scalar.mac</code></strong> until #73 is root-caused and fixed.</p>
 <h3 id="scalar-unit-sources">Scalar-unit sources<a class="headerlink" href="#scalar-unit-sources" title="Permanent link">&para;</a></h3>
 <p><strong>Table: authoritative sources for the scalar-unit proposal, verified against #418 (<code>rtl/s2-spine</code>).</strong></p>
 <table>
@@ -2255,8 +2263,8 @@ of dead code.</p>
 <td><code>tile_top.sv:29-37,218,342,454-472,479,509-523</code> · <code>dv/compute_tile/test_port_guards.py</code> · <code>dv/compute_tile/test_vreg_port_hazard.py</code></td>
 </tr>
 <tr>
-<td>ACC-writeback silicon bug (arg-mode bitstream, to re-measure on #418)</td>
-<td>ledger #73 (<code>build_id 0xB1000208</code>)</td>
+<td>ACC-writeback silicon bug (board-confirmed still open on flat-1D)</td>
+<td>ledger #73; <code>board_regression_0xB1000308_sectionB.json</code> (<code>build_id 0xB1000308</code>)</td>
 </tr>
 </tbody>
 </table>

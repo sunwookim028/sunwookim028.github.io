@@ -1225,6 +1225,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mininpumalloc-mininpufree-device-pl-ddr-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mininpuMalloc / mininpuFree (device PL-DDR memory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#memcpykind" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1309,6 +1320,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typical-arg-mode-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typical arg-mode flow
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1679,6 +1701,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#mininpumalloc-mininpufree-device-pl-ddr-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mininpuMalloc / mininpuFree (device PL-DDR memory)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#memcpykind" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1767,6 +1800,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#typical-arg-mode-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typical arg-mode flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cuda-correspondence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1796,8 +1840,9 @@
 
 <h1 id="runtime-the-host-to-device-api">Runtime: The Host-to-Device API<a class="headerlink" href="#runtime-the-host-to-device-api" title="Permanent link">&para;</a></h1>
 <p>A CUDA-style host-to-device API for driving the NPU from a Python script: device
-selection, pinned host memory, memcpy, and kernel launch, all built on the
-<code>mininpu.abi</code> SSOT (<code>mininpu/runtime/</code>). This page covers the calls a host script
+selection, pinned host memory, device (PL-DDR) allocation, memcpy, and kernel
+launch (with kernarg late-binding), all built on the <code>mininpu.abi</code> SSOT
+(<code>host/runtime/</code>). This page covers the calls a host script
 uses, plus the board HAL types they hand back. Implementation details (the
 UIO/udmabuf discovery, the two-phase doorbell handshake, the alignment contract)
 are summarised in the figure below and otherwise deferred to the module
@@ -1863,27 +1908,67 @@ sides, selected by <code>kind</code>. Both addresses must be 32-byte aligned.</p
 <p>Post-v1 stub: raises <code>NotImplementedError</code> (async COPY is a <code>[v2]</code> concurrency
 feature).</p>
 <h3 id="mininpulaunchkernel">mininpuLaunchKernel<a class="headerlink" href="#mininpulaunchkernel" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuLaunchKernel</span><span class="p">(</span><span class="n">kbin_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">kbin_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuLaunchKernel</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">kbin_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">kbin_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">grid</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
-<p>Issues a LAUNCH command for a kernel binary already resident in device memory.</p>
+<p>Issues a LAUNCH command for a kernel binary already resident in device memory
+(identity is <code>{kbin_addr, kbin_size}</code> = base + size; there is no kernel registry,
+handle, or slot index). After the command retires it reads the sticky
+<code>launch_error</code> bit of <code>launch_status</code> and raises <code>RuntimeError</code> if set, because
+retirement alone does not mean the kernel ran (an aborted LAUNCH retires exactly
+like a successful one).</p>
+<p><strong>Kernarg late-binding (RFC P1 arg-mode).</strong> <code>args</code> is an optional sequence of up
+to <strong>4</strong> unsigned 32-bit param values (device pointers and/or scalar strides)
+written to the on-chip <code>kernel_arg</code> param CSRs (slots 0..3) <strong>before</strong> the LAUNCH
+doorbell. An arg-mode DMU op (<code>FLAG_DMU_ARG_BASE</code>, <code>flags[7]</code>) then sources its
+DRAM base/stride from a param slot <strong>by index</strong> - the compiled binary carries
+slot indices, never addresses - so one kernel binary can be relaunched against a
+different device buffer. This is the CUDA <code>.param</code> model: a device pointer from
+<code>mininpuMalloc</code> is passed as a launch arg instead of being baked into the binary.
+<code>args=None</code> writes nothing (a baked/legacy kernel); <code>grid</code> is accepted but ignored
+in v1 (<code>grid_x/y</code> are [v3]-reserved). NB: this arg-CSR write path is board-only
+and is not exercised by the tile cocotb DV (which drives <code>kernel_arg_csr</code> as a
+direct input).</p>
+<h3 id="mininpumalloc-mininpufree-device-pl-ddr-memory">mininpuMalloc / mininpuFree (device PL-DDR memory)<a class="headerlink" href="#mininpumalloc-mininpufree-device-pl-ddr-memory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuMalloc</span><span class="p">(</span><span class="n">nbytes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>          <span class="c1"># 32B-aligned device pointer</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuFree</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuDeviceReset</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="k">def</span><span class="w"> </span><span class="nf">mininpuInAperture</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+<p>The <strong>device</strong>-side allocator, distinct from <code>mininpuHostAlloc</code> (the pinned-<strong>host</strong>
+udmabuf pool). A first-fit, coalescing free-list over the PL-DDR4 aperture (base
+<code>0xA000_0000</code>, span 512 MiB, with a 1 MiB low prefix reserved for the kernel
+image + param staging). <code>mininpuMalloc</code> returns an opaque device pointer that
+<strong>is</strong> the physical PL-DDR byte address, 32-byte (<code>CDMA_ALIGN</code>) aligned, ready to
+pass to <code>mininpuLaunchKernel(..., args=[ptr, ...])</code> as an arg-mode param.
+<code>mininpuFree</code> returns a span and coalesces neighbours; <code>mininpuDeviceReset</code> drops
+every allocation (test / re-run isolation). The device has <strong>no hardware bounds
+check</strong> (RFC §7 trust boundary), so <code>mininpuInAperture(addr, nbytes)</code> validates a
+pointer bound as a kernel arg before launch.</p>
+<p>These live in <code>host/runtime/device.py</code> and are imported from there
+(<code>from host.runtime.device import mininpuMalloc</code>); they are board-facing helpers,
+not re-exported in the package <code>__all__</code>.</p>
 <h3 id="memcpykind">MemcpyKind<a class="headerlink" href="#memcpykind" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">MemcpyKind</span><span class="p">:</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">HostToDevice</span> <span class="o">=</span> <span class="s2">&quot;HostToDevice&quot;</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">DeviceToHost</span> <span class="o">=</span> <span class="s2">&quot;DeviceToHost&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">MemcpyKind</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">HostToDevice</span> <span class="o">=</span> <span class="s2">&quot;HostToDevice&quot;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">DeviceToHost</span> <span class="o">=</span> <span class="s2">&quot;DeviceToHost&quot;</span>
 </code></pre></div>
 <p>Direction selector for <code>mininpuMemcpy</code> (the <code>cudaMemcpyKind</code> analog).</p>
 <h3 id="kernel-load_program-program_to_bytes">Kernel / load_program / program_to_bytes<a class="headerlink" href="#kernel-load_program-program_to_bytes" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Kernel</span><span class="p">:</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asm_path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">kbin_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span> <span class="o">...</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">program_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span> <span class="o">...</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_buffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Kernel</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">asm_path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">kbin_addr</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span> <span class="o">...</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">program_bytes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_buffer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <p>Binds a pre-assembled <code>.asm</code> file to a device address. <code>program_bytes</code> loads and
 packs its instructions; <code>run</code> stages them (COPY H2D) and issues the LAUNCH.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_program</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;np.ndarray&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">load_program</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;np.ndarray&quot;</span>
 </code></pre></div>
 <p>Reads a pre-assembled <code>.asm</code> text program into a uint64 instruction array.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">program_to_bytes</span><span class="p">(</span><span class="n">instructions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bytes</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">program_to_bytes</span><span class="p">(</span><span class="n">instructions</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bytes</span>
 </code></pre></div>
 <p>Packs an instruction array into little-endian bytes for staging via a COPY.</p>
 <h2 id="board-hal">Board HAL<a class="headerlink" href="#board-hal" title="Permanent link">&para;</a></h2>
@@ -1891,7 +1976,7 @@ packs its instructions; <code>run</code> stages them (COPY H2D) and issues the L
 normally needs only <code>open_device</code> plus <code>mininpuHostAlloc</code>; the rest are the
 backend seam that keeps the runtime testable without hardware.</p>
 <h3 id="open_device">open_device<a class="headerlink" href="#open_device" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_device</span><span class="p">(</span><span class="n">uio_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">udmabuf_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Mmio</span><span class="p">,</span> <span class="n">UdmabufBuffer</span><span class="p">]</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">open_device</span><span class="p">(</span><span class="n">uio_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">udmabuf_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Mmio</span><span class="p">,</span> <span class="n">UdmabufBuffer</span><span class="p">]</span>
 </code></pre></div>
 <p>All-in-one board bring-up used by board tests and diagnostics: opens the NPU
 AXI-Lite window over <code>uio_name</code>, installs it as the process-wide MMIO backend,
@@ -1910,10 +1995,10 @@ clobber each other's DMA. The allocator already guarantees the non-overlap and
 the 32-byte CDMA alignment a hand-picked offset would have to get right.</p>
 </div>
 <h3 id="hostregion">HostRegion<a class="headerlink" href="#hostregion" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">HostRegion</span><span class="p">:</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">UdmabufBuffer</span><span class="p">,</span> <span class="n">byte_off</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">words</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span> <span class="o">...</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">phys_addr</span><span class="p">:</span> <span class="nb">int</span>          <span class="c1"># parent base + byte_off; the COPY host_phys operand</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">view</span><span class="p">:</span> <span class="s2">&quot;np.ndarray&quot;</span>      <span class="c1"># uint32 view over that slice of the parent mmap</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">HostRegion</span><span class="p">:</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">UdmabufBuffer</span><span class="p">,</span> <span class="n">byte_off</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">words</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span> <span class="o">...</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">phys_addr</span><span class="p">:</span> <span class="nb">int</span>          <span class="c1"># parent base + byte_off; the COPY host_phys operand</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="n">view</span><span class="p">:</span> <span class="s2">&quot;np.ndarray&quot;</span>      <span class="c1"># uint32 view over that slice of the parent mmap</span>
 </code></pre></div>
 <p>A phys-addressed sub-view of one contiguous udmabuf, and the return type of
 <code>mininpuHostAlloc</code>. Satisfies the host-operand protocol <code>mininpuMemcpy</code> consumes
@@ -1922,33 +2007,49 @@ the 32-byte CDMA alignment a hand-picked offset would have to get right.</p>
 constructor takes a caller-chosen <code>byte_off</code> the allocator knows nothing about
 (see the <code>open_device</code> warning above).</p>
 <h3 id="mmio-mockmmio-uiommio">Mmio / MockMmio / UioMmio<a class="headerlink" href="#mmio-mockmmio-uiommio" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Mmio</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">read32</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">write32</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">MockMmio</span><span class="p">(</span><span class="n">Mmio</span><span class="p">):</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ready_after</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">read_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span> <span class="o">...</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">UioMmio</span><span class="p">(</span><span class="n">Mmio</span><span class="p">):</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="nd">@classmethod</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open_by_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">map_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;UioMmio&quot;</span><span class="p">:</span> <span class="o">...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Mmio</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">read32</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">write32</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">MockMmio</span><span class="p">(</span><span class="n">Mmio</span><span class="p">):</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ready_after</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">read_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span> <span class="o">...</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">UioMmio</span><span class="p">(</span><span class="n">Mmio</span><span class="p">):</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="nd">@classmethod</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open_by_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">map_index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;UioMmio&quot;</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <p><code>Mmio</code> is the 32-bit register-access seam every command write goes through.
 <code>MockMmio</code> records writes and replays scripted reads for tests with no board;
 <code>UioMmio</code> mmaps the real AXI-Lite window via <code>/dev/uioN</code>, discovered by name.</p>
 <h3 id="udmabufbuffer">UdmabufBuffer<a class="headerlink" href="#udmabufbuffer" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">UdmabufBuffer</span><span class="p">:</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="nd">@classmethod</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>             <span class="n">sysfs_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dev_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;UdmabufBuffer&quot;</span><span class="p">:</span> <span class="o">...</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">phys_addr</span><span class="p">:</span> <span class="nb">int</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">sync_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>    <span class="c1"># flush CPU cache -&gt; DDR (H2D)</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">sync_from_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># invalidate CPU cache &lt;- DDR (D2H)</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">UdmabufBuffer</span><span class="p">:</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="nd">@classmethod</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">open</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>             <span class="n">sysfs_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dev_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;UdmabufBuffer&quot;</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">phys_addr</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">sync_to_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>    <span class="c1"># flush CPU cache -&gt; DDR (H2D)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">sync_from_device</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># invalidate CPU cache &lt;- DDR (D2H)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </code></pre></div>
 <p>A contiguous host DMA buffer backed by <code>/dev/udmabufN</code>, with its physical
 address read from sysfs. The parent that <code>HostRegion</code> carves from.</p>
+<h2 id="typical-arg-mode-flow">Typical arg-mode flow<a class="headerlink" href="#typical-arg-mode-flow" title="Permanent link">&para;</a></h2>
+<p>The CUDA-style sequence for an arg-mode kernel is malloc -&gt; H2D -&gt; launch(args) -&gt; D2H:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">mininpuSetDevice</span><span class="p">(</span><span class="n">uio_name</span><span class="p">)</span>                        <span class="c1"># select the NPU (cudaSetDevice)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">src</span> <span class="o">=</span> <span class="n">mininpuMalloc</span><span class="p">(</span><span class="n">nbytes</span><span class="p">)</span>                        <span class="c1"># device (PL-DDR) input buffer</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="n">dst</span> <span class="o">=</span> <span class="n">mininpuMalloc</span><span class="p">(</span><span class="n">nbytes</span><span class="p">)</span>                        <span class="c1"># device output buffer</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">host_in</span>  <span class="o">=</span> <span class="n">mininpuHostAlloc</span><span class="p">(</span><span class="n">nbytes</span><span class="p">)</span>               <span class="c1"># pinned host staging region (in)</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="n">host_out</span> <span class="o">=</span> <span class="n">mininpuHostAlloc</span><span class="p">(</span><span class="n">nbytes</span><span class="p">)</span>               <span class="c1"># pinned host staging region (out)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="n">host_in</span><span class="o">.</span><span class="n">view</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>                          <span class="c1"># fill the host region</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="n">mininpuMemcpy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">host_in</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">,</span> <span class="n">MemcpyKind</span><span class="o">.</span><span class="n">HostToDevice</span><span class="p">)</span>    <span class="c1"># H2D: host -&gt; device</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="n">mininpuLaunchKernel</span><span class="p">(</span><span class="n">kbin_addr</span><span class="p">,</span> <span class="n">kbin_size</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">])</span>      <span class="c1"># bind ptrs, run</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="n">mininpuMemcpy</span><span class="p">(</span><span class="n">host_out</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">,</span> <span class="n">MemcpyKind</span><span class="o">.</span><span class="n">DeviceToHost</span><span class="p">)</span>   <span class="c1"># D2H: device -&gt; host</span>
+</code></pre></div>
+<p>The kernel binary is itself staged into device memory first (a COPY H2D to
+<code>kbin_addr</code>, or via <code>Kernel.run</code>). A baked kernel drops <code>args=</code> and stages its
+operands at compile-known device addresses instead.</p>
 <h2 id="cuda-correspondence">CUDA correspondence<a class="headerlink" href="#cuda-correspondence" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1961,6 +2062,10 @@ address read from sysfs. The parent that <code>HostRegion</code> carves from.</p
 <tr>
 <td><code>mininpuSetDevice(uio_name)</code></td>
 <td><code>cudaSetDevice(int device)</code></td>
+</tr>
+<tr>
+<td><code>mininpuMalloc(nbytes)</code> / <code>mininpuFree(addr)</code></td>
+<td><code>cudaMalloc</code> / <code>cudaFree</code> (device PL-DDR pool)</td>
 </tr>
 <tr>
 <td><code>mininpuHostAlloc(nbytes)</code></td>
@@ -1983,8 +2088,8 @@ address read from sysfs. The parent that <code>HostRegion</code> carves from.</p
 <td><code>cudaMemcpyAsync</code> (not yet implemented)</td>
 </tr>
 <tr>
-<td><code>mininpuLaunchKernel(kbin_addr, kbin_size)</code></td>
-<td>kernel launch (<code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> / <code>cuLaunchKernel</code>)</td>
+<td><code>mininpuLaunchKernel(kbin_addr, kbin_size, args=[...])</code></td>
+<td>kernel launch with <code>.param</code> args (<code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> / <code>cuLaunchKernel</code>)</td>
 </tr>
 <tr>
 <td><code>MemcpyKind</code></td>
