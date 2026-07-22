@@ -1,0 +1,850 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Minimal extensible compiler framework — Triton to a custom NPU ISA.">
+      
+      
+      
+        <link rel="canonical" href="https://sunwookim028.github.io/mininpu/compiler/kernel-compiler/COMPILER_ARCHITECTURE/">
+      
+      
+        <link rel="prev" href="../charter/">
+      
+      
+        <link rel="next" href="../SUPPORTED_TRITON/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+    
+    
+      
+        <title>Compiler Architecture - mininpu-compiler</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#compiler-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="mininpu-compiler" class="md-header__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            mininpu-compiler
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Compiler Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="mininpu-compiler" class="md-nav__button md-logo" aria-label="mininpu-compiler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    mininpu-compiler
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sunwookim028/mininpu-compiler" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    sunwookim028/mininpu-compiler
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../charter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Charter / Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Compiler Architecture
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Compiler Architecture
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-two-level-tiling-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Two-level tiling model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-conversion-linalgtonpu-the-only-conversion-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Conversion: LinalgToNPU (the only conversion pass)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-address-calculation-linearaddranalysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Address calculation: LinearAddrAnalysis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-physical-allocation-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Physical allocation + serialization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-host-patch-seam-loop-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Host-patch seam (loop bounds)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-structural-limits-what-bounds-new-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Structural limits (what bounds new work)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-packaging-external-consumption" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Packaging &amp; external consumption
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-design-positioning-production-analogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Design positioning (production analogs)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SUPPORTED_TRITON/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Supported Triton
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../MEMORY_BUDGET/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Memory Budget
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GLOSSARY/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Glossary
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../isa/npu-isa/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ISA narrative
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Pipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-two-level-tiling-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Two-level tiling model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-conversion-linalgtonpu-the-only-conversion-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Conversion: LinalgToNPU (the only conversion pass)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-address-calculation-linearaddranalysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Address calculation: LinearAddrAnalysis
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-physical-allocation-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Physical allocation + serialization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-host-patch-seam-loop-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Host-patch seam (loop bounds)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-structural-limits-what-bounds-new-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Structural limits (what bounds new work)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-packaging-external-consumption" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Packaging &amp; external consumption
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-design-positioning-production-analogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Design positioning (production analogs)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="compiler-architecture">Compiler Architecture<a class="headerlink" href="#compiler-architecture" title="Permanent link">&para;</a></h1>
+<p>End-to-end walkthrough of the <code>npu-compiler</code> backend: how a Triton kernel becomes
+NPU assembly, and the structural constraints that bound what is lowerable. This is
+the architecture SSOT; it cross-links (does not duplicate) the surface contract in
+<a href="../SUPPORTED_TRITON/"><code>SUPPORTED_TRITON.md</code></a>, the milestone ladder in
+<a href="../charter/"><code>charter.md</code></a>, and the ISA narrative in
+<a href="../isa/npu-isa/"><code>../isa/npu-isa.md</code></a> (opcode/encoding SSOT: sibling
+<code>mininpu/isa/opcodes.py</code>).</p>
+<h2 id="1-pipeline">1. Pipeline<a class="headerlink" href="#1-pipeline" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Triton (.py)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; triton-opt + triton-shared-opt          (triton-shared MLIR frontend)
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>2_linalg.mlir
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; npu-opt --linalg-to-npu                 (LinalgToNPU.cpp)   [only conversion pass]
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; npu-opt  PhysAllocPass                   (physical bank / pool assignment)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>3_npu.mlir
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  -&gt; npu-translate --to-asm                   (NPUToAsm.cpp)      [serialization]
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>4_npu.s
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  -&gt; mininpu.asm parse_asm() -&gt; mininpu.iss.simulator Simulator
+</code></pre></div>
+<p><code>mininpu_compiler/compile.py :: compile_kernel(fn, tiles)</code> drives all stages.
+Per-stage snapshots are checked in under <code>test/e2e/pipeline/{matmul,flash_attn}/</code>.
+<strong>These <code>.s</code> snapshots are geometry-dependent and compiled-in</strong> (see §5): regenerating
+them requires a C++ rebuild, not just re-running the Python driver.</p>
+<h2 id="2-two-level-tiling-model">2. Two-level tiling model<a class="headerlink" href="#2-two-level-tiling-model" title="Permanent link">&para;</a></h2>
+<p>Tiling is expressed at two levels and they must agree:</p>
+<ul>
+<li><strong>Program tiling</strong> - the Triton grid / <code>tiles</code> argument chooses the per-program
+  tile shape and the number of program IDs (pid). Loop trip counts derived from
+  problem size are <strong>literal in the emitted <code>.s</code></strong> and are patched host-side
+  per-pid (see §6).</li>
+<li><strong>Hardware tiling</strong> - each program's tile is further decomposed to the
+  <code>DIM x DIM</code> systolic array and the 32 KiB unified pool. This decomposition is
+  fixed by the compiled-in geometry (§5), not by the kernel.</li>
+</ul>
+<p>Arbitrary problem sizes are handled by looping the fixed hardware tile, not by
+re-parameterizing the array.</p>
+<h2 id="3-conversion-linalgtonpu-the-only-conversion-pass">3. Conversion: LinalgToNPU (the only conversion pass)<a class="headerlink" href="#3-conversion-linalgtonpu-the-only-conversion-pass" title="Permanent link">&para;</a></h2>
+<p><code>LinalgToNPU.cpp</code> is the sole linalg-&gt;npu conversion pass. Its patterns are
+deliberately narrow:</p>
+<ul>
+<li>Almost every pattern calls <code>getSingleBodyOp()</code> and matches <strong>exactly one</strong>
+  <code>arith</code>/<code>math</code> op in the region body. Single-op elementwise/reduction bodies
+  lower cleanly through the pattern set.</li>
+<li><strong>Multi-op bodies bypass the clean patterns.</strong> Fused activations whose body is
+  several ops (GELU, LayerNorm, SiLU/SwiGLU, RMSNorm) do not match a single-op
+  pattern and are instead reconstructed later in the serializer's fold matcher
+  (§5). This is the root of the extensibility debt tracked in issues #10-#12:
+  GELU is the same class as SiLU; LayerNorm is RMSNorm's fold extended with a
+  mean-subtraction term.</li>
+</ul>
+<h2 id="4-address-calculation-linearaddranalysis">4. Address calculation: LinearAddrAnalysis<a class="headerlink" href="#4-address-calculation-linearaddranalysis" title="Permanent link">&para;</a></h2>
+<p>Address generation lives in <code>LinearAddrAnalysis.cpp</code> (renamed from the older
+LinearAddr analysis). It computes linearized DMA/pool addresses from loop
+induction variables.</p>
+<p><strong>Hard constraint: induction-variable nesting is capped at <code>iv &lt;= 1</code>.</strong> Address
+generation supports at most one nested induction variable, which bounds the
+loop-nest depth an address expression can span. New ops or tilings that would
+require deeper affine address nesting are <strong>not lowerable</strong> without extending this
+analysis. Treat <code>iv &lt;= 1</code> as a first-class limit when scoping new kernels.</p>
+<h2 id="5-physical-allocation-serialization">5. Physical allocation + serialization<a class="headerlink" href="#5-physical-allocation-serialization" title="Permanent link">&para;</a></h2>
+<p><strong>PhysAllocPass</strong> assigns physical banks / pool offsets. Geometry is <strong>compiled
+into the binary</strong>: <code>PhysAllocPass::getPhysProfile()</code> hardcodes named profiles
+(historically tutorial dim4 / bench_n8 / prod dim16). Changing geometry therefore
+requires editing C++ and <code>make build</code>, and then regenerating the pipeline <code>.s</code>
+snapshots. The single fixed shipped geometry (DIM=8, one 32 KiB pool) is described
+in the root <code>CLAUDE.md</code> hardware-geometry table; <code>mininpu/hwparams.py</code> in the
+sibling package is the numeric SSOT.</p>
+<p><strong>NPUToAsm.cpp serialization is a plain in-order IR-walk - there is NO instruction
+scheduler.</strong> Instructions are emitted in program order; there is no reordering, no
+software pipelining, and no double-buffering. The <code>flags[5]=async</code> DMA bit is not
+exploited (it is a functional no-op in the current sim). This is the central
+efficiency limitation; the design rationale and the planned scheduling + async-DMA
+pass are in <a href="../charter/"><code>charter.md</code></a> § Efficiency (design notes).</p>
+<p>Two concrete debts inside NPUToAsm.cpp (context for issues #10-#12):</p>
+<ul>
+<li><strong>Stateful fold matcher (~360 lines, approx L709-1073).</strong> Multi-op activation
+  bodies (§3) are reconstructed here via five order-dependent state maps:
+  <code>fillConsts</code>, <code>siluSrcOf</code>, <code>scaleAddOf</code>, <code>sqrtMarked</code>, <code>broadcastSrc</code>. This
+  rebuilds SiLU/RMSNorm from the serialized stream. Adding GELU/LayerNorm means
+  extending these state maps, not adding a clean pattern.</li>
+<li><strong>Mirrored <code>dyn_cast</code> chains.</strong> <code>translateOp</code> and <code>walkOp</code> each carry ~23
+  hand-mirrored <code>dyn_cast</code> branches that must be kept in sync manually (the file
+  header admits this). #12 proposes generating them from <code>NPU.td</code>.</li>
+</ul>
+<h2 id="6-host-patch-seam-loop-bounds">6. Host-patch seam (loop bounds)<a class="headerlink" href="#6-host-patch-seam-loop-bounds" title="Permanent link">&para;</a></h2>
+<p>Loop trip counts are <strong>literal-only</strong> in the emitted assembly. Problem-size- and
+pid-dependent bounds are resolved by the host at launch via an ABI <strong>patch table</strong>:
+the host writes per-pid loop bounds / kernel-arg CSRs before dispatch (e.g.
+<code>loop.begin.csr</code> reads <code>kernel_args[csr_idx]</code>). The compiler does not emit dynamic
+bound arithmetic; it emits placeholders + a patch descriptor. This is why a wrong
+or omitted compile-time scalar (e.g. the <code>VALID_CTX</code> / <code>N_CTX_TILES</code> class of bug,
+issue #6) silently lowers to an unset runtime arg rather than a compile error.</p>
+<h2 id="7-structural-limits-what-bounds-new-work">7. Structural limits (what bounds new work)<a class="headerlink" href="#7-structural-limits-what-bounds-new-work" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Single-op body matching in LinalgToNPU (§3) - multi-op ops fall to the fold
+  matcher.</li>
+<li><code>iv &lt;= 1</code> address-nesting cap in LinearAddrAnalysis (§4).</li>
+<li>Geometry compiled-in via PhysAllocPass (§5) - geometry changes need a rebuild +
+  snapshot regen.</li>
+<li>No scheduler / no double-buffering / async-DMA unused (§5) - correctness-first,
+  efficiency deferred to v2.</li>
+</ul>
+<h2 id="8-packaging-external-consumption">8. Packaging &amp; external consumption<a class="headerlink" href="#8-packaging-external-consumption" title="Permanent link">&para;</a></h2>
+<p>Outside this repo the compiler is <strong>consumed, never built from source</strong>: consumers
+install a self-contained wheel (<code>scripts/build-release.sh</code>), which decouples them
+from the heavy MLIR build and the Triton pin. Release facts worth preserving:</p>
+<ul>
+<li>Default deliverable is a <strong><code>linux_x86_64</code></strong> wheel (~40 MB stripped, fits PyPI's
+  100 MB limit): <code>npu-opt</code>/<code>npu-translate</code> statically link MLIR/LLVM/Triton,
+  bundle <code>libstdc++</code>/<code>libgcc_s</code>, and set <code>RPATH=$ORIGIN/../lib</code> (zero
+  <code>LD_LIBRARY_PATH</code>).</li>
+<li><strong>No <code>manylinux</code> tag is emittable.</strong> An earlier <code>setup.py</code> hand-asserted
+  <code>manylinux_2_28</code>; that was FALSE - <code>auditwheel</code> proves the binaries require
+  <code>GLIBC_2.34</code> and are <code>x86_64_v2</code>, so a 2_28-tagged wheel installs on RHEL8 and
+  then crashes. <code>auditwheel</code> is the truth-teller, not a gate. A manylinux build is
+  only reachable via local docker (<code>scripts/build-release-docker.sh</code>) + auditwheel
+  repair. The <code>[frontend]</code> extra pins <code>triton==3.4.0</code>.</li>
+<li><strong>Ecosystem (github.com/sunwookim028), for cross-repo context only:</strong>
+  <code>mininpu</code> = RTL/verification/FPGA and the Python package that is the ISA SSOT
+  (file ISA issues there; Discussions are OFF, use Issues);
+  <code>mininpu-sdk</code>/<code>mininpu-runtime</code> = host driver (<code>NpuDriver</code>);
+  <code>mininpu-compiler</code> = this repo; <code>mininpu-inference</code> (ex <code>mininpu-software</code>) =
+  Triton kernel suite + LLM integration + tutorial arc; <code>mininpu-labs</code> is
+  RETIRING (absorbed into <code>mininpu</code>). Triton is pinned to 3.4.0 ecosystem-wide
+  (triton-shared built against triton <code>e44bd1c8</code>).</li>
+</ul>
+<h2 id="9-design-positioning-production-analogs">9. Design positioning (production analogs)<a class="headerlink" href="#9-design-positioning-production-analogs" title="Permanent link">&para;</a></h2>
+<p>The backend's structural choices are the production-default for accelerator
+compilers, not minimal shortcuts. The named analogs are the rationale for each
+shape:</p>
+<ul>
+<li><strong>CISC <code>matmul.tile</code> macro over RISC-shaped vector ops</strong> mirrors the TPU (one
+  MXU matmul opcode wraps the inner <code>DIM</code>-loop; surrounding ops are RISC) and
+  Triton's <code>tl.dot</code>. The tile is the hardware loop unit, so the inner array loop
+  is never exposed to software. <code>flash_attn.tile</code>-style CISC macros are a logical
+  extension of the same design.</li>
+<li><strong>Three on-chip spaces (SPM bf16 / ACC fp32 / VREG)</strong> match the TPU's
+  VMEM/SMEM/CMEM split. Three is the production minimum: fewer would force
+  precision conversions, more would need extra DMA. fp32 accumulation is required
+  for numerical stability across long <code>K</code>. (These are dtype views of one unified
+  byte-pool, per §5.)</li>
+<li><strong>Out-of-tree MLIR <code>npu</code> dialect</strong> (§3, §5) is the production-default for new
+  accelerator compilers - IREE, Triton, Mojo, Cerebras CSL, and Tenstorrent
+  TT-Forge are all out-of-tree MLIR - reusing the upstream pattern rewriter, type
+  system, and <code>linalg</code>/<code>scf</code>/<code>memref</code> dialects.</li>
+<li><strong>Online softmax decomposed at the linalg level</strong> (explicit rowmax / sub /
+  exp2 / scale / fma generics) matches how Triton, JAX Pallas, and Mojo express
+  attention; the decomposed form is the right granularity for a vector ISA. The
+  absence of RISC-level fusion across those vector ops is the efficiency gap in
+  <a href="../charter/"><code>charter.md</code></a> § Efficiency (issue #25); the CISC-macro answer is
+  the other direction on the same axis.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.top", "navigation.tracking", "search.highlight", "search.suggest", "content.code.copy", "content.code.annotate", "toc.follow"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
