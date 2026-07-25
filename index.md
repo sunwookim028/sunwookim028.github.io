@@ -16,7 +16,7 @@ title: Sunwoo Kim
   </div>
 </div>
 
-I am **Sunwoo Kim**, a first-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on compiler-aided methods for EDA.
+I am **Sunwoo Kim**, a first-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on computer architecture and AI.
 
 Previously, I:
 
