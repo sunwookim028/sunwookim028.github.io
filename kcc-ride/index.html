@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    :root {
+      --fg:#1f2328; --muted:#656d76; --line:#d8dee4; --bg:#fff; --sunk:#f6f8fa;
+      --brand:#2f7d32; --danger:#c62828; --radius:10px;
+      --font:clamp(15px,1.8vw,16px);
+    }
+    *{box-sizing:border-box}
+    body{
+      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Apple SD Gothic Neo",sans-serif;
+      color:var(--fg); background:var(--bg); font-size:var(--font); line-height:1.5;
+      margin:0 auto; max-width:640px; padding:clamp(14px,2.5vw,24px);
+      -webkit-text-size-adjust:100%;
+    }
+    h1{font-size:clamp(19px,3.4vw,23px); margin:0 0 4px}
+    p.sub{color:var(--muted); font-size:.9em; margin:0 0 16px}
+
+    .tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap}
+    .tabs button{
+      flex:1; min-width:96px; min-height:44px; padding:8px 12px; cursor:pointer;
+      border:1px solid var(--line); background:var(--sunk); color:var(--fg);
+      border-radius:8px; font-size:var(--font); font-weight:600;
+    }
+    .tabs button[aria-selected="true"]{background:var(--brand); border-color:var(--brand); color:#fff}
+
+    .card{border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:14px}
+    fieldset{border:0; margin:0 0 14px; padding:0}
+    legend, .lbl{font-size:.85em; font-weight:600; color:var(--muted); padding:0; margin-bottom:8px}
+
+    .seg{display:flex; gap:6px}
+    .seg label{
+      flex:1; text-align:center; padding:11px 8px; cursor:pointer; font-weight:600;
+      border:1px solid var(--line); border-radius:8px; background:var(--sunk);
+    }
+    .seg input{position:absolute; opacity:0; pointer-events:none}
+    .seg input:checked + span{color:#fff}
+    .seg label:has(input:checked){background:var(--brand); border-color:var(--brand); color:#fff}
+    .seg input:focus-visible + span{outline:2px solid var(--brand); outline-offset:3px}
+
+    .svc{display:grid; gap:6px}
+    .svc label{
+      display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer;
+      border:1px solid var(--line); border-radius:8px;
+    }
+    .svc label:has(input:checked){border-color:var(--brand); background:#f2f8f2}
+    .svc label.closed{color:var(--muted); background:var(--sunk); cursor:not-allowed}
+    .svc .when{flex:1; min-width:0}
+    .badge{font-size:.75em; color:var(--muted); white-space:nowrap}
+    .badge.shut{color:var(--danger)}
+
+    select, input[type=text], input[type=number]{
+      width:100%; min-height:44px; padding:10px 12px; font-size:var(--font);
+      border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--fg);
+    }
+    button.primary, button.ghost{
+      min-height:44px; padding:11px 16px; border-radius:8px; cursor:pointer;
+      font-size:var(--font); font-weight:600;
+    }
+    button.primary{background:var(--brand); color:#fff; border:1px solid var(--brand); width:100%}
+    button.ghost{background:#fff; color:var(--fg); border:1px solid var(--line)}
+    button:disabled{opacity:.5; cursor:not-allowed}
+
+    .status{min-height:22px; margin-top:10px; font-size:.9em}
+    .status.ok{color:var(--brand)}
+    .status.err{color:var(--danger)}
+    .muted{color:var(--muted); font-size:.85em}
+
+    .item{display:flex; gap:10px; align-items:center; padding:10px 0; border-top:1px solid var(--line)}
+    .item:first-child{border-top:0}
+    .item .who{flex:1; min-width:0}
+    .run{margin:0 0 14px}
+    .run h3{margin:0 0 6px; font-size:1em}
+    .run ul{margin:0; padding-left:18px}
+    .recall{background:var(--sunk); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-bottom:14px}
+    [hidden]{display:none !important}
+  </style>
+
+<script>
+/* PREVIEW ONLY — replaces google.script.run with an in-memory fake.
+   Data comes from the real Code.gs scheduling logic; signups live until
+   the page is reloaded. This block is not part of the deployed app. */
+var FIXTURE = {
+  "services": [
+    {
+      "id": "sun-100",
+      "label": "주일 1시",
+      "date": "2026-09-13",
+      "display": "9/13 (일) 주일 1시 13:00",
+      "freezeText": "9/13 (일) 8:00 마감"
+    },
+    {
+      "id": "sun-145",
+      "label": "주일 정시",
+      "date": "2026-09-13",
+      "display": "9/13 (일) 주일 정시 13:45",
+      "freezeText": "9/13 (일) 8:00 마감"
+    },
+    {
+      "id": "mon-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-14",
+      "display": "9/14 (월) 새벽예배 6:00",
+      "freezeText": "9/13 (일) 17:00 마감"
+    },
+    {
+      "id": "tue-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-15",
+      "display": "9/15 (화) 새벽예배 6:00",
+      "freezeText": "9/14 (월) 17:00 마감"
+    },
+    {
+      "id": "wed-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-16",
+      "display": "9/16 (수) 새벽예배 6:00",
+      "freezeText": "9/15 (화) 17:00 마감"
+    },
+    {
+      "id": "thu-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-17",
+      "display": "9/17 (목) 새벽예배 6:00",
+      "freezeText": "9/16 (수) 17:00 마감"
+    },
+    {
+      "id": "fri-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-18",
+      "display": "9/18 (금) 새벽예배 6:00",
+      "freezeText": "9/17 (목) 17:00 마감"
+    },
+    {
+      "id": "sat-dawn",
+      "label": "새벽예배",
+      "date": "2026-09-19",
+      "display": "9/19 (토) 새벽예배 6:00",
+      "freezeText": "9/18 (금) 17:00 마감"
+    }
+  ],
+  "locations": [
+    "RPCC 앞 버스정류장",
+    "Baker Flagpole",
+    "Hasbrouck CC",
+    "CTB",
+    "CTT 분수",
+    "Green st bus stop",
+    "Maplewood B동앞 (Lena st.)",
+    "Fairview Manor",
+    "Ithaca College"
+  ],
+  "board": [
+    {
+      "display": "9/13 (일) 주일 1시 13:00",
+      "groups": [
+        {
+          "driver": "김드라이버",
+          "riders": [
+            {
+              "name": "이지민",
+              "location": "RPCC 앞 버스정류장",
+              "pickupTime": "5:35"
+            },
+            {
+              "name": "박규리",
+              "location": "CTB",
+              "pickupTime": "5:45"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};
+var SIGNUPS = [];
+
+var IMPL = {
+  api_options: function () {
+    return { services: FIXTURE.services, locations: FIXTURE.locations };
+  },
+
+  api_board: function () { return FIXTURE.board; },
+
+  api_find: function (name) {
+    var nm = String(name).trim().toLowerCase();
+    return { ok: true, items: SIGNUPS.filter(function (s) {
+      return s.name.toLowerCase() === nm;
+    }) };
+  },
+
+  api_signup: function (p) {
+    var svc = FIXTURE.services.filter(function (s) { return s.id === p.serviceId; })[0];
+    if (!svc) return { ok: false, message: '알 수 없는 시간대입니다.' };
+    var dup = SIGNUPS.some(function (s) {
+      return s.role === p.role && s.serviceId === p.serviceId &&
+             s.name.toLowerCase() === String(p.name).toLowerCase();
+    });
+    if (dup) return { ok: false, message: '이미 신청하셨습니다: ' + svc.display };
+    SIGNUPS.push({
+      row: SIGNUPS.length + 2, role: p.role, name: p.name,
+      serviceId: svc.id, serviceDate: svc.date, location: p.location,
+      seats: p.seats, display: svc.display, open: true
+    });
+    return { ok: true, message: '신청되었습니다 — ' + svc.display + ' / ' + p.location };
+  },
+
+  api_cancel: function (p) {
+    SIGNUPS = SIGNUPS.filter(function (s) {
+      return !(s.role === p.role && s.serviceId === p.serviceId && s.name === p.name);
+    });
+    return { ok: true, message: '취소되었습니다.' };
+  }
+};
+
+/* Each chain gets its own handlers — a shared pair would cross the callbacks
+   of two calls that are in flight at the same time. */
+google = { script: { run: (function () {
+  var NAMES = ['api_options', 'api_board', 'api_find', 'api_signup', 'api_cancel'];
+
+  function call() {
+    var ok = null, fail = null;
+    var self = {
+      withSuccessHandler: function (f) { ok = f; return self; },
+      withFailureHandler: function (f) { fail = f; return self; }
+    };
+    NAMES.forEach(function (name) {
+      self[name] = function () {
+        try {
+          var res = IMPL[name].apply(null, arguments);
+          if (ok) ok(res);
+        } catch (e) {
+          if (fail) fail(e); else throw e;
+        }
+      };
+    });
+    return self;
+  }
+
+  var root = {};
+  ['withSuccessHandler', 'withFailureHandler'].concat(NAMES).forEach(function (name) {
+    root[name] = function () { var c = call(); return c[name].apply(c, arguments); };
+  });
+  return root;
+})() } };
+</script>
+</head>
+<body>
+<div style="max-width:640px;margin:0 auto;padding:10px 14px;
+            background:#fff8e1;border:1px solid #ffe082;border-radius:8px;
+            font:14px/1.5 system-ui,-apple-system,sans-serif;color:#5f4b00">
+  <b>미리보기</b> — 화면 확인용입니다. 신청은 저장되지 않고 새로고침하면 사라집니다.
+</div>
+
+  <h1>KCC 라이드</h1>
+  <p class="sub">이번 주 예배 라이드 신청. 각 예배는 마감 시간 전까지 자유롭게 신청·취소할 수 있어요.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-signup" aria-selected="true"  onclick="show('signup')">신청</button>
+    <button role="tab" id="tab-mine"   aria-selected="false" onclick="show('mine')">내 신청</button>
+    <button role="tab" id="tab-board"  aria-selected="false" onclick="show('board')">배정표</button>
+  </div>
+
+  <!-- ───────────────────────── 신청 ───────────────────────── -->
+  <section id="panel-signup" class="card">
+    <div id="recall" class="recall" hidden>
+      <div id="recall-text"></div>
+      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap">
+        <button class="primary" style="flex:1; width:auto" onclick="submitSignup()">이대로 신청</button>
+        <button class="ghost" onclick="dismissRecall()">직접 선택</button>
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>구분</legend>
+      <div class="seg">
+        <label><input type="radio" name="role" value="rider" checked onchange="onRole()"><span>라이더 (탑승)</span></label>
+        <label><input type="radio" name="role" value="driver" onchange="onRole()"><span>드라이버 (운전)</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>예배</legend>
+      <div id="services" class="svc"><span class="muted">불러오는 중…</span></div>
+    </fieldset>
+
+    <fieldset>
+      <label class="lbl" for="location" id="location-label">픽업 희망 장소</label>
+      <select id="location"></select>
+    </fieldset>
+
+    <fieldset id="seats-field" hidden>
+      <label class="lbl" for="seats">태울 수 있는 좌석 수</label>
+      <input id="seats" type="number" min="1" max="8" step="1" value="3" inputmode="numeric">
+    </fieldset>
+
+    <fieldset>
+      <label class="lbl" for="name">이름</label>
+      <input id="name" type="text" placeholder="이름을 입력하세요" autocomplete="name">
+    </fieldset>
+
+    <button class="primary" onclick="submitSignup()">신청하기</button>
+    <div id="status-signup" class="status" role="status"></div>
+
+    <div id="consent" hidden style="margin-top:12px">
+      <div class="muted">이 기기에 이름과 자주 쓰는 선택을 저장할까요? 다음부터 한 번에 신청할 수 있어요.</div>
+      <div style="display:flex; gap:8px; margin-top:8px">
+        <button class="ghost" onclick="setConsent(true)">저장</button>
+        <button class="ghost" onclick="setConsent(false)">저장 안 함</button>
+      </div>
+    </div>
+    <div id="forget" hidden style="margin-top:12px">
+      <button class="ghost" onclick="forget()">저장된 정보 지우기</button>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── 내 신청 ───────────────────────── -->
+  <section id="panel-mine" class="card" hidden>
+    <label class="lbl" for="mineName">이름</label>
+    <div style="display:flex; gap:8px">
+      <input id="mineName" type="text" placeholder="이름을 입력하세요">
+      <button class="ghost" onclick="lookup()">조회</button>
+    </div>
+    <div id="mine-list" style="margin-top:14px"></div>
+    <div id="status-mine" class="status" role="status"></div>
+    <div class="muted">* 신청을 바꾸려면 취소한 뒤 다시 신청해 주세요.</div>
+  </section>
+
+  <!-- ───────────────────────── 배정표 ───────────────────────── -->
+  <section id="panel-board" class="card" hidden>
+    <div id="board"><span class="muted">불러오는 중…</span></div>
+  </section>
+
+<script>
+/* ─────────────── remembered input (this device only) ───────────────
+   Kept in localStorage, never sent anywhere but the signup itself.
+   Hysteresis: the default is the most recent value that appears at least
+   twice in the last three submissions, so a one-off choice does not
+   become the new default until it is repeated.                        */
+
+var STORE = 'kcc-ride-v1';
+var mem = { consent: null, history: {} };
+
+function memLoad() {
+  try {
+    var raw = localStorage.getItem(STORE);
+    if (raw) mem = JSON.parse(raw);
+  } catch (e) { /* private mode, blocked storage — carry on without it */ }
+  if (!mem || typeof mem !== 'object') mem = { consent: null, history: {} };
+  if (!mem.history) mem.history = {};
+}
+function memSave() {
+  try { localStorage.setItem(STORE, JSON.stringify(mem)); } catch (e) {}
+}
+function remember(field, value) {
+  if (mem.consent !== true || !value) return;
+  var a = (mem.history[field] || []).slice();
+  a.unshift(String(value));
+  mem.history[field] = a.slice(0, 3);
+}
+function preferred(field) {
+  var a = mem.history[field] || [];
+  if (!a.length) return '';
+  var count = {};
+  a.forEach(function (v) { count[v] = (count[v] || 0) + 1; });
+  for (var i = 0; i < a.length; i++) if (count[a[i]] >= 2) return a[i];
+  return a[0];
+}
+
+function setConsent(yes) {
+  mem.consent = !!yes;
+  document.getElementById('consent').hidden = true;
+  if (yes) {
+    remember('name', val('name'));
+    remember('role', role());
+    remember('location', val('location'));
+  } else {
+    mem.history = {};
+  }
+  memSave();
+  renderForget();
+}
+function forget() {
+  mem = { consent: false, history: {} };
+  memSave();
+  renderForget();
+  setStatus('status-signup', '저장된 정보를 지웠습니다.', true);
+}
+function renderForget() {
+  document.getElementById('forget').hidden = !(mem.consent === true && (mem.history.name || []).length);
+}
+
+/* ─────────────── small helpers ─────────────── */
+
+function val(id) { return document.getElementById(id).value.trim(); }
+function role()  { return document.querySelector('input[name=role]:checked').value; }
+function setStatus(id, msg, ok) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = 'status ' + (msg ? (ok ? 'ok' : 'err') : '');
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+function show(which) {
+  ['signup','mine','board'].forEach(function (k) {
+    document.getElementById('panel-' + k).hidden = (k !== which);
+    document.getElementById('tab-' + k).setAttribute('aria-selected', String(k === which));
+  });
+  if (which === 'board') loadBoard();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function onRole() {
+  var driver = role() === 'driver';
+  document.getElementById('seats-field').hidden = !driver;
+  document.getElementById('location-label').textContent = driver ? '출발 장소' : '픽업 희망 장소';
+}
+
+/* ─────────────── load ─────────────── */
+
+var SERVICES = [];
+
+function init() {
+  memLoad();
+  renderForget();
+  google.script.run
+    .withSuccessHandler(onOptions)
+    .withFailureHandler(function (e) {
+      document.getElementById('services').innerHTML =
+        '<span class="status err">불러오지 못했습니다: ' + esc(e.message || e) + '</span>';
+    })
+    .api_options();
+}
+
+function onOptions(opt) {
+  SERVICES = opt.services || [];
+
+  var box = document.getElementById('services');
+  if (!SERVICES.length) { box.innerHTML = '<span class="muted">등록된 예배가 없습니다.</span>'; return; }
+  box.innerHTML = SERVICES.map(function (s) {
+    return '<label>' +
+             '<input type="radio" name="service" value="' + esc(s.id) + '">' +
+             '<span class="when">' + esc(s.display) + '</span>' +
+             '<span class="badge">' + esc(s.freezeText) + '</span>' +
+           '</label>';
+  }).join('');
+
+  var sel = document.getElementById('location');
+  sel.innerHTML = (opt.locations || []).map(function (l) {
+    return '<option>' + esc(l) + '</option>';
+  }).join('');
+
+  applyRecall();
+}
+
+/* ─────────────── prefill ─────────────── */
+
+function applyRecall() {
+  if (mem.consent !== true) return;
+  var name = preferred('name');
+  if (!name) return;
+
+  document.getElementById('name').value = name;
+
+  var r = preferred('role');
+  if (r) {
+    var radio = document.querySelector('input[name=role][value="' + r + '"]');
+    if (radio) { radio.checked = true; onRole(); }
+  }
+
+  var loc = preferred('location');
+  var sel = document.getElementById('location');
+  if (loc) {
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === loc || sel.options[i].text === loc) { sel.selectedIndex = i; break; }
+    }
+  }
+
+  // Every listed service is bookable, so suggest the soonest one.
+  var next = SERVICES.slice().sort(function (a, b) {
+    return a.date.localeCompare(b.date);
+  })[0];
+  if (!next) return;
+  var svcRadio = document.querySelector('input[name=service][value="' + next.id + '"]');
+  if (svcRadio) svcRadio.checked = true;
+
+  document.getElementById('recall-text').innerHTML =
+    '<b>' + esc(name) + '</b>님, 이대로 신청할까요?<br>' +
+    '<span class="muted">' + esc(next.display) + ' · ' +
+    esc(sel.value || '') + (role() === 'driver' ? ' · ' + esc(val('seats')) + '석' : '') + '</span>';
+  document.getElementById('recall').hidden = false;
+}
+function dismissRecall() { document.getElementById('recall').hidden = true; }
+
+/* ─────────────── actions ─────────────── */
+
+function submitSignup() {
+  var picked = document.querySelector('input[name=service]:checked');
+  if (!picked) { setStatus('status-signup', '예배를 선택하세요.', false); return; }
+  var name = val('name');
+  if (!name) { setStatus('status-signup', '이름을 입력하세요.', false); return; }
+
+  var svc = SERVICES.filter(function (s) { return s.id === picked.value; })[0];
+  var payload = {
+    role: role(),
+    name: name,
+    serviceId: picked.value,
+    serviceDate: svc ? svc.date : '',   // server rejects this if it has gone stale
+    location: val('location'),
+    seats: val('seats')
+  };
+
+  setStatus('status-signup', '신청 중…', true);
+  google.script.run
+    .withSuccessHandler(function (res) {
+      setStatus('status-signup', res.message, res.ok);
+      if (!res.ok) return;
+      dismissRecall();
+      if (mem.consent === true) {
+        remember('name', payload.name);
+        remember('role', payload.role);
+        remember('location', payload.location);
+        memSave();
+        renderForget();
+      } else if (mem.consent === null) {
+        document.getElementById('consent').hidden = false;
+      }
+    })
+    .withFailureHandler(function (e) { setStatus('status-signup', e.message || String(e), false); })
+    .api_signup(payload);
+}
+
+function lookup() {
+  var name = val('mineName');
+  if (!name) { setStatus('status-mine', '이름을 입력하세요.', false); return; }
+  setStatus('status-mine', '조회 중…', true);
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res.ok) { setStatus('status-mine', res.message, false); return; }
+      setStatus('status-mine', '', true);
+      renderMine(res.items);
+    })
+    .withFailureHandler(function (e) { setStatus('status-mine', e.message || String(e), false); })
+    .api_find(name);
+}
+
+function renderMine(items) {
+  var box = document.getElementById('mine-list');
+  if (!items.length) { box.innerHTML = '<span class="muted">신청 내역이 없습니다.</span>'; return; }
+
+  box.innerHTML = items.map(function (it, i) {
+    var meta = esc(it.location) + (it.role === 'driver' ? ' · ' + esc(it.seats) + '석 (드라이버)' : '');
+    return '<div class="item">' +
+             '<div class="who"><div>' + esc(it.display) + '</div>' +
+               '<div class="muted">' + meta + '</div></div>' +
+             (it.open
+               ? '<button class="ghost" onclick="cancelAt(' + i + ')">취소</button>'
+               : '<span class="badge shut">마감</span>') +
+           '</div>';
+  }).join('');
+  box._items = items;
+}
+
+function cancelAt(i) {
+  var it = document.getElementById('mine-list')._items[i];
+  if (!confirm(it.display + ' 신청을 취소할까요?')) return;
+
+  setStatus('status-mine', '취소 중…', true);
+  google.script.run
+    .withSuccessHandler(function (res) {
+      setStatus('status-mine', res.message, res.ok);
+      lookup();   // rows shift after a delete, so re-read rather than patch
+    })
+    .withFailureHandler(function (e) { setStatus('status-mine', e.message || String(e), false); })
+    .api_cancel({
+      row: it.row, role: it.role, name: it.name,
+      serviceId: it.serviceId, serviceDate: it.serviceDate
+    });
+}
+
+function loadBoard() {
+  var box = document.getElementById('board');
+  box.innerHTML = '<span class="muted">불러오는 중…</span>';
+  google.script.run
+    .withSuccessHandler(function (runs) {
+      if (!runs.length) {
+        box.innerHTML = '<span class="muted">아직 배정 전입니다. 마감 후 배정표가 올라옵니다.</span>';
+        return;
+      }
+      box.innerHTML = runs.map(function (s) {
+        return '<div class="run"><h3>' + esc(s.display) + '</h3>' +
+          s.groups.map(function (g) {
+            return '<div style="margin:8px 0"><b>' + esc(g.driver) + '</b><ul>' +
+              g.riders.map(function (r) {
+                return '<li>' + esc(r.name) + ' — ' + esc(r.location) +
+                       ' — <b>' + esc(r.pickupTime) + '</b></li>';
+              }).join('') +
+            '</ul></div>';
+          }).join('') +
+        '</div>';
+      }).join('');
+    })
+    .withFailureHandler(function (e) {
+      box.innerHTML = '<span class="status err">' + esc(e.message || e) + '</span>';
+    })
+    .api_board();
+}
+
+onRole();
+init();
+</script>
+</body>
+</html>
