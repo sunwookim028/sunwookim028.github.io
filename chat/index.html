@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="minitpu-api" content="">
+<meta name="minitpu-api-file" content="endpoint.json">
+<title>MiniTPU Chat</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f7f7f4;
+    --panel: #ffffff;
+    --ink: #1c1d1f;
+    --ink-2: #4a4d52;
+    --muted: #7b7f86;
+    --rule: #e3e3de;
+    --accent: #0f6f5c;
+    --accent-ink: #ffffff;
+    --user: #eaf3f0;
+    --danger: #b3261e;
+    --warn: #8a5a00;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121315; --panel: #1a1c1f; --ink: #e8e9eb; --ink-2: #b9bcc2; --muted: #868a92;
+      --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a;
+      --danger: #f2877f; --warn: #e2b04a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121315; --panel: #1a1c1f; --ink: #e8e9eb; --ink-2: #b9bcc2; --muted: #868a92;
+    --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a;
+    --danger: #f2877f; --warn: #e2b04a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
+  main { width: min(860px, 100% - 32px); margin: 0 auto; padding: 40px 0 48px; display: flex; flex-direction: column; gap: 20px; }
+
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 26px; font-weight: 650; letter-spacing: -0.01em; }
+  h1 span { color: var(--accent); }
+  .sub { margin-top: 4px; color: var(--ink-2); font-size: 14.5px; max-width: 42em; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--rule);
+          border-radius: 999px; background: var(--panel); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill[data-state="ready"] .dot { background: var(--accent); }
+  .pill[data-state="busy"] .dot { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+  .pill[data-state="offline"] .dot, .pill[data-state="error"] .dot { background: var(--danger); }
+  @keyframes pulse { 50% { opacity: .25; } }
+
+  .note { font-size: 13.5px; color: var(--ink-2); border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; }
+  .note.offline { border-color: var(--danger); }
+  .note:empty { display: none; }
+
+  .chat { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  #messages { height: min(52vh, 520px); overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .msg { max-width: 86%; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.user { align-self: flex-end; background: var(--user); padding: 8px 13px; border-radius: 12px 12px 3px 12px; }
+  .msg.assistant { align-self: flex-start; }
+  .msg.assistant .echo { color: var(--muted); }
+  .msg.system { align-self: center; font-size: 13px; color: var(--muted); text-align: center; max-width: 100%; }
+  .msg.streaming::after { content: ""; display: inline-block; width: .5em; height: 1em; margin-left: 2px;
+                          vertical-align: -0.15em; background: var(--accent); animation: pulse 1s steps(2, start) infinite; }
+  .msg .fig { display: block; margin-top: 4px; font: 12px var(--mono); color: var(--muted); white-space: normal; }
+
+  form { display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--rule); padding: 12px; }
+  textarea { flex: 1; resize: none; min-height: 40px; max-height: 160px; padding: 9px 12px; border: 1px solid var(--rule);
+             border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; line-height: 1.45; }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button { border: 0; border-radius: 8px; padding: 10px 18px; background: var(--accent); color: var(--accent-ink);
+           font: 600 14px var(--sans); cursor: pointer; }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.quiet { background: transparent; color: var(--ink-2); border: 1px solid var(--rule); font-weight: 500; padding: 7px 12px; }
+
+  .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule);
+             border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+  .metric { background: var(--panel); padding: 12px 14px; min-width: 0; }
+  .metric strong { display: block; font: 500 20px var(--mono); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+  .metric span { display: block; font-size: 12.5px; color: var(--muted); }
+
+  footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+           font-size: 12.5px; color: var(--muted); }
+  footer code { font-family: var(--mono); color: var(--ink-2); }
+  #error { color: var(--danger); font-size: 13.5px; min-height: 1.2em; }
+
+  @media (max-width: 620px) {
+    main { padding-top: 24px; }
+    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .msg { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Mini<span>TPU</span> chat</h1>
+      <div class="sub" id="sub">A language model whose transformer body runs on a 16&times;16 BF16 systolic array
+        on an FPGA. Embeddings, sampling and the tokenizer run on the board's ARM cores.</div>
+    </div>
+    <div class="pill" id="pill" data-state="connecting"><span class="dot"></span><span id="status">connecting</span></div>
+  </header>
+
+  <div class="note" id="note"></div>
+
+  <section class="chat">
+    <div id="messages" aria-live="polite"></div>
+    <form id="form">
+      <textarea id="prompt" rows="1" maxlength="2000" placeholder="Type a message" disabled></textarea>
+      <button id="send" type="submit" disabled>Send</button>
+    </form>
+  </section>
+
+  <div class="metrics" aria-label="last turn">
+    <div class="metric"><strong id="m-ttft">&mdash;</strong><span>time to first token</span></div>
+    <div class="metric"><strong id="m-rate">&mdash;</strong><span>decode tokens/s</span></div>
+    <div class="metric"><strong id="m-tokens">&mdash;</strong><span>tokens generated</span></div>
+    <div class="metric"><strong id="m-wall">&mdash;</strong><span>turn wall time</span></div>
+    <div class="metric"><strong id="m-context">&mdash;</strong><span>context used / budget</span></div>
+    <div class="metric"><strong id="m-ddr">&mdash;</strong><span>DDR traffic (device counter)</span></div>
+  </div>
+
+  <div id="error" role="alert"></div>
+
+  <footer>
+    <span id="identity">&nbsp;</span>
+    <button class="quiet" id="reset" type="button" disabled>New conversation</button>
+  </footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const messages = $('messages'), form = $('form'), prompt = $('prompt'), send = $('send');
+  const pill = $('pill'), status = $('status'), note = $('note'), errorBox = $('error');
+
+  let api = '';
+  let info = null;
+  let running = false;
+
+  function clientId() {
+    const make = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');
+    try {
+      let id = sessionStorage.getItem('minitpu-client');
+      if (!id) { id = make(); sessionStorage.setItem('minitpu-client', id); }
+      return id;
+    } catch (_) { return make(); }
+  }
+  const client = clientId();
+
+  function setState(state, text) { pill.dataset.state = state; status.textContent = text; }
+  function fixed(value, digits) { return value === null || value === undefined ? '—' : Number(value).toFixed(digits); }
+  function add(role, text) {
+    const node = document.createElement('div');
+    node.className = `msg ${role}`;
+    node.textContent = text;
+    messages.appendChild(node);
+    messages.scrollTop = messages.scrollHeight;
+    return node;
+  }
+  function enable(on) { prompt.disabled = !on; send.disabled = !on; $('reset').disabled = !on; }
+
+  async function resolveApi() {
+    const params = new URLSearchParams(location.search);
+    if (params.get('api')) return params.get('api').replace(/\/$/, '');
+    const base = document.querySelector('meta[name="minitpu-api"]').content;
+    if (base && !base.startsWith('{{')) return base.replace(/\/$/, '');
+    const file = document.querySelector('meta[name="minitpu-api-file"]').content;
+    if (file && !file.startsWith('{{')) {
+      const response = await fetch(file, {cache: 'no-store'});
+      if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+      const named = (await response.json()).api;
+      if (!named) throw new Error(`${file} names no board right now`);
+      return String(named).replace(/\/$/, '');
+    }
+    return '';
+  }
+
+  function describe(i) {
+    const kind = i.multi_turn
+      ? `Multi-turn, ${i.max_context} tokens for the whole conversation; the oldest exchanges drop out when it fills.`
+      : `${i.title} is a base model: it continues your text, and each message stands alone.`;
+    return `${i.title}. ${kind} Replies stop at ${i.max_new_tokens} tokens, sampled at temperature ${i.temperature}. ` +
+           'The device runs one turn at a time, so you may wait behind another visitor.';
+  }
+
+  async function connect() {
+    setState('connecting', 'connecting');
+    try {
+      api = await resolveApi();
+      const response = await fetch(`${api}/api/info`, {cache: 'no-store'});
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      info = await response.json();
+    } catch (cause) {
+      info = null;
+      setState('offline', 'board offline');
+      note.className = 'note offline';
+      note.textContent = 'The board is not serving right now: the FPGA boards are shared lab hardware, ' +
+                         'so the demo is up only while one is lent to it. This page retries every 30 s.';
+      enable(false);
+      setTimeout(connect, 30000);
+      return;
+    }
+    note.className = 'note';
+    note.textContent = describe(info);
+    const clock = info.pl_clock_mhz ? ` at ${Number(info.pl_clock_mhz).toFixed(1)} MHz` : '';
+    $('identity').innerHTML = '';
+    $('identity').append(document.createTextNode(`${info.backend}${clock} · bitstream `),
+                         Object.assign(document.createElement('code'), {textContent: info.build_id || 'unread'}));
+    if (!messages.childElementCount) add('system', info.multi_turn ? 'Ask something.' : 'Start a sentence and the model will continue it.');
+    setState('ready', 'ready');
+    enable(true);
+    prompt.focus();
+  }
+
+  function renderStats(s) {
+    $('m-ttft').textContent = s.ttft_seconds === null ? '—' : `${fixed(s.ttft_seconds, 2)} s`;
+    $('m-rate').textContent = fixed(s.decode_tokens_per_second, 2);
+    $('m-tokens').textContent = s.generated_tokens;
+    $('m-wall').textContent = `${fixed(s.wall_seconds, 2)} s`;
+    $('m-context').textContent = `${s.context_tokens} / ${s.max_context}`;
+    $('m-ddr').textContent = s.ddr_megabytes === null ? '—' : `${fixed(s.ddr_megabytes, 0)} MB`;
+  }
+
+  async function turn(text) {
+    const response = await fetch(`${api}/api/chat/stream`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({client, message: text}),
+    });
+    if (!response.ok) {
+      let detail = `HTTP ${response.status}`;
+      try { detail = (await response.json()).error || detail; } catch (_) {}
+      throw new Error(detail);
+    }
+    const node = add('assistant', '');
+    node.classList.add('streaming');
+    let body = node;
+    if (info && !info.multi_turn) {
+      node.append(Object.assign(document.createElement('span'), {className: 'echo', textContent: text}));
+      body = node.appendChild(document.createElement('span'));
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', reply = '', pieces = 0, done = null;
+    const started = performance.now();
+    try {
+      for (;;) {
+        const {value, done: ended} = await reader.read();
+        if (ended) break;
+        buffer += decoder.decode(value, {stream: true});
+        let cut;
+        while ((cut = buffer.indexOf('\n\n')) >= 0) {
+          const frame = buffer.slice(0, cut);
+          buffer = buffer.slice(cut + 2);
+          const line = frame.split('\n').find(l => l.startsWith('data: '));
+          if (!line) continue;
+          const event = JSON.parse(line.slice(6));
+          if (event.error) throw new Error(event.error);
+          if (event.waiting !== undefined) setState('busy', 'waiting for the board');
+          if (event.delta !== undefined) {
+            reply += event.delta;
+            body.textContent = reply;
+            pieces += 1;
+            const seconds = (performance.now() - started) / 1000;
+            setState('busy', `generating · ${seconds.toFixed(1)} s`);
+            messages.scrollTop = messages.scrollHeight;
+          }
+          if (event.done) done = event;
+        }
+      }
+    } catch (cause) {
+      node.remove();
+      throw cause;
+    } finally {
+      node.classList.remove('streaming');
+    }
+    if (!done) { node.remove(); throw new Error('the stream ended before the reply did'); }
+    const s = done.stats;
+    // The server's reply is authoritative: a streamed piece can be revised when a later token completes a character.
+    reply = s.reply;
+    body.textContent = reply || '(no text: the model ended its reply at once)';
+    const figure = document.createElement('span');
+    figure.className = 'fig';
+    figure.textContent = `${s.generated_tokens} tokens · first after ${fixed(s.ttft_seconds, 2)} s · ` +
+                         `${fixed(s.decode_tokens_per_second, 2)} tok/s after that`;
+    node.appendChild(figure);
+    if (s.dropped_exchanges) add('system', `The context filled, so ${s.dropped_exchanges} older exchange${s.dropped_exchanges === 1 ? '' : 's'} dropped out.`);
+    return s;
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const text = prompt.value.trim();
+    if (!text || running || !info) return;
+    running = true;
+    add('user', text);
+    prompt.value = '';
+    prompt.style.height = '';
+    enable(false);
+    errorBox.textContent = '';
+    setState('busy', 'sending');
+    try {
+      renderStats(await turn(text));
+      setState('ready', 'ready');
+    } catch (cause) {
+      errorBox.textContent = cause.message;
+      if (cause instanceof TypeError) { setState('offline', 'board offline'); setTimeout(connect, 5000); }
+      else setState('error', 'turn failed');
+    } finally {
+      running = false;
+      if (info) { enable(true); prompt.focus(); }
+    }
+  });
+  prompt.addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); form.requestSubmit(); }
+  });
+  prompt.addEventListener('input', () => {
+    prompt.style.height = 'auto';
+    prompt.style.height = `${Math.min(prompt.scrollHeight, 160)}px`;
+  });
+  $('reset').addEventListener('click', async () => {
+    try {
+      const response = await fetch(`${api}/api/reset`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({client}),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      messages.replaceChildren();
+      add('system', 'New conversation.');
+      errorBox.textContent = '';
+    } catch (cause) { errorBox.textContent = cause.message; }
+  });
+
+  connect();
+})();
+</script>
+</body>
+</html>
