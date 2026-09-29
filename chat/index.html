@@ -65,6 +65,13 @@
   .msg.system { align-self: center; font-size: 13px; color: var(--muted); text-align: center; max-width: 100%; }
   .msg.streaming::after { content: ""; display: inline-block; width: .5em; height: 1em; margin-left: 2px;
                           vertical-align: -0.15em; background: var(--accent); animation: pulse 1s steps(2, start) infinite; }
+  .msg.cmd { align-self: stretch; max-width: 100%; text-align: left; font: 12.5px/1.5 var(--mono); color: var(--ink-2);
+             background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 12px; }
+  .msg.cmd .line { color: var(--accent); }
+  .hints { display: none; gap: 6px 14px; flex-wrap: wrap; padding: 0 14px 10px; font: 12.5px var(--mono); color: var(--muted); }
+  .hints.on { display: flex; }
+  .hints button { all: unset; cursor: pointer; color: var(--ink-2); }
+  .hints button:hover, .hints button:focus-visible { color: var(--accent); text-decoration: underline; }
   .msg .fig { display: block; margin-top: 4px; font: 12px var(--mono); color: var(--muted); white-space: normal; }
 
   form { display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--rule); padding: 12px; }
@@ -110,9 +117,10 @@
   <section class="chat">
     <div id="messages" aria-live="polite"></div>
     <form id="form">
-      <textarea id="prompt" rows="1" maxlength="2000" placeholder="Type a message" disabled></textarea>
+      <textarea id="prompt" rows="1" maxlength="2000" placeholder="Type a message, or / for commands" disabled></textarea>
       <button id="send" type="submit" disabled>Send</button>
     </form>
+    <div class="hints" id="hints" aria-label="commands"></div>
   </section>
 
   <div class="metrics" aria-label="last turn">
@@ -136,7 +144,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const messages = $('messages'), form = $('form'), prompt = $('prompt'), send = $('send');
-  const pill = $('pill'), status = $('status'), note = $('note'), errorBox = $('error');
+  const pill = $('pill'), status = $('status'), note = $('note'), errorBox = $('error'), hints = $('hints');
 
   let api = '';
   let info = null;
@@ -162,6 +170,15 @@
     messages.scrollTop = messages.scrollHeight;
     return node;
   }
+  function addCommand(line, output) {
+    const node = document.createElement('div');
+    node.className = 'msg cmd';
+    node.appendChild(Object.assign(document.createElement('div'), {className: 'line', textContent: line}));
+    node.appendChild(document.createTextNode(output));
+    node.style.whiteSpace = 'pre-wrap';
+    messages.appendChild(node);
+    messages.scrollTop = messages.scrollHeight;
+  }
   function enable(on) { prompt.disabled = !on; send.disabled = !on; $('reset').disabled = !on; }
 
   async function resolveApi() {
@@ -185,16 +202,42 @@
       ? `Multi-turn, ${i.max_context} tokens for the whole conversation; the oldest exchanges drop out when it fills.`
       : `${i.title} is a base model: it continues your text, and each message stands alone.`;
     return `${i.title}. ${kind} Replies stop at ${i.max_new_tokens} tokens, sampled at temperature ${i.temperature}. ` +
-           'The device runs one turn at a time, so you may wait behind another visitor.';
+           'The device runs one turn at a time, so you may wait behind another visitor. Type /help for commands.';
+  }
+
+  // Everything the header shows follows this visitor's own model and settings.
+  function applyInfo(next) {
+    info = next;
+    note.className = 'note';
+    note.textContent = describe(info);
+    const clock = info.pl_clock_mhz ? ` at ${Number(info.pl_clock_mhz).toFixed(1)} MHz` : '';
+    $('identity').textContent = '';
+    $('identity').append(document.createTextNode(`${info.backend}${clock} · bitstream `),
+                         Object.assign(document.createElement('code'), {textContent: info.build_id || 'unread'}));
+    prompt.placeholder = info.multi_turn ? 'Type a message, or / for commands' : 'Start a sentence, or / for commands';
+    renderHints();
+  }
+
+  function renderHints() {
+    const typed = prompt.value;
+    hints.textContent = '';
+    if (!info || !typed.startsWith('/') || typed.includes(' ')) { hints.classList.remove('on'); return; }
+    const matches = info.commands.filter(c => `/${c.name}`.startsWith(typed));
+    for (const c of matches) {
+      const button = Object.assign(document.createElement('button'), {type: 'button', textContent: `/${c.name}`, title: c.help});
+      button.addEventListener('click', () => { prompt.value = `/${c.name} `; prompt.focus(); renderHints(); });
+      hints.appendChild(button);
+    }
+    hints.classList.toggle('on', matches.length > 0);
   }
 
   async function connect() {
     setState('connecting', 'connecting');
     try {
       api = await resolveApi();
-      const response = await fetch(`${api}/api/info`, {cache: 'no-store'});
+      const response = await fetch(`${api}/api/info?client=${client}`, {cache: 'no-store'});
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      info = await response.json();
+      applyInfo(await response.json());
     } catch (cause) {
       info = null;
       setState('offline', 'board offline');
@@ -205,12 +248,6 @@
       setTimeout(connect, 30000);
       return;
     }
-    note.className = 'note';
-    note.textContent = describe(info);
-    const clock = info.pl_clock_mhz ? ` at ${Number(info.pl_clock_mhz).toFixed(1)} MHz` : '';
-    $('identity').innerHTML = '';
-    $('identity').append(document.createTextNode(`${info.backend}${clock} · bitstream `),
-                         Object.assign(document.createElement('code'), {textContent: info.build_id || 'unread'}));
     if (!messages.childElementCount) add('system', info.multi_turn ? 'Ask something.' : 'Start a sentence and the model will continue it.');
     setState('ready', 'ready');
     enable(true);
@@ -226,17 +263,39 @@
     $('m-ddr').textContent = s.ddr_megabytes === null ? '—' : `${fixed(s.ddr_megabytes, 0)} MB`;
   }
 
-  async function turn(text) {
-    const response = await fetch(`${api}/api/chat/stream`, {
+  // POSTs one request and hands each server-sent `data:` frame to `onEvent`; comment frames are keepalives.
+  async function stream(path, payload, onEvent) {
+    const response = await fetch(`${api}${path}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({client, message: text}),
+      body: JSON.stringify({client, ...payload}),
     });
     if (!response.ok) {
       let detail = `HTTP ${response.status}`;
       try { detail = (await response.json()).error || detail; } catch (_) {}
       throw new Error(detail);
     }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    for (;;) {
+      const {value, done} = await reader.read();
+      if (done) return;
+      buffer += decoder.decode(value, {stream: true});
+      let cut;
+      while ((cut = buffer.indexOf('\n\n')) >= 0) {
+        const frame = buffer.slice(0, cut);
+        buffer = buffer.slice(cut + 2);
+        const line = frame.split('\n').find(l => l.startsWith('data: '));
+        if (!line) continue;
+        const event = JSON.parse(line.slice(6));
+        if (event.error) throw new Error(event.error);
+        onEvent(event);
+      }
+    }
+  }
+
+  async function turn(text) {
     const node = add('assistant', '');
     node.classList.add('streaming');
     let body = node;
@@ -244,35 +303,19 @@
       node.append(Object.assign(document.createElement('span'), {className: 'echo', textContent: text}));
       body = node.appendChild(document.createElement('span'));
     }
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '', reply = '', pieces = 0, done = null;
+    let reply = '', done = null;
     const started = performance.now();
     try {
-      for (;;) {
-        const {value, done: ended} = await reader.read();
-        if (ended) break;
-        buffer += decoder.decode(value, {stream: true});
-        let cut;
-        while ((cut = buffer.indexOf('\n\n')) >= 0) {
-          const frame = buffer.slice(0, cut);
-          buffer = buffer.slice(cut + 2);
-          const line = frame.split('\n').find(l => l.startsWith('data: '));
-          if (!line) continue;
-          const event = JSON.parse(line.slice(6));
-          if (event.error) throw new Error(event.error);
-          if (event.waiting !== undefined) setState('busy', 'waiting for the board');
-          if (event.delta !== undefined) {
-            reply += event.delta;
-            body.textContent = reply;
-            pieces += 1;
-            const seconds = (performance.now() - started) / 1000;
-            setState('busy', `generating · ${seconds.toFixed(1)} s`);
-            messages.scrollTop = messages.scrollHeight;
-          }
-          if (event.done) done = event;
+      await stream('/api/chat/stream', {message: text}, event => {
+        if (event.waiting !== undefined) setState('busy', 'waiting for the board');
+        if (event.delta !== undefined) {
+          reply += event.delta;
+          body.textContent = reply;
+          setState('busy', `generating · ${((performance.now() - started) / 1000).toFixed(1)} s`);
+          messages.scrollTop = messages.scrollHeight;
         }
-      }
+        if (event.done) done = event;
+      });
     } catch (cause) {
       node.remove();
       throw cause;
@@ -293,24 +336,39 @@
     return s;
   }
 
+  async function command(line) {
+    let done = null;
+    await stream('/api/command', {line}, event => {
+      if (event.waiting !== undefined) setState('busy', 'waiting for the board');
+      if (event.note !== undefined) setState('busy', event.note);
+      if (event.done) done = event;
+    });
+    if (!done) throw new Error('the stream ended before the command did');
+    if (done.cleared) messages.replaceChildren();
+    addCommand(line, done.output);
+    applyInfo(done.info);
+  }
+
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const text = prompt.value.trim();
     if (!text || running || !info) return;
     running = true;
-    add('user', text);
+    const isCommand = text.startsWith('/');
+    if (!isCommand) add('user', text);
     prompt.value = '';
     prompt.style.height = '';
+    renderHints();
     enable(false);
     errorBox.textContent = '';
-    setState('busy', 'sending');
+    setState('busy', isCommand ? 'running command' : 'sending');
     try {
-      renderStats(await turn(text));
+      if (isCommand) await command(text); else renderStats(await turn(text));
       setState('ready', 'ready');
     } catch (cause) {
       errorBox.textContent = cause.message;
       if (cause instanceof TypeError) { setState('offline', 'board offline'); setTimeout(connect, 5000); }
-      else setState('error', 'turn failed');
+      else setState('error', isCommand ? 'command failed' : 'turn failed');
     } finally {
       running = false;
       if (info) { enable(true); prompt.focus(); }
@@ -322,17 +380,12 @@
   prompt.addEventListener('input', () => {
     prompt.style.height = 'auto';
     prompt.style.height = `${Math.min(prompt.scrollHeight, 160)}px`;
+    renderHints();
   });
-  $('reset').addEventListener('click', async () => {
-    try {
-      const response = await fetch(`${api}/api/reset`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({client}),
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      messages.replaceChildren();
-      add('system', 'New conversation.');
-      errorBox.textContent = '';
-    } catch (cause) { errorBox.textContent = cause.message; }
+  $('reset').addEventListener('click', () => {
+    if (running || !info) return;
+    prompt.value = '/clear';
+    form.requestSubmit();
   });
 
   connect();
