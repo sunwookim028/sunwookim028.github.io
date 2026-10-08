@@ -9,96 +9,72 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #f7f7f4;
-    --panel: #ffffff;
-    --ink: #1c1d1f;
-    --ink-2: #4a4d52;
-    --muted: #7b7f86;
-    --rule: #e3e3de;
-    --accent: #0f6f5c;
-    --accent-ink: #ffffff;
-    --user: #eaf3f0;
-    --danger: #b3261e;
-    --warn: #8a5a00;
+    --bg: #f7f7f4; --panel: #ffffff; --ink: #1c1d1f; --ink-2: #4a4d52; --muted: #7b7f86; --rule: #e3e3de;
+    --accent: #0f6f5c; --accent-ink: #ffffff; --user: #eaf3f0; --danger: #b3261e; --warn: #8a5a00;
     --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #121315; --panel: #1a1c1f; --ink: #e8e9eb; --ink-2: #b9bcc2; --muted: #868a92;
-      --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a;
-      --danger: #f2877f; --warn: #e2b04a;
+      --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a; --danger: #f2877f; --warn: #e2b04a;
     }
   }
   :root[data-theme="dark"] {
     --bg: #121315; --panel: #1a1c1f; --ink: #e8e9eb; --ink-2: #b9bcc2; --muted: #868a92;
-    --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a;
-    --danger: #f2877f; --warn: #e2b04a;
+    --rule: #2b2e33; --accent: #4cc2a4; --accent-ink: #0b1411; --user: #17302a; --danger: #f2877f; --warn: #e2b04a;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
-  body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; }
-  main { width: min(860px, 100% - 32px); margin: 0 auto; padding: 40px 0 48px; display: flex; flex-direction: column; gap: 20px; }
-
+  body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+  main { width: min(1320px, 100% - 32px); margin: 0 auto; padding: 32px 0 40px; display: flex; flex-direction: column; gap: 18px; }
   header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
   h1 { margin: 0; font-size: 26px; font-weight: 650; letter-spacing: -0.01em; }
   h1 span { color: var(--accent); }
-  .sub { margin-top: 4px; color: var(--ink-2); font-size: 14.5px; max-width: 42em; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--rule);
-          border-radius: 999px; background: var(--panel); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-  .pill[data-state="ready"] .dot { background: var(--accent); }
-  .pill[data-state="busy"] .dot { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
-  .pill[data-state="offline"] .dot, .pill[data-state="error"] .dot { background: var(--danger); }
-  @keyframes pulse { 50% { opacity: .25; } }
-
-  .note { font-size: 13.5px; color: var(--ink-2); border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; }
+  .sub { margin-top: 4px; color: var(--ink-2); font-size: 14.5px; max-width: 52em; }
+  .note { font-size: 13.5px; color: var(--ink-2); border-left: 3px solid var(--warn); padding: 2px 0 2px 12px; }
   .note.offline { border-color: var(--danger); }
-  .note:empty { display: none; }
-
-  .chat { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
-  #messages { height: min(52vh, 520px); overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-  .msg { max-width: 86%; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .msg.user { align-self: flex-end; background: var(--user); padding: 8px 13px; border-radius: 12px 12px 3px 12px; }
+  .boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+  .board { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden;
+           display: flex; flex-direction: column; min-width: 0; }
+  .board.mine { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .bhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px;
+           border-bottom: 1px solid var(--rule); }
+  .bname { font-weight: 650; }
+  .bname small { font-weight: 400; color: var(--muted); margin-left: 6px; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); white-space: nowrap;
+          overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill[data-state="free"] .dot { background: var(--accent); }
+  .pill[data-state="held"] .dot { background: var(--warn); }
+  .pill[data-state="busy"] .dot { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+  .pill[data-state="offline"] .dot { background: var(--danger); }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .messages { height: min(54vh, 520px); overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 90%; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg .by { display: block; font-size: 11.5px; color: var(--muted); }
+  .msg.user { align-self: flex-end; background: var(--user); padding: 6px 11px; border-radius: 12px 12px 3px 12px; }
   .msg.assistant { align-self: flex-start; }
-  .msg.assistant .echo { color: var(--muted); }
-  .msg.system { align-self: center; font-size: 13px; color: var(--muted); text-align: center; max-width: 100%; }
-  .msg.streaming::after { content: ""; display: inline-block; width: .5em; height: 1em; margin-left: 2px;
-                          vertical-align: -0.15em; background: var(--accent); animation: pulse 1s steps(2, start) infinite; }
-  .msg.cmd { align-self: stretch; max-width: 100%; text-align: left; font: 12.5px/1.5 var(--mono); color: var(--ink-2);
-             background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 12px; }
+  .msg.system { align-self: center; font-size: 12.5px; color: var(--muted); text-align: center; max-width: 100%; }
+  .msg.error { align-self: center; font-size: 13px; color: var(--danger); }
+  .msg.streaming::after { content: ""; display: inline-block; width: .5em; height: 1em; margin-left: 2px; vertical-align: -0.15em;
+                          background: var(--accent); animation: pulse 1s steps(2, start) infinite; }
+  .msg.cmd { align-self: stretch; max-width: 100%; font: 12px/1.5 var(--mono); color: var(--ink-2); background: var(--bg);
+             border: 1px solid var(--rule); border-radius: 8px; padding: 7px 10px; }
   .msg.cmd .line { color: var(--accent); }
-  .hints { display: none; gap: 6px 14px; flex-wrap: wrap; padding: 0 14px 10px; font: 12.5px var(--mono); color: var(--muted); }
-  .hints.on { display: flex; }
-  .hints button { all: unset; cursor: pointer; color: var(--ink-2); }
-  .hints button:hover, .hints button:focus-visible { color: var(--accent); text-decoration: underline; }
-  .msg .fig { display: block; margin-top: 4px; font: 12px var(--mono); color: var(--muted); white-space: normal; }
-
-  form { display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--rule); padding: 12px; }
-  textarea { flex: 1; resize: none; min-height: 40px; max-height: 160px; padding: 9px 12px; border: 1px solid var(--rule);
-             border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; line-height: 1.45; }
+  .msg .fig { display: block; margin-top: 3px; font: 11.5px var(--mono); color: var(--muted); }
+  .controls { border-top: 1px solid var(--rule); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; gap: 8px; align-items: flex-end; }
+  textarea { flex: 1; min-width: 0; resize: none; min-height: 38px; max-height: 140px; padding: 8px 11px; border: 1px solid var(--rule);
+             border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; line-height: 1.4; }
   textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  button { border: 0; border-radius: 8px; padding: 10px 18px; background: var(--accent); color: var(--accent-ink);
-           font: 600 14px var(--sans); cursor: pointer; }
+  button { border: 0; border-radius: 8px; padding: 9px 15px; background: var(--accent); color: var(--accent-ink);
+           font: 600 13.5px var(--sans); cursor: pointer; white-space: nowrap; }
   button:disabled { opacity: .4; cursor: not-allowed; }
-  button.quiet { background: transparent; color: var(--ink-2); border: 1px solid var(--rule); font-weight: 500; padding: 7px 12px; }
-
-  .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule);
-             border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
-  .metric { background: var(--panel); padding: 12px 14px; min-width: 0; }
-  .metric strong { display: block; font: 500 20px var(--mono); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
-  .metric span { display: block; font-size: 12.5px; color: var(--muted); }
-
-  footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
-           font-size: 12.5px; color: var(--muted); }
-  footer code { font-family: var(--mono); color: var(--ink-2); }
-  #error { color: var(--danger); font-size: 13.5px; min-height: 1.2em; }
-
-  @media (max-width: 620px) {
-    main { padding-top: 24px; }
-    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .msg { max-width: 100%; }
-  }
+  button.quiet { background: transparent; color: var(--ink-2); border: 1px solid var(--rule); font-weight: 500; }
+  .status { font-size: 12.5px; color: var(--muted); min-height: 1.2em; }
+  .status.err { color: var(--danger); }
+  footer { font-size: 12.5px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -106,80 +82,33 @@
   <header>
     <div>
       <h1>Mini<span>TPU</span> chat</h1>
-      <div class="sub" id="sub">A language model whose transformer body runs on a 16&times;16 BF16 systolic array
-        on an FPGA. Embeddings, sampling and the tokenizer run on the board's ARM cores.</div>
+      <div class="sub">Language models whose transformer body runs on a 16&times;16 BF16 systolic array on an FPGA, one per board.
+        One visitor types into a board at a time; everyone watches every board live.</div>
     </div>
-    <div class="pill" id="pill" data-state="connecting"><span class="dot"></span><span id="status">connecting</span></div>
   </header>
-
-  <div class="note" id="note"></div>
-
-  <section class="chat">
-    <div id="messages" aria-live="polite"></div>
-    <form id="form">
-      <textarea id="prompt" rows="1" maxlength="2000" placeholder="Type a message, or / for commands" disabled></textarea>
-      <button id="send" type="submit" disabled>Send</button>
-    </form>
-    <div class="hints" id="hints" aria-label="commands"></div>
-  </section>
-
-  <div class="metrics" aria-label="last turn">
-    <div class="metric"><strong id="m-ttft">&mdash;</strong><span>time to first token</span></div>
-    <div class="metric"><strong id="m-rate">&mdash;</strong><span>decode tokens/s</span></div>
-    <div class="metric"><strong id="m-tokens">&mdash;</strong><span>tokens generated</span></div>
-    <div class="metric"><strong id="m-wall">&mdash;</strong><span>turn wall time</span></div>
-    <div class="metric"><strong id="m-context">&mdash;</strong><span>context used / budget</span></div>
-    <div class="metric"><strong id="m-ddr">&mdash;</strong><span>DDR traffic (device counter)</span></div>
-  </div>
-
-  <div id="error" role="alert"></div>
-
-  <footer>
-    <span id="identity">&nbsp;</span>
-    <button class="quiet" id="reset" type="button" disabled>New conversation</button>
-  </footer>
+  <div class="note" id="note">Everything typed here is shown to everyone watching. Do not type anything personal.</div>
+  <div class="boards" id="boards"></div>
+  <footer id="footer">connecting&hellip;</footer>
 </main>
+<template id="board-template">
+  <section class="board">
+    <div class="bhead"><div class="bname"></div><div class="pill" data-state="offline"><span class="dot"></span><span class="ptext">offline</span></div></div>
+    <div class="messages" aria-live="polite"></div>
+    <div class="controls">
+      <div class="row lockrow"><button class="claim" type="button">Take the keyboard</button><button class="release quiet" type="button" hidden>Let go</button></div>
+      <form class="row" hidden><textarea rows="1" maxlength="2000" placeholder="Type a message, or / for commands"></textarea><button type="submit">Send</button></form>
+      <div class="status"></div>
+    </div>
+  </section>
+</template>
 <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const messages = $('messages'), form = $('form'), prompt = $('prompt'), send = $('send');
-  const pill = $('pill'), status = $('status'), note = $('note'), errorBox = $('error'), hints = $('hints');
+  let api = '', seat = null, source = null, limits = {};
+  const boards = new Map();   // key -> {node, state, live (the streaming node), stateAt}
 
-  let api = '';
-  let info = null;
-  let running = false;
-
-  function clientId() {
-    const make = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');
-    try {
-      let id = sessionStorage.getItem('minitpu-client');
-      if (!id) { id = make(); sessionStorage.setItem('minitpu-client', id); }
-      return id;
-    } catch (_) { return make(); }
-  }
-  const client = clientId();
-
-  function setState(state, text) { pill.dataset.state = state; status.textContent = text; }
-  function fixed(value, digits) { return value === null || value === undefined ? '—' : Number(value).toFixed(digits); }
-  function add(role, text) {
-    const node = document.createElement('div');
-    node.className = `msg ${role}`;
-    node.textContent = text;
-    messages.appendChild(node);
-    messages.scrollTop = messages.scrollHeight;
-    return node;
-  }
-  function addCommand(line, output) {
-    const node = document.createElement('div');
-    node.className = 'msg cmd';
-    node.appendChild(Object.assign(document.createElement('div'), {className: 'line', textContent: line}));
-    node.appendChild(document.createTextNode(output));
-    node.style.whiteSpace = 'pre-wrap';
-    messages.appendChild(node);
-    messages.scrollTop = messages.scrollHeight;
-  }
-  function enable(on) { prompt.disabled = !on; send.disabled = !on; $('reset').disabled = !on; }
+  function fixed(v, d) { return v === null || v === undefined ? '—' : Number(v).toFixed(d); }
 
   async function resolveApi() {
     // The address comes only from this page as published (or its own origin), never from the link: a ?api= in a
@@ -191,204 +120,226 @@
       const response = await fetch(file, {cache: 'no-store'});
       if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
       const named = (await response.json()).api;
-      if (!named) throw new Error(`${file} names no board right now`);
+      if (!named) throw new Error('no board is lent to the demo right now');
       return String(named).replace(/\/$/, '');
     }
     return '';
   }
 
-  function describe(i) {
-    const kind = i.multi_turn
-      ? `Multi-turn, ${i.max_context} tokens for the whole conversation; the oldest exchanges drop out when it fills.`
-      : `${i.title} is a base model: it continues your text, and each message stands alone.`;
-    return `${i.title}. ${kind} Replies stop at ${i.max_new_tokens} tokens, sampled at temperature ${i.temperature}. ` +
-           'The device runs one turn at a time, so you may wait behind another visitor. Type /help for commands.';
+  async function post(path, payload) {
+    const response = await fetch(`${api}${path}`, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                                   body: JSON.stringify(payload)});
+    let body = {};
+    try { body = await response.json(); } catch (_) {}
+    if (!response.ok) { const e = new Error(body.error || `HTTP ${response.status}`); e.status = response.status; throw e; }
+    return body;
   }
 
-  // Everything the header shows follows this visitor's own model and settings.
-  function applyInfo(next) {
-    info = next;
-    note.className = 'note';
-    note.textContent = describe(info);
-    const clock = info.pl_clock_mhz ? ` at ${Number(info.pl_clock_mhz).toFixed(1)} MHz` : '';
-    $('identity').textContent = '';
-    $('identity').append(document.createTextNode(`${info.backend}${clock} · bitstream `),
-                         Object.assign(document.createElement('code'), {textContent: info.build_id || 'unread'}));
-    prompt.placeholder = info.multi_turn ? 'Type a message, or / for commands' : 'Start a sentence, or / for commands';
-    renderHints();
-  }
-
-  function renderHints() {
-    const typed = prompt.value;
-    hints.textContent = '';
-    if (!info || !typed.startsWith('/') || typed.includes(' ')) { hints.classList.remove('on'); return; }
-    const matches = info.commands.filter(c => `/${c.name}`.startsWith(typed));
-    for (const c of matches) {
-      const button = Object.assign(document.createElement('button'), {type: 'button', textContent: `/${c.name}`, title: c.help});
-      button.addEventListener('click', () => { prompt.value = `/${c.name} `; prompt.focus(); renderHints(); });
-      hints.appendChild(button);
-    }
-    hints.classList.toggle('on', matches.length > 0);
-  }
-
-  async function connect() {
-    setState('connecting', 'connecting');
-    try {
-      api = await resolveApi();
-      const response = await fetch(`${api}/api/info?client=${client}`, {cache: 'no-store'});
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      applyInfo(await response.json());
-    } catch (cause) {
-      info = null;
-      setState('offline', 'board offline');
-      note.className = 'note offline';
-      note.textContent = 'The board is not serving right now: the FPGA boards are shared lab hardware, ' +
-                         'so the demo is up only while one is lent to it. This page retries every 30 s.';
-      enable(false);
-      setTimeout(connect, 30000);
-      return;
-    }
-    if (!messages.childElementCount) add('system', info.multi_turn ? 'Ask something.' : 'Start a sentence and the model will continue it.');
-    setState('ready', 'ready');
-    enable(true);
-    prompt.focus();
-  }
-
-  function renderStats(s) {
-    $('m-ttft').textContent = s.ttft_seconds === null ? '—' : `${fixed(s.ttft_seconds, 2)} s`;
-    $('m-rate').textContent = fixed(s.decode_tokens_per_second, 2);
-    $('m-tokens').textContent = s.generated_tokens;
-    $('m-wall').textContent = `${fixed(s.wall_seconds, 2)} s`;
-    $('m-context').textContent = `${s.context_tokens} / ${s.max_context}`;
-    $('m-ddr').textContent = s.ddr_megabytes === null ? '—' : `${fixed(s.ddr_megabytes, 0)} MB`;
-  }
-
-  // POSTs one request and hands each server-sent `data:` frame to `onEvent`; comment frames are keepalives.
-  async function stream(path, payload, onEvent) {
-    const response = await fetch(`${api}${path}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({client, ...payload}),
-    });
-    if (!response.ok) {
-      let detail = `HTTP ${response.status}`;
-      try { detail = (await response.json()).error || detail; } catch (_) {}
-      throw new Error(detail);
-    }
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    for (;;) {
-      const {value, done} = await reader.read();
-      if (done) return;
-      buffer += decoder.decode(value, {stream: true});
-      let cut;
-      while ((cut = buffer.indexOf('\n\n')) >= 0) {
-        const frame = buffer.slice(0, cut);
-        buffer = buffer.slice(cut + 2);
-        const line = frame.split('\n').find(l => l.startsWith('data: '));
-        if (!line) continue;
-        const event = JSON.parse(line.slice(6));
-        if (event.error) throw new Error(event.error);
-        onEvent(event);
-      }
-    }
-  }
-
-  async function turn(text) {
-    const node = add('assistant', '');
-    node.classList.add('streaming');
-    let body = node;
-    if (info && !info.multi_turn) {
-      node.append(Object.assign(document.createElement('span'), {className: 'echo', textContent: text}));
-      body = node.appendChild(document.createElement('span'));
-    }
-    let reply = '', done = null;
-    const started = performance.now();
-    try {
-      await stream('/api/chat/stream', {message: text}, event => {
-        if (event.waiting !== undefined) setState('busy', 'waiting for the board');
-        if (event.delta !== undefined) {
-          reply += event.delta;
-          body.textContent = reply;
-          setState('busy', `generating · ${((performance.now() - started) / 1000).toFixed(1)} s`);
-          messages.scrollTop = messages.scrollHeight;
-        }
-        if (event.done) done = event;
-      });
-    } catch (cause) {
-      node.remove();
-      throw cause;
-    } finally {
-      node.classList.remove('streaming');
-    }
-    if (!done) { node.remove(); throw new Error('the stream ended before the reply did'); }
-    const s = done.stats;
-    // The server's reply is authoritative: a streamed piece can be revised when a later token completes a character.
-    reply = s.reply;
-    body.textContent = reply || '(no text: the model ended its reply at once)';
-    const figure = document.createElement('span');
-    figure.className = 'fig';
-    figure.textContent = `${s.generated_tokens} tokens · first after ${fixed(s.ttft_seconds, 2)} s · ` +
-                         `${fixed(s.decode_tokens_per_second, 2)} tok/s after that`;
-    node.appendChild(figure);
-    if (s.dropped_exchanges) add('system', `The context filled, so ${s.dropped_exchanges} older exchange${s.dropped_exchanges === 1 ? '' : 's'} dropped out.`);
+  // A seat is this tab's: its token stays in sessionStorage, so a reload keeps its name. Not the keyboard: the hub
+  // gives that up the moment the tab's event stream closes.
+  async function getSeat(fresh) {
+    if (!fresh) { try { const s = JSON.parse(sessionStorage.getItem('minitpu-seat')); if (s && s.token) return s; } catch (_) {} }
+    const s = await post('/api/session', {});
+    try { sessionStorage.setItem('minitpu-seat', JSON.stringify(s)); } catch (_) {}
     return s;
   }
 
-  async function command(line) {
-    let done = null;
-    await stream('/api/command', {line}, event => {
-      if (event.waiting !== undefined) setState('busy', 'waiting for the board');
-      if (event.note !== undefined) setState('busy', event.note);
-      if (event.done) done = event;
-    });
-    if (!done) throw new Error('the stream ended before the command did');
-    if (done.cleared) messages.replaceChildren();
-    addCommand(line, done.output);
-    applyInfo(done.info);
+  function addEntry(b, e) {
+    const m = b.node.querySelector('.messages');
+    const node = document.createElement('div');
+    if (e.role === 'command') {
+      node.className = 'msg cmd';
+      node.append(Object.assign(document.createElement('div'), {className: 'line', textContent: `${e.by}: ${e.line}`}),
+                  document.createTextNode(e.text));
+    } else {
+      node.className = `msg ${e.role}`;
+      if (e.role === 'user') node.append(Object.assign(document.createElement('span'), {className: 'by', textContent: e.by === seat?.name ? 'you' : e.by}));
+      node.append(document.createTextNode(e.role === 'assistant' && !e.text ? '(no text: the model ended its reply at once)' : e.text));
+      if (e.stats && e.stats.generated_tokens !== undefined) {
+        const s = e.stats;
+        node.append(Object.assign(document.createElement('span'), {className: 'fig',
+          textContent: `${s.generated_tokens} tokens · first after ${fixed(s.ttft_seconds, 2)} s · ${fixed(s.decode_tokens_per_second, 2)} tok/s`}));
+      }
+    }
+    m.appendChild(node);
+    m.scrollTop = m.scrollHeight;
+    return node;
   }
 
-  form.addEventListener('submit', async event => {
-    event.preventDefault();
-    const text = prompt.value.trim();
-    if (!text || running || !info) return;
-    running = true;
-    const isCommand = text.startsWith('/');
-    if (!isCommand) add('user', text);
-    prompt.value = '';
-    prompt.style.height = '';
-    renderHints();
-    enable(false);
-    errorBox.textContent = '';
-    setState('busy', isCommand ? 'running command' : 'sending');
-    try {
-      if (isCommand) await command(text); else renderStats(await turn(text));
-      setState('ready', 'ready');
-    } catch (cause) {
-      errorBox.textContent = cause.message;
-      if (cause instanceof TypeError) { setState('offline', 'board offline'); setTimeout(connect, 5000); }
-      else setState('error', isCommand ? 'command failed' : 'turn failed');
-    } finally {
-      running = false;
-      if (info) { enable(true); prompt.focus(); }
-    }
-  });
-  prompt.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) { event.preventDefault(); form.requestSubmit(); }
-  });
-  prompt.addEventListener('input', () => {
-    prompt.style.height = 'auto';
-    prompt.style.height = `${Math.min(prompt.scrollHeight, 160)}px`;
-    renderHints();
-  });
-  $('reset').addEventListener('click', () => {
-    if (running || !info) return;
-    prompt.value = '/clear';
-    form.requestSubmit();
-  });
+  function liveNode(b) {
+    if (!b.live) { b.live = addEntry(b, {role: 'assistant', text: ''}); b.live.classList.add('streaming'); b.live.textContent = ''; }
+    return b.live;
+  }
+  function dropLive(b) { if (b.live) { b.live.remove(); b.live = null; } }
 
-  connect();
+  function render(key) {
+    const b = boards.get(key), s = b.state, node = b.node;
+    const mine = seat && s.holder === seat.name;
+    const position = seat ? s.queue.indexOf(seat.name) + 1 : 0;
+    node.classList.toggle('mine', !!mine);
+    node.querySelector('.bname').innerHTML = '';
+    node.querySelector('.bname').append(`.${s.board}`, Object.assign(document.createElement('small'), {textContent: s.title || ''}));
+    const pill = node.querySelector('.pill'), text = node.querySelector('.ptext');
+    let state, label;
+    if (!s.online) { state = 'offline'; label = 'offline'; }
+    else if (s.warming) { state = 'busy'; label = 'warming up'; }
+    else if (s.busy) { state = 'busy'; label = `answering ${mine ? 'you' : s.holder || ''}`; }
+    else if (s.holder) { state = 'held'; label = mine ? 'you have the keyboard' : `in use by ${s.holder}`; }
+    else { state = 'free'; label = 'free'; }
+    if (s.queue.length) label += ` · ${s.queue.length} waiting`;
+    pill.dataset.state = state; text.textContent = label;
+    const claim = node.querySelector('.claim'), release = node.querySelector('.release'), form = node.querySelector('form');
+    form.hidden = !mine;
+    claim.hidden = !!mine || position > 0;
+    claim.disabled = !s.online || s.warming || !seat;
+    claim.textContent = s.holder ? 'Join the queue' : 'Take the keyboard';
+    release.hidden = !mine && !position;
+    release.textContent = mine ? 'Let go' : 'Leave the queue';
+    form.querySelector('textarea').disabled = form.querySelector('button').disabled = !mine || s.busy;
+    const status = node.querySelector('.status');
+    if (!status.classList.contains('err')) {
+      if (mine && !s.busy && s.idle_left !== null) {
+        const left = Math.max(0, s.idle_left - (performance.now() - b.stateAt) / 1000);
+        status.textContent = `the keyboard goes back after ${left.toFixed(0)} s without a message`;
+      } else if (position) status.textContent = `you are number ${position} in line`;
+      else status.textContent = '';
+    }
+  }
+
+  function setStatus(key, text, error) {
+    const status = boards.get(key).node.querySelector('.status');
+    status.textContent = text; status.classList.toggle('err', !!error);
+    if (error) setTimeout(() => { status.classList.remove('err'); render(key); }, 6000);
+  }
+
+  function makeBoard(s) {
+    const node = $('board-template').content.firstElementChild.cloneNode(true);
+    const b = {node, state: s, live: null, stateAt: performance.now()};
+    boards.set(s.board, b);
+    $('boards').appendChild(node);
+    const form = node.querySelector('form'), area = node.querySelector('textarea');
+    node.querySelector('.claim').addEventListener('click', () => act(s.board, 'claim'));
+    node.querySelector('.release').addEventListener('click', () => act(s.board, 'release'));
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const text = area.value.trim();
+      if (!text) return;
+      try {
+        if (text.startsWith('/')) await post(`/api/boards/${s.board}/command`, {token: seat.token, line: text});
+        else await post(`/api/boards/${s.board}/chat`, {token: seat.token, message: text});
+        area.value = ''; area.style.height = '';
+      } catch (cause) { setStatus(s.board, cause.message, true); }
+    });
+    area.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); } });
+    area.addEventListener('input', () => { area.style.height = 'auto'; area.style.height = `${Math.min(area.scrollHeight, 140)}px`; });
+    return b;
+  }
+
+  async function act(key, action) {
+    try {
+      const result = await post(`/api/boards/${key}/${action}`, {token: seat.token});
+      if (result.holding) boards.get(key).node.querySelector('textarea').focus();
+    } catch (cause) {
+      if (cause.status === 403) { seat = await getSeat(true); listen(); }
+      setStatus(key, cause.message, true);
+    }
+  }
+
+  function onEvent(e) {
+    if (e.kind === 'snapshot') {
+      if (seat && e.seat !== seat.name) {
+        // The hub no longer knows this tab's seat (it restarted, or the seat expired): take a new one and listen again.
+        getSeat(true).then(s => { seat = s; }, () => { seat = null; }).then(listen);
+        return;
+      }
+      limits = e.limits || {};
+      $('boards').replaceChildren(); boards.clear();
+      for (const s of e.boards) {
+        const b = makeBoard(s);
+        for (const entry of s.transcript) addEntry(b, entry);
+        if (s.partial !== null && s.partial !== undefined) liveNode(b).textContent = s.partial;
+        render(s.board);
+      }
+      $('footer').textContent = `You are ${seat ? seat.name : 'watching'}. A holder keeps the keyboard until ` +
+        `${limits.idle_seconds | 0} s without a message, ${limits.max_hold_seconds | 0} s while others wait, or until the tab closes.`;
+      return;
+    }
+    const b = boards.get(e.board);
+    if (!b) return;
+    if (e.kind === 'state') { b.state = e; b.stateAt = performance.now(); render(e.board); }
+    else if (e.kind === 'delta') { const n = liveNode(b); n.textContent += e.text; n.parentNode.scrollTop = n.parentNode.scrollHeight; }
+    else if (e.kind === 'note') { setStatus(e.board, e.text, false); }
+    else if (e.kind === 'cleared') { b.node.querySelector('.messages').replaceChildren(); b.live = null; }
+    else if (e.kind === 'entry') {
+      if (e.role === 'assistant' || e.role === 'error') dropLive(b);
+      addEntry(b, e);
+    }
+  }
+
+  // The event stream is a POST read with fetch, as minichat_web.html streams a turn: a Cloudflare quick tunnel holds a
+  // streamed GET until it ends, and the seat token stays out of the URL. Each (re)connect starts from a snapshot, so a
+  // dropped stream re-fetches every board's history. Closing it (the tab, or a reconnect) frees this seat's keyboard.
+  // A failed (re)connect waits longer each time, from 3 s to 30 s, jittered so a restarted hub's viewers do not all
+  // return in the same instant; a snapshot resets it.
+  let generation = 0, failures = 0;
+  function listen() {
+    const mine = ++generation;
+    if (source) source.abort();
+    source = new AbortController();
+    const signal = source.signal;
+    (async () => {
+      try {
+        const response = await fetch(`${api}/api/events`, {method: 'POST', headers: {'Content-Type': 'application/json'},
+                                                            body: JSON.stringify({token: seat ? seat.token : null}), signal});
+        if (!response.ok) {
+          let detail = `HTTP ${response.status}`;
+          try { detail = (await response.json()).error || detail; } catch (_) {}
+          throw new Error(detail);
+        }
+        $('note').className = 'note';
+        $('note').textContent = 'Everything typed here is shown to everyone watching. Do not type anything personal.';
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        for (;;) {
+          const {value, done} = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, {stream: true});
+          let cut;
+          while ((cut = buffer.indexOf('\n\n')) >= 0) {
+            const frame = buffer.slice(0, cut);
+            buffer = buffer.slice(cut + 2);
+            const line = frame.split('\n').find(l => l.startsWith('data: '));
+            if (!line || mine !== generation) continue;   // other frames are keepalives
+            const event = JSON.parse(line.slice(6));
+            if (event.kind === 'snapshot') failures = 0;
+            onEvent(event);
+          }
+        }
+      } catch (cause) {
+        if (signal.aborted) return;   // a newer listen() replaced this one
+      }
+      if (mine !== generation) return;
+      $('note').className = 'note offline'; $('note').textContent = 'Lost the connection; reconnecting…';
+      const delay = Math.min(30000, 3000 * 2 ** failures++) * (0.5 + Math.random());
+      setTimeout(() => { if (mine === generation) listen(); }, delay);
+    })();
+  }
+
+  async function start() {
+    try {
+      api = await resolveApi();
+      try { seat = await getSeat(false); } catch (_) { seat = null; }   // without a seat, the page still watches
+      listen();
+    } catch (cause) {
+      $('note').className = 'note offline';
+      $('note').textContent = `The boards are not serving right now (${cause.message}): they are shared lab hardware, ` +
+                              'up only while lent to the demo. This page retries every 30 s.';
+      setTimeout(start, 30000);
+    }
+  }
+  setInterval(() => { for (const key of boards.keys()) render(key); }, 1000);
+  start();
 })();
 </script>
 </body>
