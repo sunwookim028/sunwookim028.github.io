@@ -16,7 +16,7 @@ title: Sunwoo Kim
   </div>
 </div>
 
-I am **Sunwoo Kim**, a second-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on languages for computer architecture and more generally ML systems co-design.
+I am **Sunwoo Kim**, a second-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on languages for computer architecture and more generally **ML systems co-design**.
 
 Previously, I:
 
