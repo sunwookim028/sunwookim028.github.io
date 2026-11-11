@@ -10,7 +10,7 @@ title: Sunwoo Kim
       <a href="https://scholar.google.com/citations?user=yGwOFuQAAAAJ">Papers</a> ·
       <a href="https://github.com/sunwookim028">GitHub</a> ·
       <a href="https://www.linkedin.com/in/sunwookim028">LinkedIn</a> ·
-      <a href="{{ '/cv.pdf' | relative_url }}">CV</a>
+      <a href="https://drive.google.com/file/d/1l6vA1RxwvN9bP9m_ffADU_GnCCTAF7my/view?usp=sharing">CV</a>
     </div>
     <div class="email">sk3463@cornell.edu</div>
   </div>
