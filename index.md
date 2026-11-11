@@ -16,16 +16,28 @@ title: Sunwoo Kim
   </div>
 </div>
 
-I am **Sunwoo Kim**, a first-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on computer architecture and AI.
+I am **Sunwoo Kim**, a second-year Ph.D. student in Electrical and Computer Engineering at **Cornell**. I am advised by [Prof. Zhiru Zhang](https://www.csl.cornell.edu/~zhiruz/). I work on languages for computer architecture and more generally ML systems co-design.
 
 Previously, I:
 
 - studied in South Korea: Seoul National University (2019–2024), Seoul Science High School (2016–2018)
 
-## Selected Publications
+## Projects
+
+- **Accelerator Specification Language**: Formal language and code generation to design and program ML accelerators.
+- **MiniTPU**: Research VLIW TPU stack with 45nm implementation, FPGA prototypes, Triton compiler, and a serving engine.
+- **Others**: Rack-level characterization of agentic inference and RL workloads.
+
+## Publications
 
 <div class="pub">
   <div class="pub-title">From Pragmas to Partners: A Symbiotic Evolution of Agentic High-Level Synthesis</div>
-  <div class="pub-authors">Niansong Zhang, <strong>Sunwoo Kim</strong>, Shreesha Srinath, Zhiru Zhang</div>
-  <div class="pub-footer"><span>2026</span><span><a href="https://capra.cs.cornell.edu/latte26">Paper</a></span></div>
+  <div class="pub-authors">Niansong Zhang, <strong>Sunwoo Kim</strong>, Andrew Butt, Shreesha Srinath, Zhiru Zhang</div>
+  <div class="pub-footer"><span>ICCAD 2026</span><span><a href="https://www.csl.cornell.edu/~zhiruz/pdfs/agentic-hls-iccad2026.pdf">Paper</a></span></div>
+</div>
+
+<div class="pub">
+  <div class="pub-title">G<sup>3</sup>SA: A GPU-Accelerated Gold Standard Genomics Library for End-to-End Sequence Alignment</div>
+  <div class="pub-authors">Yeejoo Han<sup>*</sup>, <strong>Sunwoo Kim<sup>*</sup></strong>, Seongyeon Park, Jinho Lee (<sup>*</sup>equal contribution)</div>
+  <div class="pub-footer"><span>ICS 2025</span><span><a href="https://dl.acm.org/doi/10.1145/3721145.3729516">Paper</a></span></div>
 </div>
