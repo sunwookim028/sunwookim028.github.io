@@ -1,0 +1,6 @@
+_site/
+.sass-cache/
+.preview/
+Gemfile.lock
+.DS_Store
+.claude/

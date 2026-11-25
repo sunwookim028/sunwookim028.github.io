@@ -1,0 +1,12 @@
+# `authors` is HTML; wrap your own name in <u>…</u>.
+- title: "From Pragmas to Partners: A Symbiotic Evolution of Agentic High-Level Synthesis"
+  authors: "Niansong Zhang, <u>Sunwoo Kim</u>, Andrew Butt, Shreesha Srinath, Zhiru Zhang"
+  venue: ICCAD’26
+  links:
+    Paper: https://www.csl.cornell.edu/~zhiruz/pdfs/agentic-hls-iccad2026.pdf
+
+- title: "G<sup>3</sup>SA: A GPU-Accelerated Gold Standard Genomics Library for End-to-End Sequence Alignment"
+  authors: "Yeejoo Han*, <u>Sunwoo Kim</u>*, Seongyeon Park, Jinho Lee (*equal contribution)"
+  venue: ICS’25
+  links:
+    Paper: https://dl.acm.org/doi/10.1145/3721145.3729516

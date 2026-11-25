@@ -1,0 +1,119 @@
+---
+---
+
+/*!
+ * Adapted from Minimal-Academic-Website, https://github.com/yuhui-zh15/Minimal-Academic-Website
+ * MIT License, Copyright (c) 2025 Yuhui Zhang
+ * Changes: accent color; Merriweather weights matched to the CV
+ * (Light body, Medium name/headings, Bold titles and emphasis).
+ */
+
+$bg: #fff;
+$text: #2d3748;
+$text-2: #4a5568;
+$accent: #980000;
+$accent-hover: #6e0000;
+$accent-soft: rgba(152, 0, 0, 0.08);
+$border: #e2e8f0;
+$shadow: rgba(0, 0, 0, 0.05);
+$nudge: 3px;
+$t: 0.3s;
+
+body {
+  font-family: 'Merriweather', Georgia, 'Times New Roman', serif;
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  color: $text;
+  background-color: $bg;
+}
+
+a { color: $accent; text-decoration: none; transition: color $t ease; }
+a:hover { color: $accent-hover; }
+// Links in running text get a thin underline, as in the CV, so they differ from red keywords.
+p a, li a {
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+  text-decoration-color: rgba(152, 0, 0, 0.35);
+}
+p a:hover, li a:hover { text-decoration-color: currentColor; }
+p { margin: 0.5rem 0 0.75rem; }
+ul { padding-left: 1.25rem; }
+strong { font-weight: 700; color: $accent; }
+li strong { font-weight: 500; color: $text; }
+em { font-style: italic; color: $text-2; }
+img { max-width: 100%; }
+
+h1 { font-size: 2.2rem; font-weight: 500; margin-bottom: 0.25rem; letter-spacing: -0.02em; }
+h2 {
+  font-size: 1.4rem; font-weight: 500; letter-spacing: -0.01em;
+  margin: 1.75rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid $border;
+}
+
+/* Header */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid $border;
+}
+.header-content { flex: 1; }
+.header-image img {
+  width: 130px; height: 130px; object-fit: cover;
+  border-radius: 50%; border: 2px solid $border;
+  transition: transform $t ease, box-shadow $t ease;
+}
+.header-image img:hover { transform: scale(1.02); box-shadow: 0 5px 15px $shadow; }
+
+.social-links { display: flex; gap: 1.25rem; margin: 1.2rem 0; }
+.social-links a {
+  color: $text-2; font-weight: 400; padding: 0.3rem 0.6rem; border-radius: 4px;
+  transition: all $t ease;
+}
+.social-links a:hover { color: $accent; background-color: $accent-soft; transform: translateX($nudge); }
+.social-links a i { margin-right: 0.4rem; }
+
+/* Sections fade in one after another */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX($nudge); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+section { margin-bottom: 2rem; animation: fadeIn 0.8s ease-out backwards; width: 100%; }
+section:nth-of-type(2) { animation-delay: 0.1s; }
+section:nth-of-type(3) { animation-delay: 0.2s; }
+section:nth-of-type(4) { animation-delay: 0.3s; }
+
+/* Publications */
+.publication-item {
+  margin-bottom: 1.5rem; padding: 0.75rem 0; border-bottom: 1px solid $border;
+  display: flex; gap: 1.25rem; transition: transform $t ease;
+}
+.publication-item:hover { transform: translateX($nudge); }
+.pub-content { flex: 1; }
+.pub-title { font-weight: 700; margin-bottom: 0.4rem; font-size: 1.05rem; }
+.pub-authors { font-size: 0.9rem; margin-bottom: 0.4rem; color: $text-2; line-height: 1.5; }
+.pub-authors u { color: $text; text-underline-offset: 2px; }
+.pub-venue { font-size: 0.9rem; font-style: italic; color: $text-2; margin-bottom: 0.5rem; }
+.publication-item:last-child { border-bottom: none; margin-bottom: 0; }
+.pub-links { font-size: 0.85rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pub-links a {
+  padding: 0.2rem 0.5rem; border-radius: 4px; background-color: $accent-soft;
+  transition: all $t ease;
+}
+.pub-links a:hover {
+  color: #fff; background-color: $accent; transform: translateX($nudge);
+  box-shadow: 0 2px 5px rgba(152, 0, 0, 0.2);
+}
+
+.service-title { font-weight: 300; margin-bottom: 0.35rem; }
+.service-category { transition: transform $t ease; }
+.service-category:hover { transform: translateX($nudge); }
+.service-category p { margin: 0.25rem 0 0.75rem; }
+
+@media (max-width: 768px) {
+  header { flex-direction: column-reverse; align-items: center; text-align: center; gap: 1rem; }
+  .social-links { flex-wrap: wrap; justify-content: center; }
+  .publication-item:hover, .service-category:hover, .social-links a:hover, .pub-links a:hover { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

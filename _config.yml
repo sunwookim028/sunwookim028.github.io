@@ -1,0 +1,18 @@
+title: Sunwoo Kim
+description: Sunwoo Kim — Ph.D. student in Electrical and Computer Engineering at Cornell.
+url: "https://sunwookim028.github.io"
+google_analytics: G-E00L9PT3V9
+
+sass:
+  style: compressed
+
+# Old /kcc-ride/ links redirect to misc/; see redirect_from in those pages.
+plugins:
+  - jekyll-redirect-from
+
+# GitHub Pages would otherwise publish these as pages.
+exclude:
+  - Gemfile
+  - Makefile
+  - README.md
+  - misc/README.md

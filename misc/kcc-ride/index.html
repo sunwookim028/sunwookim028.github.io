@@ -1,0 +1,30 @@
+---
+redirect_from: /kcc-ride/
+---
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KCC 라이드</title>
+<!--
+  Published to https://sunwookim028.github.io/misc/kcc-ride/ and forwards to the
+  Apps Script web app. This indirection exists so the address people bookmark
+  survives a redeploy: if the /exec URL ever changes, change APP_URL here.
+  The stubbed UI preview lives at /misc/kcc-ride/preview/ .
+-->
+<style>
+  body{font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;
+       display:grid;place-items:center;min-height:100vh;margin:0;color:#1f2328}
+  a{color:#2f7d32}
+</style>
+</head>
+<body>
+  <p>KCC 라이드로 이동 중… <a id="go" href="#">바로가기</a></p>
+<script>
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbwnD38UTdCM7PCJjqhT9Tw_G3GUaTVfq_vFd2f1uphLGRT8fS8rW2IbBGu3BBnHTskJ3Q/exec';
+  document.getElementById('go').href = APP_URL;
+  location.replace(APP_URL);
+</script>
+</body>
+</html>
